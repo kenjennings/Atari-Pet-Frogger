@@ -120,10 +120,10 @@ ATASCII_0      = $30 ; Character for '0'
 ; bytes directly to the screen:
 INTERNAL_O        = $2F ; Letter 'O' is the frog.  
 INTERNAL_0        = $10 ; Number '0' for scores.
-INTERNAL_BALL     = $53 ; Ball graphics, ctrl-t, boat part.
+INTERNAL_BALL     = $54 ; Ball graphics, ctrl-t, boat part.
 INTERNAL_SPACE    = $00 ; Blank space character.
 INTERNAL_INVSPACE = $80 ; Inverse Blank space, for the beach.
-
+INTERNAL_ASTER    = $0A ; Character for '*' splattered frog.
 
 ; Keyboard codes for keyboard game controls.
 
@@ -143,6 +143,13 @@ KEY_4     = 24
 
 	jmp GAMESTART ; Probably not needed.  Atari DOS will automatically go to GAMESTART
 
+	; Label and Credit 
+	.by "    Dalesoft PET FROGGER by John C. Dale, November 1983. "
+	.by "Atari port by Ken Jennings, November 2018. Version 00. "
+	.by "As much of the PET code is used as possible.  "
+	.by "In most places only the barest minimum of changes are made to "
+	.by "deal with the differences on the Atari. " 
+	.by "** Thanks to the Word (John 1:1), Creator of heaven and earth, and semiconductor chemistry and physics making all this fun possible. **"
 
 ; ==========================================================================
 ; Move the lines of boats around either left or right.
@@ -359,18 +366,23 @@ TEXT1 ; Default display of "Beach", for lack of any other description, and the t
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT '['
 	.by ATASCII_BALL  ATASCII_BALL  ATASCII_BALL  ATASCII_BALL  '>'           ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT '['           ATASCII_BALL  ATASCII_BALL  ATASCII_BALL
-	.by ATASCII_BALL  '>'           ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
+	; Added an extra right here to make it 40 characters.
+	.by ATASCII_BALL  '>'           ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
 	;BYTE $1D,$1D,$1D,$1D,$1D,$1D,$3C,$D1
 	;BYTE $D1,$D1,$D1,$5D,$1D,$1D,$1D,$1D
 	;BYTE $1D,$1D,$1D,$1D,$3C,$D1,$D1,$D1
 	;BYTE $D1,$5D,$1D,$1D,$1D,$3C,$D1,$D1 ; This data is missing a Right cursor. ?
 	;BYTE $D1,$D1,$5D,$1D,$1D,$1D,$1D,$1D
 	;TEXT "{right*6}<QQQQ]{right*8}<QQQQ]{right*4}<QQQQ]{right*5}"; This data is 41 characters? {right 5} at start?
+	; Adding a down here to make the data go to the next line.
+	.by ATASCII_DOWN
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT '<'           ATASCII_BALL
 	.by ATASCII_BALL  ATASCII_BALL  ATASCII_BALL  ']'           ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT '<'           ATASCII_BALL  ATASCII_BALL  ATASCII_BALL  
 	.by ATASCII_BALL  ']'           ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT '<'           ATASCII_BALL
 	.by ATASCII_BALL  ATASCII_BALL  ATASCII_BALL  ']'           ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT 
+	; Adding a down here to make the data go to the next line.
+	.by ATASCII_DOWN
 	.by ATASCII_EOL
 	brk  
 
@@ -398,6 +410,8 @@ TEXT2 ; this last block includes a Beach, with the "Frog" character which is the
 	;BYTE $43,$2E,$20,$44,$41,$4C,$45,$1D
 	;BYTE $1D,$1D,$1D,$1D,$1D,$1D,$1D,$1D
 	;TEXT "{right*8}written by john c. dale{right*9}"
+	; Adding a down here to make the data go to the next line.
+	.by ATASCII_DOWN
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
 	.by "WRITTEN BY JOHN C. DALE"
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
@@ -413,6 +427,7 @@ LIVETT
 	;BYTE $1D,$1D,$1D,$1D,$1D,$1D,$1D,$1D
 	;BYTE $1D,$1D,$1D,$1D,$1D,$1D,$1D,$1D
 	;TEXT "{home}successful crossings = {right*17}"
+	; Assume position 0,0 happens before this.
 	.by "SUCCESSFUL CROSSINGS = "
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
@@ -423,6 +438,8 @@ LIVETT
 	;BYTE $3D,$20,$1D,$1D,$1D,$1D,$1D,$1D
 	;BYTE $1D,$1D,$1D,$1D,$4C,$56,$3A
 	;TEXT "score = {right*13}hi = {right*10}lv:"
+	; Adding a down here to make the data go to the next line.
+	.by ATASCII_DOWN
 	.by "SCORE = "
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT   
@@ -489,9 +506,11 @@ LK3
 	jmp LK3
 
 
-PRINT2 ; Display the number of frogs that crossed the river.
-	   ; This is done by direct write, not printing.
-	   ; Logic here is ummm. different. not exactly certain of it all.
+PRINT2
+	jsr PRINTPORTBYTEXT 
+		; Display the number of frogs that crossed the river.
+		; This is done by direct write, not printing.
+		; Logic here is ummm. different. not exactly certain of it all.
 
 	ldx FrogsCrossed ; number of times successfully crossed the rivers.
 LIVES
@@ -503,12 +522,12 @@ LIVES
 	sta FrogsCrossed ; FrogsCrossed to 1
 
 PRINT4
-;	lda #$57           ; PET Frog - either upper case W or Open circle graphics.
-	lda #INTERNAL_O    ; On Atari we're using "O" as the frog shape.
-	sta SCREENMEM+17,x ; Write to screen.
-	dex                ; Decrement number of frogs.
-	cpx #0             ; If there are more frogs left
-	bne LIVES          ; then go back and display the next frog counter.
+;	lda #$57            ; PET Frog - either upper case W or Open circle graphics.
+	lda #INTERNAL_O     ; On Atari we're using "O" as the frog shape.
+	sta SCREENMEM+$17,x ; Write to screen.
+	dex                 ; Decrement number of frogs.
+	cpx #0              ; If there are more frogs left
+	bne LIVES           ; then go back and display the next frog counter.
 
 
 PRINT3 ; Print the lives and score labels at the top of the screen.
@@ -645,8 +664,8 @@ START
 ; screen code for digits. ("0" base)
 	ldx #$07           ; 7 digits.
 CLEAR
-	lda #$30           ; PET ASCII "0". (And Atari ASCII).
-	;lda #INTERNAL_0   ; Atari internal code for "0"
+;	lda #$30           ; PET ASCII "0". (And Atari ASCII).
+	lda #INTERNAL_0   ; Atari internal code for "0"
 	sta MyScore,x      ; Put zero/"0" in score buffer.
 	ldy FlaggedHiScore ; Has a high score been flagged?
 	cpy #$FF           ; If so, then skip this and 
@@ -700,6 +719,10 @@ DEL
 
 
 KEY1 ; Process keypress
+	pha
+	lda #$FF             ; Need to clear CH on Atari
+	sta CH
+	pla
 	cmp LastKeyPressed   ; is this key the same as the last key?
 	BEQ DELAY            ; Yes.  So, probably a key repeat, so ignore it and do delay.
 
@@ -792,7 +815,7 @@ PLACE
 ; Draw the frog on screen.
 PLACE2 
 ;	lda #87              ; Pet frog. ASCII $57/87 (dec) 
-	lda INTERNAL_O       ; Atari internal code for "O" is frog.
+	lda #INTERNAL_O       ; Atari internal code for "O" is frog.
 	sta (FrogLocation),y ; Save to screen memory to display it.
 	jmp DELAY            ; Slow down game speed.
 	rts
@@ -863,7 +886,7 @@ YRDDTX
 
 ; Frog is dead.
 YRDD
-	lda #ATASCII_ASTER   ; Pet ASCII/Atari ASCII $2A/42 (dec) Splattered Frog.
+	lda #INTERNAL_ASTER  ; Atari ASCII $2A/42 (dec) Splattered Frog.
 	sta (FrogLocation),y ; Road kill the frog.
 	jsr DELAY1           ; Various pauses....
 	jsr DELAY1           ; Should do this with  jiffy counters. future TO DO.
@@ -1073,13 +1096,16 @@ SCORE
 	adc MyScore,x
 	sta MyScore,x
 
-SCORE1                ; Evaluate if carry occurred
+SCORE1                   ; Evaluate if carry occurred
 	lda MyScore,x
-	cmp #$3A          ; PET/Atari ASCII ":" Did math carry past the "9"?
-	bcs UPDATE        ; if it carried then readjust the values.
+	; Pet used $3A for the next comparison.  Since the score display is 
+	; writing directly to the screen, the values are updated based 
+	; on Atari ointernal character codes instead.
+	cmp #[INTERNAL_0+10] ; Did math carry past the "9"?
+	bcs UPDATE           ; if it carried then readjust the values.
 
-PULL                  ; All done.
-	pla               ; Restore Y, X, and A
+PULL                     ; All done.
+	pla                  ; Restore Y, X, and A
 	tay
 	pla
 	tax
@@ -1093,11 +1119,11 @@ PULL                  ; All done.
 ; the next/greater position is added.
 
 UPDATE
-	lda #ATASCII_0 ; PET/Atari ASCII "0".  
-	sta MyScore,x ; Reset current position to "0"
-	dex            ; Go to previous position in score
-	inc MyScore,x ; Add 1 to the next digit.
-	jmp SCORE1     ; (re)evaluate carry for the current position.
+	lda #INTERNAL_0 ; Atari internal code for "0".  
+	sta MyScore,x   ; Reset current position to "0"
+	dex             ; Go to previous position in score
+	inc MyScore,x   ; Add 1 to the next digit.
+	jmp SCORE1      ; (re)evaluate carry for the current position.
 
 
 ; ==========================================================================
@@ -1224,8 +1250,10 @@ INSTR1
 ;	lda $97               ; Pet current key pressed (LSTX)
 	lda CH                ; Atari current key press
 	cmp #$FF              ; Pet/Atari, no key pressed
+	bne CLEAR_CH
 	beq INSTR1            ; so, loop again while no key pressed.
 
+CLEAR_CH
 	lda #$FF              ; Atari, clear  out the key
 	sta CH
 
@@ -1342,9 +1370,10 @@ PORTBYLOOP
 ;ICPTL = IOCB+$06 ; Put char routine (low)
 ;ICPTH = IOCB+$07 ; Put char routine (high)
 
-; Borrow a page 0 location to preserve Y register, 
-; because the PutCH will change all the registers.
-SAVEY = $FF 
+; Borrow page 0 locations to preserve X and Y registers,
+; because the PutCH will change everything.
+SAVEY = $FF
+SAVEX = $FE
 
 
 ; ==========================================================================
@@ -1355,8 +1384,10 @@ SAVEY = $FF
 ;---------------------------------------------------------------------
 fputc
 	sty SAVEY  ; Need to save Y for printing index.  PutCH will change it.
+	stx SAVEX  ; Need to save X also, since PutCH will change it.
 	jsr PutCH  ; Uses the CIO PutCH in IOCB0
 	ldy SAVEY  ; Restore Y.
+	ldx SAVEX  ; Restore X.
 	rts
 
 
