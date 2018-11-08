@@ -16,7 +16,6 @@ Video of the game play on YouTube: https://youtu.be/Fc3VV4xq25s
 
 [Frogger00.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger00.asm "Frogger00.asm") Atari assembly program.
 
-
 PET FROGGER for Commodore PET 4032
 
 (c) November 1983 by John C. Dale, aka Dalesoft
@@ -36,7 +35,11 @@ Notable changes:
 - Direct write to screen memory uses different internal code values, not ASCII/ATASCII values.
 
 - Direct keyboard scanning is different requiring Atari to clear the OS value in order to get the next character.  Also, key codes are different on the Atari (and not ASCII or Internal codes.)
- 
+
+---
+
+I think I did something that broke the display of multiple frogs that successfully crossed over the rivers.  One is displayed.   But if more frogs cross, still only one is displayed.
+
 ---
 
 [Back to Home](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README.md "Home") 
