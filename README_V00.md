@@ -1,4 +1,4 @@
-# Atari Pet Frogger Version 00
+# Atari PET FROGGER Version 00
 
 Commodore PET FROGGER game ported to the Atari.
 
@@ -17,7 +17,7 @@ Video of the game play on YouTube: https://youtu.be/Fc3VV4xq25s
 [Frogger00.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger00.asm "Frogger00.asm") Atari assembly program.
 
 
-; Pet Frogger
+; PET FROGGER
 
 ; (c) November 1983 by John C. Dale, aka Dalesoft
 
