@@ -16,18 +16,14 @@ Video of the animation on YouTube: https://youtu.be/Fc3VV4xq25s
 
 [Frogger00.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger00.asm "Frogger00.asm") Atari assembly program.
 
-; ==========================================================================
+
 ; Pet Frogger
+
 ; (c) November 1983 by John C. Dale, aka Dalesoft
-;
-; ==========================================================================
-; Ported (parodied) to Atari 8-bit computers
-; November 2018 by Ken Jennings (if this were 1983, aka FTR Enterprises)
-;
-; Version 00.
-; As much of the Pet code is used as possible.
-; In most places only the barest minimum of changes are made to deal with
-; the differences on the Atari.  
+
+; Ported (parodied) to Atari 8-bit computers November 2018 by Ken Jennings (if this were 1983, aka FTR Enterprises)
+
+As much of the Pet code is used as possible. In most places only the barest minimum of changes are made to deal with the differences on the Atari.  
 
 Notable changes:
 
@@ -43,5 +39,5 @@ Notable changes:
  
 ---
 
-[Back to Home](https://github.com/kenjennings/Melbourne-House-C64-Book1-For-Atari/blob/master/README.md "Home") 
+[Back to Home](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README.md "Home") 
 
