@@ -1,6 +1,6 @@
 # Atari-Pet-Frogger
 
-OldSkoolCoder presented a video on YouTube and source code on GitHub for a Frogger-like game written for the PET in 1983.
+OldSkoolCoder presented a video on YouTube and source code on GitHub for a Frogger-like game written for the PET 4032 in 1983.
 
 The PET assembly source is here:  https://github.com/OldSkoolCoder/PET-Frogger
 
@@ -20,7 +20,7 @@ The assembly code for the Atari depends on my MADS include library here: https:/
 
 [![V00 Title](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V00_Title.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V00.md)
 
-As much of the original PET code is used as possible.  In most places only the barest minimum of changes are made to deal with the differences on the Atari. 
+As much of the original PET 4032 assembly code is used as possible.  In most places only the barest minimum of changes are made to deal with the differences on the Atari. 
 
 ---
 
