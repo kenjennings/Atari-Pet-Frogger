@@ -40,6 +40,8 @@ Notable changes:
 
 I think I did something that broke the display of multiple frogs that successfully crossed over the rivers.  One is displayed.   But if more frogs cross, still only one is displayed.
 
+I dialed down the game speed a bit in order to shoot the video and make sure my elderly reflexes could manage some successful runs.
+
 ---
 
 [Back to Home](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README.md "Home") 
