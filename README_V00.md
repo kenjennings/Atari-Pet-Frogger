@@ -1,6 +1,6 @@
 # Atari Pet Frogger Version 00
 
-This draws kaleidescope-like random patterns on the high resolution screen.
+Commodore PET FROGGER game ported to the Atari.
 
 [![Title Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V00_Title.png)](#features1)
 
