@@ -16,6 +16,10 @@ Video of the game play on YouTube: https://youtu.be/Fc3VV4xq25s
 
 [Frogger00.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger00.asm "Frogger00.asm") Atari assembly program.
 
+The assembly code for the Atari depends on my MADS include library here: https://github.com/kenjennings/Atari-Mads-Includes.  
+
+---
+
 PET FROGGER for Commodore PET 4032
 
 (c) November 1983 by John C. Dale, aka Dalesoft
