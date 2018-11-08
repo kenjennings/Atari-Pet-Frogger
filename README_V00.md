@@ -8,7 +8,7 @@ Commodore PET FROGGER game ported to the Atari.
 
 [![You Died!](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V00_YerDead.png)](#features3)
 
-Video of the animation on YouTube: https://youtu.be/Fc3VV4xq25s
+Video of the game play on YouTube: https://youtu.be/Fc3VV4xq25s
 
 ---
 
