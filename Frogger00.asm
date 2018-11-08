@@ -3,42 +3,138 @@
 ; (c) November 1983 by John C. Dale, aka Dalesoft
 ;
 ; ==========================================================================
-; Ported (parodied) to Atari 8-bit computers 
+; Ported (parodied) to Atari 8-bit computers
 ; November 2018 by Ken Jennings (if this were 1983, aka FTR Enterprises)
+;
+; Version 00.
+; As much of the Pet code is used as possible.
+; In most places only the barest minimum of changes are made to deal with
+; the differences on the Atari.  Notable changes:
+; * References to fixed addresses are changed to meaningful labels.  This
+;   includes page 0 variables, and score values.
+; * Kernel call $FFD2 is replaced with "fputc" subroutine for Atari.
+; * The Atari screen is a full screen editor, so cursor movement off the
+;   right edge of the screen is different from the Pet requiring an extra
+;   "DOWN" character to move the cursor to next lines.
+; * Direct write to screen memory uses different internal code values, not
+;   ASCII/ATASCII values.
+; * Direct keyboard scanning is different requiring Atari to clear the
+;   OS value in order to get the next character.  Also, key codes are
+;   different on the Atari (and not ASCII or Internal codes.)
+; * Given the differences in clock speed and frame rates between the
+;   UK Pet 4032 the game is intended for and the NTSC Atari to which it is
+;   ported the timing values in the delays are altered to scale the game
+;   speed more like the original on the Pet.
+; --------------------------------------------------------------------------
+ 
+; ==========================================================================
+; Random blabbering across the versions of Pet Frogger concerning 
+; differences between Atari and Pet, and the code considerations:
+;
+; It appears text printing on the Pet treats the screen like a typewriter.
+; "Right" cursor movement used to move through full line width will cause
+; the cursor to wrap around to the next line.  "Down" also moves to the next
+; line.  I don't know for certain, but for printing purposes the program
+; code makes it seem like character printing on the PET does not support
+; direct positioning of the cursor other than "Home".
 
-; Version 00.  As much of the Pet code is used as possible.  In most 
-; places only the barest minimum of changes are made to deal with the
-; differences on the Atari.
+; Printing for the Atari version implemented similarly by sending single
+; characters to the screen editor, E: device, channel 0.  The Atari'
+; full screen editor does things differently.   Moving off the right edge
+; of the screen returns the cursor to the left edge of the screen on the
+; same line.  (Full screen editor, remember).  Therefore the Atari needs
+; an extra "Down" cursor inserted where code expects the cursor on the
+; Pet to be on the following line.  It looks like replacing the "Right"
+; cursor movements with a blank space should accomplish the same thing,
+; but for the sake of minimal changes Version 00 of the port retains the
+; Pet's idea of cursor movement.
+
+; Also, depending on how the text is printed the Atari editor can relate
+; several adjacent physical lines as one logical line. Great for editing
+; text lines longer than 40 characters, not so good when printing wraps the
+; cursor from one line to the next.  Printing a character through the end of
+; the screen line (aka the right margin) extends the current line as a
+; logical line into the next screen line which pushes the content in lines
+; below that further down the screen.
+
+; Since some code does direct manipulation of the screen memory, I wonder
+; why all the screen code didn't just do the same.  Copy from source to
+; destination is easier (or at least more consistent) than printing.
+; Changing all the text handling to use direct write is number one on
+; the short list of Version 01 optimizations.
+
+; The "BRK" instruction, byte value $00, is used as the end of string
+; sentinel in the data.  This conflicts with the character value $00 for
+; the graphics heart which the code also uses in place of the "o" in
+; "Dalesoft".  The end of string sentinel is changed to the Atari End
+; Of Line character, $9B, which does not conflict with anything else in
+; the code for printing or data.
+
+; None of the game displays use the entire 25 lines available on the PET.
+; The only time the game writes to the entire screen is when it fills the
+; screen with the block graphics upon the frog's demise.  This conveniently
+; leaves the 25th line free for the "ported by" credit.  But the Atari only
+; displays 24 lines of text!?!  Gasp!  Not true.  The NTSC Atari can do up
+; to 30 lines of text.  Only the OS printing routines are limited to 24
+; lines of text.  The game's 25 screen lines is accomplished on the Atari
+; with a custom display list that also designates screen memory starting at
+; $8000 which is the same location the Pet uses for its display.
+; --------------------------------------------------------------------------
+
+; ==========================================================================
+; Ideas for Atari-specific version improvements, Version 01 and beyond!:
+; * Remove all printing.  Replace with direct screen writes.  This will
+;   be much faster.
+; * Timing delay loops are imprecise.  Use the OS jiffy clock (frame
+;   counter) to maintain timing, and while we're here make timing tables
+;   for NTSC and PAL.
+; * Joystick controls.  I hate the keyboard.  The joystick is free and
+;   easy on the Atari.
+; * Color... Simple version: a DLI for each line could make separate text
+;   line colors for beach lines vs boat lines (and credit text lines.)
+; * Sound..  Some simple splats, plops, beeps, water sloshings.
+; * Custom character set that looks more like beach, boats, water, and frog.
+; * Horizontal Fine scrolling text allows smoother movements for the boats.
+; * Player Missile Frog. This would make frog placement v the boat
+;   positions easier when horizontal scrolling is in effect, not to mention
+;   extra color for the frog.
+; * Stir, rinse, repeat -- more extreme of all of the above: more color,
+;   more DLI, more custom character sets, isometric perspective.
+;   Game additions -- pursuing enemies, alternate boat shapes, lily pads,
+;   bonus objects to collect, variable/changing boat speeds.  Heavy metal
+;   chip tune soundtrack unrelated to frogs that has no good reason for
+;   drowning out the game sound effects.  Boss battles.  Online multi-
+;   player death matches.  Game Achievements.  In-game micro transaction
+;   payments for upgrades and abilities.
+; --------------------------------------------------------------------------
 
 ; ==========================================================================
 ; Atari System Includes (MADS assembler)
-	icl "ANTIC.asm"
-	icl "GTIA.asm"
-	icl "POKEY.asm"
-	icl "OS.asm"
-	icl "DOS.asm" ; This provides the LOMEM, start, and run addresses.
-
+	icl "ANTIC.asm" ; Display List registers
+	icl "GTIA.asm"  ; Color Registers.
+	icl "POKEY.asm" ;
+	icl "OS.asm"    ;
+	icl "DOS.asm"   ; LOMEM, load file start, and run addresses.
+; --------------------------------------------------------------------------
 
 ; ==========================================================================
 ; Macros (No code/data declared)
 	icl "macros.asm"
-;	icl "macros_screen.asm"
-;	icl "macros_input.asm"
-
+; --------------------------------------------------------------------------
 
 ; ==========================================================================
-; SYS init N/A for Atari.   Atari load file format will do it.
+; SYS init is N/A for Atari.   Atari load file format will do it.
 
 ; 10 SYS (1280) ; aka $0500
 ;	*= $0401
 ;	BYTE $0E, $04, $0A, $00, $9E, $20, $28,  $31, $32, $38, $30, $29, $00, $00, $00
-
+; --------------------------------------------------------------------------
 
 ; ==========================================================================
 ; Declare some Page Zero variables.
-; On the Atari we'll move these a bit, since 
+; On the Atari we'll move these a bit, since
 ; the OS owns the first half of Page Zero.
-
+; --------------------------------------------------------------------------
 ; $00 - $01 = Moves Cars
 ; $02 - $03 = Frog Location
 ; $04       = Number Of Rows
@@ -62,14 +158,14 @@
 ; NumberOfLives   = $0C
 ; LastKeyPressed  = $0D
 
-; The Atari load file format allows loading from disk to anywhere in 
-; memory, therefore indulging in this evilness to define Page Zero 
+; The Atari load file format allows loading from disk to anywhere in
+; memory, therefore indulging in this evilness to define Page Zero
 ; variables and load directly into them at the same time...
 
 	ORG $88
 
 MovesCars       .word $00
-FrogLocation    .word $00 
+FrogLocation    .word $00
 NumberOfRows    .word $00
 LastCharacter   .byte 0
 DelayNumber     .byte 0
@@ -81,24 +177,25 @@ NumberOfLives   .byte 0
 LastKeyPressed  .byte 0
 ScreenPointer   .word $00
 
-; In the original code the game score and the high score are (oddly) referred 
-; to by fixed addresses $4600 and $4610, respectively.  Maybe scoring was 
-; added after the fact?  For the sake of my sanity I am declaring equivalent
-; space and labeling it for scores.  All occurrences of addresses in code 
-; are changed to show the named labels. The evil part is that I'm declaring 
-; the values here in Page Zero with everything else.  This cuts three byte 
+; In the original code the game score and the high score are referred to by
+; fixed addresses $4600 and $4610, respectively.  Maybe scoring was added
+; after the fact?  For the sake of my sanity I am declaring equivalent space
+; and labeling it for scores.  All occurrences of addresses in code are
+; changed to show the named labels. The evil part is that I'm declaring
+; the values here in Page Zero with everything else.  This cuts three byte
 ; instructions down to two byte Page Zero instructions.  Muahahahaha!
 
-; The scores appear to be 16 bytes each. I think.  Based on the difference
-; between $4600 and $4610.   So, declaring each as 16 bytes...
+; The scores appear to be 16 bytes each. I think.  Based on the fact that
+; $4610 - $4600 = $10.  So... declaring each as 16 bytes...
 MyScore .by $0 $0 $0 $0 $0 $0 $0 $0 $0 $0 $0 $0 $0 $0 $0 $0
 HiScore .by $0 $0 $0 $0 $0 $0 $0 $0 $0 $0 $0 $0 $0 $0 $0 $0
 
 
 ; ==========================================================================
-; Some Atari character things for convenience, or that can't be easily 
-; typed in a modern text editor...
-ATASCII_UP     = $1C ; Move Cursor 
+; Some Atari character things for convenience.
+; Some that can't be easily typed in a modern text editor...
+; --------------------------------------------------------------------------
+ATASCII_UP     = $1C ; Move Cursor
 ATASCII_DOWN   = $1D
 ATASCII_LEFT   = $1E
 ATASCII_RIGHT  = $1F
@@ -107,18 +204,18 @@ ATASCII_CLEAR  = $7D
 ATASCII_EOL    = $9B
 
 ATASCII_HEART  = $00 ; heart graphics
-ATASCII_HLINE  = $12 ; horizontal line, ctrl-r (title underline) 
+ATASCII_HLINE  = $12 ; horizontal line, ctrl-r (title underline)
 ATASCII_BALL   = $14 ; ball graphics, ctrl-t
 
 ATASCII_EQUALS = $3D ; Character for '='
 ATASCII_ASTER  = $2A ; Character for '*' splattered frog.
 ATASCII_Y      = $59 ; Character for 'Y'
-ATASCII_0      = $30 ; Character for '0'
+ATASCII_0      = $30 ; Character for '0' (Zero)
 
-; Atari uses different, "internal" values when writing to 
-; Screen RAM.  These are the internal codes for writing 
+; Atari uses different, "internal" values when writing to
+; Screen RAM.  These are the internal codes for writing
 ; bytes directly to the screen:
-INTERNAL_O        = $2F ; Letter 'O' is the frog.  
+INTERNAL_O        = $2F ; Letter 'O' is the frog.
 INTERNAL_0        = $10 ; Number '0' for scores.
 INTERNAL_BALL     = $54 ; Ball graphics, ctrl-t, boat part.
 INTERNAL_SPACE    = $00 ; Blank space character.
@@ -126,60 +223,61 @@ INTERNAL_INVSPACE = $80 ; Inverse Blank space, for the beach.
 INTERNAL_ASTER    = $0A ; Character for '*' splattered frog.
 
 ; Keyboard codes for keyboard game controls.
-
-KEY_S     = 62
-KEY_Y     = 43
-KEY_6     = 27
-KEY_4     = 24
+KEY_S = 62
+KEY_Y = 43
+KEY_6 = 27
+KEY_4 = 24
 
 
 ; ==========================================================================
 ; Inform DOS of the program's Auto-Run address...
+; --------------------------------------------------------------------------
 	mDiskDPoke DOS_RUN_ADDR, GAMESTART
 
-;	*= $0500  ; Originally on PET. 
+;	*= $0500  ; Originally on PET.
 
-	ORG $5000 ; Programmer's unintelligently chosen higher address on Atari for DOS, blah de blah. 
+; Programmer's unintelligently chosen higher address on Atari
+; to account for DOS, etc.
+	ORG $5000
 
-	jmp GAMESTART ; Probably not needed.  Atari DOS will automatically go to GAMESTART
+;	jmp GAMESTART ; Not needed.  Atari DOS will automatically go to GAMESTART
 
-	; Label and Credit 
-	.by "    Dalesoft PET FROGGER by John C. Dale, November 1983. "
+	; Label and Credit
+	.by "** Thanks to the Word (John 1:1), Creator of heaven and earth, and "
+	.by "semiconductor chemistry and physics making all this fun possible. ** "
+	.by "Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. ** "
 	.by "Atari port by Ken Jennings, November 2018. Version 00. "
 	.by "As much of the PET code is used as possible.  "
 	.by "In most places only the barest minimum of changes are made to "
-	.by "deal with the differences on the Atari. " 
-	.by "** Thanks to the Word (John 1:1), Creator of heaven and earth, and semiconductor chemistry and physics making all this fun possible. **"
+	.by "deal with the differences on the Atari. **"
+
 
 ; ==========================================================================
 ; Move the lines of boats around either left or right.
-; Not sure why the initialization switches between Y and A for setting MovesCars.
-
+; --------------------------------------------------------------------------
 MOVESC
-;	ldx #$00
-;	ldy #$78
-;	sty MovesCars
-;	ldy #$26
-;	lda #$80
-;	sta MovesCars + 1
+	ldx #$00 ; Count number of rows shifted
 
-	; Alternatively.  Set up for Right Shift... 
+	; Set up for Right Shift...
 	; MovedCars is a word set to $8078...
 	; which is SCREENMEM + $78 (or 120 decimal [i.e. 3 lines of text])
-	lda #<[SCREENMEM+$78] ; low byte 
+;	lda #$78
+	lda #<[SCREENMEM+$78] ; low byte
 	sta MovesCars
+;	lda #$80
 	lda #>[SCREENMEM+$78] ; high byte
 	sta MovesCars + 1
 
-	ldx #$00  ; Count number of rows shifted
 	ldy #$26  ; Character position, start at +38 (dec)
 
 MOVE ; Shift text lines to the right.
-	lda (MovesCars),y ; Read byte from screen (start +38)
+	lda (MovesCars),y ; Read byte from screen (start at +38)
 	iny
 	sta (MovesCars),y ; Store byte to screen at next position (start +39)
 
-	; Blank the original read position. (Hummmm.Mmmmmm. May not be necessary.)
+	; Blank the original read position.
+	; (Hummmm.Mmmmmm. May not be necessary as it copies the character
+	; from end end of line to beginning.)
 	dey               ; Back up to the original read position.
 ;	lda #$20          ; Was ASCII/PETSCII blank space...
 	lda #$00          ; is now Atari blank space.
@@ -201,12 +299,12 @@ MOVE ; Shift text lines to the right.
 	adc #$78          ; to set new position 3 lines lower.
 	sta MovesCars
 	bcc CROSS         ; Smartly done instead of lda/adc #0/sta.
-	inc MovesCars + 1 
+	inc MovesCars + 1
 
 CROSS
 	inx               ; Track that a line is done.
-	ldy #$26          ; Get offset $26 == 38 (dec) 
-	cpx #6            ; Did we do this 6 times?
+	ldy #$26          ; Get offset $26 == 38 (dec)
+	cpx #6            ; Did the shift 6 times?
 	bne MOVE          ; No.  Go do right shift on another line.
 
 	; Setup for Left Shift...
@@ -214,9 +312,9 @@ CROSS
 	; which is SCREENMEM + $A0 (or 160 decimal [i.e. 4 lines of text])
 ;	lda #$80
 	lda #>[SCREENMEM+$A0] ; high byte
-	sta MovesCars + 1 ; 
+	sta MovesCars + 1 ;
 ;	lda #$A0
-	lda #<[SCREENMEM+$A0] ; low byte 
+	lda #<[SCREENMEM+$A0] ; low byte
 	sta MovesCars
 
 	; Then the index values are set.
@@ -236,7 +334,7 @@ MOVE1 ; Shift text lines to the left.
 	sta (MovesCars),y ; Erase position at first byte read above.
 
 ;	dey               ; Back up to previous position.
-;	iny               ; Move to next position.   (huh?) 
+;	iny               ; Move to next position.   (huh?)
 	cpy #$27          ; Reached position $27/39 (dec) (end of line)?
 	bne MOVE1         ; No.  Do the shift again.
 
@@ -256,7 +354,7 @@ MOVE1 ; Shift text lines to the left.
 
 CROSS1
 	inx               ; Track that a line is done.
-	ldy #0            ; Get offset $0 
+	ldy #0            ; Get offset $0
 	cpx #06           ; Did we do this 6 times?
 	bne MOVE1         ; No.  Go do left shift on another line.
 
@@ -268,56 +366,15 @@ REPLACE
 	sta SCREENMEM+$30,x ; Screen Memory + $30/48 bytes (9th character on second line)
 	lda HiScore,x       ; Read from Hi Score buffer
 	sta SCREENMEM+$42,x ; Screen Memory + $42/66 bytes (27th character on second line)
-	inx ; 
+	inx ;
 	cpx #7 ; Loop 8 bytes - 0 to 7.
-	bne REPLACE 
+	bne REPLACE
 
 	rts
 
-; ==========================================================================
-; It appears text printing treats the screen sort of like a typewriter.
-; "Right" seems like it is used to move through full line width to cause 
-; the cursor to wrap around to the next line.  "Down" moves to the next 
-; line.  I don't know, but for printing purposes the code makes it seem 
-; like character printing on the PET does not support direct positioning 
-; of the cursor. 
-
-; I'm sort of torn here to support printing the same way on the Atari via 
-; the screen editor, "E:"/Channel 0.  The Atari screen editor is more 
-; advanced and does some things that interferes with a simple printing 
-; mechanism that assumes streaming text to contiguous screen bytes.  
-; Depending on how the text is printed the Atari editor can relate several 
-; adjacent lines as one logical line. Great for editing text lines longer 
-; than 40 characters, not so good when printing wraps the cursor from one
-; line to the next.  Printing through the end of the screen line (aka the 
-; right margin) extends the current line as a logical line into the next 
-; screen line which pushes the content in lines below that further down 
-; the screen.
-
-; ALSO, since some code does direct manipulation of the screen memory, I 
-; wonder why all the screen code didn't just do the same.  Copy from 
-; source to destination is easier (or at least more consistent) than
-; printing.
-
-; Atari cursor control is a little different from PET.  The Pet's cursor 
-; moves to the next line when right cursor movement occurs at the right 
-; border.  On the Atari it is part of the screen editor and wraps around 
-; to the same line.  Atari needs a DOWN inserted to move the cursor to 
-; the next line.  (The alternative is replacing all the Pet RIGHT cursor 
-; control characters with simple blank spaces).
-
-; Changing all the text handling to use direct write is number one on 
-; the short list of Version 1 optimizations.
-
-; It looks like "BRK" is actually being treated as 0 data to end the 
-; text strings.  Changing this to hange this to Atari EOL $9B in order to print 
-
-; None of the game displays use the entire 25 lines available on the PET.
-; Actually, none even use 24 lines.  The only time the game writes to 
-; the entire screen is when it fills the screen with the block graphics.
 
 
-TEXT_CLEARSCREEN 
+TEXT_CLEARSCREEN      ; Blank the screen.
 	; TEXT "{clear}{down*2}"
 	; BYTE $11,$11
 	.by ATASCII_CLEAR ATASCII_DOWN ATASCII_DOWN
@@ -325,28 +382,29 @@ TEXT_CLEARSCREEN
 	BRK
 
 
-; It doesn't seem like there is a need to do cursor control 
-; movement (right) rather than just printing spaces as it 
-; seems like the purpose is to redraw the entire line, 
-; so.... I think blank spaces will do.  (therefore  I can 
+; ==========================================================================
+; It doesn't seem like there is a need to do cursor control
+; movement (right) rather than just printing spaces as it
+; seems like the purpose is to redraw the entire line,
+; so.... I think blank spaces will do.  (therefore  I can
 ; be lazy and provide most of this data as text strings.)
 
 ; The original PET version uses some graphics characters that
-; don't have direct equivalents on the Atari.  In a future 
-; iteration custom characters would be used to make the 
-; characters appear more like the original PET version. 
+; don't have direct equivalents on the Atari.  In a future
+; iteration custom characters would be used to make the
+; characters appear more like the original PET version.
 ; (just for the sake of matching the look of the original.)
-; going that route of redefined characters would then imply 
-; why not make a frog that looks like a frog and a boat that 
+; going that route of redefined characters would then imply
+; why not make a frog that looks like a frog and a boat that
 ; looks like a boat.
 
 ; Using the inverse blank space as the "beach" character.
 ; Using the 'O' as the frog. (No open circle graphic like the Pet's).
 ; Using the Atari EOL $9b to flag the end of text, because the
-; character value 0 on the Atari is the heart graphic which 
+; character value 0 on the Atari is the heart graphic which
 ; appears in the "Dalesoft" string and which would then conflict
 ; with the 0 byte (BRK) used as end of text on the PET version.
-
+; --------------------------------------------------------------------------
 TEXT1 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 	;BYTE $A6,$A6,$A6,$A6,$A6,$A6,$A6,$A6
 	;BYTE $A6,$A6,$A6,$A6,$A6,$A6,$A6,$A6
@@ -354,7 +412,7 @@ TEXT1 ; Default display of "Beach", for lack of any other description, and the t
 	;BYTE $A6,$A6,$A6,$A6,$A6,$A6,$A6,$A6
 	;BYTE $A6,$A6,$A6,$A6,$A6,$A6,$A6,$A6
 	;TEXT "{cm +*40}"
-	; I do not understand the data.. Code suggests $66 is the "beach" 
+	; I do not understand the data.. Code suggests $66 is the "beach"
 	.by +$80 "                                        " ; "Beach"
 	;BYTE $1D,$5B,$D1,$D1,$D1,$D1,$3E,$1D
 	;BYTE $1D,$1D,$1D,$1D,$1D,$1D,$1D,$5B
@@ -378,15 +436,15 @@ TEXT1 ; Default display of "Beach", for lack of any other description, and the t
 	.by ATASCII_DOWN
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT '<'           ATASCII_BALL
 	.by ATASCII_BALL  ATASCII_BALL  ATASCII_BALL  ']'           ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
-	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT '<'           ATASCII_BALL  ATASCII_BALL  ATASCII_BALL  
+	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT '<'           ATASCII_BALL  ATASCII_BALL  ATASCII_BALL
 	.by ATASCII_BALL  ']'           ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT '<'           ATASCII_BALL
-	.by ATASCII_BALL  ATASCII_BALL  ATASCII_BALL  ']'           ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT 
+	.by ATASCII_BALL  ATASCII_BALL  ATASCII_BALL  ']'           ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
 	; Adding a down here to make the data go to the next line.
 	.by ATASCII_DOWN
 	.by ATASCII_EOL
-	brk  
+	brk
 
-TEXT2 ; this last block includes a Beach, with the "Frog" character which is the starting line. 
+TEXT2 ; this last block includes a Beach, with the "Frog" character which is the starting line.
 	;BYTE $A6,$A6,$A6,$A6,$A6,$A6,$A6,$A6
 	;BYTE $A6,$A6,$A6,$A6,$A6,$A6,$A6,$A6
 	;BYTE $A6,$A6,$A6,$D7,$A6,$A6,$A6,$A6
@@ -442,25 +500,25 @@ LIVETT
 	.by ATASCII_DOWN
 	.by "SCORE = "
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
-	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT   
+	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
 	.by "HI = "
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
-	.by ATASCII_RIGHT ATASCII_RIGHT 
+	.by ATASCII_RIGHT ATASCII_RIGHT
 	.by "LV:"
 	.by ATASCII_EOL
 	brk
 
-	
+
 ; ==========================================================================
 ; Printing things to the screen.
 ; For Atari, all occurrences of $FFD2 now call routine "fputc"
-; Most of this priting is strictly serial and prints the entire content 
-; of screen line.  This means this could be easily optimized to do direct 
-; copy of a block of bytes from a defined source to the destination in 
+; Most of this printing is strictly serial and prints the entire content
+; of screen line.  This means this could be easily optimized to do direct
+; copy of a block of bytes from a defined source to the destination in
 ; screen memory. (future to-do)
-
-PRINTSC ; Print the Clear Screen 
-	ldx #0 ; how many times printed the block of beach/boats 
+; --------------------------------------------------------------------------
+PRINTSC ; Print the Clear Screen
+	ldx #0 ; how many times printed the block of beach/boats
 	ldy #0
 
 LK
@@ -488,8 +546,8 @@ LK2
 	jmp LK2
 
 PRINT1 ; Evaluate number of times beach/boats is printed
-	inx 
-	cpx #6     ; if we printed six times, (18 lines total) then we're done 
+	inx
+	cpx #6     ; if we printed six times, (18 lines total) then we're done
 	bne PRINT  ; Go back and print another set of lines.
 
 
@@ -507,18 +565,18 @@ LK3
 
 
 PRINT2
-	jsr PRINTPORTBYTEXT 
+	jsr PRINTPORTBYTEXT
 		; Display the number of frogs that crossed the river.
 		; This is done by direct write, not printing.
 		; Logic here is ummm. different. not exactly certain of it all.
 
 	ldx FrogsCrossed ; number of times successfully crossed the rivers.
 LIVES
-	cpx #0           ; If FrogsCrossed is 0 , 
+	cpx #0           ; If FrogsCrossed is 0 ,
 	beq PRINT3       ; then nothing to display. Skip to scores.
 	cpx #$11         ; If FrogsCrossed is $11/17 (dec)    Hmmm...   Why??
 	beq PRINT4       ; then print the frog.
-	lda #1           ; Reset the 
+	lda #1           ; Reset the
 	sta FrogsCrossed ; FrogsCrossed to 1
 
 PRINT4
@@ -546,7 +604,7 @@ PRLIVE ; Print the lives and score labels in the top two lines of the screen.
 
 FINLIV ; Write the number of lives to screen memory
 	lda NumberOfLives ; Get number of lives.
-	clc               ; Add to value for  
+	clc               ; Add to value for
 ;	adc #$30          ; PET ASCII '0'
 	adc #INTERNAL_0   ; Atari internal code for '0'
 	sta SCREENMEM+$4F ; Write to screen
@@ -559,7 +617,7 @@ FINLIV ; Write the number of lives to screen memory
 ; 0   = Beach line, no movement.
 ; 1   = first boat/river row, move right
 ; 255 = second boat/river row, move left.
-
+; --------------------------------------------------------------------------
 DATA
 	.BYTE 0, 1, 255
 	.BYTE 0, 1, 255
@@ -573,26 +631,26 @@ DATA
 
 ; ==========================================================================
 ; Called once on program start.
-; Use this to setup Atari display settings to imitate the   
+; Use this to setup Atari display settings to imitate the
 ; PET 4032's 40x25 display.
-
+; --------------------------------------------------------------------------
 GAMESTART
 	; Atari initialization stuff...
-	
-	; Changing the Display List is potentially tricky.  If the update is 
+
+	; Changing the Display List is potentially tricky.  If the update is
 	; interrupted by the Vertical blank, then it could mess up the display
-	; list address and crash the Atari.  So, the code must make sure the 
+	; list address and crash the Atari.  So, the code must make sure the
 	; system is not near the end of the screen to make the change.
-	; The jiffy counter is updated during the vertical blank.  When the 
-	; main code sees the counter change then it means the vertical blank is 
-	; over, the electron beam is near the top of the screen thus there is 
-	; now plenty of time to set the new display list pointer.  Technically, 
-	; this should be done by managing SDMCTL too, but this is overkill for a 
+	; The jiffy counter is updated during the vertical blank.  When the
+	; main code sees the counter change then it means the vertical blank is
+	; over, the electron beam is near the top of the screen thus there is
+	; now plenty of time to set the new display list pointer.  Technically,
+	; this should be done by managing SDMCTL too, but this is overkill for a
 	; program with only one display.
 
 	lda RTCLOK60     ; Get the jiffy clock
 WaitForFrame
-	cmp RTCLOK60     ; If it is unchanged, 
+	cmp RTCLOK60     ; If it is unchanged,
 	beq WaitForFrame ; then go check the jiffy clock value again.
 
 	; Safe to change Display list pointer now.
@@ -601,7 +659,7 @@ WaitForFrame
 	lda #>DISPLAYLIST
 	sta SDLSTH
 
-	; Tell the OS where screen memory starts 
+	; Tell the OS where screen memory starts
 	lda #<SCREENMEM ; low byte screen
 	sta SAVMSC
 	lda #>SCREENMEM ; hi byte screen
@@ -621,32 +679,35 @@ WaitForFrame
 	sta COLOR1       ; Text brightness
 
 	; End of Atari initialization stuff.
+; ==========================================================================
 
 	; Continue with regular Pet Frogger initialization
 	; Zero these values...
+	lda #$00
 	sta FrogsCrossed
 	sta FlaggedHiScore
 	sta LastKeyPressed
 
 	jsr INSTR ; print game instructions
 
+
 START
 	lda #0
-	sta FrogsCrossed       ; Zero the number of successful crossings.
-	
+	sta FrogsCrossed       ; Zero the number of successful crossings. (again)
+
 	lda #<[SCREENMEM+$320] ; Low Byte, Frog position.
-	sta FrogLocation      
+	sta FrogLocation
 	lda #>[SCREENMEM+$320] ; Hi Byte, Frog position.
 	sta FrogLocation + 1
-	
+
 	ldy #$13               ; Y = 19 (dec)
-	;lda #$66               ; PET ASCII.  I think the "beach" ??  
+	;lda #$66               ; PET ASCII.  I think the "beach" ??
 	lda #INTERNAL_INVSPACE ; On Atari use inverse space.
 	sta LastCharacter      ; Preset the character under the frog.
-	
+
 	lda #$12               ; 18 (dec), number of screen rows of playfield.
 	sta NumberOfRows
-	lda #$30               ; 48 (dec), delay counter.
+	lda #$60               ; 48 (dec), delay counter.
 	sta DelayNumber
 
 ;	lda #0                 ; Hey, we did this at the top
@@ -658,30 +719,28 @@ START
 	;lda FlaggedHiScore    ; Don't look at me.  It was commented out when I got here.
 
 ; Clear the score digits to zeros.
-; Reminder to do for Atari.  
-; If Scores are printed on screen, keep the ASCII values.
-; If scores are written directly to screen memory then change to use internal
-; screen code for digits. ("0" base)
+; Since scores are written directly to screen memory this is changed on Atari 
+; to use the internal code for "0"  as the base value for decimal digits. 
 	ldx #$07           ; 7 digits.
 CLEAR
-;	lda #$30           ; PET ASCII "0". (And Atari ASCII).
-	lda #INTERNAL_0   ; Atari internal code for "0"
+;	lda #$30           ; PET ASCII "0". .
+	lda #INTERNAL_0    ; Atari internal code for "0"
 	sta MyScore,x      ; Put zero/"0" in score buffer.
 	ldy FlaggedHiScore ; Has a high score been flagged?
-	cpy #$FF           ; If so, then skip this and 
+	cpy #$FF           ; If so, then skip this and
 	beq CLNEXT         ; go to the next digit.
 
-	sta HiScore,x      ; Also put zero/"0" in the high score. 
+	sta HiScore,x      ; Also put zero/"0" in the high score.
 	;sta $HiScore      ; Don't look at me.  It was commented out when I got here.
 	tay                ; Now Y also is zero/"0".
-	lda #3             ; Reset number of 
+	lda #3             ; Reset number of
 	sta NumberOfLives  ; lives to 3.
 	tya                ; A  is zero/"0" again.
 	ldy #$13           ; Y = 19 (dec) (again)
 
 CLNEXT
 	dex                ; decrement index to score digits.
-	cpx #255           ; did it go from 0 to $FF?  
+	cpx #255           ; did it go from 0 to $FF?
 	bne CLEAR          ; no, loop for next digit.
 	;  FYI: alternatively,  dex ; bpl CLEAR  would work without using cpx.
 	;sta MyScore       ; Don't look at me.  It was commented out when I got here.
@@ -692,7 +751,7 @@ CLNEXT
 
 KEY ; Read keyboard.  (I hate keyboard input.  TO DO - Use a joystick.)
 ;	lda $97            ; PET Get key pressed (LSTX)
-	lda CH             ; Atari get key pressed 
+	lda CH             ; Atari get key pressed
 	cmp #$FF           ; Check for no key pressed (same for PET and Atari)
 	bne KEY1           ; Not $FF, then something is pressed.
 
@@ -713,21 +772,22 @@ DEL
 	dex                ; decrement delay counter.
 	bne DEL1           ; If X is not 0, then wind up Y again and start over.
 
-	pla                ; Pull original Y value 
+	pla                ; Pull original Y value
 	tay                ; and return to Y.
 	jmp AUTMVE         ; GOTO AUTOMVE
 
 
 KEY1 ; Process keypress
-	pha
-	lda #$FF             ; Need to clear CH on Atari
+	pha                  ; A is a keypress, but the value of CH
+	lda #$FF             ; on Atari needs to be cleared.
 	sta CH
-	pla
+	pla                  ; A has the original keypress again.  Continue....
+
 	cmp LastKeyPressed   ; is this key the same as the last key?
 	BEQ DELAY            ; Yes.  So, probably a key repeat, so ignore it and do delay.
 
 	tax                  ; Save that key in X, too.
-	lda LastCharacter    ; Get the last character (under the frog)  
+	lda LastCharacter    ; Get the last character (under the frog)
 	sta (FrogLocation),y ; Erase the frog with the last character.
 
 ; Test for Left "4" key
@@ -770,7 +830,7 @@ UP ; Test for Up "S" key
 	jmp DELAY            ; Go to the delay
 
 UP1 ; Move the frog a row up.
-	lda #1               ; Represents "10" Since we don't need to add to the ones column.  
+	lda #1               ; Represents "10" Since we don't need to add to the ones column.
 	ldx #5               ; Offset from start of "00000000" to do the adding.
 ; I have to correct this.
 ; the intend is to add 10 to the score.
@@ -787,19 +847,19 @@ UP1 ; Move the frog a row up.
 	stx NumberOfChars    ; Position offset in score.
 	jsr SCORE            ; Deal with score update.
 
-	lda FrogLocation     ; subtract $28/40 (dec) from 
-	sec                  ; the address pointing to 
+	lda FrogLocation     ; subtract $28/40 (dec) from
+	sec                  ; the address pointing to
 	sbc #$28             ; the frog.
 	sta FrogLocation
 	bcs CORR2
-	dec FrogLocation + 1 
+	dec FrogLocation + 1
 
 CORR2 ; decrement number of rows.
 	sec                  ; ummm.  Does carry affect dec? did not think so.
 	dec NumberOfRows
 	lda NumberOfRows
-	cmp #0               ; If more row are left to cross, then 
-	bne PLACE            ; draw frog on screen. 
+	cmp #0               ; If more row are left to cross, then
+	bne PLACE            ; draw frog on screen.
 ;pla
 ;pla
 	jmp FROG             ; No more rows to cross. Update frog reward/stats.
@@ -813,8 +873,8 @@ PLACE
 
 
 ; Draw the frog on screen.
-PLACE2 
-;	lda #87              ; Pet frog. ASCII $57/87 (dec) 
+PLACE2
+;	lda #87              ; Pet frog. ASCII $57/87 (dec)
 	lda #INTERNAL_O       ; Atari internal code for "O" is frog.
 	sta (FrogLocation),y ; Save to screen memory to display it.
 	jmp DELAY            ; Slow down game speed.
@@ -824,7 +884,7 @@ PLACE2
 ; Will the Pet Frog land on the Beach?
 CHECK
 	lda LastCharacter      ; Is the character the beach?
-;	cmp #102               ; Pet ASCII $66/102 (dec) - The beach 
+;	cmp #102               ; Pet ASCII $66/102 (dec) - The beach
 	cmp #INTERNAL_INVSPACE ; Atari uses inverse space for beach
 	bne CHECK1             ; not the beach?  Goto CHECK1
 	jmp PLACE2             ; Draw the frog.
@@ -849,7 +909,7 @@ CHECK2
 AUTMVE
 	ldx NumberOfRows   ; Get the current row number.
 	lda DATA,x         ; Get the movement flag for the row.
-	cmp #0             ; Is it 0?  Nothing to do.  Bail and go back to keyboard polling..  
+	cmp #0             ; Is it 0?  Nothing to do.  Bail and go back to keyboard polling..
 	beq RETURN         ; (ya know, the cmp was not actually necessary.)
 	cmp #$FF           ; is it $ff?  then automatic right move.
 	bne AUTRIG         ; (ya know, could have done  bmi AUTRIG without the cmp).
@@ -858,7 +918,7 @@ AUTMVE
 	bne RETURN         ; No.  Bail and go back to keyboard polling.
 	jmp YRDD           ; Yup.  Ran out of river.   Yer Dead!
 
-AUTRIG 
+AUTRIG
 	iny                ; Move Frog right one character
 	cpy #$28           ; Did it reach the right side ?    $28/40 (dec)
 	bne RETURN         ; No.  Bail and go back to keyboard polling.
@@ -868,8 +928,7 @@ RETURN
 	jmp KEY            ; Return to keyboard polling.
 
 
-; Yer dead! Text prompt.
-YRDDTX
+YRDDTX              ; Yer dead! Text prompt.
 	;BYTE $13
 	;BYTE $1D,$1D,$1D,$1D,$1D
 	;BYTE $12
@@ -884,7 +943,9 @@ YRDDTX
 	brk
 
 
+; ==========================================================================
 ; Frog is dead.
+; --------------------------------------------------------------------------
 YRDD
 	lda #INTERNAL_ASTER  ; Atari ASCII $2A/42 (dec) Splattered Frog.
 	sta (FrogLocation),y ; Road kill the frog.
@@ -907,7 +968,9 @@ AGAIN                    ; Print the dead frog prompt.
 	jmp AGAIN            ; Do until the end of string....
 
 
+; ==========================================================================
 ; Decide   G A M E   O V E R-ish
+; --------------------------------------------------------------------------
 GAMEOV
 	lda #0
 ;	sta $9E              ; Zero a Pet interrupt  ?????
@@ -928,10 +991,12 @@ GAMEOV
 
 
 GOV
+	lda #$FF
+	sta CH    ; Atari.  Make sure key is cleared.
 	jmp GOVER ; G A M E   O V E R
 
 
-FROGTXT
+FROGTXT                     ; You won, text prompt.
 	;BYTE $13,
 	;BYTE $1D,$1D,$1D,$1D,$1D,$1D
 	;BYTE $12
@@ -993,11 +1058,11 @@ FILL ; Fill screen with the "beach" characters
 ;	lda #$66               ; Pet beach character.
 	lda #INTERNAL_INVSPACE ; Atari beach character is inverse space.
 	sta (ScreenPointer),y
-	lda ScreenPointer      ; Increment  
-	clc                    ; the  
-	adc #1                 ; pointer 
-	sta ScreenPointer      ; to  
-	lda ScreenPointer+1    ; screen 
+	lda ScreenPointer      ; Increment
+	clc                    ; the
+	adc #1                 ; pointer
+	sta ScreenPointer      ; to
+	lda ScreenPointer+1    ; screen
 	adc #0                 ; memory.
 	sta ScreenPointer+1    ; You know, inc lowbyte, bne FILL works instead of adc.
 	cmp #>[SCREENMEM+$400] ; Did high byte reach $8400 (screen memory + 1K)?
@@ -1031,7 +1096,7 @@ FILL ; Fill screen with the "beach" characters
 
 ; ==========================================================================
 ; Update starting frog position.
-
+; --------------------------------------------------------------------------
 NEXTFR
 	lda DelayNumber        ; Subtract 3 from delay number...
 	sec
@@ -1048,7 +1113,7 @@ START1 ; Manage frog's starting postion.
 	jsr MOVESC
 
 ;	lda #$66               ; Pet?  Beach?
-	lda #INTERNAL_INVSPACE ; Atari: Beach character 
+	lda #INTERNAL_INVSPACE ; Atari: Beach character
 	sta LastCharacter      ; Prep space under frog
 
 ;	lda #$57               ; Pet: Frog character
@@ -1058,13 +1123,14 @@ START1 ; Manage frog's starting postion.
 	sta (FrogLocation),y   ; Erase Frog starting position.
 	lda #$12               ; A = 18 (dec)
 	sta NumberOfRows       ; Save as number of rows to jump
-	
+
 	jmp KEY                ; GOTO Key input
 
 
 ; ==========================================================================
 ; D E  L   A    Y          L      O       O        P
-; Count down X=255 to 0 by Y=255 times.  
+; Count down X=255 to 0 by Y=255 times.
+; --------------------------------------------------------------------------
 DELAY1
 	ldx #$FF
 
@@ -1082,7 +1148,7 @@ DELA
 
 ; ==========================================================================
 ; Add to score.
-
+; --------------------------------------------------------------------------
 SCORE
 	pha               ; Save A, X, and Y.
 	txa
@@ -1098,8 +1164,8 @@ SCORE
 
 SCORE1                   ; Evaluate if carry occurred
 	lda MyScore,x
-	; Pet used $3A for the next comparison.  Since the score display is 
-	; writing directly to the screen, the values are updated based 
+	; Pet used $3A for the next comparison.  Since the score display is
+	; writing directly to the screen, the values are updated based
 	; on Atari ointernal character codes instead.
 	cmp #[INTERNAL_0+10] ; Did math carry past the "9"?
 	bcs UPDATE           ; if it carried then readjust the values.
@@ -1117,9 +1183,9 @@ PULL                     ; All done.
 ; ==========================================================================
 ; The score carried past "9", so it must be adjusted and
 ; the next/greater position is added.
-
+; --------------------------------------------------------------------------
 UPDATE
-	lda #INTERNAL_0 ; Atari internal code for "0".  
+	lda #INTERNAL_0 ; Atari internal code for "0".
 	sta MyScore,x   ; Reset current position to "0"
 	dex             ; Go to previous position in score
 	inc MyScore,x   ; Add 1 to the next digit.
@@ -1128,7 +1194,7 @@ UPDATE
 
 ; ==========================================================================
 ; Game Over - Prompt to go again.
-
+; --------------------------------------------------------------------------
 GOVER
 	ldy #0
 
@@ -1143,12 +1209,13 @@ GOVER1                 ; Print the go again message.
 	jmp GOVER1
 
 GOVER2
-;	jsr $FFCF          ; Get a byte.  Input from keyboard.  returned in A
-	cmp #ATASCII_Y     ; 89 (dec) Pet/Atari ASCII "Y"
-	bne GOVER3         ; Not "Y".  
+;	jsr $FFCF          ; Pet Get a byte from keyboard.  returned in A
+	jsr WaitKey        ; For Atari, wait for a key press.  returned in A
+	cmp #KEY_Y         ; keyboard code for Y 
+	bne GOVER3         ; Not "Y".
 	jsr HISC           ; Manage high score
 	lda #$FF           ; Re-init a few things. . . .
-	sta FlaggedHiScore ; 
+	sta FlaggedHiScore ;
 	lda #0
 	sta FrogsCrossed
 	lda #3
@@ -1167,7 +1234,7 @@ GOVER3
 
 ; ==========================================================================
 ; Figure out if My Score is the High Score
-
+; --------------------------------------------------------------------------
 HISC
 	lda #0
 
@@ -1179,7 +1246,7 @@ HISC2
 	bcs HISC1        ; Greater than.  Could be high score.
 
 NOT
-	inx              
+	inx
 	cpx #7           ; Are all 7 digits tested?
 	bne HISC2        ; No, then go do next digit.
 	rts              ; Yes.  Done.
@@ -1195,7 +1262,7 @@ HISC1                ; It is a high score.
 
 ; ==========================================================================
 ; Prompt for playing again.
-
+; --------------------------------------------------------------------------
 OVER
 	;BYTE $93,$1D,$1D,$1D,$1D,$1D,$1D,$1D
 	;BYTE $44,$4F,$20,$59,$4F,$55,$20,$57
@@ -1209,11 +1276,12 @@ OVER
 	brk
 
 
+; ==========================================================================
 ; Print the instruction/title screen text.
 ; Instructions are longer than a register can index, so this
-; version of printing iterates the pointer itself and not the 
+; version of printing iterates the pointer itself and not the
 ; index register.
-
+; --------------------------------------------------------------------------
 INSTR ; Per PET Memory Map - Set integer value for SYS/GOTO ?
 	lda #<INSTXT
 ;	sta $11
@@ -1243,30 +1311,50 @@ INSTR2
 	sta ScreenPointer+1
 	jmp INSTR2            ; Do again until end of string
 
-PRINTPORTBTYTEXT 
-	jsr PRINTPORTBYTEXT  ; Add Atari Ported by credit.
+PRINTPORTBTYTEXT
+	jsr PRINTPORTBYTEXT   ; Add Atari Ported by credit.
 
 INSTR1
-;	lda $97               ; Pet current key pressed (LSTX)
-	lda CH                ; Atari current key press
-	cmp #$FF              ; Pet/Atari, no key pressed
-	bne CLEAR_CH
-	beq INSTR1            ; so, loop again while no key pressed.
+;	lda $97              ; Pet current key pressed (LSTX)
+;	cmp #$FF
+;	beq INSTR1           ; Pet polling the keyboard.
 
-CLEAR_CH
-	lda #$FF              ; Atari, clear  out the key
-	sta CH
+	jsr WaitKey          ; Atari polling the keyboard.
 
 	lda #0                ; Clear high score flag.
 	sta FlaggedHiScore
 	rts
 
+	
 ; ==========================================================================
-; Instructions text. 
-; Atari cursor is different from PET. Due to the Atari's full scrren editor
-; the Atari needs a DOWN inserted to get the Atari printing to move to the 
-; next line.  
+; Wait for a keypress. 
+;
+; A  returns the key pressed.
+; --------------------------------------------------------------------------
+WaitKey
+	lda #$FF
+	sta CH          ; Clear any pending key
 
+WaitKeyLoop
+	lda CH
+	cmp #$FF        ; No key pressed
+	beq WaitKeyLoop ; Loop until a key is pressed.
+
+	pha             ; Save the key
+	lda #$FF
+	sta CH          ; Clear any pending key
+	pla             ; return the pressed key in A.
+
+	rts
+
+
+
+; ==========================================================================
+; Instructions text.
+; Atari cursor is different from PET. Due to the Atari's full screen editor
+; the Atari needs a DOWN inserted to get the Atari printing to move to the
+; next line.
+; --------------------------------------------------------------------------
 INSTXT
 	;BYTE $93,
 	;BYTE $1D,$1D,$1D,$1D,$1D,$1D,$1D,$1D
@@ -1275,11 +1363,11 @@ INSTXT
 	;BYTE $52,$1D,$1D,$1D,$1D,$1D,$1D,$1D
 	;BYTE $1D,$1D,$1D,$1D,$1D,$1D,$1D,$1D
 	;TEXT "{clear}{right*14}pet frogger{right*15}"
-	.by ATASCII_CLEAR ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT 
-	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT 
+	.by ATASCII_CLEAR ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
+	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
 	.by "PET FROGGER"
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
-	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT 
+	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
 	.by ATASCII_DOWN
 	;byte $1D,$1D,$1D,$1D,$1D,$1D,$1D,$1D
 	;BYTE $1D,$1D,$1D,$1D,$1D,$1D,$B8,$B8
@@ -1288,7 +1376,7 @@ INSTXT
 	;BYTE $1D,$1D,$1D,$1D,$1D,$1D,$1D,$1D
 	;TEXT "{right*14}{cm u*3} {cm u*7}{right*15}"
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
-	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT  
+	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
 	.by ATASCII_HLINE ATASCII_HLINE ATASCII_HLINE ' '           ATASCII_HLINE ATASCII_HLINE ATASCII_HLINE ATASCII_HLINE
 	.by ATASCII_HLINE ATASCII_HLINE ATASCII_HLINE ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
 	.by ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT ATASCII_RIGHT
@@ -1309,7 +1397,7 @@ INSTXT
 	;TEXT "boat like this :- <QQQ] and land on the{right}"
 	.BY "BOAT LIKE THIS :- <" ATASCII_BALL ATASCII_BALL ATASCII_BALL "] AND LAND ON THE" ATASCII_RIGHT ATASCII_DOWN
 	;TEXT "seats ('Q'). you get 10 points for every"
-	.by "SEATS ('" ATASCII_BALL "'). YOU GET 10 POINTS FOR EVERY" 
+	.by "SEATS ('" ATASCII_BALL "'). YOU GET 10 POINTS FOR EVERY"
 	;TEXT "jump forward and 500 points every time{right*2}"
 	.by "JUMP FORWARD AND 500 POINTS EVERY TIME" ATASCII_RIGHT ATASCII_RIGHT ATASCII_DOWN
 	;TEXT "you get a frog across the river{right*9}"
@@ -1340,13 +1428,15 @@ INSTXT
 	.by ATASCII_EOL
 	brk
 
+
 ; ==========================================================================
 ; Atari stuff.
-; The game never uses the 25th text line, so that conveniently allows a 
+; The game never uses the 25th text line, so that conveniently allows a
 ; place to put the porting credit.  Cheap and dirty.  Just direct copy,
 ; because the OS printing can only write to the top 24 lines.
+; --------------------------------------------------------------------------
 PORTBYTEXT
-	.sb '  Atari port by Ken Jennings, Nov 2018  '
+	.sb 'Atari V00 port by Ken Jennings, Nov 2018'
 
 PRINTPORTBYTEXT
 	ldy #39             ; Loop 40 bytes from +39 to +0
@@ -1360,7 +1450,7 @@ PORTBYLOOP
 
 
 ; ==========================================================================
-; Atari stuff.   
+; Atari stuff.
 ; Necessary Central I/O values for putch to screen.
 ;
 ; If OS.asm is not included, then you need these declared:
@@ -1372,6 +1462,7 @@ PORTBYLOOP
 
 ; Borrow page 0 locations to preserve X and Y registers,
 ; because the PutCH will change everything.
+; --------------------------------------------------------------------------
 SAVEY = $FF
 SAVEX = $FE
 
@@ -1379,11 +1470,11 @@ SAVEX = $FE
 ; ==========================================================================
 ; Write a character to the screen.
 ;
-; Due to foolish hackery in PutCH, provide a wrapper function to save
-; register(s) for return to the caller.
-;---------------------------------------------------------------------
+; Due to the foolish hackery in PutCH, provide a wrapper function to
+; save register(s) for return to the caller.
+; --------------------------------------------------------------------------
 fputc
-	sty SAVEY  ; Need to save Y for printing index.  PutCH will change it.
+	sty SAVEY  ; Need to save Y for printing index. PutCH will change it.
 	stx SAVEX  ; Need to save X also, since PutCH will change it.
 	jsr PutCH  ; Uses the CIO PutCH in IOCB0
 	ldy SAVEY  ; Restore Y.
@@ -1393,18 +1484,18 @@ fputc
 
 ; ==========================================================================
 ; Write a character to the screen.
-; Rather than doing the whole setup for an IOCB call, cheat by using the  
-; put character vector in the Channel 0 IOCB meant for BASIC. 
+; Rather than doing the whole setup for an IOCB call, cheat by using the
+; put character vector in the Channel 0 IOCB meant for BASIC.
 ;
-; Push the address of the E: device PutChar routine held in 
-; IOCB0 onto the stack and call it. 
+; Push the address of the E: device PutChar routine held in
+; IOCB0 onto the stack and call it.
 ;
 ; INPUT:
 ; A = character to write
 ;
 ; NOTE:
 ; OS will modify all registers.
-;---------------------------------------------------------------------
+; --------------------------------------------------------------------------
 PutCH
 	sta OUTPUT ; Self modifying code - save the byte below.
 
@@ -1419,15 +1510,15 @@ OUTPUT = *+1
 
 	; This rts actually triggers calling the address of PutCH
 	; that was pushed onto the stack above.
-	; This hackery means the caller must restore Y register. 
-	rts  
+	; This hackery means the caller must restore Y register.
+	rts
 
 
 ; ==========================================================================
-; Atari does not have a "Home" character, so we need to set 
-; cursor position ourselves. 
+; Atari does not have a "Home" character, so we need to set
+; cursor position ourselves.
 ; Do POSITION 0,0.
-;---------------------------------------------------------------------
+; --------------------------------------------------------------------------
 POSITION
 	sty SAVEY  ; Need to save Y for printing index.
 
@@ -1449,17 +1540,17 @@ POSITION
 
 ; ==========================================================================
 ; Force the Atari to impersonate the PET 4032 by setting the 40-column
-; text mode memory to the same fixed address.  This minimizes the 
+; text mode memory to the same fixed address.  This minimizes the
 ; amount of code changes for screen memory.
 ;
-; But First we need a 25-line ANTIC Mode 2 text screen which means a  
+; But First we need a 25-line ANTIC Mode 2 text screen which means a
 ; custom display list.
-; 
+;
 ; Since the OS only understands 24 lines it can do standard printing to those
 ; lines, but the 25th line requires some code shenanigans.
-
+; --------------------------------------------------------------------------
 	ORG $7FD8  ; $xxD8 to xxFF - more than enough space for Display List
-	
+
 DISPLAYLIST
 	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4 ; 20 blank scan lines.
 	mDL_LMS DL_TEXT_2,SCREENMEM              ; Mode 2 text and Load Memory Scan for text/graphics
