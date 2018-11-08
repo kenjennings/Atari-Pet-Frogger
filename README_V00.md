@@ -2,11 +2,11 @@
 
  PET FROGGER game for Commodore PET 4032 ported to the Atari 8-bit computers
 
-[![Title Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V00_Title.png)](#features1)
+[![Title Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V00_Title.png "Title Screen")](#features1)
 
-[![Game Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V00_Game.png)](#features2)
+[![Game Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V00_Game.png "Game Screen")](#features2)
 
-[![You Died!](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V00_YerDead.png)](#features3)
+[![You Died!](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V00_YerDead.png "You're Dead!")](#features3)
 
 Video of the game play on YouTube: https://youtu.be/Aotkgw6ZSfw
 
