@@ -431,21 +431,15 @@ SCREEN_OVER  = 5 ; Game Over.
 ; Graphics chars design, DEAD FROG!
 ; | *|**|* |  | *|**|**|* |  | *|* |  | *|**|* |  |  |  |  | *|**|**|* | *|**|**|  |  |**|**|  |  |**|**|* |  |**|
 ; | *|* |**|  | *|* |  |  |  |**|**|  | *|* |**|  |  |  |  | *|* |  |  | *|* | *|* | *|* | *|* | *|* |  |  |  |**|
-
-; |
-
 ; | *|* | *|* | *|**|**|  | *|* | *|* | *|* | *|* |  |  |  | *|**|**|  | *|* | *|* | *|* | *|* | *|* |  |  |  |**|
 ; | *|* | *|* | *|* |  |  | *|* | *|* | *|* | *|* |  |  |  | *|* |  |  | *|**|**|  | *|* | *|* | *|* |**|* |  |**|
-
-; |
-
 ; | *|* |**|  | *|* |  |  | *|**|**|* | *|* |**|  |  |  |  | *|* |  |  | *|* |**|  | *|* | *|* | *|* | *|* |  |  |
 ; | *|**|* |  | *|**|**|* | *|* | *|* | *|**|* |  |  |  |  | *|* |  |  | *|* | *|* |  |**|**|  |  |**|**|* |  |**|
 
-; |
-
-
 ; Graphics chars, DEAD FROG!
+; |iY|iI|iK|  |iY|iI|iU| L|  |iL|iK|  |iY|iI|iK|  |  |  |  |iY|iI|iU| L|iY|iI|iO| O| I|iI|iO| O| I|iI|iU| L|  |i |
+; |iY| Y|iY| Y|iY| I|iU|  |iY| Y|iY| Y|iY| Y|iY| Y|  |  |  |iY|iI|iU|  |iY|iK|iL| L|iY| Y|iY| Y|iY| Y| U| O|  |i |
+; |iY|iK|iI|  |iY|iK| U| O|iY|iI|iO| Y|iY|iK|iI|  |  |  |  |iY| Y|  |  |iY| Y|iO| O| K|iK|iL| L| K|iK|iL|iY|  | U|
 
 
 ; Graphics chars design, GAME OVER 
@@ -555,19 +549,19 @@ TEXT_SIZES ; length of message.  Each should be a multiple of 40.
 	.word 120,80,40,40,40
 	.word 120,280,120,40,40
 
-TEXT_TARGET ; where in screen memory does it get written?
-	.word SCREENMEM+80,SCREENMEM+200,SCREENMEM+320  ; Six Beach + Boat lines
-	.word SCREENMEM+440,SCREENMEM+560,SCREENMEM+680 
-	.word SCREENMEM+800                             ; Beach + Credit lines
-	.word SCREENMEM                                 ; Score lines
-	.word SCREENMEM                                 ; Yer Dead!
-	.word SCREENMEM                                 ; Congratulations
-	.word SCREENMEM                                 ; Another go? 
-	.word SCREENMEM                                 ; Title text 
-	.word SCREENMEM+160                             ; Title text instructions
-	.word SCREENMEM+560                             ; Title text controls
-	.word SCREENMEM+760                             ; Title text prompt
-	.word SCREENMEM+960                             ; Ported By Bozo
+;TEXT_TARGET ; where in screen memory does it get written?
+;	.word SCREENMEM+80,SCREENMEM+200,SCREENMEM+320  ; Six Beach + Boat lines
+;	.word SCREENMEM+440,SCREENMEM+560,SCREENMEM+680 
+;	.word SCREENMEM+800                             ; Beach + Credit lines
+;	.word SCREENMEM                                 ; Score lines
+;	.word SCREENMEM                                 ; Yer Dead!
+;	.word SCREENMEM                                 ; Congratulations
+;	.word SCREENMEM                                 ; Another go? 
+;	.word SCREENMEM                                 ; Title text 
+;	.word SCREENMEM+160                             ; Title text instructions
+;	.word SCREENMEM+560                             ; Title text controls
+;	.word SCREENMEM+760                             ; Title text prompt
+;	.word SCREENMEM+960                             ; Ported By Bozo
 
 SCREEN_ADDR ; Direct address lookup for each row of screen memory.
 	.rept 25,#           
