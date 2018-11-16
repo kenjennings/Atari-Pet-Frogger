@@ -272,7 +272,7 @@ SCREEN_OVER  = 5 ; Game Over.
 	.by "semiconductor chemistry and physics making all this fun possible. ** "
 	.by "Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. ** "
 	.by "Atari port by Ken Jennings, November 2018. Version 01. "
-	.by "IOCB Printing removed.  All display is writing to screen RAM. **" 
+	.by "IOCB Printing removed. Everything is direct writes to screen RAM. **" 
 	.by "Code reworked into timer/event loop organization. **"
 
 
@@ -294,8 +294,7 @@ SCREEN_OVER  = 5 ; Game Over.
 
 ; Display layouts and associated text blocks:
 
-; Original Title Screen and Instructions:
-
+; Original V00 Title Screen and Instructions:
 ;    +----------------------------------------+
 ; 1  |              PET FROGGER               | INSTXT_1
 ; 2  |              --- -------               | INSTXT_1
@@ -324,7 +323,7 @@ SCREEN_OVER  = 5 ; Game Over.
 ; 25 |Atari V01 port by Ken Jennings, Nov 2018| PORTBYTEXT
 ;    +----------------------------------------+
 
-; Original Main Game Play Screen:
+; Original V00 Main Game Play Screen:
 ;    +----------------------------------------+
 ; 1  |Successful Crossings =                  | LIVETT 
 ; 2  |Score = 0000000      Hi = 0000000   Lv:3| LIVETT
@@ -353,17 +352,114 @@ SCREEN_OVER  = 5 ; Game Over.
 ; 25 |Atari V01 port by Ken Jennings, Nov 2018| PORTBYTEXT
 ;    +----------------------------------------+
 
-; |  |**|**|* |  | *|* |  |**|  | *|* |**|**|**|  |  |  |**|**|  | *|* | *|* | *|**|**|* | *|**|**|  |
-; | *|* |  |  |  |**|**|  |**|* |**|* |**|  |  |  |  | *|* | *|* | *|* | *|* | *|* |  |  | *|* | *|* |
-; | *|* |  |  | *|* | *|* |**|**|**|* |**|**|* |  |  | *|* | *|* | *|* | *|* | *|**|**|  | *|* | *|* |
-; | *|* |**|* | *|* | *|* |**| *| *|* |**|  |  |  |  | *|* | *|* | *|* | *|* | *|* |  |  | *|**|**|  |
-; | *|* | *|* | *|**|**|* |**|  | *|* |**|  |  |  |  | *|* | *|* |  |**|**|  | *|* |  |  | *|* |**|  |
-; |  |**|**|* | *|* | *|* |**|  | *|* |**|**|**|  |  |  |**|**|  |  | *|* |  | *|**|**|* | *|* | *|* |
+; Revised V01 Title Screen and Instructions:
+;    +----------------------------------------+
+; 1  |              PET FROGGER               | TITLE
+; 2  |              --- -------               | TITLE
+; 3  |     (c) November 1983 by DalesOft      | CREDIT
+; 4  |        Written by John C Dale          | CREDIT
+; 5  |Atari V01 port by Ken Jennings, Nov 2018| CREDIT
+; 6  |                                        |
+; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
+; 8  |frog legs fast food franchise! But, the | INSTXT_1
+; 9  |frogs must cross piranha-infested rivers| INSTXT_1
+; 10 |to reach freedom. You have three chances| INSTXT_1
+; 11 |to prove your frog management skills by | INSTXT_1
+; 12 |directing frogs to jump on boats in the | INSTXT_1
+; 13 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
+; 14 |the seats in the boats ('Q').           | INSTXT_1
+; 15 |                                        |
+; 16 |Scoring:                                | INSTXT_2
+; 17 |    10 points for each jump forward.    | INSTXT_2
+; 18 |   500 points for each rescued frog.    | INSTXT_2
+; 19 |                                        |
+; 20 |Game controls:                          | INSTXT_3
+; 21 |                 S = Up                 | INSTXT_3
+; 22 |      left = 4           6 = right      | INSTXT_3
+; 23 |                                        |
+; 24 |     Hit any key to start the game.     | INSTXT_4
+; 25 |                                        |
+;    +----------------------------------------+
 
-; Graphics chars. 
-; - I-iI-iU- I-  -iL-iK-  -iS- O-iL- Y-i -iU-iU-  -  - I-iI-iO- O-iY- Y-iY- Y-iY-iI-iU- L-iY-iI-iO- O-
-; -iY- Y- U- O-iY- Y-iY- Y-i -iO-iO- Y-i -iU- L-  -  -iY- Y-iY- Y-iY- Y-iY- Y-iY-iI-iU-  -iY-iK-iL- L-
-; - K-iK-iL- Y-iY-iI-iO- Y-i -  -iY- Y-i - U- U-  -  - K-iK-iL- L-  -iO-iI-  -iY- K- U- O-iY- Y-iO- O-
+; Transition Title screen to Game Screen.
+; Animate Credit lines down from Line 3 to Line 23.
+ 
+; Revised V01 Main Game Play Screen:
+;    +----------------------------------------+
+; 1  |Successful Crossings =                  | LIVETT 
+; 2  |Score = 0000000      Hi = 0000000   Lv:3| LIVETT
+; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
+; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
+; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
+; 6  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
+; 7  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
+; 8  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
+; 9  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
+; 10 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3
+; 11 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3
+; 12 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
+; 13 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4
+; 14 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4
+; 15 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
+; 16 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5
+; 17 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5
+; 18 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
+; 29 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
+; 20 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
+; 21 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
+; 22 |                                        |
+; 23 |     (c) November 1983 by DalesOft      | TEXT2
+; 24 |        Written by John C Dale          | TEXT2
+; 25 |Atari V01 port by Ken Jennings, Nov 2018| PORTBYTEXT
+;    +----------------------------------------+
+
+
+; Graphics chars design, SAVED!
+; |  |**|**|  |  | *|* |  | *|* | *|* | *|**|**|* | *|**|* |  |  |**|
+; | *|* |  |  |  |**|**|  | *|* | *|* | *|* |  |  | *|* |**|  |  |**|
+; |  |**|**|  | *|* | *|* | *|* | *|* | *|**|**|  | *|* | *|* |  |**|
+; |  |  | *|* | *|* | *|* | *|* | *|* | *|* |  |  | *|* | *|* |  |**|
+; |  |  | *|* | *|**|**|* |  |**|**|  | *|* |  |  | *|* |**|  |  |  |
+; |  |**|**|  | *|* | *|* |  | *|* |  | *|**|**|* | *|**|* |  |  |**|
+
+; Graphics chars, SAVED!
+; | I|iI|iU|  |  |iL|iK|  |iY| Y|iY| Y|iY|iI|iU| L|iY|iI|iK|  |  |i |
+; |  |iU|iO| O|iY| Y|iY| Y|iY| Y|iY|Y |iY|iI|iU|  |iY| Y|iY| Y|  |i |
+; |  | U|iL| L|iY|iI|iO| Y|  |iO|iI|  |iY|iK| U| O|iY|iK|iI|  |  | U|
+
+
+; Graphics chars design, DEAD FROG!
+; | *|**|* |  | *|**|**|* |  | *|* |  | *|**|* |  |  |  |  | *|**|**|* | *|**|**|  |  |**|**|  |  |**|**|* |  |**|
+; | *|* |**|  | *|* |  |  |  |**|**|  | *|* |**|  |  |  |  | *|* |  |  | *|* | *|* | *|* | *|* | *|* |  |  |  |**|
+
+; |
+
+; | *|* | *|* | *|**|**|  | *|* | *|* | *|* | *|* |  |  |  | *|**|**|  | *|* | *|* | *|* | *|* | *|* |  |  |  |**|
+; | *|* | *|* | *|* |  |  | *|* | *|* | *|* | *|* |  |  |  | *|* |  |  | *|**|**|  | *|* | *|* | *|* |**|* |  |**|
+
+; |
+
+; | *|* |**|  | *|* |  |  | *|**|**|* | *|* |**|  |  |  |  | *|* |  |  | *|* |**|  | *|* | *|* | *|* | *|* |  |  |
+; | *|**|* |  | *|**|**|* | *|* | *|* | *|**|* |  |  |  |  | *|* |  |  | *|* | *|* |  |**|**|  |  |**|**|* |  |**|
+
+; |
+
+
+; Graphics chars, DEAD FROG!
+
+
+; Graphics chars design, GAME OVER 
+; |  |**|**|* |  | *|* |  |**|  | *|* |**|**|**|  |  |  |  |**|**|  | *|* | *|* | *|**|**|* | *|**|**|  |
+; | *|* |  |  |  |**|**|  |**|* |**|* |**|  |  |  |  |  | *|* | *|* | *|* | *|* | *|* |  |  | *|* | *|* |
+; | *|* |  |  | *|* | *|* |**|**|**|* |**|**|* |  |  |  | *|* | *|* | *|* | *|* | *|**|**|  | *|* | *|* |
+; | *|* |**|* | *|* | *|* |**| *| *|* |**|  |  |  |  |  | *|* | *|* | *|* | *|* | *|* |  |  | *|**|**|  |
+; | *|* | *|* | *|**|**|* |**|  | *|* |**|  |  |  |  |  | *|* | *|* |  |**|**|  | *|* |  |  | *|* |**|  |
+; |  |**|**|* | *|* | *|* |**|  | *|* |**|**|**|  |  |  |  |**|**|  |  | *|* |  | *|**|**|* | *|* | *|* |
+
+; Graphics chars, Game Over. 
+; | I|iI|iU| I|  |iL|iK|  |iS| O|iL| Y|i |iU|iU|  |  |  | I|iI|iO| O|iY| Y|iY| Y|iY|iI|iU| L|iY|iI|iO| O|
+; |iY| Y| U| O|iY| Y|iY| Y|i |iO|iO| Y|i |iU| L|  |  |  |iY| Y|iY| Y|iY| Y|iY| Y|iY|iI|iU|  |iY|iK|iL| L|
+; | K|iK|iL| Y|iY|iI|iO| Y|i |  |iY| Y|i | U| U|  |  |  | K|iK|iL| L|  |iO|iI|  |iY| K| U| O|iY| Y|iO| O|
 
 
 
@@ -473,6 +569,11 @@ TEXT_TARGET ; where in screen memory does it get written?
 	.word SCREENMEM+760                             ; Title text prompt
 	.word SCREENMEM+960                             ; Ported By Bozo
 
+SCREEN_ADDR ; Direct address lookup for each row of screen memory.
+	.rept 25,#           
+		.word >[40*:1+SCREENMEM]
+	.endr
+
 
 ; ==========================================================================
 ; "Printing" things to the screen.
@@ -517,6 +618,7 @@ ClearScreenLoop
 ;
 ; Parameters:
 ; Y = index of the text item.  One of the PRINT_... values.
+; X = row number on screen 0 to 24.
 ;
 ; Used by code:
 ; A = used to multiply  value of index, and move the values.  
@@ -525,10 +627,21 @@ PrintToScreen
 	cpy #PRINT_END
 	bcs ExitPrintToScreen  ; Greater than or equal to END marker, so exit.
 
-	pha   ; Save A and Y, so the caller doesn't need to.
+	pha   ; Save A and Y and X, so the caller doesn't need to.
 	tya
 	pha
+	txa
+	pha
 
+	asl                    ; multiply row number by 2 for address lookup.
+	tax                    ; use as index.
+	lda SCREEN_ADDR,x
+	sta ScreenPointer
+	inx 
+	lda SCREEN_ADDR,x
+	sta ScreenPointer+1
+
+	tya                    ; get the text identification.
 	asl                    ; multiply by 2 for all the word lookups.
 	tay                    ; use as index.
 
@@ -536,15 +649,15 @@ PrintToScreen
 	sta TextPointer
 	lda TEXT_SIZES,y
 	sta TextLength
-	lda TEXT_TARGET,y
-	sta ScreenPointer
+;	lda TEXT_TARGET,y
+;	sta ScreenPointer
 	iny                    ; now the high bytes
 	lda TEXT_MESSAGES,y    ; Load up the values from the tables.
 	sta TextPointer+1
 	lda TEXT_SIZES,y
 	sta TextLength+1
-	lda TEXT_TARGET,y
-	sta ScreenPointer+1
+;	lda TEXT_TARGET,y
+;	sta ScreenPointer+1
 
 	ldy #0
 PrintToScreenLoop          ; sub-optimal copy through page 0 indirect index
@@ -574,7 +687,9 @@ DoScreenPointer            ; inc screen pointer.
 	bne PrintToScreenLoop  ; The inc above must reasonably be non-zero.
 
 EndPrintToScreen
-	pla  ; Restore Y and A
+	pla  ; Restore X, Y and A
+	tax
+	pla
 	tay
 	pla
 	
