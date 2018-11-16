@@ -43,9 +43,9 @@ Notable changes:
 
 - The Atari screen is a full screen editor, so cursor movement off the right edge of the screen is different from the Pet requiring an extra "DOWN" character to move the cursor to next lines.
 
-- Direct write to screen memory uses different internal code values, not ASCII/ATASCII values.
+- Direct write to screen memory does not use ASCII/ATASCII codes on the Atari.  Instead, internal character codes are used. 
 
-- Direct keyboard scanning is different requiring Atari to clear the OS value in order to get the next character.  Also, key codes are different on the Atari (and not ASCII or Internal codes.)
+- Direct keyboard scanning is a little different on the Atari.  The OS register for the key needs to be cleared to the no-key-pressed value ($FF) in order to recognize the next key press.   Also, the keyboard codes are different on the Atari (and they're not ASCII/ATASCII or Internal character set codes.)
 
 ---
 
