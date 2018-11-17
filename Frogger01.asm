@@ -216,7 +216,7 @@ ATASCII_0      = $30 ; Character for '0'
 ; Atari uses different, "internal" values when writing to 
 ; Screen RAM.  These are the internal codes for writing 
 ; bytes directly to the screen:
-INTERNAL_O        = $2F ; Letter 'O' is the frog.  
+INTERNAL_O        = $2F ; Letter 'O' is the frog.
 INTERNAL_0        = $10 ; Number '0' for scores.
 INTERNAL_BALL     = $54 ; Ball graphics, ctrl-t, boat part.
 INTERNAL_SPACE    = $00 ; Blank space character.
@@ -224,6 +224,23 @@ INTERNAL_INVSPACE = $80 ; Inverse Blank space, for the beach.
 INTERNAL_ASTER    = $0A ; Character for '*' splattered frog.
 INTERNAL_HEART    = $40 ; heart graphics
 INTERNAL_HLINE    = $52 ; underline for title text.
+; Graphics chars shorthanded due to frequency....
+I_I  = 73      ; Internal ctrl-I
+I_II = 73+$80  ; Internal ctrl-I Inverse
+I_K  = 75      ; Internal ctrl-K
+I_IK = 75+$80  ; Internal ctrl-K Inverse
+I_L  = 76      ; Internal ctrl-L
+I_IL = 76+$80  ; Internal ctrl-L Inverse
+I_O  = 79      ; Internal ctrl-O
+I_IO = 79+$80  ; Internal ctrl-O Inverse
+I_U  = 85      ; Internal ctrl-U
+I_IU = 85+$80  ; Internal ctrl-U Inverse
+I_Y  = 89      ; Internal ctrl-Y
+I_IY = 89+$80  ; Internal ctrl-Y Inverse
+I_S  = 0       ; Internal Space
+I_IS = 0+$80   ; Internal Space Inverse
+I_T  = $54     ; Internal ctrl-t (ball)
+I_IT = $54+$80 ; Internal ctrl-t Inverse
 
 ; Keyboard codes for keyboard game controls.
 KEY_S = 62
@@ -269,7 +286,7 @@ SCREEN_OVER  = 5 ; Game Over.
 
 	; Label and Credit
 	.by "** Thanks to the Word (John 1:1), Creator of heaven and earth, and "
-	.by "semiconductor chemistry and physics making all this fun possible. ** "
+	.by "semiconductor chemistry and physics which makes all this fun possible. ** "
 	.by "Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. ** "
 	.by "Atari port by Ken Jennings, November 2018. Version 01. "
 	.by "IOCB Printing removed. Everything is direct writes to screen RAM. **" 
@@ -427,6 +444,10 @@ SCREEN_OVER  = 5 ; Game Over.
 ; |  |iU|iO| O|iY| Y|iY| Y|iY| Y|iY|Y |iY|iI|iU|  |iY| Y|iY| Y|  |i |
 ; |  | U|iL| L|iY|iI|iO| Y|  |iO|iI|  |iY|iK| U| O|iY|iK|iI|  |  | U|
 
+; Graphics data, SAVED!  (22) + 18 spaces.
+	.by $0,$0,$0,$0,$0,$0,$0,$0,$0,I_I,I_II,I_IU,I_S,I_S, I_IL,I_IK,I_S,I_IY,I_Y, I_IY,I_Y,I_IY,I_II,I_IU,I_L,I_IY,I_II,I_IK,I_S,I_S,I_IS,$0,$0,$0,$0,$0,$0,$0,$0,$0
+	.by $0,$0,$0,$0,$0,$0,$0,$0,$0,I_S,I_IU,I_IO,I_O,I_IY,I_Y, I_IY,I_Y,I_IY,I_Y, I_IY,I_Y,I_IY,I_II,I_IU,I_S,I_IY,I_Y, I_IY,I_Y,I_S,I_IS,$0,$0,$0,$0,$0,$0,$0,$0,$0
+	.by $0,$0,$0,$0,$0,$0,$0,$0,$0,I_S,I_U, I_IL,I_L,I_IY,I_II,I_IO,I_Y,I_S, I_IO,I_II,I_S,I_IY,I_IK,I_U, I_O,I_IY,I_IK,I_II,I_S,I_S,I_U, $0,$0,$0,$0,$0,$0,$0,$0,$0
 
 ; Graphics chars design, DEAD FROG!
 ; | *|**|* |  | *|**|**|* |  | *|* |  | *|**|* |  |  |  |  | *|**|**|* | *|**|**|  |  |**|**|  |  |**|**|* |  |**|
@@ -441,6 +462,10 @@ SCREEN_OVER  = 5 ; Game Over.
 ; |iY| Y|iY| Y|iY| I|iU|  |iY| Y|iY| Y|iY| Y|iY| Y|  |  |  |iY|iI|iU|  |iY|iK|iL| L|iY| Y|iY| Y|iY| Y| U| O|  |i |
 ; |iY|iK|iI|  |iY|iK| U| O|iY|iI|iO| Y|iY|iK|iI|  |  |  |  |iY| Y|  |  |iY| Y|iO| O| K|iK|iL| L| K|iK|iL|iY|  | U|
 
+; Graphics data, DEAD FROG!  (37) + 3 spaces.
+	.by $0,$0,I_IY,I_II,I_IK,I_S,I_IY,I_II,I_IU,I_L,I_S, I_IL,I_IK,I_S,I_IY,I_II,I_IK,I_S,I_S,I_S,I_S,I_IY,I_II,I_IU,I_L,I_IY,I_II,I_IO,I_O,I_I, I_II,I_IO,I_O,I_I, I_II,I_IU,I_L, I_S,I_IS,$0
+	.by $0,$0,I_IY,I_Y, I_IY,I_Y,I_IY,I_I, I_IU,I_S,I_IY,I_Y, I_IY,I_Y,I_IY,I_Y, I_IY,I_Y,I_S,I_S,I_S,I_IY,I_II,I_IU,I_S,I_IY,I_IK,I_IL,I_L,I_IY,I_Y, I_IY,I_Y,I_IY,I_Y, I_U, I_O, I_S,I_IS,$0
+	.by $0,$0,I_IY,I_IK,I_II,I_S,I_IY,I_IK,I_U, I_O,I_IY,I_II,I_IO,I_Y,I_IY,I_IK,I_II,I_S,I_S,I_S,I_S,I_IY,I_Y, I_S, I_S,I_IY,I_Y, I_IO,I_O,I_IK,I_IK,I_IL,I_L,I_IK,I_IK,I_IL,I_IY,I_S,I_U ,$0
 
 ; Graphics chars design, GAME OVER 
 ; |  |**|**|* |  | *|* |  |**|  | *|* |**|**|**|  |  |  |  |**|**|  | *|* | *|* | *|**|**|* | *|**|**|  |
@@ -454,6 +479,15 @@ SCREEN_OVER  = 5 ; Game Over.
 ; | I|iI|iU| I|  |iL|iK|  |iS| O|iL| Y|i |iU|iU|  |  |  | I|iI|iO| O|iY| Y|iY| Y|iY|iI|iU| L|iY|iI|iO| O|
 ; |iY| Y| U| O|iY| Y|iY| Y|i |iO|iO| Y|i |iU| L|  |  |  |iY| Y|iY| Y|iY| Y|iY| Y|iY|iI|iU|  |iY|iK|iL| L|
 ; | K|iK|iL| Y|iY|iI|iO| Y|i |  |iY| Y|i | U| U|  |  |  | K|iK|iL| L|  |iO|iI|  |iY| K| U| O|iY| Y|iO| O|
+
+; Graphics data, Game Over.  (34) + 6 spaces.
+	.by $0,$0,$0,I_I, I_II,I_IU,I_I,I_S, I_IL,I_IK,I_S,I_IS,I_O, I_IL,I_Y,I_IS,I_IU,I_IU,I_S,I_S,I_S,I_I, I_II,I_IO,I_O,I_IY,I_Y, I_IY,I_Y,I_IY,I_II,I_IU,I_L,I_IY,I_II,I_IO,I_O,$0,$0,$0
+	.by $0,$0,$0,I_IY,I_Y, I_U, I_O,I_IY,I_Y, I_IY,I_Y,I_IS,I_IO,I_IO,I_Y,I_IS,I_IU,I_L, I_S,I_S,I_S,I_IY,I_Y, I_IY,I_Y,I_IY,I_Y, I_IY,I_Y,I_IY,I_II,I_IU,I_S,I_IY,I_IK,I_IL,I_L,$0,$0,$0
+	.by $0,$0,$0,I_IK,I_IK,I_IL,I_Y,I_IY,I_II,I_IO,I_Y,I_IS,I_S, I_IY,I_Y,I_IS,I_U, I_U, I_S,I_S,I_S,I_IK,I_IK,I_IL,I_L,I_S, I_IO,I_II,I_S,I_IY,I_IK,I_U, I_O,I_IY,I_Y, I_IO,I_O,$0,$0,$0
+
+
+
+
 
 
 
