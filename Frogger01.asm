@@ -671,10 +671,10 @@ PrintToScreen
 
 	asl                    ; multiply row number by 2 for address lookup.
 	tax                    ; use as index.
-	lda SCREEN_ADDR,x
+	lda SCREEN_ADDR,x      ; Get screen row address low byte.
 	sta ScreenPointer
 	inx 
-	lda SCREEN_ADDR,x
+	lda SCREEN_ADDR,x      ; Get screen row address high byte.
 	sta ScreenPointer+1
 
 	tya                    ; get the text identification.
@@ -685,15 +685,11 @@ PrintToScreen
 	sta TextPointer
 	lda TEXT_SIZES,y
 	sta TextLength
-;	lda TEXT_TARGET,y
-;	sta ScreenPointer
 	iny                    ; now the high bytes
 	lda TEXT_MESSAGES,y    ; Load up the values from the tables.
 	sta TextPointer+1
 	lda TEXT_SIZES,y
 	sta TextLength+1
-;	lda TEXT_TARGET,y
-;	sta ScreenPointer+1
 
 	ldy #0
 PrintToScreenLoop          ; sub-optimal copy through page 0 indirect index
@@ -728,60 +724,18 @@ EndPrintToScreen
 	pla
 	tay
 	pla
-	
+
 ExitPrintToScreen
 	rts
 
 
 ; ==========================================================================
-; Move the lines of boats around either left or right.
+; A little code size optimization.
+; Add 120 (dec) to the current MovesCars pointer.
+; This moves the pointer to the next river/boat line 3 lines lower, 
+; so the current shift logic can be repeated.
 ; --------------------------------------------------------------------------
-MOVESC
-	; First Part -- Set up for Right Shift... 
-	; MovedCars is a word set to $8078...
-	; which is SCREENMEM + $78 (or 120 decimal [i.e. 3rd line of text])
-	lda #<[SCREENMEM+$78] ; low byte 
-	sta MovesCars
-	lda #>[SCREENMEM+$78] ; high byte
-	sta MovesCars + 1
-
-	ldx #$00  ; Count number of rows shifted
-;	ldy #$26  ; Character position, start at +38 (dec)
-
-RightShiftRow
-	ldy #$27  ; Character position, start at +39 (dec)
-
-	lda (MovesCars),y ; Read byte from screen (start +39)
-	pha               ; Save to move to position 0.
-	dey               ; now at offset +38 (dec)
-
-MOVE ; Shift text lines to the right.
-	lda (MovesCars),y ; Read byte from screen (start +38)
-	iny
-	sta (MovesCars),y ; Store byte to screen at next position (start +39)
-
-	; Blank the original read position. (Hummmm.Mmmmmm. May not be necessary.)
-	dey               ; Back up to the original read position.
-
-;;	lda #$20          ; Was ASCII/PETSCII blank space...
-;	lda #$00          ; is now Atari blank space.
-;	sta (MovesCars),y ; Erase position at first byte read above.
-
-	dey               ; Backup to previous position.
-	cpy #$FF          ; Backed up from 0 to FF?
-	bne MOVE          ; No.  Do the shift again.
-
-	; Copy character at end of line to the start of the line.
-
-;	ldy #$27          ; Offset $27/39 (dec)
-;	lda (MovesCars),y ; Get character at end of line
-
-	pha               ; Get character that was at the end of the line.
-	ldy #$00          ; Offset 0 == start of line
-	sta (MovesCars),y ; Save it at start of line.
-
-;	ldy #$27          ; Set offset $27/39 (dec) again. (Why?  See ldy #$26 in CROSS section.)
-
+MoveCarsPlus120
 	clc
 	lda MovesCars     ; Add $78/120 (dec) to the start of line pointer
 	adc #$78          ; to set new position 3 lines lower.
@@ -789,14 +743,51 @@ MOVE ; Shift text lines to the right.
 	bcc CROSS         ; Smartly done instead of lda/adc #0/sta.
 	inc MovesCars + 1 
 
+	rts
+
+; ==========================================================================
+; Move the lines of boats around either left or right.
+; --------------------------------------------------------------------------
+MOVESC
+	; FIRST PART -- Set up for Right Shift... 
+	; MovedCars is a word set to $8078...
+	; which is SCREENMEM + $78 (or 120 decimal [i.e. 3rd line of text])
+	lda #<[SCREENMEM+$78] ; low byte 
+	sta MovesCars
+	lda #>[SCREENMEM+$78] ; high byte
+	sta MovesCars + 1
+
+	ldx #6            ; Count number of rows to shift
+
+RightShiftRow
+	ldy #$27          ; Character position, start at +39 (dec)
+	lda (MovesCars),y ; Read byte from screen (start +39)
+	pha               ; Save the character at the end to move to position 0.
+	dey               ; now at offset +38 (dec)
+
+MOVE ; Shift text lines to the right.
+	lda (MovesCars),y ; Read byte from screen (start +38)
+	iny
+	sta (MovesCars),y ; Store byte to screen at next position (start +39)
+
+	dey               ; Back up to the original read position.
+	dey               ; Backup to previous position.
+
+	bpl MOVE          ; Backed up from 0 to FF? No. Do the shift again.
+
+	; Copy character at end of line to the start of the line.
+	pla               ; Get character that was at the end of the line.
+	ldy #$00          ; Offset 0 == start of line
+	sta (MovesCars),y ; Save it at start of line.
+
+	; Move to the next river/boat line to shift to the right 3 lines lower.
+	jsr MoveCarsPlus120
+
 CROSS
-	inx               ; Track that a line is done.
-;	ldy #$26          ; Get offset $26 == 38 (dec) 
-	cpx #6            ; Did we do this 6 times?
-;	bne MOVE          ; No.  Go do right shift on another line.
+	dex               ; Track that a line is done.
 	bne RightShiftRow ; No.  Go do right shift on another line.
 
-	; Second Part -- Setup for Left Shift...
+	; SECOND PART -- Setup for Left Shift...
 	; MovedCars is a word to set to $80A0...
 	; which is SCREENMEM + $A0 (or 160 decimal [i.e. 4th line of text])
 	lda #>[SCREENMEM+$A0] ; high byte
@@ -804,58 +795,37 @@ CROSS
 	lda #<[SCREENMEM+$A0] ; low byte 
 	sta MovesCars
 
-	; Then the index values are set.
-;	ldy #0 ; Number of rows shifted
-	ldx #0 ; Character position, start at +38 (dec)
+	ldx #6            ; Count number of rows to shift
 
 LeftShiftRow
-	ldy #$00  ; Character position, start at +0 (dec)
+	ldy #$00          ; Character position, start at +0 (dec)
 
 	lda (MovesCars),y ; Read byte from screen (start +0)
 	pha               ; Save to move to position +39.
-	iny               ; now at offset +38 (dec)
+	iny               ; now at offset +1 (dec)
 
 MOVE1 ; Shift text lines to the left.
-;	iny
 	lda (MovesCars),y ; Get byte from screen (start +1)
 	dey
 	sta (MovesCars),y ; Store byte at previous position (start +0)
 
-	; Blank the original read position. (May not be necessary.)
-	iny               ; Forward to the original read position.
-;;	lda #$20          ; Was ASCII/PETSCII blank space...
-;	lda #$00          ; is now Atari blank space.
-;	sta (MovesCars),y ; Erase position at first byte read above.
+	iny               ; Forward to the original read position. (start +1)
+	iny               ; Forward to the next read position. (start +2)
 
-;	dey               ; Back up to previous position.
-;	iny               ; Move to next position.   (huh?)
 	cpy #$27          ; Reached position $27/39 (dec) (end of line)?
 	bne MOVE1         ; No.  Do the shift again.
 
 	; Copy character at start of line to the end of the line.
-;	ldy #0            ; Offset 0 == start of line
-;	lda (MovesCars),y ; Get character at start of line.
-
-	pha               ; Get character that was at the end of the line.
-
+	pla               ; Get character that was at the end of the line.
 	ldy #$27          ; Offset $27/39 (dec)
 	sta (MovesCars),y ; Save it at end of line.
 
-;	ldy #0            ; Set offset $0 again. (Why?  See ldy #$0 in CROSS1 section.)
-	clc
-	lda MovesCars     ; Add $78/120 (dec) to the start of line pointer
-	adc #$78          ; to set new position 3 lines lower.
-	sta MovesCars
-	bcc CROSS1        ; Smartly done instead of lda/adc #0/sta.
-	inc MovesCars + 1
+	; Move to the next river/boat line to shift to the left 3 lines lower.
+	jsr MoveCarsPlus120
 
 CROSS1
-	inx               ; Track that a line is done.
-;	ldy #0            ; Get offset $0 
-	cpx #06           ; Did we do this 6 times?
-;	bne MOVE1         ; No.  Go do left shift on another line.
+	dex               ; Track that a line is done.
 	bne LeftShiftRow  ; No.  Go do left shift on another line.
-
 
 	jsr PRITSC        ; Finish up by copying the score from memory to the screen.
 
