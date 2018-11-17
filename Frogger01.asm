@@ -28,7 +28,7 @@
 ; --------------------------------------------------------------------------
 ; Version 01.  
 ; Atari-specific optimizations, though limited.  Most of the program 
-; still should assemble on a Pet (with changes for values and registers).
+; still could assemble on a Pet (with changes for values and registers).
 ; The only doubt I have is monitoring for the start of a frame where the 
 ; Atari could monitor vcount or the jiffy counter.  Not sure how the Pet 
 ; could do this.
@@ -191,6 +191,9 @@ CurrentScreen   .byte $00 ; = identity of current screen.
 MyScore .by $0 $0 $0 $0 $0 $0 $0 $0 
 HiScore .by $0 $0 $0 $0 $0 $0 $0 $0 
 
+; In the event X, Y can't be saved on stack...
+SAVEX = $FE
+SAVEY = $FF
 
 ; ==========================================================================
 ; Some Atari character things for convenience, or that can't be easily 
@@ -213,6 +216,10 @@ ATASCII_ASTER  = $2A ; Character for '*' splattered frog.
 ATASCII_Y      = $59 ; Character for 'Y'
 ATASCII_0      = $30 ; Character for '0'
 
+; ATASCII chars shorthanded due to frequency....
+A_B = ATASCII_BALL
+A_H = ATASCII_HLINE
+
 ; Atari uses different, "internal" values when writing to 
 ; Screen RAM.  These are the internal codes for writing 
 ; bytes directly to the screen:
@@ -224,6 +231,7 @@ INTERNAL_INVSPACE = $80 ; Inverse Blank space, for the beach.
 INTERNAL_ASTER    = $0A ; Character for '*' splattered frog.
 INTERNAL_HEART    = $40 ; heart graphics
 INTERNAL_HLINE    = $52 ; underline for title text.
+
 ; Graphics chars shorthanded due to frequency....
 I_I  = 73      ; Internal ctrl-I
 I_II = 73+$80  ; Internal ctrl-I Inverse
@@ -497,12 +505,12 @@ LIVETT  ; Labels for crossings counter, scores, and lives
 
 TEXT1 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 	.sb +$80 "                                        " ; "Beach"
-	.sb " [" ATASCII_BALL ATASCII_BALL ATASCII_BALL ATASCII_BALL ">        " ; Boats Right
-	.sb "[" ATASCII_BALL ATASCII_BALL ATASCII_BALL ATASCII_BALL ">       "
-	.sb "[" ATASCII_BALL ATASCII_BALL ATASCII_BALL ATASCII_BALL ">      "
-	.sb "      <" ATASCII_BALL ATASCII_BALL ATASCII_BALL ATASCII_BALL "]" ; Boats Left
-	.sb "        <" ATASCII_BALL ATASCII_BALL ATASCII_BALL ATASCII_BALL "]"
-	.sb "    <" ATASCII_BALL ATASCII_BALL ATASCII_BALL ATASCII_BALL "]    "
+	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
+	.sb "[" A_B A_B A_B A_B ">       "
+	.sb "[" A_B A_B A_B A_B ">      "
+	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
+	.sb "        <" A_B A_B A_B A_B "]"
+	.sb "    <" A_B A_B A_B A_B "]    "
 
 TEXT2 ; this last block includes a Beach, with the "Frog" character which is the starting line. 
 	.sb +$80 "                   O                    " ; The "beach" + frog
@@ -528,16 +536,16 @@ OVER ; Prompt for playing again.
 INSTXT_1 ; Instructions text.  
 	.sb "              PET FROGGER               "
 	.sb "              " 
-	.sb ATASCII_HLINE ATASCII_HLINE ATASCII_HLINE " " ATASCII_HLINE ATASCII_HLINE ATASCII_HLINE ATASCII_HLINE
-	.sb ATASCII_HLINE ATASCII_HLINE ATASCII_HLINE "               "
+	.sb A_H A_H A_H " " A_H A_H A_H A_H
+	.sb A_H A_H A_H "               "
 	.sb "     (c) November 1983 by Dales" ATASCII_HEART "ft      "
 
 INSTXT_2 ; Instructions text.
 	.sb "All you have to do is to get as many of "
 	.sb "the frogs across the river without      "
 	.sb "drowning them. You have to leap onto a  "
-	.sb "boat like this :- <" ATASCII_BALL ATASCII_BALL ATASCII_BALL "] and land on the "
-	.sb "seats ('" ATASCII_BALL "'). You get 10 points for every"
+	.sb "boat like this :- <" A_B A_B A_B "] and land on the "
+	.sb "seats ('" A_B "'). You get 10 points for every"
 	.sb "jump forward and 500 points every time  "
 	.sb "you get a frog across the river.        "
 
@@ -1542,6 +1550,55 @@ WaitKeyLoop
 	pla             ; return the pressed key in A.
 
 	rts
+
+
+;==============================================================================
+;                                                       SCREENWAITFRAMES  A  Y
+;==============================================================================
+; Subroutine to wait for a number of frames.
+;
+; FYI:
+; Calling with A = 1 is the same thing as directly calling ScreenWaitFrame.
+;
+; ScreenWaitFrames expects A to contain the number of frames.
+;
+; ScreenWaitFrames uses  Y
+;==============================================================================
+	
+libScreenWaitFrames
+	sty SAVEY           ;  Save what is here, can't go to stack due to tay 
+	tay
+	beq bExitWaitFrames
+
+bLoopWaitFrames
+	jsr libScreenWaitFrame
+
+	dey
+	bne bLoopWaitFrames ; Still more frames to count?   go 
+
+bExitWaitFrames
+	ldy SAVEY           ; restore Y
+	rts                 ; No.  Clock changed means frame ended.  exit.
+
+
+;==============================================================================
+;                                                           SCREENWAITFRAME  A
+;==============================================================================
+; Subroutine to wait for the current frame to finish display.
+;
+; ScreenWaitFrame  uses A
+;==============================================================================
+	
+libScreenWaitFrame
+	pha                ; Save A, so caller is not disturbed.
+	lda RTCLOK60       ; Read the jiffy clock incremented during vertical blank.
+
+bLoopWaitFrame
+	cmp RTCLOK60       ; Is it still the same?
+	beq bLoopWaitFrame ; Yes.  Then the frame has not ended.
+
+	pla                ; restore A
+	rts                ; No.  Clock changed means frame ended.  exit.
 
 
 ; ==========================================================================
