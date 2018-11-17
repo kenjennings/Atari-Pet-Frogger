@@ -497,6 +497,30 @@ SCREEN_OVER  = 5 ; Game Over.
 
 
 
+; 1  |              PET FROGGER               | TITLE
+; 2  |              --- -------               | TITLE
+; 3  |     (c) November 1983 by DalesOft      | CREDIT
+; 4  |        Written by John C Dale          | CREDIT
+; 5  |Atari V01 port by Ken Jennings, Nov 2018| CREDIT
+; 6  |                                        |
+; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
+; 8  |frog legs fast food franchise! But, the | INSTXT_1
+; 9  |frogs must cross piranha-infested rivers| INSTXT_1
+; 10 |to reach freedom. You have three chances| INSTXT_1
+; 11 |to prove your frog management skills by | INSTXT_1
+; 12 |directing frogs to jump on boats in the | INSTXT_1
+; 13 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
+; 14 |the seats in the boats ('Q').           | INSTXT_1
+; 15 |                                        |
+; 16 |Scoring:                                | INSTXT_2
+; 17 |    10 points for each jump forward.    | INSTXT_2
+; 18 |   500 points for each rescued frog.    | INSTXT_2
+; 19 |                                        |
+; 20 |Game controls:                          | INSTXT_3
+; 21 |                 S = Up                 | INSTXT_3
+; 22 |      left = 4           6 = right      | INSTXT_3
+; 23 |                                        |
+; 24 |     Hit any key to start the game.     | INSTXT_4
 
 
 LIVETT  ; Labels for crossings counter, scores, and lives
@@ -740,9 +764,10 @@ MoveCarsPlus120
 	lda MovesCars     ; Add $78/120 (dec) to the start of line pointer
 	adc #$78          ; to set new position 3 lines lower.
 	sta MovesCars
-	bcc CROSS         ; Smartly done instead of lda/adc #0/sta.
-	inc MovesCars + 1 
+	bcc ExitMoveCarsPlus120 
+	inc MovesCars + 1 ; Smartly done instead of lda/adc #0/sta.
 
+ExitMoveCarsPlus120
 	rts
 
 ; ==========================================================================
@@ -783,7 +808,6 @@ MOVE ; Shift text lines to the right.
 	; Move to the next river/boat line to shift to the right 3 lines lower.
 	jsr MoveCarsPlus120
 
-CROSS
 	dex               ; Track that a line is done.
 	bne RightShiftRow ; No.  Go do right shift on another line.
 
@@ -823,7 +847,6 @@ MOVE1 ; Shift text lines to the left.
 	; Move to the next river/boat line to shift to the left 3 lines lower.
 	jsr MoveCarsPlus120
 
-CROSS1
 	dex               ; Track that a line is done.
 	bne LeftShiftRow  ; No.  Go do left shift on another line.
 
@@ -879,23 +902,30 @@ PRINTSC
 	jsr ClearScreen 
 
 	ldy #PRINT_TEXT1_1
+	ldx #2
 PRINT ; Print TEXT1 -  beaches and boats, six times.
 	jsr PrintToScreen
 
+	inx
+	inx
+	inx
 	iny 
 	cpy #PRINT_TEXT1_1+6  ; if we printed six times, (18 lines total) then we're done 
 	bcc PRINT             ; Go back and print another set of lines.
 
 ; Print TEXT2 - Beach and Credits
 	ldy #PRINT_TEXT2
+	ldx #21
 	jsr PrintToScreen
 
 ; Print the Ported By Credit
 	ldy #PRINT_PORTBYTEXT
+	ldx #24
 	jsr PrintToScreen 
 
 ; Print the lives and score labels in the top two lines of the screen.
 	ldy #PRINT_LIVETT
+	ldx #0
 	jsr PrintToScreen
 
 ; Display the number of frogs that crossed the river.
@@ -912,18 +942,23 @@ INSTR ; Per PET Memory Map - Set integer value for SYS/GOTO ?
 	jsr ClearScreen 
 
 	ldy #PRINT_INSTXT_1 
+	ldx #0
 	jsr PrintToScreen
 
-	ldy #PRINT_INSTXT_2 
+	ldy #PRINT_INSTXT_2
+	ldx #4
 	jsr PrintToScreen
 
 	ldy #PRINT_INSTXT_3 
+	ldx #12
 	jsr PrintToScreen
 
 	ldy #PRINT_INSTXT_4
+	ldx #19
 	jsr PrintToScreen
 
 	ldy #PRINT_PORTBYTEXT 
+	ldx #24
 	jsr PrintToScreen
 
 INSTR1
