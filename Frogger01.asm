@@ -137,9 +137,6 @@
 ; --------------------------------------------------------------------------
 
 
-
-
-
 ; ==========================================================================
 ; Declare some Page Zero variables.
 ; On the Atari the OS owns the first half of Page Zero.
@@ -350,8 +347,8 @@ SCREEN_OVER  = 5 ; Game Over.
 
 ; Original V00 Main Game Play Screen:
 ;    +----------------------------------------+
-; 1  |Successful Crossings =                  | LIVETT 
-; 2  |Score = 0000000      Hi = 0000000   Lv:3| LIVETT
+; 1  |Score = 0000000      Hi = 0000000   Lv:3| SCORE_TXT
+; 2  |Successful Crossings =                  | SCORE_TXT 
 ; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
 ; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
 ; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
@@ -411,8 +408,8 @@ SCREEN_OVER  = 5 ; Game Over.
  
 ; Revised V01 Main Game Play Screen:
 ;    +----------------------------------------+
-; 1  |Successful Crossings =                  | LIVETT 
-; 2  |Score = 0000000      Hi = 0000000   Lv:3| LIVETT
+; 1  |Successful Crossings =                  | SCORE_TXT 
+; 2  |Score = 0000000      Hi = 0000000   Lv:3| SCORE_TXT
 ; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
 ; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
 ; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
@@ -453,9 +450,9 @@ SCREEN_OVER  = 5 ; Game Over.
 ; |  | U|iL| L|iY|iI|iO| Y|  |iO|iI|  |iY|iK| U| O|iY|iK|iI|  |  | U|
 
 ; Graphics data, SAVED!  (22) + 18 spaces.
-	.by $0,$0,$0,$0,$0,$0,$0,$0,$0,I_I,I_II,I_IU,I_S,I_S, I_IL,I_IK,I_S,I_IY,I_Y, I_IY,I_Y,I_IY,I_II,I_IU,I_L,I_IY,I_II,I_IK,I_S,I_S,I_IS,$0,$0,$0,$0,$0,$0,$0,$0,$0
-	.by $0,$0,$0,$0,$0,$0,$0,$0,$0,I_S,I_IU,I_IO,I_O,I_IY,I_Y, I_IY,I_Y,I_IY,I_Y, I_IY,I_Y,I_IY,I_II,I_IU,I_S,I_IY,I_Y, I_IY,I_Y,I_S,I_IS,$0,$0,$0,$0,$0,$0,$0,$0,$0
-	.by $0,$0,$0,$0,$0,$0,$0,$0,$0,I_S,I_U, I_IL,I_L,I_IY,I_II,I_IO,I_Y,I_S, I_IO,I_II,I_S,I_IY,I_IK,I_U, I_O,I_IY,I_IK,I_II,I_S,I_S,I_U, $0,$0,$0,$0,$0,$0,$0,$0,$0
+	.by $0,$0,$0,$0,$0,$0,$0,$0,$0,I_I,I_II,I_IU,I_S,I_S,I_IL,I_IK,I_S,I_IY,I_Y,I_IY,I_Y,I_IY,I_II,I_IU,I_L,I_IY,I_II,I_IK,I_S,I_S,I_IS,$0,$0,$0,$0,$0,$0,$0,$0,$0
+	.by $0,$0,$0,$0,$0,$0,$0,$0,$0,I_S,I_IU,I_IO,I_O,I_IY,I_Y,I_IY,I_Y,I_IY,I_Y,I_IY,I_Y,I_IY,I_II,I_IU,I_S,I_IY,I_Y,I_IY,I_Y,I_S,I_IS,$0,$0,$0,$0,$0,$0,$0,$0,$0
+	.by $0,$0,$0,$0,$0,$0,$0,$0,$0,I_S,I_U,I_IL,I_L,I_IY,I_II,I_IO,I_Y,I_S,I_IO,I_II,I_S,I_IY,I_IK,I_U,I_O,I_IY,I_IK,I_II,I_S,I_S,I_U,$0,$0,$0,$0,$0,$0,$0,$0,$0
 
 ; Graphics chars design, DEAD FROG!
 ; | *|**|* |  | *|**|**|* |  | *|* |  | *|**|* |  |  |  |  | *|**|**|* | *|**|**|  |  |**|**|  |  |**|**|* |  |**|
@@ -471,9 +468,9 @@ SCREEN_OVER  = 5 ; Game Over.
 ; |iY|iK|iI|  |iY|iK| U| O|iY|iI|iO| Y|iY|iK|iI|  |  |  |  |iY| Y|  |  |iY| Y|iO| O| K|iK|iL| L| K|iK|iL|iY|  | U|
 
 ; Graphics data, DEAD FROG!  (37) + 3 spaces.
-	.by $0,$0,I_IY,I_II,I_IK,I_S,I_IY,I_II,I_IU,I_L,I_S, I_IL,I_IK,I_S,I_IY,I_II,I_IK,I_S,I_S,I_S,I_S,I_IY,I_II,I_IU,I_L,I_IY,I_II,I_IO,I_O,I_I, I_II,I_IO,I_O,I_I, I_II,I_IU,I_L, I_S,I_IS,$0
-	.by $0,$0,I_IY,I_Y, I_IY,I_Y,I_IY,I_I, I_IU,I_S,I_IY,I_Y, I_IY,I_Y,I_IY,I_Y, I_IY,I_Y,I_S,I_S,I_S,I_IY,I_II,I_IU,I_S,I_IY,I_IK,I_IL,I_L,I_IY,I_Y, I_IY,I_Y,I_IY,I_Y, I_U, I_O, I_S,I_IS,$0
-	.by $0,$0,I_IY,I_IK,I_II,I_S,I_IY,I_IK,I_U, I_O,I_IY,I_II,I_IO,I_Y,I_IY,I_IK,I_II,I_S,I_S,I_S,I_S,I_IY,I_Y, I_S, I_S,I_IY,I_Y, I_IO,I_O,I_IK,I_IK,I_IL,I_L,I_IK,I_IK,I_IL,I_IY,I_S,I_U ,$0
+	.by $0,$0,I_IY,I_II,I_IK,I_S,I_IY,I_II,I_IU,I_L,I_S,I_IL,I_IK,I_S,I_IY,I_II,I_IK,I_S,I_S,I_S,I_S,I_IY,I_II,I_IU,I_L,I_IY,I_II,I_IO,I_O,I_I,I_II,I_IO,I_O,I_I,I_II,I_IU,I_L,I_S,I_IS,$0
+	.by $0,$0,I_IY,I_Y,I_IY,I_Y,I_IY,I_I,I_IU,I_S,I_IY,I_Y,I_IY,I_Y,I_IY,I_Y,I_IY,I_Y,I_S,I_S,I_S,I_IY,I_II,I_IU,I_S,I_IY,I_IK,I_IL,I_L,I_IY,I_Y,I_IY,I_Y,I_IY,I_Y,I_U,I_O,I_S,I_IS,$0
+	.by $0,$0,I_IY,I_IK,I_II,I_S,I_IY,I_IK,I_U,I_O,I_IY,I_II,I_IO,I_Y,I_IY,I_IK,I_II,I_S,I_S,I_S,I_S,I_IY,I_Y,I_S,I_S,I_IY,I_Y,I_IO,I_O,I_IK,I_IK,I_IL,I_L,I_IK,I_IK,I_IL,I_IY,I_S,I_U ,$0
 
 ; Graphics chars design, GAME OVER 
 ; |  |**|**|* |  | *|* |  |**|  | *|* |**|**|**|  |  |  |  |**|**|  | *|* | *|* | *|**|**|* | *|**|**|  |
@@ -489,20 +486,38 @@ SCREEN_OVER  = 5 ; Game Over.
 ; | K|iK|iL| Y|iY|iI|iO| Y|i |  |iY| Y|i | U| U|  |  |  | K|iK|iL| L|  |iO|iI|  |iY| K| U| O|iY| Y|iO| O|
 
 ; Graphics data, Game Over.  (34) + 6 spaces.
-	.by $0,$0,$0,I_I, I_II,I_IU,I_I,I_S, I_IL,I_IK,I_S,I_IS,I_O, I_IL,I_Y,I_IS,I_IU,I_IU,I_S,I_S,I_S,I_I, I_II,I_IO,I_O,I_IY,I_Y, I_IY,I_Y,I_IY,I_II,I_IU,I_L,I_IY,I_II,I_IO,I_O,$0,$0,$0
-	.by $0,$0,$0,I_IY,I_Y, I_U, I_O,I_IY,I_Y, I_IY,I_Y,I_IS,I_IO,I_IO,I_Y,I_IS,I_IU,I_L, I_S,I_S,I_S,I_IY,I_Y, I_IY,I_Y,I_IY,I_Y, I_IY,I_Y,I_IY,I_II,I_IU,I_S,I_IY,I_IK,I_IL,I_L,$0,$0,$0
-	.by $0,$0,$0,I_IK,I_IK,I_IL,I_Y,I_IY,I_II,I_IO,I_Y,I_IS,I_S, I_IY,I_Y,I_IS,I_U, I_U, I_S,I_S,I_S,I_IK,I_IK,I_IL,I_L,I_S, I_IO,I_II,I_S,I_IY,I_IK,I_U, I_O,I_IY,I_Y, I_IO,I_O,$0,$0,$0
+	.by $0,$0,$0,I_I,I_II,I_IU,I_I,I_S,I_IL,I_IK,I_S,I_IS,I_O,I_IL,I_Y,I_IS,I_IU,I_IU,I_S,I_S,I_S,I_I,I_II,I_IO,I_O,I_IY,I_Y,I_IY,I_Y,I_IY,I_II,I_IU,I_L,I_IY,I_II,I_IO,I_O,$0,$0,$0
+	.by $0,$0,$0,I_IY,I_Y,I_U,I_O,I_IY,I_Y,I_IY,I_Y,I_IS,I_IO,I_IO,I_Y,I_IS,I_IU,I_L,I_S,I_S,I_S,I_IY,I_Y,I_IY,I_Y,I_IY,I_Y,I_IY,I_Y,I_IY,I_II,I_IU,I_S,I_IY,I_IK,I_IL,I_L,$0,$0,$0
+	.by $0,$0,$0,I_IK,I_IK,I_IL,I_Y,I_IY,I_II,I_IO,I_Y,I_IS,I_S,I_IY,I_Y,I_IS,I_U,I_U,I_S,I_S,I_S,I_IK,I_IK,I_IL,I_L,I_S,I_IO,I_II,I_S,I_IY,I_IK,I_U,I_O,I_IY,I_Y,I_IO,I_O,$0,$0,$0
 
 
+; ==========================================================================
 
+BLANK_TXT ; Blank line used to erase things.
+	.sb "                                        "
 
+BLANK_TXT_INV ; Inverse blank line used to "animate" things.
+	.sb +$80 "                                        "
 
+; ==========================================================================
+
+TITLE_TXT ; Instructions/Title text.
 ; 1  |              PET FROGGER               | TITLE
 ; 2  |              --- -------               | TITLE
+	.sb "              PET FROGGER               "
+	.sb "              " 
+	.sb A_H A_H A_H " " A_H A_H A_H A_H
+	.sb A_H A_H A_H "               "
+
+CREDIT_TXT ; The perpetrators identified...
 ; 3  |     (c) November 1983 by DalesOft      | CREDIT
 ; 4  |        Written by John C Dale          | CREDIT
 ; 5  |Atari V01 port by Ken Jennings, Nov 2018| CREDIT
-; 6  |                                        |
+	.sb "     (c) November 1983 by Dales" ATASCII_HEART "ft      "
+	.sb "        Written by John C. Dale         "
+	.sb "Atari V01 port by Ken Jennings, Nov 2018"
+
+INST_TXT1 ; Basic instructions...
 ; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
 ; 8  |frog legs fast food franchise! But, the | INSTXT_1
 ; 9  |frogs must cross piranha-infested rivers| INSTXT_1
@@ -511,21 +526,48 @@ SCREEN_OVER  = 5 ; Game Over.
 ; 12 |directing frogs to jump on boats in the | INSTXT_1
 ; 13 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
 ; 14 |the seats in the boats ('Q').           | INSTXT_1
-; 15 |                                        |
+	.sb "Help the frogs escape from Doc Hopper's "
+	.sb "frog legs fast food franchise! But, the " 
+	.sb "frogs must cross piranha-infested rivers" 
+	.sb "to reach freedom. You have three chances" 
+	.sb "to prove your frog management skills by " 
+	.sb "directing frogs to jump on boats in the " 
+	.sb "rivers like this:  <" A_B A_B A_B "]  Land only on " 
+	.sb "the seats in the boats ('" A_B "').           " 
+
+INST_TXT2 ; Scoring
 ; 16 |Scoring:                                | INSTXT_2
 ; 17 |    10 points for each jump forward.    | INSTXT_2
 ; 18 |   500 points for each rescued frog.    | INSTXT_2
-; 19 |                                        |
+	.sb "Scoring:                                "
+	.sb "    10 points for each jump forward.    "
+	.sb "   500 points for each rescued frog.    "
+
+INST_TXT3 ; Game Controls
 ; 20 |Game controls:                          | INSTXT_3
 ; 21 |                 S = Up                 | INSTXT_3
 ; 22 |      left = 4           6 = right      | INSTXT_3
-; 23 |                                        |
+	.sb "Game controls:                          " 
+	.sb "                 S = Up                 | 
+	.sb "      left = 4           6 = right      | 
+
+INST_TXT4 ; Prompt to start game.
 ; 24 |     Hit any key to start the game.     | INSTXT_4
+	.sb "     Hit any key to start the game.     "
 
+INST_TXT4_INV ; inverse version to support blinking.
+; 24 |     Hit any key to start the game.     | INSTXT_4INV
+	.sb +$80 "     Hit any key to start the game.     "
 
-LIVETT  ; Labels for crossings counter, scores, and lives
-	.sb "Successful Crossings =                  "
+; ==========================================================================
+
+SCORE_TXT  ; Labels for crossings counter, scores, and lives
+; 1  |Score = 0000000      Hi = 0000000   Lv:3| SCORE_TXT
+; 2  |Successful Crossings =                  | SCORE_TXT 
 	.sb "Score =              Hi =           Lv: "
+	.sb "Successful Crossings =                  "
+
+
 
 TEXT1 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 	.sb +$80 "                                        " ; "Beach"
@@ -583,18 +625,33 @@ INSTXT_4
 
 
 ; ==========================================================================
-; Text is static.  Everything is written in the same places each time,
-; So, all we need are lists --  a list of the text, a list of the target 
-; memory, and the sizes.
+; Text is static.  The vertical position may vary based on parameter 
+; by the caller.
+; So, all we need are lists --  a list of the text and the sizes.
+; To index the lists we neeed enumerated values.
 ; --------------------------------------------------------------------------
+PRINT_BLANK_TXT     = 0  ; BLANK_TXT     ; Blank line used to erase things.
+PRINT_BLANK_TXT_INV = 0  ; BLANK_TXT_INV ; Inverse blank line used to "animate" things.
+PRINT_TITLE_TXT     = 0  ; TITLE_TXT     ; Instructions/Title text. 
+PRINT_CREDIT_TXT    = 0  ; CREDIT_TXT    ; The perpetrators identified...
+PRINT_INST_TXT1     = 0  ; INST_TXT1     ; Basic instructions...
+PRINT_INST_TXT2     = 0  ; INST_TXT2     ; Scoring
+PRINT_INST_TXT3     = 0  ; INST_TXT3     ; Game Controls
+PRINT_INST_TXT4     = 0  ; INST_TXT4     ; Prompt to start game.
+PRINT_INST_TXT4_INV = 0  ; INST_TXT4_INV ; inverse version to support blinking.
+PRINT_SCORE_TXT     = 0  ; SCORE_TXT     ; Labels for crossings counter, scores, and lives
+
+
+
 PRINT_TEXT1_1    = 0  ; Playfield lines printed six times on screen
 PRINT_TEXT1_2    = 1  ;
 PRINT_TEXT1_3    = 2  ;
 PRINT_TEXT1_4    = 3  ;
 PRINT_TEXT1_5    = 4  ;
 PRINT_TEXT1_6    = 5  ;
+
 PRINT_TEXT2      = 6  ; End playfield is beach plus credits.
-PRINT_LIVETT     = 7  ; Score lines 
+PRINT_SCORE_TXT     = 7  ; Score lines 
 PRINT_YRDDTX     = 8  ; Yer dead!
 PRINT_FROGTXT    = 9  ; Congratulations!
 PRINT_OVER       = 10 ; Do you want to play a game?
@@ -607,7 +664,7 @@ PRINT_END        = 16 ; value marker for end of list.
 
 TEXT_MESSAGES ; Starting addresses of each of the text messages
 	.word TEXT1,TEXT1,TEXT1,TEXT1,TEXT1,TEXT1
-	.word TEXT2,LIVETT,YRDDTX,FROGTXT,OVER
+	.word TEXT2,SCORE_TXT,YRDDTX,FROGTXT,OVER
 	.word INSTXT_1,INSTXT_2,INSTXT_3,INSTXT_4,PORTBYTEXT
 
 TEXT_SIZES ; length of message.  Each should be a multiple of 40.
@@ -924,7 +981,7 @@ PRINT ; Print TEXT1 -  beaches and boats, six times.
 	jsr PrintToScreen 
 
 ; Print the lives and score labels in the top two lines of the screen.
-	ldy #PRINT_LIVETT
+	ldy #PRINT_SCORE_TXT
 	ldx #0
 	jsr PrintToScreen
 
@@ -979,7 +1036,7 @@ INSTR1
 ;	jsr ClearScreen 
 
 ; Print the lives and score labels in the top two lines of the screen.
-;	ldy #PRINT_LIVETT
+;	ldy #PRINT_SCORE_TXT
 ;	jsr PrintToScreen
 
 ; Display the number of frogs that crossed the river.
