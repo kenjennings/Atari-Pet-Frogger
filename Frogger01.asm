@@ -149,8 +149,10 @@
 
 MovesCars       .word $00 ; = Moves Cars
 FrogLocation    .word $00 ; = Frog Location
-NumberOfRows    .word $00 ; = Number Of Rows
+FrogColumn      .byte $00 ; = Frog X coord
+NumberOfRows    .word $00 ; = Frog's row position. 
 LastCharacter   .byte 0   ; = Last Character Under Frog
+FrogSafety      .byte 0   ; = 0 When Frog OK.  !0 == Yer Dead.
 DelayNumber     .byte 0   ; = Delay No. (Hi = Slow, Low = Fast)
 FrogsCrossed    .byte 0   ; = Number Of Frogs crossed
 ScoreToAdd      .byte 0   ; = Number To Be Added to Score
@@ -158,13 +160,13 @@ NumberOfChars   .byte 0   ; = Number Of Characters Across
 FlaggedHiScore  .byte 0   ; = Flag For Hi Score.  0 = no high score.  $FF = High score.
 NumberOfLives   .byte 0   ; = Is Number Of Lives
 LastKeyPressed  .byte 0   ; = Remember last key pressed
-ScreenPointer   .word $00 ; = Pointer to location in screen.
+ScreenPointer   .word $00 ; = Pointer to location in screen memory.
 TextPointer     .word $00 ; = Pointer to text message to write.
 TextLength      .word $00 ; = Length of text message to write.
 
 ; Timers and event control.
 DoTimers        .byte $00 ; = 0 means stop timer features.  Return from event polling. Main line
-						  ; code would inc DoTimers to make sure accidental animation doe snot
+						  ; code would inc DoTimers to make sure accidental animation does not
 						  ; occur while the code switches between screens.  This will become
 						  ; more important when the game logic is enhanced to an event loop.
 
@@ -174,21 +176,28 @@ DoTimers        .byte $00 ; = 0 means stop timer features.  Return from event po
 ; In the case of key press this counter value is set whenever a key is 
 ; pressed to force a delay between key presses to limit the speed of 
 ; the frog movement.
-KeyscanFrames   .byte $00 ; = number of frames to wait for next key input. to limit frog speed.
+KeyscanFrames   .byte $00 ; = KEYSCAN_FRAMES
 
 ; In the case of animation frames the value is set from the ANIMATION_FRAMES
-; table based on the number of frogs that crossed the river.  
-AnimateFrames   .byte $00 ; = number of frames to wait for screen animation. 
+; table based on the number of frogs that crossed the river (difficulty level) 
+AnimateFrames   .byte $00 ; = ANIMATION_FRAMES,X.  
 
-; Identify the current screen.  This is what drives which timer/event loop features 
-; are in effect.  Value is enumerated from SCREEN_LIST table.
+; Identify the current screen.  This is what drives which timer/event loop 
+; features are in effect.  Value is enumerated from SCREEN_LIST table.
 CurrentScreen   .byte $00 ; = identity of current screen.
+
+; This is a 0, 1, toggle to remember the last state of  
+; something that blinks on screen.
+ToggleState     .byte 0   ; = 0, 1, flipper to drive a blinking thing.
+
+; Another event value.  Use for counting things for each pass of a screen/event.
+EventCounter    .byte 0
 
 ; Game Score and High Score.
 MyScore .by $0 $0 $0 $0 $0 $0 $0 $0 
 HiScore .by $0 $0 $0 $0 $0 $0 $0 $0 
 
-; In the event X, Y can't be saved on stack...
+; In the event X, Y can't be saved on stack, hide them here....
 SAVEX = $FE
 SAVEY = $FF
 
@@ -267,13 +276,21 @@ ANIMATION_FRAMES .byte 30,25,20,18,15,13,11,10,9,8,7,6
 ; based on number of frogs, how many frames between boat movements...
 ;ANIMATION_FRAMES .byte 25,21,17,14,12,11,10,9,8,7,6,5
 
-; Screen enumeration
-SCREEN_OFF   = 0 ; Do nothing?  Place holder for pause.
-SCREEN_TITLE = 1 ; Credits and Instructions.
-SCREEN_GAME  = 2 ; GamePlay 
-SCREEN_WIN   = 3 ; Crossed the river!
-SCREEN_DEAD  = 4 ; Yer Dead!
-SCREEN_OVER  = 5 ; Game Over.
+; Screen enumeration states for current processing condition.
+; Note that the order here does not imply the only order of 
+; movement between screens/event activity.  The enumeration 
+; could be entirely random.
+SCREEN_START       = 0  ; Entry Point for New Game setup..
+SCREEN_TITLE       = 1  ; Credits and Instructions.
+SCREEN_TRANS_GAME  = 2  ; Transition animation from Title to Game.
+SCREEN_GAME        = 3  ; GamePlay 
+SCREEN_TRANS_WIN   = 4  ; Transition animation from Game to Win.
+SCREEN_WIN         = 5  ; Crossed the river!
+SCREEN_TRANS_DEAD  = 6  ; Transition animation from Game to Dead.
+SCREEN_DEAD        = 7  ; Yer Dead!
+SCREEN_TRANS_OVER  = 8  ; Transition animation from Dead to Game Over.
+SCREEN_OVER        = 9  ; Game Over.
+SCREEN_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
 
 ; Screen Order/Path
 ;                       +-------------------------+
@@ -291,7 +308,7 @@ SCREEN_OVER  = 5 ; Game Over.
 
 	; Label and Credit
 	.by "** Thanks to the Word (John 1:1), Creator of heaven and earth, and "
-	.by "semiconductor chemistry and physics which makes all this fun possible. ** "
+	.by "the semiconductor chemistry and physics which makes all this fun possible. ** "
 	.by "Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. ** "
 	.by "Atari port by Ken Jennings, November 2018. Version 01. "
 	.by "IOCB Printing removed. Everything is direct writes to screen RAM. **" 
@@ -306,11 +323,12 @@ SCREEN_OVER  = 5 ; Game Over.
 ; the Atari full screen editor works differently from the Pet terminal.
 
 ; Most of the ASCII/PETASCII/ATASCII is now removed.  No more "printing"  
-; to the screen.  Everything is directly written to the screen.  All the
-; screen data is declared, then the addresses are put into a table.
-; Rather than several different screen printing routines there is now
-; one display routine that accepts an index into the table driving the
-; data movement to screen memory.  The end of text sentinel byte is no
+; to the screen.  Everything is directly written to the screen memory.  
+; All the data to write to the screen is declared, then the addresses to 
+; the data is listed in a table. Rather than several different screen 
+; printing routines there is now one display routine that accepts an index 
+; into the table driving the data movement to screen memory.  Since the 
+; data also has a declared length the end of text sentinel byte is no 
 ; longer needed.
 ; --------------------------------------------------------------------------
 
@@ -345,10 +363,10 @@ SCREEN_OVER  = 5 ; Game Over.
 ; 25 |Atari V01 port by Ken Jennings, Nov 2018| PORTBYTEXT
 ;    +----------------------------------------+
 
-; Original V00 Main Game Play Screen:
+;  Original V00 Main Game Play Screen:
 ;    +----------------------------------------+
-; 1  |Score = 0000000      Hi = 0000000   Lv:3| SCORE_TXT
-; 2  |Successful Crossings =                  | SCORE_TXT 
+; 1  |Successful Crossings =                  | SCORE_TXT 
+; 2  |Score = 0000000      Hi = 0000000   Lv:3| SCORE_TXT
 ; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
 ; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
 ; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
@@ -373,6 +391,7 @@ SCREEN_OVER  = 5 ; Game Over.
 ; 24 |                                        |
 ; 25 |Atari V01 port by Ken Jennings, Nov 2018| PORTBYTEXT
 ;    +----------------------------------------+
+
 
 ; Revised V01 Title Screen and Instructions:
 ;    +----------------------------------------+
@@ -408,8 +427,8 @@ SCREEN_OVER  = 5 ; Game Over.
  
 ; Revised V01 Main Game Play Screen:
 ;    +----------------------------------------+
-; 1  |Successful Crossings =                  | SCORE_TXT 
-; 2  |Score = 0000000      Hi = 0000000   Lv:3| SCORE_TXT
+; 1  |Score = 0000000      Hi = 0000000   Lv:3| SCORE_TXT
+; 2  |  Frogs Saved =                         | SCORE_TXT 
 ; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
 ; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
 ; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
@@ -426,14 +445,144 @@ SCREEN_OVER  = 5 ; Game Over.
 ; 16 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5
 ; 17 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5
 ; 18 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
-; 29 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
+; 19 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
 ; 20 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
 ; 21 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
 ; 22 |                                        |
-; 23 |     (c) November 1983 by DalesOft      | TEXT2
-; 24 |        Written by John C Dale          | TEXT2
-; 25 |Atari V01 port by Ken Jennings, Nov 2018| PORTBYTEXT
+; 23 |     (c) November 1983 by DalesOft      | CREDIT
+; 24 |        Written by John C Dale          | CREDIT
+; 25 |Atari V01 port by Ken Jennings, Nov 2018| CREDIT
 ;    +----------------------------------------+
+
+
+
+; ==========================================================================
+
+BLANK_TXT ; Blank line used to erase things.
+	.sb "                                        "
+
+BLANK_TXT_INV ; Inverse blank line used to "animate" things.
+	.sb +$80 "                                        "
+
+; ==========================================================================
+
+TITLE_TXT ; Instructions/Title text.
+; 1  |              PET FROGGER               | TITLE
+; 2  |              --- -------               | TITLE
+	.sb "              PET FROGGER               "
+	.sb "              " 
+	.sb A_H A_H A_H " " A_H A_H A_H A_H
+	.sb A_H A_H A_H "               "
+
+CREDIT_TXT ; The perpetrators identified...
+; 3  |     (c) November 1983 by DalesOft      | CREDIT
+; 4  |        Written by John C Dale          | CREDIT
+; 5  |Atari V01 port by Ken Jennings, Nov 2018| CREDIT
+	.sb "     (c) November 1983 by Dales" ATASCII_HEART "ft      "
+	.sb "        Written by John C. Dale         "
+	.sb "Atari V01 port by Ken Jennings, Nov 2018"
+
+INST_TXT1 ; Basic instructions...
+; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
+; 8  |frog legs fast food franchise! But, the | INSTXT_1
+; 9  |frogs must cross piranha-infested rivers| INSTXT_1
+; 10 |to reach freedom. You have three chances| INSTXT_1
+; 11 |to prove your frog management skills by | INSTXT_1
+; 12 |directing frogs to jump on boats in the | INSTXT_1
+; 13 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
+; 14 |the seats in the boats ('Q').           | INSTXT_1
+	.sb "Help the frogs escape from Doc Hopper's "
+	.sb "frog legs fast food franchise! But, the " 
+	.sb "frogs must cross piranha-infested rivers" 
+	.sb "to reach freedom. You have three chances" 
+	.sb "to prove your frog management skills by " 
+	.sb "directing frogs to jump on boats in the " 
+	.sb "rivers like this:  <" A_B A_B A_B "]  Land only on  " 
+	.sb "the seats in the boats ('" A_B "').           " 
+
+INST_TXT2 ; Scoring
+; 16 |Scoring:                                | INSTXT_2
+; 17 |    10 points for each jump forward.    | INSTXT_2
+; 18 |   500 points for each rescued frog.    | INSTXT_2
+	.sb "Scoring:                                "
+	.sb "    10 points for each jump forward.    "
+	.sb "   500 points for each rescued frog.    "
+
+INST_TXT3 ; Game Controls
+; 20 |Game controls:                          | INSTXT_3
+; 21 |                 S = Up                 | INSTXT_3
+; 22 |      left = 4           6 = right      | INSTXT_3
+	.sb "Game controls:                          " 
+	.sb "                 S = Up                 "
+	.sb "      left = 4           6 = right      " 
+
+INST_TXT4 ; Prompt to start game.
+; 24 |     Hit any key to start the game.     | INSTXT_4
+	.sb "     Hit any key to start the game.     "
+
+INST_TXT4_INV ; inverse version to support blinking.
+; 24 |     Hit any key to start the game.     | INSTXT_4INV
+	.sb +$80 "     Hit any key to start the game.     "
+
+; ==========================================================================
+
+SCORE_TXT  ; Labels for crossings counter, scores, and lives
+; 1  |Score = 0000000      Hi = 0000000   Lv:3| SCORE_TXT
+; 2  |  Frogs Saved =                         | SCORE_TXT 
+	.sb "Score =              Hi =           Lv: "
+	.sb "  Frogs Saved =                         "
+
+TEXT1 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
+	.sb +$80 "                                        " ; "Beach"
+	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
+	.sb "[" A_B A_B A_B A_B ">       "
+	.sb "[" A_B A_B A_B A_B ">      "
+	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
+	.sb "        <" A_B A_B A_B A_B "]"
+	.sb "    <" A_B A_B A_B A_B "]    "
+
+TEXT2 ; this last block includes a Beach, with the "Frog" character which is the starting line. 
+	.sb +$80 "                   O                    " ; The "beach" + frog
+
+; ==========================================================================
+
+YRDDTX  ; Yer dead! Text prompt.
+	.sb +$80 "     YOU'RE DEAD!! YOU WAS SWAMPED!     "
+
+FROGTXT ; You made it across the rivers.
+	.sb +$80 "     CONGRATULATIONS!! YOU MADE IT!     "
+	.sb ATASCII_EOL
+	BRK
+
+OVER ; Prompt for playing again.
+	.sb "        DO YOU WANT ANOTHER GO ?        "
+	.sb ATASCII_EOL
+	brk
+
+INSTXT_1 ; Instructions text.  
+	.sb "              PET FROGGER               "
+	.sb "              " 
+	.sb A_H A_H A_H " " A_H A_H A_H A_H
+	.sb A_H A_H A_H "               "
+	.sb "     (c) November 1983 by Dales" ATASCII_HEART "ft      "
+
+INSTXT_2 ; Instructions text.
+	.sb "All you have to do is to get as many of "
+	.sb "the frogs across the river without      "
+	.sb "drowning them. You have to leap onto a  "
+	.sb "boat like this :- <" A_B A_B A_B "] and land on the "
+	.sb "seats ('" A_B "'). You get 10 points for every"
+	.sb "jump forward and 500 points every time  "
+	.sb "you get a frog across the river.        "
+
+INSTXT_3 ; More instructions
+	.sb "The controls are :-                     "
+	.sb "                 S = Up                 "
+	.sb "  4 = left                   6 = right  "
+
+INSTXT_4
+	.sb +$80 "     Hit any key to start the game.     "
+
 
 
 ; Graphics chars design, SAVED!
@@ -492,203 +641,44 @@ SCREEN_OVER  = 5 ; Game Over.
 
 
 ; ==========================================================================
-
-BLANK_TXT ; Blank line used to erase things.
-	.sb "                                        "
-
-BLANK_TXT_INV ; Inverse blank line used to "animate" things.
-	.sb +$80 "                                        "
-
-; ==========================================================================
-
-TITLE_TXT ; Instructions/Title text.
-; 1  |              PET FROGGER               | TITLE
-; 2  |              --- -------               | TITLE
-	.sb "              PET FROGGER               "
-	.sb "              " 
-	.sb A_H A_H A_H " " A_H A_H A_H A_H
-	.sb A_H A_H A_H "               "
-
-CREDIT_TXT ; The perpetrators identified...
-; 3  |     (c) November 1983 by DalesOft      | CREDIT
-; 4  |        Written by John C Dale          | CREDIT
-; 5  |Atari V01 port by Ken Jennings, Nov 2018| CREDIT
-	.sb "     (c) November 1983 by Dales" ATASCII_HEART "ft      "
-	.sb "        Written by John C. Dale         "
-	.sb "Atari V01 port by Ken Jennings, Nov 2018"
-
-INST_TXT1 ; Basic instructions...
-; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
-; 8  |frog legs fast food franchise! But, the | INSTXT_1
-; 9  |frogs must cross piranha-infested rivers| INSTXT_1
-; 10 |to reach freedom. You have three chances| INSTXT_1
-; 11 |to prove your frog management skills by | INSTXT_1
-; 12 |directing frogs to jump on boats in the | INSTXT_1
-; 13 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
-; 14 |the seats in the boats ('Q').           | INSTXT_1
-	.sb "Help the frogs escape from Doc Hopper's "
-	.sb "frog legs fast food franchise! But, the " 
-	.sb "frogs must cross piranha-infested rivers" 
-	.sb "to reach freedom. You have three chances" 
-	.sb "to prove your frog management skills by " 
-	.sb "directing frogs to jump on boats in the " 
-	.sb "rivers like this:  <" A_B A_B A_B "]  Land only on " 
-	.sb "the seats in the boats ('" A_B "').           " 
-
-INST_TXT2 ; Scoring
-; 16 |Scoring:                                | INSTXT_2
-; 17 |    10 points for each jump forward.    | INSTXT_2
-; 18 |   500 points for each rescued frog.    | INSTXT_2
-	.sb "Scoring:                                "
-	.sb "    10 points for each jump forward.    "
-	.sb "   500 points for each rescued frog.    "
-
-INST_TXT3 ; Game Controls
-; 20 |Game controls:                          | INSTXT_3
-; 21 |                 S = Up                 | INSTXT_3
-; 22 |      left = 4           6 = right      | INSTXT_3
-	.sb "Game controls:                          " 
-	.sb "                 S = Up                 | 
-	.sb "      left = 4           6 = right      | 
-
-INST_TXT4 ; Prompt to start game.
-; 24 |     Hit any key to start the game.     | INSTXT_4
-	.sb "     Hit any key to start the game.     "
-
-INST_TXT4_INV ; inverse version to support blinking.
-; 24 |     Hit any key to start the game.     | INSTXT_4INV
-	.sb +$80 "     Hit any key to start the game.     "
-
-; ==========================================================================
-
-SCORE_TXT  ; Labels for crossings counter, scores, and lives
-; 1  |Score = 0000000      Hi = 0000000   Lv:3| SCORE_TXT
-; 2  |Successful Crossings =                  | SCORE_TXT 
-	.sb "Score =              Hi =           Lv: "
-	.sb "Successful Crossings =                  "
-
-
-
-TEXT1 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
-	.sb +$80 "                                        " ; "Beach"
-	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
-	.sb "[" A_B A_B A_B A_B ">       "
-	.sb "[" A_B A_B A_B A_B ">      "
-	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
-	.sb "        <" A_B A_B A_B A_B "]"
-	.sb "    <" A_B A_B A_B A_B "]    "
-
-TEXT2 ; this last block includes a Beach, with the "Frog" character which is the starting line. 
-	.sb +$80 "                   O                    " ; The "beach" + frog
-	.sb "     (c) November 1983 by Dales" ATASCII_HEART "ft      "
-	.sb "        Written by John C. Dale         "
-
-PORTBYTEXT
-	.sb "Atari V01 port by Ken Jennings, Nov 2018"
-
-YRDDTX  ; Yer dead! Text prompt.
-	.sb +$80 "     YOU'RE DEAD!! YOU WAS SWAMPED!     "
-
-FROGTXT ; You made it across the rivers.
-	.sb +$80 "     CONGRATULATIONS!! YOU MADE IT!     "
-	.sb ATASCII_EOL
-	BRK
-
-OVER ; Prompt for playing again.
-	.sb "        DO YOU WANT ANOTHER GO ?        "
-	.sb ATASCII_EOL
-	brk
-
-INSTXT_1 ; Instructions text.  
-	.sb "              PET FROGGER               "
-	.sb "              " 
-	.sb A_H A_H A_H " " A_H A_H A_H A_H
-	.sb A_H A_H A_H "               "
-	.sb "     (c) November 1983 by Dales" ATASCII_HEART "ft      "
-
-INSTXT_2 ; Instructions text.
-	.sb "All you have to do is to get as many of "
-	.sb "the frogs across the river without      "
-	.sb "drowning them. You have to leap onto a  "
-	.sb "boat like this :- <" A_B A_B A_B "] and land on the "
-	.sb "seats ('" A_B "'). You get 10 points for every"
-	.sb "jump forward and 500 points every time  "
-	.sb "you get a frog across the river.        "
-
-INSTXT_3 ; More instructions
-	.sb "The controls are :-                     "
-	.sb "                 S = Up                 "
-	.sb "  4 = left                   6 = right  "
-
-INSTXT_4
-	.sb +$80 "     Hit any key to start the game.     "
-
-
-; ==========================================================================
 ; Text is static.  The vertical position may vary based on parameter 
 ; by the caller.
 ; So, all we need are lists --  a list of the text and the sizes.
 ; To index the lists we neeed enumerated values.
 ; --------------------------------------------------------------------------
 PRINT_BLANK_TXT     = 0  ; BLANK_TXT     ; Blank line used to erase things.
-PRINT_BLANK_TXT_INV = 0  ; BLANK_TXT_INV ; Inverse blank line used to "animate" things.
-PRINT_TITLE_TXT     = 0  ; TITLE_TXT     ; Instructions/Title text. 
-PRINT_CREDIT_TXT    = 0  ; CREDIT_TXT    ; The perpetrators identified...
-PRINT_INST_TXT1     = 0  ; INST_TXT1     ; Basic instructions...
-PRINT_INST_TXT2     = 0  ; INST_TXT2     ; Scoring
-PRINT_INST_TXT3     = 0  ; INST_TXT3     ; Game Controls
-PRINT_INST_TXT4     = 0  ; INST_TXT4     ; Prompt to start game.
-PRINT_INST_TXT4_INV = 0  ; INST_TXT4_INV ; inverse version to support blinking.
-PRINT_SCORE_TXT     = 0  ; SCORE_TXT     ; Labels for crossings counter, scores, and lives
+PRINT_BLANK_TXT_INV = 1  ; BLANK_TXT_INV ; Inverse blank line used to "animate" things.
+PRINT_TITLE_TXT     = 2  ; TITLE_TXT     ; Instructions/Title text. 
+PRINT_CREDIT_TXT    = 3  ; CREDIT_TXT    ; The perpetrators identified...
+PRINT_INST_TXT1     = 4  ; INST_TXT1     ; Basic instructions...
+PRINT_INST_TXT2     = 5  ; INST_TXT2     ; Scoring
+PRINT_INST_TXT3     = 6  ; INST_TXT3     ; Game Controls
+PRINT_INST_TXT4     = 7  ; INST_TXT4     ; Prompt to start game.
+PRINT_INST_TXT4_INV = 8  ; INST_TXT4_INV ; inverse version to support blinking.
+PRINT_SCORE_TXT     = 9  ; SCORE_TXT     ; Labels for crossings counter, scores, and lives
+PRINT_TEXT1         = 10 ; TEXT1         ; Beach and boats.
+PRINT_TEXT2         = 11 ; TEXT2         ; Beach with frog (starting line)
+PRINT_END           = 12 ; value marker for end of list.
 
-
-
-PRINT_TEXT1_1    = 0  ; Playfield lines printed six times on screen
-PRINT_TEXT1_2    = 1  ;
-PRINT_TEXT1_3    = 2  ;
-PRINT_TEXT1_4    = 3  ;
-PRINT_TEXT1_5    = 4  ;
-PRINT_TEXT1_6    = 5  ;
-
-PRINT_TEXT2      = 6  ; End playfield is beach plus credits.
-PRINT_SCORE_TXT     = 7  ; Score lines 
-PRINT_YRDDTX     = 8  ; Yer dead!
-PRINT_FROGTXT    = 9  ; Congratulations!
-PRINT_OVER       = 10 ; Do you want to play a game?
-PRINT_INSTXT_1   = 11 ; Instructions title.
-PRINT_INSTXT_2   = 12 ; Instructions, instructions.
-PRINT_INSTXT_3   = 13 ; Instructions controls
-PRINT_INSTXT_4   = 14 ; Instructions start game
-PRINT_PORTBYTEXT = 15 ; Ported by bozo the clown
-PRINT_END        = 16 ; value marker for end of list.
 
 TEXT_MESSAGES ; Starting addresses of each of the text messages
-	.word TEXT1,TEXT1,TEXT1,TEXT1,TEXT1,TEXT1
-	.word TEXT2,SCORE_TXT,YRDDTX,FROGTXT,OVER
+	.word BLANK_TXT,BLANK_TXT_INV
+	.word TITLE_TXT,CREDIT_TXT,INST_TXT1,INST_TXT2,INST_TXT3,INST_TXT4,INST_TXT4_INV
+	.word SCORE_TXT,TEXT1,TEXT2
+	
+	.word YRDDTX,FROGTXT,OVER
 	.word INSTXT_1,INSTXT_2,INSTXT_3,INSTXT_4,PORTBYTEXT
 
 TEXT_SIZES ; length of message.  Each should be a multiple of 40.
-	.word 120,120,120,120,120,120
-	.word 120,80,40,40,40
+	.word 40,40
+	.word 80,120,320,120,120,40,40
+	.word 80,120,40
+	.word 80,40,40,40
 	.word 120,280,120,40,40
-
-;TEXT_TARGET ; where in screen memory does it get written?
-;	.word SCREENMEM+80,SCREENMEM+200,SCREENMEM+320  ; Six Beach + Boat lines
-;	.word SCREENMEM+440,SCREENMEM+560,SCREENMEM+680 
-;	.word SCREENMEM+800                             ; Beach + Credit lines
-;	.word SCREENMEM                                 ; Score lines
-;	.word SCREENMEM                                 ; Yer Dead!
-;	.word SCREENMEM                                 ; Congratulations
-;	.word SCREENMEM                                 ; Another go? 
-;	.word SCREENMEM                                 ; Title text 
-;	.word SCREENMEM+160                             ; Title text instructions
-;	.word SCREENMEM+560                             ; Title text controls
-;	.word SCREENMEM+760                             ; Title text prompt
-;	.word SCREENMEM+960                             ; Ported By Bozo
 
 SCREEN_ADDR ; Direct address lookup for each row of screen memory.
 	.rept 25,#           
-		.word >[40*:1+SCREENMEM]
+		.word [40*:1+SCREENMEM]
 	.endr
 
 
@@ -726,6 +716,86 @@ ClearScreenLoop
 	pla   ; Restore Y and A.
 	tay
 	pla
+
+	rts
+
+
+; ==========================================================================
+; Print the instruction/title screen text.
+; Set state of the text line that is blinking.
+; --------------------------------------------------------------------------
+DisplayTitleScreen
+INSTR 
+	jsr ClearScreen 
+
+	ldy #PRINT_TITLE_TXT ; title 
+	ldx #0
+	jsr PrintToScreen
+
+	ldy #PRINT_CREDIT_TXT ; culprits responsible
+	ldx #2
+	jsr PrintToScreen
+
+	ldy #PRINT_INST_TXT1  ; directions.
+	ldx #6
+	jsr PrintToScreen
+
+	ldy #PRINT_INST_TXT2 ; scoring values
+	ldx #15
+	jsr PrintToScreen
+
+	ldy #PRINT_INST_TXT3 ; input controls
+	ldx #19
+	jsr PrintToScreen
+
+	ldy #PRINT_INST_TXT4_INV  ; prompt to press a key to start.
+	ldx #23
+	jsr PrintToScreen
+
+	lda #1 ; default condition of blinking prompt is inverse
+	sta ToggleState
+
+	rts
+
+
+; ==========================================================================
+; Display the game screen. 
+; The credits at the bottom of the screen is still always redrawn.
+; From the title screen it is animated to move to the bottom of the 
+; screen.  But from the Win and Dead frog screens the credits
+; are overdrawn. 
+; --------------------------------------------------------------------------
+DisplayGameScreen
+PRINTSC 
+	jsr ClearScreen 
+
+	ldy #PRINT_SCORE_TXT    ; Print the lives and score labels 
+	ldx #0
+	jsr PrintToScreen
+
+	ldy #PRINT_TEXT1        ; Print TEXT1 -  beaches and boats (6 times)
+	ldx #2
+
+LoopPrintBoats
+	jsr PrintToScreen
+
+	inx
+	inx
+	inx
+
+	cpx #20                 ; Printed six times? (18 lines total) 
+	bne LoopPrintBoats      ; No, go back to print another set of lines.
+
+	ldy #PRINT_TEXT2        ; Print TEXT2 - last Beach with the frog
+;	ldx #20
+	jsr PrintToScreen
+
+	ldy #PRINT_CREDIT_TXT   ; Identify the culprits responsible
+	ldx #2
+	jsr PrintToScreen
+
+; Display the number of frogs that crossed the river.
+	jsr PrintFrogsAndLives
 
 	rts
 
@@ -827,21 +897,65 @@ MoveCarsPlus120
 ExitMoveCarsPlus120
 	rts
 
+
 ; ==========================================================================
-; Move the lines of boats around either left or right.
+; AUTO MOVE FROG
+; Process automagical movement on the frog in the boat.
 ; --------------------------------------------------------------------------
+
+AutoMoveFrog
+AUTMVE
+	ldx NumberOfRows   ; Get the current row number.
+	lda DATA,x         ; Get the movement flag for the row.
+	cmp #0             ; Is it 0?  Nothing to do.  Bail and go back to keyboard polling..  
+	beq RETURN         ; (ya know, the cmp was not actually necessary.)
+	cmp #$FF           ; is it $ff?  then automatic right move.
+	bne AUTRIG         ; (ya know, could have done  bmi AUTRIG without the cmp).
+	dey                ; Move Frog left one character
+	cpy #0             ; Is it at 0? (Why not check for $FF here (or bmi)?)
+	bne RETURN         ; No.  Bail and go back to keyboard polling.
+	jmp YRDD           ; Yup.  Ran out of river.   Yer Dead!
+
+AUTRIG 
+	iny                ; Move Frog right one character
+	cpy #$28           ; Did it reach the right side ?    $28/40 (dec)
+	bne RETURN         ; No.  Bail and go back to keyboard polling.
+	jmp YRDD           ; Yup.  Ran out of river.   Yer Dead!
+
+RETURN
+	jmp KEY            ; Return to keyboard polling.
+
+
+
+
+
+; ==========================================================================
+; ANIMATE BOATS
+; Move the lines of boats around either left or right.
+; Changed logic to move lines from the top to the bottom rather than 
+; the original code which moves all the rows going right, then all the 
+; rows going left
+; --------------------------------------------------------------------------
+AnimateBoats
 MOVESC
 	; FIRST PART -- Set up for Right Shift... 
 	; MovedCars is a word set to $8078...
 	; which is SCREENMEM + $78 (or 120 decimal [i.e. 3rd line of text])
-	lda #<[SCREENMEM+$78] ; low byte 
-	sta MovesCars
-	lda #>[SCREENMEM+$78] ; high byte
-	sta MovesCars + 1
+;	lda #<[SCREENMEM+$78] ; low byte 
+;	sta MovesCars
+;	lda #>[SCREENMEM+$78] ; high byte
+;	sta MovesCars + 1
 
-	ldx #6            ; Count number of rows to shift
+	ldx #6            ; Loop 3 to 18 step 3 -- times 2 for size of word in SCREEN_ADDR
 
 RightShiftRow
+	lda SCREEN_ADDR,x ; Get address of this row in X from the screen memeory lookup.
+	sta MovesCars
+	inx
+	lda SCREEN_ADDR,x
+	sta MovesCars+1
+	inx 
+
 	ldy #$27          ; Character position, start at +39 (dec)
 	lda (MovesCars),y ; Read byte from screen (start +39)
 	pha               ; Save the character at the end to move to position 0.
@@ -862,21 +976,29 @@ MOVE ; Shift text lines to the right.
 	ldy #$00          ; Offset 0 == start of line
 	sta (MovesCars),y ; Save it at start of line.
 
-	; Move to the next river/boat line to shift to the right 3 lines lower.
-	jsr MoveCarsPlus120
 
-	dex               ; Track that a line is done.
-	bne RightShiftRow ; No.  Go do right shift on another line.
+
+	; Move to the next river/boat line to shift to the right 3 lines lower.
+;	jsr MoveCarsPlus120
+
+;	dex               ; Track a line is done. All six done?
+;	bne RightShiftRow ; No.  Go do right shift on another line.
 
 	; SECOND PART -- Setup for Left Shift...
 	; MovedCars is a word to set to $80A0...
 	; which is SCREENMEM + $A0 (or 160 decimal [i.e. 4th line of text])
-	lda #>[SCREENMEM+$A0] ; high byte
-	sta MovesCars + 1 ; 
-	lda #<[SCREENMEM+$A0] ; low byte 
+;	lda #>[SCREENMEM+$A0] ; high byte
+;	sta MovesCars + 1 ; 
+;	lda #<[SCREENMEM+$A0] ; low byte 
+;	sta MovesCars
+	lda SCREEN_ADDR,x
 	sta MovesCars
+	inx
+	lda SCREEN_ADDR,x
+	sta MovesCars+1
+	inx 
 
-	ldx #6            ; Count number of rows to shift
+;	ldx #6            ; Count number of rows to shift
 
 LeftShiftRow
 	ldy #$00          ; Character position, start at +0 (dec)
@@ -901,13 +1023,19 @@ MOVE1 ; Shift text lines to the left.
 	ldy #$27          ; Offset $27/39 (dec)
 	sta (MovesCars),y ; Save it at end of line.
 
-	; Move to the next river/boat line to shift to the left 3 lines lower.
-	jsr MoveCarsPlus120
+	inx ; skip the beach line
+	inx
 
-	dex               ; Track that a line is done.
-	bne LeftShiftRow  ; No.  Go do left shift on another line.
+	cpx #40 ; 21st line (20 base 0) times 2  
+	bcc RightShiftRow ; Continue to loop, right, left, right, left
 
-	jsr PRITSC        ; Finish up by copying the score from memory to the screen.
+;	; Move to the next river/boat line to shift to the left 3 lines lower.
+;	jsr MoveCarsPlus120
+
+;	dex               ; Track a line is done.  All six done?
+;	bne LeftShiftRow  ; No.  Go do left shift on another line.
+
+	jsr CopyScoreToScreen ; Finish up by updating score display.
 
 	rts
 
@@ -915,14 +1043,15 @@ MOVE1 ; Shift text lines to the left.
 ; ==========================================================================
 ; Copy the score from memory to screen positions.
 ; --------------------------------------------------------------------------
+CopyScoreToScreen
 PRITSC
 	ldx #7
 
 REPLACE
 	lda MyScore,x       ; Read from Score buffer
-	sta SCREENMEM+$30,x ; Screen Memory + $30/48 bytes (9th character on second line)
+	sta SCREENMEM+8,x   ; Screen Memory + 9th character 
 	lda HiScore,x       ; Read from Hi Score buffer
-	sta SCREENMEM+$42,x ; Screen Memory + $42/66 bytes (27th character on second line)
+	sta SCREENMEM+26,x  ; Screen Memory + 27th character
 	dex                 ; Loop 8 bytes - 7 to 0.
 	bpl REPLACE 
 
@@ -932,14 +1061,14 @@ REPLACE
 ; ==========================================================================
 ; Display the number of frogs that crossed the river.
 ; --------------------------------------------------------------------------
-PRINT2
 PrintFrogsAndLives
+PRINT2
 	lda #INTERNAL_O     ; On Atari we're using "O" as the frog shape.
 	ldx FrogsCrossed    ; number of times successfully crossed the rivers.
 	beq FINLIV          ; then nothing to display. Skip to Lives.
 
 SAVED_FROGGIES
-	sta SCREENMEM+$17,x ; Write to screen.
+	sta SCREENMEM+46,x  ; Write to screen. (second line, 16th position)
 	dex                 ; Decrement number of frogs.
 	bne SAVED_FROGGIES  ; then go back and display the next frog counter.
 
@@ -947,7 +1076,30 @@ FINLIV ; Write the number of lives to screen memory
 	lda NumberOfLives ; Get number of lives.
 	clc               ; Add to value for  
 	adc #INTERNAL_0   ; Atari internal code for '0'
-	sta SCREENMEM+$4F ; Write to screen
+	sta SCREENMEM+39  ; Write to screen. Last position ofz first line.
+
+	rts
+
+
+; ==========================================================================
+; SET BOAT SPEED
+; Set the animation timer for the game screen based on the 
+; number of frogs that have been saved.
+;
+; A  and  X  will be saved.
+; --------------------------------------------------------------------------
+SetBoatSpeed
+	mSaveRegAX
+
+	ldx FrogsCrossed
+	cpx #12                   ; Index is 0 to 11.   
+	bcc GetSpeedByWayOfFrogs  ; anything bigger than that
+	ldx #11                   ; must be truncated to the limit.
+GetSpeedByWayOfFrogs
+	lda ANIMATION_FRAMES,x    ; Set timer for animation based on frogs.
+	jsr ResetTimers
+
+	mRestoreRegAX
 
 	rts
 
@@ -955,10 +1107,11 @@ FINLIV ; Write the number of lives to screen memory
 ; ==========================================================================
 ; Display game screen
 ; --------------------------------------------------------------------------
+DisplayGameScreen
 PRINTSC 
 	jsr ClearScreen 
 
-	ldy #PRINT_TEXT1_1
+;	ldy #PRINT_TEXT1_1
 	ldx #2
 PRINT ; Print TEXT1 -  beaches and boats, six times.
 	jsr PrintToScreen
@@ -967,16 +1120,16 @@ PRINT ; Print TEXT1 -  beaches and boats, six times.
 	inx
 	inx
 	iny 
-	cpy #PRINT_TEXT1_1+6  ; if we printed six times, (18 lines total) then we're done 
+;	cpy #PRINT_TEXT1_1+6  ; if we printed six times, (18 lines total) then we're done 
 	bcc PRINT             ; Go back and print another set of lines.
 
 ; Print TEXT2 - Beach and Credits
-	ldy #PRINT_TEXT2
+;	ldy #PRINT_TEXT2
 	ldx #21
 	jsr PrintToScreen
 
 ; Print the Ported By Credit
-	ldy #PRINT_PORTBYTEXT
+;	ldy #PRINT_PORTBYTEXT
 	ldx #24
 	jsr PrintToScreen 
 
@@ -988,44 +1141,15 @@ PRINT ; Print TEXT1 -  beaches and boats, six times.
 ; Display the number of frogs that crossed the river.
 	jsr PrintFrogsAndLives
 
-	rts
+; Set the animation timer for the game screen.
+	jsr SetBoatSpeed
 
-
-; ==========================================================================
-; Print the instruction/title screen text.
-; Wait for a keypress.
-; --------------------------------------------------------------------------
-INSTR ; Per PET Memory Map - Set integer value for SYS/GOTO ?
-	jsr ClearScreen 
-
-	ldy #PRINT_INSTXT_1 
-	ldx #0
-	jsr PrintToScreen
-
-	ldy #PRINT_INSTXT_2
-	ldx #4
-	jsr PrintToScreen
-
-	ldy #PRINT_INSTXT_3 
-	ldx #12
-	jsr PrintToScreen
-
-	ldy #PRINT_INSTXT_4
-	ldx #19
-	jsr PrintToScreen
-
-	ldy #PRINT_PORTBYTEXT 
-	ldx #24
-	jsr PrintToScreen
-
-INSTR1
-	jsr WaitKey           ; Atari polling the keyboard.
-
-	; I like to keep the high score forever.  (as long as the program runs)
-;	lda #0                ; Clear high score flag.
-;	sta FlaggedHiScore
+	; Reset frog position.
+	ldy #$13           ; Y = #$13/19 (dec) 
+	sty FrogColumn     ; Frog X coord
 
 	rts
+
 
 
 ; ==========================================================================
@@ -1070,12 +1194,9 @@ GAMESTART
 	; this should be done by managing SDMCTL too, but this is overkill for a 
 	; program with only one display.
 
-	lda RTCLOK60     ; Get the jiffy clock
-WaitForFrame
-	cmp RTCLOK60     ; If it is unchanged, 
-	beq WaitForFrame ; then go check the jiffy clock value again.
+	jsr libScreenWaitFrame ; Wait for display to start next frame.
 
-	; Safe to change Display list pointer now.
+	; Safe to change Display list pointer now.  Would not be interrupted.
 	lda #<DISPLAYLIST
 	sta SDLSTL
 	lda #>DISPLAYLIST
@@ -1105,17 +1226,35 @@ WaitForFrame
 	; Continue with regular Pet Frogger initialization
 	; Zero these values...
 	lda #0 
-;	sta FrogsCrossed
 	sta FlaggedHiScore
 	sta LastKeyPressed
 
-	jsr INSTR ; print game instructions, wait for key to start.
+	lda #SCREEN_START  ; Set main game loop to start new game at title screen.
+	sta CurrentScreen 
+
+	jmp GameLoop ; Ready to go.  
 
 
 ; ==========================================================================
-; GAME LOOP
+; RESET KEY SCAN TIMER and ANIMATION TIMER
+; 
+; A  is the time to set for animation.
 ; --------------------------------------------------------------------------
-START
+ResetTimers
+	sta AnimateFrames
+
+	pha ; preserve it for caller.
+	lda #KEYSCAN_FRAMES
+	sta KeyscanFrames
+	pla ; get this back for the caller.
+
+	rts
+
+
+; ==========================================================================
+; NEW GAME SETUP
+; --------------------------------------------------------------------------
+NewGameSetup
 	lda #0
 	sta FrogsCrossed       ; Zero the number of successful crossings.
 
@@ -1137,12 +1276,19 @@ START
 	lda #INTERNAL_O        ; On Atari we're using "O" as the frog shape.
 	sta (FrogLocation),y   ; SCREENMEM + $320 + $13
 
+	jsr ClearGameScores    ; Zero the score.  And high score if not set.
+
+	rts
+
 
 ; ==========================================================================
 ; Clear the score digits to zeros.
 ; That is, internal screen code for "0" 
+; If a high score is flagged, then do not clear high score.
 ; --------------------------------------------------------------------------
-	ldx #$07           ; 7 digits.
+ClearGameScores
+	ldx #$07           ; 8 digits. 7 to 0
+
 CLEAR
 	lda #INTERNAL_0    ; Atari internal code for "0"
 	sta MyScore,x      ; Put zero/"0" in score buffer.
@@ -1160,17 +1306,448 @@ CLNEXT
 	dex                ; decrement index to score digits.
 	bpl CLEAR          ; went from 0 to $FF? no, loop for next digit.
 
-	jsr PRINTSC        ; Go clear screen and print game screen
-	ldy #$13           ; Y = 19 (dec) (again, again)
+	rts
 
 
-KEY ; Read keyboard.  (I hate keyboard input.  TO DO - Use a joystick.)
-	lda CH             ; Atari get key pressed
-	cmp #$FF           ; Check for no key pressed (same for PET and Atari)
-	bne KEY1           ; Not $FF, then something is pressed.
+; ==========================================================================
+; TOGGLE FLIP FLOP
+;
+; Flip toggle state 0, 1, 0, 1, 0, 1,....
+;
+; Ordinarily should be EOR with #1, but I don;t trust myself that
+; Toggle state ends up being something greater than 1 due to some 
+; moment of sloppiness, so the absolute, slower slogging about 
+; with INC and AND is done here.
+;
+; Uses A, CPU flag status Z indicates 0 or 1
+; --------------------------------------------------------------------------
+ToggleFlipFlop
+	inc ToggleState ; Add 1.  (says Capt Obvious)
+	lda ToggleState
+	and #1          ; Squash to only lowest bit -- 0, 1, 0, 1, 0, 1...
+	sta ToggleState
 
+	rts
+
+
+; ==========================================================================
+; GAME LOOP 
+;
+; The main loop for the game...
+; Very vaguely like an event loop across the progressive game states 
+; based on the current mode of the display.
+;
+; Rules:  "Continue" labels for the next screen/event block must  
+;         be called with screen value in A.
+; --------------------------------------------------------------------------
+
+GameLoop
+; ==========================================================================
+; SCREEN START/NEW GAME
+; Setup for New Game and do transition to Title screen.
+; --------------------------------------------------------------------------
+	lda CurrentScreen
+	cmp #SCREEN_START
+	bne ContinueTitleScreen ; SCREEN_START=0?  No? 
+
+	jsr NewGameSetup        ; SCREEN_START, Yes. Setup for a new game.
+
+	jsr DisplayTitleScreen  ; Draw title and game instructions.
+
+	lda #60                 ; Text Blinking speed for prompt on Title screen.
+	jsr ResetTimers
+
+	lda #SCREEN_TITLE ; Next step is operating the title screen input.
+	sta CurrentScreen
+
+; ==========================================================================
+; TITLE SCREEN
+; The activity on the title screen is 
+; 1) blinking the text and 
+; 2) waiting for a key press.
+; --------------------------------------------------------------------------
+ContinueTitleScreen
+	cmp #SCREEN_TITLE
+	bne ContinueTransitionToGame
+
+	lda AnimateFrames            ; Did animation counter reach 0 ?
+	bne CheckTitleKey            ; no, then is a key pressed? 
+
+	jsr ToggleFlipFlop           ; Yes! Let's toggle the flashing prompt
+
+	bne TitlePromptInverse       ; If this is 1 then display inverse prompt
+
+	ldy #PRINT_INST_TXT4         ; Display normal prompt
+	ldx #23
+	jsr PrintToScreen
+	jmp ResetTitlePromptBlinking
+
+TitlePromptInverse
+	ldy #PRINT_INST_TXT4_INV     ; Display inverse prompt
+	ldx #23
+	jsr PrintToScreen
+
+ResetTitlePromptBlinking
+	lda #60                      ; Blinking speed.
+	jsr ResetTimers
+
+CheckTitleKey
+	jsr CheckKey                 ; Get a key if timer permits.
+	cmp #$FF                     ; Key is pressed?
+	beq EndTitleScreen           ; Nothing pressed, done with title screen.
+
+ProcessTitleScreenInput          ; a key is pressed. Prepare for the screen transition.
+	lda #10                      ; Text moving speed.
+	jsr ResetTimers
+
+	lda #3                       ; Transition Loops from third row through 21st row.
+	sta EventCounter
+
+	lda #0                       ; Mark frog as safe location.
+	sta FrogSafety
+
+	lda #SCREEN_TRANS_GAME       ; Next step is operating the transition animation.
+	sta CurrentScreen   
+
+EndTitleScreen
+	lda CurrentScreen            ; Yeah, redundant to when a key is pressed.
+
+; ==========================================================================
+; TRANSITION TO GAME SCREEN
+; The Activity in the transition area, based on timer.
+; 1) Progressively reprint the credits on lines from the top of the screen 
+; to the bottom.
+; 2) follow with a blank line to erase the highest line of trailing text.
+; --------------------------------------------------------------------------
+ContinueTransitionToGame
+	cmp #SCREEN_TRANS_GAME
+	bne ContinueGameScreen
+
+	lda AnimateFrames        ; Did animation counter reach 0 ?
+	bne EndTransitionToGame  ; Nope.  Nothing to do.
+	lda #10                  ; yes.  Reset it.
+	jsr ResetTimers
+
+	ldy #PRINT_BLANK_TXT    ; erase top line
+	ldx EventCounter
+	jsr PrintToScreen
+
+	inx                     ; next row.
+	stx EventCounter        ; Save new row number
+	ldy #PRINT_CREDIT_TXT   ; Print the culprits responsible
+	jsr PrintToScreen
+
+	cpx #21                 ; reached bottom of screen?
+	bne EndTransitionToGame ; No.  Remain on this transition event next time.
+
+	jsr DisplayGameScreen   ; Draw title and game instructions.; draw game screen.
+
+	lda #SCREEN_GAME        ; Yes, change to game screen.
+	sta CurrentScreen
+
+EndTransitionToGame
+	lda CurrentScreen
+
+; ==========================================================================
+; GAME SCREEN
+; Play the game.
+; 1) When the animation timer expires, shift the boat rows.
+; 2) When the input timer allows, get a key.
+; 3) Evaluate frog Movement
+; 3.a) Determine exit to Win screen
+; 3.b) Determine exit to Dead screen.
+; --------------------------------------------------------------------------
+ContinueGameScreen
+	cmp #SCREEN_GAME
+	bne ContinueTransitionToWin
+
+
+CheckTitleKey
+	jsr CheckKey         ; Get a key if timer permits.
+	cmp #$FF             ; Key is pressed?
+	bne ProcessKey       ; Something pressed, Do key input.
 
 DELAY
+	sta LastKeyPressed   ; Save $FF, for no key pressed.
+	lda FrogColumn
+	tya                  ; Whatever Y was, probably $13/19 (dec) again,
+	pha                  ; and push that to the stack.  must be important.
+
+	lda AnimateFrames    ; Does the timer allow the boats to move?
+	bne NOTHINGTODOHERE
+;	jsr MOVESC           ; Move the boats around.
+	jsr AnimateBoats     ; Move the boats around.
+
+;	ldx DelayNumber      ; Get the Delay counter.
+
+DEL1
+;	ldy #$FF             ; Reset Y to $FF/255 (dec)
+
+;DEL
+;	dey                  ; decrement Y counter
+;	bne DEL              ; if Y is not 0, then do the decrement again.
+;	dex                  ; decrement delay counter.
+;	bne DEL1             ; If X is not 0, then wind up Y again and start over.
+
+;	pla                  ; Pull original Y value
+;	tay                  ; and return to Y.
+	jmp AUTMVE           ; GOTO AUTOMVE
+
+
+ProcessKey
+KEY1 ; Process keypress
+	pha                  ; A is a keypress, but the value of
+;	lda #$FF             ; CH needs to be cleared.
+;	sta CH
+;	pla                  ; A has the original keypress again.  Continue....
+
+	cmp LastKeyPressed   ; is this key the same as the last key?
+	BEQ DELAY            ; Yes.  So, probably a key repeat, so ignore it and do delay.
+
+	tax                  ; Save that key in X, too.
+	lda LastCharacter    ; Get the last character (under the frog)
+	sta (FrogLocation),y ; Erase the frog with the last character.
+
+; Test for Left "4" key
+	txa                  ; Restore the key press to A
+	cmp #KEY_4           ; Atari "4", #24
+	bne RIGHT            ; No.  Go test for Right.
+
+	dey                  ; Move Y to left.
+;	cpy #$FF             ; Did it move off the screen?
+;	bne CORR             ; No.  GOTO CORR (Place frog on screen)
+	bpl CORR             ; Not $FF.  GOTO CORR (Place frog on screen)
+	iny                  ; Is $FF.  Correct by adding 1 to Y.
+
+CORR
+	jmp PLACE ; Place frog on screen (?)
+
+
+RIGHT ; Test for Right "6" key
+	cmp #KEY_6           ; Atari "6", #27
+	bne UP               ; Not "6" key, so go test for Up.
+
+	iny                  ; Move Y to right.
+	cpy #$28             ; Did it move off screen? Position $28/40 (dec)
+	bne CORR1            ; No.  GOTO CORR1  (Place frog on screen)
+	DEY                  ; Yes.  Correct by subtracting 1 from Y.
+
+CORR1    ; couldn't the BNE above just go to CORR in order to jump to PLACE?
+	jmp PLACE
+
+
+UP ; Test for Up "S" key
+	cmp #KEY_S           ; Atari "S", #62
+	beq UP1              ; Yes, go do UP.
+
+; No.  key press is not a frog control key.  Replace frog where it came from.
+	lda #INTERNAL_O      ; On Atari we're using "O" as the frog shape.
+	sta (FrogLocation),y ; Return frog to screen
+	jmp DELAY            ; Go to the delay
+
+UP1 ; Move the frog a row up.
+	lda #1               ; Represents "10" Since we don't need to add to the ones column.  
+	sta ScoreToAdd       ; Save to add 1
+	ldx #5               ; Offset from start of "00000000" to do the adding.
+	stx NumberOfChars    ; Position offset in score.
+	jsr SCORE            ; Deal with score update.
+
+	lda FrogLocation     ; subtract $28/40 (dec) from 
+	sec                  ; the address pointing to 
+	sbc #$28             ; the frog.
+	sta FrogLocation
+	bcs CORR2
+	dec FrogLocation + 1 
+
+CORR2 ; decrement number of rows.
+;	sec                  ; ummm.  Does carry affect dec? did not think so.
+	dec NumberOfRows
+	lda NumberOfRows     ; If more row are left to cross, then 
+;	cmp #0               
+	bne PLACE            ; redraw frog on screen. 
+
+	jmp FROG             ; No more rows to cross. Update frog reward/stats.
+
+
+; Get the character that will be under the frog.
+PLACE
+	lda (FrogLocation),y ; Get the character in the new position.
+	sta LastCharacter    ; Save for later when frog moves.
+	jmp CHECK
+
+
+; Draw the frog on screen.
+PLACE2 
+	lda #INTERNAL_O       ; Atari internal code for "O" is frog.
+	sta (FrogLocation),y ; Save to screen memory to display it.
+	jmp DELAY            ; Slow down game speed.
+	rts
+
+
+; Will the Pet Frog land on the Beach?
+CHECK
+	lda LastCharacter      ; Is the character the beach?
+	cmp #INTERNAL_INVSPACE ; Atari uses inverse space for beach
+	bne CHECK1             ; not the beach?  Goto CHECK1
+	jmp PLACE2             ; Draw the frog.
+
+
+; Will the Pet Frog land in the boat?
+CHECK1
+	cmp #INTERNAL_BALL     ; Atari uses ball graphics, ctrl-t
+	bne CHECK2             ; No?   GOTO CHECK2 to die.
+	jmp PLACE2             ; Draw the frog.
+
+
+; Safe locations discarded, so wherever the Frog will land, it is Baaaaad.
+CHECK2
+	jmp YRDD               ; Yer Dead!
+
+
+	
+	
+	
+
+EndGameScreen
+	lda CurrentScreen   
+
+; ==========================================================================
+; TRANSITION TO WIN SCREEN
+; The Activity in the transition area, based on timer.
+; 1) Animate something.
+; 2) End With display of WIN Screen.
+; --------------------------------------------------------------------------
+ContinueTransitionToWin
+	cmp #SCREEN_TRANS_WIN
+	bne ContinueWinScreen
+
+
+
+EndTransitionToWin
+	lda CurrentScreen  
+
+; ==========================================================================
+; WIN SCREEN
+; The activity in the WIN screen.
+; 1) blinking the text and 
+; 2) waiting for a key press.
+; --------------------------------------------------------------------------
+ContinueWinScreen
+	cmp #SCREEN_WIN
+	bne ContinueTransitionToDead
+	
+	
+	
+EndWinScreen
+	lda CurrentScreen 
+
+; ==========================================================================
+; TRANSITION TO DEAD SCREEN
+; The Activity in the transition area, based on timer.
+; 1) Animate something.
+; 2) End With display of DEAD Screen.
+; --------------------------------------------------------------------------
+ContinueTransitionToDead
+	cmp #SCREEN_TRANS_DEAD
+	bne ContinueDeadScreen
+
+
+
+EndTransitionToDead
+	lda CurrentScreen  
+
+; ==========================================================================
+; DEAD SCREEN
+; The activity in the DEAD screen.
+; 1) blinking the text and 
+; 2) waiting for a key press.
+; 3.a) Evaluate to continue to game screen
+; 3.b.) Evaluate to continue to Game Over
+; --------------------------------------------------------------------------
+ContinueDeadScreen
+	cmp #SCREEN_DEAD
+	bne ContinueTransitionToOver
+	
+	
+	
+EndDeadScreen
+	lda CurrentScreen 
+
+; ==========================================================================
+; TRANSITION TO GAME OVER SCREEN
+; The Activity in the transition area, based on timer.
+; 1) Animate something.
+; 2) End With display of GAME OVER Screen.
+; --------------------------------------------------------------------------
+ContinueTransitionToOver
+	cmp #SCREEN_TRANS_OVER
+	bne ContinueOverScreen
+
+
+
+EndTransitionToOver
+	lda CurrentScreen  
+
+; ==========================================================================
+; GAME OVER SCREEN
+; The activity in the DEAD screen.
+; 1) blinking the text and 
+; 2) waiting for a key press.
+; --------------------------------------------------------------------------
+ContinueOverScreen
+	cmp #SCREEN_OVER
+	bne ContinueTransitionToTitle
+	
+	
+	
+EndOverScreen
+	lda CurrentScreen 
+
+; ==========================================================================
+; TRANSITION TO TITLE 
+; The Activity in the transition area, based on timer.
+; 1) Animate something.
+; 2) End With going to the Title Screen.
+; --------------------------------------------------------------------------
+ContinueTransitionToTitle
+	cmp #SCREEN_TRANS_TITLE
+	bne EndGameLoop
+
+
+
+EndTransitionToTitle
+	lda CurrentScreen  
+
+; ==========================================================================
+; END OF GAME EVENT LOOP
+; --------------------------------------------------------------------------
+EndGameLoop
+	jsr TimerLoop    ; Wait for end of frame and update timers.
+
+	jmp GameLoop
+
+	rts
+
+
+
+
+
+;START
+
+
+
+
+;	jsr PRINTSC        ; Go clear screen and print game screen
+;	ldy #$13           ; Y = 19 (dec) (again, again)
+
+
+;KEY ; Read keyboard.  (I hate keyboard input.  TO DO - Use a joystick.)
+;	lda CH             ; Atari get key pressed
+;	cmp #$FF           ; Check for no key pressed (same for PET and Atari)
+;	bne KEY1           ; Not $FF, then something is pressed.
+
+
+;DELAY
 	sta LastKeyPressed ; Save $FF, for no key pressed.
 	tya                ; Whatever Y was, probably $13/19 (dec) again,
 	pha                ; and push that to the stack.  must be important.
@@ -1354,7 +1931,7 @@ YRDD
 	jsr FILLSC           ; Fill screen with inverse blanks.
 
 ; Print the dead frog prompt.
-	ldy #PRINT_YRDDTX
+;	ldy #PRINT_YRDDTX
 	jsr PrintToScreen
 
 ; Decide   G A M E   O V E R-ish
@@ -1390,7 +1967,7 @@ FROG
 	jsr FILLSC           ; Update the score display
 
 FROG1 ; Print the frog wins text.
-	ldy #PRINT_FROGTXT
+;	ldy #PRINT_FROGTXT
 	jsr PrintToScreen
 
 FROG2  ; More score maintenance.   and delays.
@@ -1492,11 +2069,7 @@ DELA
 ; Add to score.
 ; --------------------------------------------------------------------------
 SCORE
-	pha               ; Save A, X, and Y.
-	txa
-	pha
-	tya
-	pha
+	mRegSaveAYX               ; Save A, X, and Y.
 
 	ldx NumberOfChars ; index into "00000000" to add score.
 	lda ScoreToAdd    ; value to add to the score
@@ -1517,14 +2090,10 @@ UPDATE
 	dex             ; Go to previous position in score
 	inc MyScore,x   ; Add 1 to the next digit.
 	bne SCORE1      ; This cannot go from $FF to 0, so it must be not zero.
-;	jmp SCORE1      ; (re)evaluate carry for the current position.
+;	jmp SCORE1      ; go (re)evaluate carry for the current position.
 
 PULL                     ; All done.
-	pla                  ; Restore Y, X, and A
-	tay
-	pla
-	tax
-	pla
+	mRegRestoreAYX  ; Restore Y, X, and A
 
 	rts
 
@@ -1536,7 +2105,7 @@ GOVER
 	ldy #0
 
 GOVER1                 ; Print the go again message.
-	ldy #PRINT_OVER
+;	ldy #PRINT_OVER
 	jsr PrintToScreen
 
 GOVER2
@@ -1593,6 +2162,38 @@ HISC1                ; It is a high score.
 
 
 ; ==========================================================================
+; Check for a keypress based on timer state. 
+;
+; A  returns the key pressed.  or returns $FF for no key pressed.
+; If the timer allows reading, and a key is found, then the timer is 
+; reset for the time of the next key input cycle.
+; --------------------------------------------------------------------------
+CheckKey
+	lda KeyscanFrames         ; Is keyboard timer delay  0?
+	bne ExitCheckKeyNow       ; No. thus no key to scan.
+
+	lda CH
+	pha                       ; Save the key for later
+
+	cmp #$FF                  ; No key pressed, so nothing to do.
+	beq ExitCheckKey
+	 
+	lda #$FF                  ; Got a key.  Clear register for next key read
+	sta CH
+
+	lda #KEYSCAN_FRAMES       ; Reset keyboard timer for next key input.
+	sta KeyscanFrames
+
+ExitCheckKey                  ; exit with some kind of key value in A.
+	pla                       ; restore the pressed key in A.
+	rts
+
+ExitCheckKeyNow               ; exit with no key value in A
+	lda #$FF
+	rts
+
+
+; ==========================================================================
 ; Wait for a keypress. 
 ;
 ; A  returns the key pressed.
@@ -1610,6 +2211,49 @@ WaitKeyLoop
 	lda #$FF
 	sta CH          ; Clear any pending key
 	pla             ; return the pressed key in A.
+
+	rts
+
+
+;==============================================================================
+;                                                           TIMERLOOP  A
+;==============================================================================
+; Primitive timer loop.
+;
+; When the game design is more Atari-ficated (planned Version 02) this is part 
+; of the program's deferred Vertical Blank Interrupt routine.  This routine 
+; services any display-oriented updates and notifications for the mainline 
+; code that runs during the bulk of the frame.
+;
+; Main code calls this at the end of its cycle, then afterwards it restarts 
+; its cycle.  
+; This routine waits for the current frame to finish display, then 
+; manages the timers/countdown values.
+; It is the responsibility of the main line code to observe when timers
+; reach 0 and reset them or act accordingly.
+;
+; All registers are preserved.
+;==============================================================================
+
+TimerLoop
+	mRegSaveAYX
+
+	lda DoTimers           ; Are timers turned on or off?
+	beq ExitEventLoop      ; Off, skip it all.
+
+	jsr libScreenWaitFrame ; Wait until end of frame
+
+	lda KeyscanFrames      ; Is keyboard delay already 0?
+	beq DoAnimateClock     ; Yes, do not decrement it again.
+	dec KeyscanFrames      ; Minus 1.
+
+DoAnimateClock
+	lda AnimateFrames      ; Is animation countdown already 0?
+	beq ExitEventLoop      ; Yes, do not decrement now.
+	dec AnimateFrames      ; Minus 1
+
+ExitEventLoop
+	mRegRestoreAYX
 
 	rts
 
