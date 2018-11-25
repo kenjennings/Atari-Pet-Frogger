@@ -150,7 +150,9 @@
 MovesCars       .word $00 ; = Moves Cars
 FrogLocation    .word $00 ; = Frog Location
 FrogColumn      .byte $00 ; = Frog X coord
-NumberOfRows    .word $00 ; = Frog's row position. 
+FrogRow         .word $00 ; = Frog Y row position (on the playfield not counting score lines)
+FrogLastColumn  .byte $00 ; = Frog's last X coordinate
+FrogLastRow     .byte $00 ; = Frog's last Y row position 
 LastCharacter   .byte 0   ; = Last Character Under Frog
 FrogSafety      .byte 0   ; = 0 When Frog OK.  !0 == Yer Dead.
 DelayNumber     .byte 0   ; = Delay No. (Hi = Slow, Low = Fast)
@@ -905,7 +907,7 @@ ExitMoveCarsPlus120
 
 AutoMoveFrog
 AUTMVE
-	ldx NumberOfRows   ; Get the current row number.
+	ldx FrogRow   ; Get the current row number.
 	lda DATA,x         ; Get the movement flag for the row.
 	cmp #0             ; Is it 0?  Nothing to do.  Bail and go back to keyboard polling..  
 	beq RETURN         ; (ya know, the cmp was not actually necessary.)
@@ -1269,7 +1271,7 @@ NewGameSetup
 	sta LastCharacter      ; Preset the character under the frog.
 
 	lda #$12               ; 18 (dec), number of screen rows of playfield.
-	sta NumberOfRows
+	sta FrogRow
 	lda #$30               ; 48 (dec), delay counter.
 	sta DelayNumber
 
@@ -1561,8 +1563,8 @@ UP1 ; Move the frog a row up.
 
 CORR2 ; decrement number of rows.
 ;	sec                  ; ummm.  Does carry affect dec? did not think so.
-	dec NumberOfRows
-	lda NumberOfRows     ; If more row are left to cross, then 
+	dec FrogRow
+	lda FrogRow     ; If more row are left to cross, then 
 ;	cmp #0               
 	bne PLACE            ; redraw frog on screen. 
 
@@ -1834,8 +1836,8 @@ UP1 ; Move the frog a row up.
 
 CORR2 ; decrement number of rows.
 ;	sec                  ; ummm.  Does carry affect dec? did not think so.
-	dec NumberOfRows
-	lda NumberOfRows     ; If more row are left to cross, then 
+	dec FrogRow
+	lda FrogRow     ; If more row are left to cross, then 
 ;	cmp #0               
 	bne PLACE            ; redraw frog on screen. 
 
@@ -1896,7 +1898,7 @@ DATA
 
 ; Process automagical movement on the frog in the boat.
 AUTMVE
-	ldx NumberOfRows   ; Get the current row number.
+	ldx FrogRow   ; Get the current row number.
 	lda DATA,x         ; Get the movement flag for the row.
 	cmp #0             ; Is it 0?  Nothing to do.  Bail and go back to keyboard polling..  
 	beq RETURN         ; (ya know, the cmp was not actually necessary.)
@@ -2041,7 +2043,7 @@ START1 ; Manage frog's starting postion.
 	ldy #$13               ; Y = 19 (dec) the middle of screen
 	sta (FrogLocation),y   ; Erase Frog starting position.
 	lda #$12               ; A = 18 (dec)
-	sta NumberOfRows       ; Save as number of rows to jump
+	sta FrogRow       ; Save as number of rows to jump
 	
 	jmp KEY                ; GOTO Key input
 
