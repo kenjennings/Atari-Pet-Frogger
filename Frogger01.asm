@@ -1458,6 +1458,12 @@ EndTransitionToGame
 ; 3) Evaluate frog Movement
 ; 3.a) Determine exit to Win screen
 ; 3.b) Determine exit to Dead screen.
+; As a timer based pattern the key input is first.
+; Keyboard input updates the frog's logical and physical position 
+; and updates screen memory.
+; The animation update forces an automatic movement of the frog 
+; logically, as the frog moves with the boats and remains static
+; relative to the boats.
 ; --------------------------------------------------------------------------
 ContinueGameScreen
 	cmp #SCREEN_GAME
