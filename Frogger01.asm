@@ -1508,7 +1508,6 @@ ProcessKey ; Process keypress
 	dey                  ; Move Y to left.
 	bpl UpdateFrogX      ; Not $FF.  Go place frog on screen)
 	iny                  ; It is $FF.  Correct by adding 1 to Y.
-
 	bpl UpdateFrogX      ; Place frog on screen (?)
 
 
@@ -1522,9 +1521,7 @@ RightKeyTest ; Test for Right "6" key
 	dey                  ; Yes.  Correct by subtracting 1 from Y.
 
 UpdateFrogX              ; couldn't the BNE above just go to CORR in order to jump to PLACE?
-
 	jmp PLACE
-
 
 UpKeyTest ; Test for Up "S" key
 	cmp #KEY_S           ; Atari "S", #62
@@ -1533,7 +1530,7 @@ UpKeyTest ; Test for Up "S" key
 ; No.  key press is not a frog control key.  Replace frog where it came from.
 	lda #INTERNAL_O      ; On Atari we're using "O" as the frog shape.
 	sta (FrogLocation),y ; Return frog to screen
-	jmp DELAY            ; Go to the delay
+	jmp CheckForAnim     ; Done.  Go Do the animation check.
 
 UP1 ; Move the frog a row up.
 	lda #1               ; Represents "10" Since we don't need to add to the ones column.  
@@ -1567,8 +1564,6 @@ CORR2 ; decrement number of rows.
 PLACE
 	lda (FrogLocation),y ; Get the character in the new position.
 	sta LastCharacter    ; Save for later when frog moves.
-	jmp CHECK
-
 
 ; Will the Pet Frog land on the Beach?
 CHECK
