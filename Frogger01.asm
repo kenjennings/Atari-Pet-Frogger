@@ -148,19 +148,24 @@
 	ORG $88
 
 MovesCars       .word $00 ; = Moves Cars
+
 FrogLocation    .word $00 ; = Frog Location
 FrogColumn      .byte $00 ; = Frog X coord
 FrogRow         .word $00 ; = Frog Y row position (on the playfield not counting score lines)
 FrogLastColumn  .byte $00 ; = Frog's last X coordinate
 FrogLastRow     .byte $00 ; = Frog's last Y row position 
 LastCharacter   .byte 0   ; = Last Character Under Frog
+
 FrogSafety      .byte 0   ; = 0 When Frog OK.  !0 == Yer Dead.
 DelayNumber     .byte 0   ; = Delay No. (Hi = Slow, Low = Fast)
+
 FrogsCrossed    .byte 0   ; = Number Of Frogs crossed
 ScoreToAdd      .byte 0   ; = Number To Be Added to Score
+
 NumberOfChars   .byte 0   ; = Number Of Characters Across
 FlaggedHiScore  .byte 0   ; = Flag For Hi Score.  0 = no high score.  $FF = High score.
 NumberOfLives   .byte 0   ; = Is Number Of Lives
+
 LastKeyPressed  .byte 0   ; = Remember last key pressed
 ScreenPointer   .word $00 ; = Pointer to location in screen memory.
 TextPointer     .word $00 ; = Pointer to text message to write.
@@ -1061,6 +1066,7 @@ REPLACE
 
 
 ; ==========================================================================
+; PRINT FROGS AND LIVES
 ; Display the number of frogs that crossed the river.
 ; --------------------------------------------------------------------------
 PrintFrogsAndLives
@@ -1078,7 +1084,7 @@ FINLIV ; Write the number of lives to screen memory
 	lda NumberOfLives ; Get number of lives.
 	clc               ; Add to value for  
 	adc #INTERNAL_0   ; Atari internal code for '0'
-	sta SCREENMEM+39  ; Write to screen. Last position ofz first line.
+	sta SCREENMEM+39  ; Write to screen. Last position of first line.
 
 	rts
 
@@ -1107,32 +1113,36 @@ GetSpeedByWayOfFrogs
 
 
 ; ==========================================================================
-; Display game screen
+; DISPLAY GAME SCREEN
+; Draw everything for game on screen.
+; Scores and lives at the top.
+; 19 lines of beaches and boats.
 ; --------------------------------------------------------------------------
 DisplayGameScreen
 PRINTSC 
 	jsr ClearScreen 
 
-;	ldy #PRINT_TEXT1_1
+	ldy #PRINT_TEXT1 ; Beach and boats...
 	ldx #2
+LoopDisplayBoatsEtc
 PRINT ; Print TEXT1 -  beaches and boats, six times.
 	jsr PrintToScreen
 
+	inx        ; So, is tya, clc, adc #3, tay better?  probably not.
 	inx
 	inx
-	inx
-	iny 
-;	cpy #PRINT_TEXT1_1+6  ; if we printed six times, (18 lines total) then we're done 
-	bcc PRINT             ; Go back and print another set of lines.
 
-; Print TEXT2 - Beach and Credits
-;	ldy #PRINT_TEXT2
-	ldx #21
+	cpx #20                 ; if we printed six times, (18 lines total) then we're done 
+;	cpy #PRINT_TEXT1_1+6   
+;	bcc PRINT               ; Go back and print another set of lines.
+	bcc LoopDisplayBoatsEtc ; Go back and print another set of lines.
+; Print TEXT2 - Beach
+	ldy #PRINT_TEXT2 ; Beach with the frog present
 	jsr PrintToScreen
 
-; Print the Ported By Credit
-;	ldy #PRINT_PORTBYTEXT
-	ldx #24
+; Identify the criminals responsible...
+	ldy #PRINT_CREDIT_TXT
+	ldx #22
 	jsr PrintToScreen 
 
 ; Print the lives and score labels in the top two lines of the screen.
@@ -1146,9 +1156,15 @@ PRINT ; Print TEXT1 -  beaches and boats, six times.
 ; Set the animation timer for the game screen.
 	jsr SetBoatSpeed
 
-	; Reset frog position.
-	ldy #$13           ; Y = #$13/19 (dec) 
-	sty FrogColumn     ; Frog X coord
+	; Reset frog position to origin..
+	ldy #$13            ; Y = #$13/19 (dec) 
+	sty FrogColumn      ; Frog X coord
+	sty FrogLastColummn ; Where the Frog was before update.
+	ldy #20 
+	sty FrogRow
+	sty FrogLastRow
+	lda #INTERNAL_INVSPACE; $80 for inverse blank space.
+	sty 
 
 	rts
 
@@ -1469,82 +1485,48 @@ ContinueGameScreen
 	cmp #SCREEN_GAME
 	bne ContinueTransitionToWin
 
-
-CheckTitleKey
+; ==========================================================================
+; GAME SCREEN - Keyboard section
+; --------------------------------------------------------------------------
 	jsr CheckKey         ; Get a key if timer permits.
 	cmp #$FF             ; Key is pressed?
-	bne ProcessKey       ; Something pressed, Do key input.
+	beq CheckForAnim     ; Nothing pressed, Skip to  input.
 
-DELAY
-	sta LastKeyPressed   ; Save $FF, for no key pressed.
-	lda FrogColumn
-	tya                  ; Whatever Y was, probably $13/19 (dec) again,
-	pha                  ; and push that to the stack.  must be important.
+	sta LastKeyPressed   ; Save key.
 
-	lda AnimateFrames    ; Does the timer allow the boats to move?
-	bne NOTHINGTODOHERE
-;	jsr MOVESC           ; Move the boats around.
-	jsr AnimateBoats     ; Move the boats around.
-
-;	ldx DelayNumber      ; Get the Delay counter.
-
-DEL1
-;	ldy #$FF             ; Reset Y to $FF/255 (dec)
-
-;DEL
-;	dey                  ; decrement Y counter
-;	bne DEL              ; if Y is not 0, then do the decrement again.
-;	dex                  ; decrement delay counter.
-;	bne DEL1             ; If X is not 0, then wind up Y again and start over.
-
-;	pla                  ; Pull original Y value
-;	tay                  ; and return to Y.
-	jmp AUTMVE           ; GOTO AUTOMVE
-
-
-ProcessKey
-KEY1 ; Process keypress
-	pha                  ; A is a keypress, but the value of
-;	lda #$FF             ; CH needs to be cleared.
-;	sta CH
-;	pla                  ; A has the original keypress again.  Continue....
-
-	cmp LastKeyPressed   ; is this key the same as the last key?
-	BEQ DELAY            ; Yes.  So, probably a key repeat, so ignore it and do delay.
-
-	tax                  ; Save that key in X, too.
+	ldy FrogColumn       ; Current X coordinate
 	lda LastCharacter    ; Get the last character (under the frog)
 	sta (FrogLocation),y ; Erase the frog with the last character.
 
+ProcessKey ; Process keypress
+
 ; Test for Left "4" key
-	txa                  ; Restore the key press to A
+	lda LastKeyPressed   ; Restore the key press to A
 	cmp #KEY_4           ; Atari "4", #24
-	bne RIGHT            ; No.  Go test for Right.
+	bne RightKeyTest     ; No.  Go test for Right.
 
 	dey                  ; Move Y to left.
-;	cpy #$FF             ; Did it move off the screen?
-;	bne CORR             ; No.  GOTO CORR (Place frog on screen)
-	bpl CORR             ; Not $FF.  GOTO CORR (Place frog on screen)
-	iny                  ; Is $FF.  Correct by adding 1 to Y.
+	bpl UpdateFrogX      ; Not $FF.  Go place frog on screen)
+	iny                  ; It is $FF.  Correct by adding 1 to Y.
 
-CORR
-	jmp PLACE ; Place frog on screen (?)
+	bpl UpdateFrogX      ; Place frog on screen (?)
 
 
-RIGHT ; Test for Right "6" key
+RightKeyTest ; Test for Right "6" key
 	cmp #KEY_6           ; Atari "6", #27
-	bne UP               ; Not "6" key, so go test for Up.
+	bne UpKeyTest        ; Not "6" key, so go test for Up.
 
 	iny                  ; Move Y to right.
 	cpy #$28             ; Did it move off screen? Position $28/40 (dec)
-	bne CORR1            ; No.  GOTO CORR1  (Place frog on screen)
-	DEY                  ; Yes.  Correct by subtracting 1 from Y.
+	bne UpdateFrogX      ; No.  Go place frog on screen.
+	dey                  ; Yes.  Correct by subtracting 1 from Y.
 
-CORR1    ; couldn't the BNE above just go to CORR in order to jump to PLACE?
+UpdateFrogX              ; couldn't the BNE above just go to CORR in order to jump to PLACE?
+
 	jmp PLACE
 
 
-UP ; Test for Up "S" key
+UpKeyTest ; Test for Up "S" key
 	cmp #KEY_S           ; Atari "S", #62
 	beq UP1              ; Yes, go do UP.
 
@@ -1577,19 +1559,15 @@ CORR2 ; decrement number of rows.
 	jmp FROG             ; No more rows to cross. Update frog reward/stats.
 
 
-; Get the character that will be under the frog.
+
+
+; Draw the frog on screen.
+
+	; Get the character that will be under the frog.
 PLACE
 	lda (FrogLocation),y ; Get the character in the new position.
 	sta LastCharacter    ; Save for later when frog moves.
 	jmp CHECK
-
-
-; Draw the frog on screen.
-PLACE2 
-	lda #INTERNAL_O       ; Atari internal code for "O" is frog.
-	sta (FrogLocation),y ; Save to screen memory to display it.
-	jmp DELAY            ; Slow down game speed.
-	rts
 
 
 ; Will the Pet Frog land on the Beach?
@@ -1606,15 +1584,34 @@ CHECK1
 	bne CHECK2             ; No?   GOTO CHECK2 to die.
 	jmp PLACE2             ; Draw the frog.
 
+	PLACE2 
+	lda #INTERNAL_O       ; Atari internal code for "O" is frog.
+	sta (FrogLocation),y ; Save to screen memory to display it.
+	jmp DELAY            ; Slow down game speed.
+	rts
+
 
 ; Safe locations discarded, so wherever the Frog will land, it is Baaaaad.
 CHECK2
 	jmp YRDD               ; Yer Dead!
 
+	
+	
+	
+	
+	
+; ==========================================================================
+; GAME SCREEN - Screen Animation
+; --------------------------------------------------------------------------
+CheckForAnim
+	lda AnimateFrames    ; Does the timer allow the boats to move?
+	bne NOTHINGTODOHERE
+;	jsr MOVESC           ; Move the boats around.
+	jsr AnimateBoats     ; Move the boats around.
+		jmp AUTMVE           ; GOTO AUTOMVE
 
-	
-	
-	
+;	ldx DelayNumber      ; Get the Delay counter.
+
 
 EndGameScreen
 	lda CurrentScreen   
