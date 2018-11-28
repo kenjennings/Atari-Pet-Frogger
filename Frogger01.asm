@@ -1490,7 +1490,7 @@ ContinueGameScreen
 ; --------------------------------------------------------------------------
 	jsr CheckKey         ; Get a key if timer permits.
 	cmp #$FF             ; Key is pressed?
-	beq CheckForAnim     ; Nothing pressed, Skip to  input.
+	beq CheckForAnim     ; Nothing pressed, Skip the input section.
 
 	sta LastKeyPressed   ; Save key.
 
@@ -1499,14 +1499,14 @@ ContinueGameScreen
 	sta (FrogLocation),y ; Erase the frog with the last character.
 
 ProcessKey ; Process keypress
+	lda LastKeyPressed   ; Restore the key press to A
 
 ; Test for Left "4" key
-	lda LastKeyPressed   ; Restore the key press to A
 	cmp #KEY_4           ; Atari "4", #24
 	bne RightKeyTest     ; No.  Go test for Right.
 
 	dey                  ; Move Y to left.
-	bpl UpdateFrogX      ; Not $FF.  Go place frog on screen)
+	bpl UpdateFrogX      ; Not $FF.  Go place frog on screen.
 	iny                  ; It is $FF.  Correct by adding 1 to Y.
 	bpl UpdateFrogX      ; Place frog on screen (?)
 
@@ -1525,14 +1525,14 @@ UpdateFrogX              ; couldn't the BNE above just go to CORR in order to ju
 
 UpKeyTest ; Test for Up "S" key
 	cmp #KEY_S           ; Atari "S", #62
-	beq UP1              ; Yes, go do UP.
+	beq FrogMoveUp       ; Yes, go do UP.
 
 ; No.  key press is not a frog control key.  Replace frog where it came from.
 	lda #INTERNAL_O      ; On Atari we're using "O" as the frog shape.
 	sta (FrogLocation),y ; Return frog to screen
 	jmp CheckForAnim     ; Done.  Go Do the animation check.
 
-UP1 ; Move the frog a row up.
+FrogMoveUp ; Move the frog a row up.
 	lda #1               ; Represents "10" Since we don't need to add to the ones column.  
 	sta ScoreToAdd       ; Save to add 1
 	ldx #5               ; Offset from start of "00000000" to do the adding.
@@ -1543,14 +1543,12 @@ UP1 ; Move the frog a row up.
 	sec                  ; the address pointing to 
 	sbc #$28             ; the frog.
 	sta FrogLocation
-	bcs CORR2
+	bcs DecrementRows
 	dec FrogLocation + 1 
 
-CORR2 ; decrement number of rows.
-;	sec                  ; ummm.  Does carry affect dec? did not think so.
+DecrementRows ; decrement number of rows.
 	dec FrogRow
-	lda FrogRow     ; If more row are left to cross, then 
-;	cmp #0               
+	lda FrogRow          ; If more row are left to cross, then           
 	bne PLACE            ; redraw frog on screen. 
 
 	jmp FROG             ; No more rows to cross. Update frog reward/stats.
@@ -1582,7 +1580,6 @@ CHECK1
 	PLACE2 
 	lda #INTERNAL_O       ; Atari internal code for "O" is frog.
 	sta (FrogLocation),y ; Save to screen memory to display it.
-	jmp DELAY            ; Slow down game speed.
 	rts
 
 
@@ -1835,11 +1832,12 @@ UP1 ; Move the frog a row up.
 CORR2 ; decrement number of rows.
 ;	sec                  ; ummm.  Does carry affect dec? did not think so.
 	dec FrogRow
-	lda FrogRow     ; If more row are left to cross, then 
-;	cmp #0               
+	lda FrogRow          ; If more rows are left (>0) to cross, then 
 	bne PLACE            ; redraw frog on screen. 
 
-	jmp FROG             ; No more rows to cross. Update frog reward/stats.
+	jmp FrogWins         ; No more rows to cross. Update frog reward/stats.
+
+
 
 
 ; Get the character that will be under the frog.
@@ -1962,24 +1960,26 @@ GOV
 
 
 
-FROG
+FrogWins
 	inc FrogsCrossed     ; Add to frogs successfully crossed the rivers.
 	jsr FILLSC           ; Update the score display
 
-FROG1 ; Print the frog wins text.
+FrogWins1 ; Print the frog wins text.
 ;	ldy #PRINT_FROGTXT
 	jsr PrintToScreen
 
-FROG2  ; More score maintenance.   and delays.
+FrogWins2  ; More score maintenance.   and delays.
 	jsr SCORE
-	jsr PRITSC
-	jsr DELAY1
-	jsr DELAY1
-	jsr DELAY1
-	jsr DELAY1
-	jsr DELAY1
-	jsr DELAY1
+;	jsr PRITSC
+;	jsr DELAY1
+;	jsr DELAY1
+;	jsr DELAY1
+;	jsr DELAY1
+;	jsr DELAY1
+;	jsr DELAY1
 	jmp NEXTFR
+
+
 
 
 FILLSC  ; Setup pointer to screen. then fill screen
