@@ -119,7 +119,7 @@
 ;   chip tune soundtrack unrelated to frogs that has no good reason for
 ;   drowning out the game sound effects.  Boss battles.  Online multi-
 ;   player death matches.  Game Achievements.  In-game micro transaction
-;   payments for upgrades and abilities.
+;   payments for upgrades and abilities.  Yeah, that's the ticket.
 ; --------------------------------------------------------------------------
 
 ; ==========================================================================
@@ -149,7 +149,7 @@
 
 MovesCars       .word $00 ; = Moves Cars
 
-FrogLocation    .word $00 ; = Frog Location
+FrogLocation    .word $00 ; = Pointer to start of Frog's current row in screen memory. 
 FrogColumn      .byte $00 ; = Frog X coord
 FrogRow         .word $00 ; = Frog Y row position (on the playfield not counting score lines)
 FrogLastColumn  .byte $00 ; = Frog's last X coordinate
@@ -907,30 +907,34 @@ ExitMoveCarsPlus120
 
 ; ==========================================================================
 ; AUTO MOVE FROG
-; Process automagical movement on the frog in the boat.
+; Process automagical movement on the frog in the moving boat lines
 ; --------------------------------------------------------------------------
-
 AutoMoveFrog
-AUTMVE
-	ldx FrogRow   ; Get the current row number.
-	lda DATA,x         ; Get the movement flag for the row.
-	cmp #0             ; Is it 0?  Nothing to do.  Bail and go back to keyboard polling..  
-	beq RETURN         ; (ya know, the cmp was not actually necessary.)
-	cmp #$FF           ; is it $ff?  then automatic right move.
-	bne AUTRIG         ; (ya know, could have done  bmi AUTRIG without the cmp).
-	dey                ; Move Frog left one character
-	cpy #0             ; Is it at 0? (Why not check for $FF here (or bmi)?)
-	bne RETURN         ; No.  Bail and go back to keyboard polling.
-	jmp YRDD           ; Yup.  Ran out of river.   Yer Dead!
+	ldx FrogRow          ; Get the current row number.
+	lda DATA,x           ; Get the movement flag for the row.
+	beq ExitAutoMoveFrog ; Is it 0?  Nothing to do.  Bail.
+	bmi AutoFrogRight    ; is it $ff?  then automatic right move.
 
-AUTRIG 
-	iny                ; Move Frog right one character
-	cpy #$28           ; Did it reach the right side ?    $28/40 (dec)
-	bne RETURN         ; No.  Bail and go back to keyboard polling.
-	jmp YRDD           ; Yup.  Ran out of river.   Yer Dead!
+	dey                  ; Move Frog left one character
+;	cpy #0               ; Is it at 0? (Why not check for $FF here (or bmi)?)
+	bpl ExitAutoMoveFrog ; Is it 0 or greater? Then nothing to do.  Bail.
+;	bne ExitAutoMoveFrog ; No.  Bail.
+	inc FrogSafety       ; Yup.  Ran out of river.   Yer Dead!
+	rts
 
-RETURN
-	jmp KEY            ; Return to keyboard polling.
+;	jmp YRDD             ; Yup.  Ran out of river.   Yer Dead!
+
+AutoFrogRight 
+	iny                  ; Move Frog right one character
+	cpy #$28             ; Did it reach the right side ?    $28/40 (dec)
+	bne ExitAutoMoveFrog ; No.  Bail..
+	inc FrogSafety       ; Yup.  Ran out of river.   Yer Dead!
+
+	;	jmp YRDD         ; Yup.  Ran out of river.   Yer Dead!
+
+ExitAutoMoveFrog
+	rts
+;	jmp KEY              ; Return to keyboard polling.
 
 
 
@@ -1349,25 +1353,27 @@ ToggleFlipFlop
 
 
 ; ==========================================================================
-; GAME LOOP 
+; ADD 500 TO SCORE
 ;
-; The main loop for the game...
-; Very vaguely like an event loop across the progressive game states 
-; based on the current mode of the display.
+; Add 500 to score.  (duh.)
 ;
-; Rules:  "Continue" labels for the next screen/event block must  
-;         be called with screen value in A.
+; Uses A, X 
 ; --------------------------------------------------------------------------
+Add500ToScore
+	lda #1               ; Represents "10" Since we don't need to add to the ones column.  
+	sta ScoreToAdd       ; Save to add 1
+	ldx #5               ; Offset from start of "00000000" to do the adding.
+	stx NumberOfChars    ; Position offset in score.
+	jsr SCORE            ; Deal with score update.
 
-GameLoop
+	rts
+
+
 ; ==========================================================================
-; SCREEN START/NEW GAME
+; Event process SCREEN START/NEW GAME
 ; Setup for New Game and do transition to Title screen.
 ; --------------------------------------------------------------------------
-	lda CurrentScreen
-	cmp #SCREEN_START
-	bne ContinueTitleScreen ; SCREEN_START=0?  No? 
-
+EventScreenStart
 	jsr NewGameSetup        ; SCREEN_START, Yes. Setup for a new game.
 
 	jsr DisplayTitleScreen  ; Draw title and game instructions.
@@ -1378,16 +1384,16 @@ GameLoop
 	lda #SCREEN_TITLE ; Next step is operating the title screen input.
 	sta CurrentScreen
 
+	rts
+
+
 ; ==========================================================================
-; TITLE SCREEN
+; Event Process TITLE SCREEN
 ; The activity on the title screen is 
 ; 1) blinking the text and 
 ; 2) waiting for a key press.
 ; --------------------------------------------------------------------------
-ContinueTitleScreen
-	cmp #SCREEN_TITLE
-	bne ContinueTransitionToGame
-
+EventTitleScreen
 	lda AnimateFrames            ; Did animation counter reach 0 ?
 	bne CheckTitleKey            ; no, then is a key pressed? 
 
@@ -1421,26 +1427,23 @@ ProcessTitleScreenInput          ; a key is pressed. Prepare for the screen tran
 	lda #3                       ; Transition Loops from third row through 21st row.
 	sta EventCounter
 
-	lda #0                       ; Mark frog as safe location.
-	sta FrogSafety
-
 	lda #SCREEN_TRANS_GAME       ; Next step is operating the transition animation.
 	sta CurrentScreen   
 
 EndTitleScreen
 	lda CurrentScreen            ; Yeah, redundant to when a key is pressed.
 
+	rts
+
+
 ; ==========================================================================
-; TRANSITION TO GAME SCREEN
+; Event Process TRANSITION TO GAME SCREEN
 ; The Activity in the transition area, based on timer.
 ; 1) Progressively reprint the credits on lines from the top of the screen 
 ; to the bottom.
 ; 2) follow with a blank line to erase the highest line of trailing text.
 ; --------------------------------------------------------------------------
-ContinueTransitionToGame
-	cmp #SCREEN_TRANS_GAME
-	bne ContinueGameScreen
-
+EventTransitionToGame
 	lda AnimateFrames        ; Did animation counter reach 0 ?
 	bne EndTransitionToGame  ; Nope.  Nothing to do.
 	lda #10                  ; yes.  Reset it.
@@ -1458,7 +1461,10 @@ ContinueTransitionToGame
 	cpx #21                 ; reached bottom of screen?
 	bne EndTransitionToGame ; No.  Remain on this transition event next time.
 
-	jsr DisplayGameScreen   ; Draw title and game instructions.; draw game screen.
+	jsr DisplayGameScreen   ; Draw game screen.
+
+	lda #0
+	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
 
 	lda #SCREEN_GAME        ; Yes, change to game screen.
 	sta CurrentScreen
@@ -1466,14 +1472,18 @@ ContinueTransitionToGame
 EndTransitionToGame
 	lda CurrentScreen
 
+	rts
+
+
 ; ==========================================================================
-; GAME SCREEN
+; Event Process GAME SCREEN
 ; Play the game.
-; 1) When the animation timer expires, shift the boat rows.
-; 2) When the input timer allows, get a key.
-; 3) Evaluate frog Movement
-; 3.a) Determine exit to Win screen
-; 3.b) Determine exit to Dead screen.
+; 1) When the input timer allows, get a key.
+; 2) Evaluate frog Movement
+; 2.a) Determine exit to Win screen
+; 2.b) Determine exit to Dead screen.
+; 3) When the animation timer expires, shift the boat rows.
+; 3.a) Determine if frog hits screen border to go to Dead screen.
 ; As a timer based pattern the key input is first.
 ; Keyboard input updates the frog's logical and physical position 
 ; and updates screen memory.
@@ -1481,10 +1491,7 @@ EndTransitionToGame
 ; logically, as the frog moves with the boats and remains static
 ; relative to the boats.
 ; --------------------------------------------------------------------------
-ContinueGameScreen
-	cmp #SCREEN_GAME
-	bne ContinueTransitionToWin
-
+EventGameScreen
 ; ==========================================================================
 ; GAME SCREEN - Keyboard section
 ; --------------------------------------------------------------------------
@@ -1506,9 +1513,11 @@ ProcessKey ; Process keypress
 	bne RightKeyTest     ; No.  Go test for Right.
 
 	dey                  ; Move Y to left.
-	bpl UpdateFrogX      ; Not $FF.  Go place frog on screen.
+;	bpl UpdateFrogX      ; Not $FF.  Go place frog on screen.
+	bpl PlaceNewFrogLocation      ; Not $FF.  Go place frog on screen.
 	iny                  ; It is $FF.  Correct by adding 1 to Y.
-	bpl UpdateFrogX      ; Place frog on screen (?)
+;	bpl UpdateFrogX      ; Place frog on screen (?)
+	bpl PlaceNewFrogLocation      ; Place frog on screen (?)
 
 
 RightKeyTest ; Test for Right "6" key
@@ -1517,11 +1526,13 @@ RightKeyTest ; Test for Right "6" key
 
 	iny                  ; Move Y to right.
 	cpy #$28             ; Did it move off screen? Position $28/40 (dec)
-	bne UpdateFrogX      ; No.  Go place frog on screen.
+;	bne UpdateFrogX      ; No.  Go place frog on screen.
+	bne PlaceNewFrogLocation      ; No.  Go place frog on screen.
 	dey                  ; Yes.  Correct by subtracting 1 from Y.
-
-UpdateFrogX              ; couldn't the BNE above just go to CORR in order to jump to PLACE?
-	jmp PLACE
+	bne PlaceNewFrogLocation      ; Corrected.  Go place frog on screen.
+	
+;UpdateFrogX              ; couldn't the BNE above just go to PlaceNewFrogLocation?
+;	jmp PlaceNewFrogLocation
 
 UpKeyTest ; Test for Up "S" key
 	cmp #KEY_S           ; Atari "S", #62
@@ -1533,11 +1544,7 @@ UpKeyTest ; Test for Up "S" key
 	jmp CheckForAnim     ; Done.  Go Do the animation check.
 
 FrogMoveUp ; Move the frog a row up.
-	lda #1               ; Represents "10" Since we don't need to add to the ones column.  
-	sta ScoreToAdd       ; Save to add 1
-	ldx #5               ; Offset from start of "00000000" to do the adding.
-	stx NumberOfChars    ; Position offset in score.
-	jsr SCORE            ; Deal with score update.
+	jsr Add500ToScore
 
 	lda FrogLocation     ; subtract $28/40 (dec) from 
 	sec                  ; the address pointing to 
@@ -1546,50 +1553,51 @@ FrogMoveUp ; Move the frog a row up.
 	bcs DecrementRows
 	dec FrogLocation + 1 
 
-DecrementRows ; decrement number of rows.
+DecrementRows                ; decrement number of rows.
 	dec FrogRow
-	lda FrogRow          ; If more row are left to cross, then           
-	bne PLACE            ; redraw frog on screen. 
+	bne PlaceNewFrogLocation ; If row greater than 0 then redraw frog on screen. 
 
-	jmp FROG             ; No more rows to cross. Update frog reward/stats.
-
+	beq DoSetupFrogWins    ; No more rows to cross. Update to frog Wins!
 
 
-
-; Draw the frog on screen.
 
 	; Get the character that will be under the frog.
-PLACE
+PlaceNewFrogLocation
 	lda (FrogLocation),y ; Get the character in the new position.
 	sta LastCharacter    ; Save for later when frog moves.
 
 ; Will the Pet Frog land on the Beach?
-CHECK
-	lda LastCharacter      ; Is the character the beach?
-	cmp #INTERNAL_INVSPACE ; Atari uses inverse space for beach
-	bne CHECK1             ; not the beach?  Goto CHECK1
-	jmp PLACE2             ; Draw the frog.
-
+	cmp #INTERNAL_INVSPACE  ; Atari uses inverse space for beach
+	beq ReplaceFrogOnScreen ; The beach is safe. Draw the frog.
 
 ; Will the Pet Frog land in the boat?
-CHECK1
-	cmp #INTERNAL_BALL     ; Atari uses ball graphics, ctrl-t
-	bne CHECK2             ; No?   GOTO CHECK2 to die.
-	jmp PLACE2             ; Draw the frog.
+CheckBoatLanding
+	cmp #INTERNAL_BALL      ; Atari uses ball graphics, ctrl-t
+	bne DoSetupForYerDead   ; No?   GOTO DoSetupForYerDead to die.
+;	jmp ReplaceFrogOnScreen ; Draw the frog.
 
-	PLACE2 
+ReplaceFrogOnScreen
+PLACE2 
 	lda #INTERNAL_O       ; Atari internal code for "O" is frog.
-	sta (FrogLocation),y ; Save to screen memory to display it.
-	rts
+	sta (FrogLocation),y  ; Save to screen memory to display it.
+	bne CheckForAnim      ; Frog movement is done.  Go do screen animation.
 
 
 ; Safe locations discarded, so wherever the Frog will land, it is Baaaaad.
-CHECK2
-	jmp YRDD               ; Yer Dead!
+DoSetupForYerDead
+;CHECK2
+	clc
+	bcc SetupTransitionYerDead
 
-	
-	
-	
+DoSetupFrogWins
+; Safe location at the far beach.  the Frog is saved.
+DoSetupForFrogWins
+;CHECK2
+	clc
+	bcc SetupTransitionWins
+
+ExitEventGameScreen
+	rts
 	
 	
 ; ==========================================================================
@@ -1597,16 +1605,89 @@ CHECK2
 ; --------------------------------------------------------------------------
 CheckForAnim
 	lda AnimateFrames    ; Does the timer allow the boats to move?
-	bne NOTHINGTODOHERE
+	bne EndGameScreen    ; Nothing at this time. Exit.
 ;	jsr MOVESC           ; Move the boats around.
 	jsr AnimateBoats     ; Move the boats around.
-		jmp AUTMVE           ; GOTO AUTOMVE
+	jsr AutoMoveFrog     ; GOTO AUTOMVE
 
 ;	ldx DelayNumber      ; Get the Delay counter.
 
-
 EndGameScreen
-	lda CurrentScreen   
+	lda CurrentScreen  
+
+	rts
+
+
+; ==========================================================================
+; GAME LOOP 
+;
+; The main loop for the game... said Capt Obvious.
+; Very vaguely like an event loop or state loop across the progressive 
+; game states which are (more or less) based on the current mode of 
+; the display.
+;
+; Rules:  "Continue" labels for the next screen/event block must  
+;         be called with screen value in A.
+;         Also, each Event routine should end by lda CurrentScreen.
+; --------------------------------------------------------------------------
+
+GameLoop
+; ==========================================================================
+; SCREEN START/NEW GAME
+; Setup for New Game and do transition to Title screen.
+; --------------------------------------------------------------------------
+	lda CurrentScreen
+	cmp #SCREEN_START
+	bne ContinueTitleScreen ; SCREEN_START=0?  No? 
+
+	jsr EventScreenStart
+
+; ==========================================================================
+; TITLE SCREEN
+; The activity on the title screen is 
+; 1) blinking the text and 
+; 2) waiting for a key press.
+; --------------------------------------------------------------------------
+ContinueTitleScreen
+	cmp #SCREEN_TITLE
+	bne ContinueTransitionToGame
+
+	jsr EventTitleScreen
+
+; ==========================================================================
+; TRANSITION TO GAME SCREEN
+; The Activity in the transition area, based on timer.
+; 1) Progressively reprint the credits on lines from the top of the screen 
+; to the bottom.
+; 2) follow with a blank line to erase the highest line of trailing text.
+; --------------------------------------------------------------------------
+ContinueTransitionToGame
+	cmp #SCREEN_TRANS_GAME
+	bne ContinueGameScreen
+
+	jsr EventTransitionToGame
+
+; ==========================================================================
+; GAME SCREEN
+; Play the game.
+; 1) When the input timer allows, get a key.
+; 2) Evaluate frog Movement
+; 2.a) Determine exit to Win screen
+; 2.b) Determine exit to Dead screen.
+; 3) When the animation timer expires, shift the boat rows.
+; 3.a) Determine if frog hits screen border to go to Dead screen.
+; As a timer based pattern the key input is first.
+; Keyboard input updates the frog's logical and physical position 
+; and updates screen memory.
+; The animation update forces an automatic movement of the frog 
+; logically, as the frog moves with the boats and remains static
+; relative to the boats.
+; --------------------------------------------------------------------------
+ContinueGameScreen
+	cmp #SCREEN_GAME
+	bne ContinueTransitionToWin
+
+	jsr EventGameScreen
 
 ; ==========================================================================
 ; TRANSITION TO WIN SCREEN
@@ -1618,7 +1699,7 @@ ContinueTransitionToWin
 	cmp #SCREEN_TRANS_WIN
 	bne ContinueWinScreen
 
-
+	jsr EventTransitionToWin
 
 EndTransitionToWin
 	lda CurrentScreen  
@@ -1632,9 +1713,9 @@ EndTransitionToWin
 ContinueWinScreen
 	cmp #SCREEN_WIN
 	bne ContinueTransitionToDead
-	
-	
-	
+
+	jsr EventWinScreen
+
 EndWinScreen
 	lda CurrentScreen 
 
@@ -1648,7 +1729,7 @@ ContinueTransitionToDead
 	cmp #SCREEN_TRANS_DEAD
 	bne ContinueDeadScreen
 
-
+	jsr EventTransitionToDead
 
 EndTransitionToDead
 	lda CurrentScreen  
@@ -1664,9 +1745,9 @@ EndTransitionToDead
 ContinueDeadScreen
 	cmp #SCREEN_DEAD
 	bne ContinueTransitionToOver
-	
-	
-	
+
+	jsr EventDeadScreen
+
 EndDeadScreen
 	lda CurrentScreen 
 
@@ -1680,7 +1761,7 @@ ContinueTransitionToOver
 	cmp #SCREEN_TRANS_OVER
 	bne ContinueOverScreen
 
-
+	jsr Event TransitionGameOver
 
 EndTransitionToOver
 	lda CurrentScreen  
@@ -1694,9 +1775,9 @@ EndTransitionToOver
 ContinueOverScreen
 	cmp #SCREEN_OVER
 	bne ContinueTransitionToTitle
-	
-	
-	
+
+	jsr EventOverScreen
+
 EndOverScreen
 	lda CurrentScreen 
 
@@ -1710,7 +1791,7 @@ ContinueTransitionToTitle
 	cmp #SCREEN_TRANS_TITLE
 	bne EndGameLoop
 
-
+	jsr EventTransitionToTitle
 
 EndTransitionToTitle
 	lda CurrentScreen  
@@ -1719,7 +1800,7 @@ EndTransitionToTitle
 ; END OF GAME EVENT LOOP
 ; --------------------------------------------------------------------------
 EndGameLoop
-	jsr TimerLoop    ; Wait for end of frame and update timers.
+	jsr TimerLoop    ; Wait for end of frame and update the timers.
 
 	jmp GameLoop
 
@@ -1762,7 +1843,7 @@ DEL
 
 	pla                ; Pull original Y value
 	tay                ; and return to Y.
-	jmp AUTMVE         ; GOTO AUTOMVE
+	jmp AutoMoveFrog         ; GOTO AUTOMVE
 
 
 KEY1 ; Process keypress
@@ -1893,7 +1974,7 @@ DATA
 	brk
 
 ; Process automagical movement on the frog in the boat.
-AUTMVE
+AutoMoveFrog
 	ldx FrogRow   ; Get the current row number.
 	lda DATA,x         ; Get the movement flag for the row.
 	cmp #0             ; Is it 0?  Nothing to do.  Bail and go back to keyboard polling..  
