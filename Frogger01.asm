@@ -735,34 +735,59 @@ DisplayTitleScreen
 INSTR 
 	jsr ClearScreen 
 
-	ldy #PRINT_TITLE_TXT ; title 
 	ldx #0
-	jsr PrintToScreen
 
-	ldy #PRINT_CREDIT_TXT ; culprits responsible
-	ldx #2
-	jsr PrintToScreen
+; Since there are multiple, repeat patterns of the same thing, 
+; wrap it in a loop and read driving data from a table.
 
-	ldy #PRINT_INST_TXT1  ; directions.
-	ldx #6
+LoopDisplayTitleText
+	ldy TITLE_PRINT_LIST,x
+	txa
+	pha
+	lda TITLE_PRINT_ROWS,x
+	tax
 	jsr PrintToScreen
+	pha
+	tax
+	inx
+	cpx #6
+	bne LoopDisplayTitleText
+	
+;	ldy #PRINT_TITLE_TXT ; title 
+;	ldx #0
+;	jsr PrintToScreen
 
-	ldy #PRINT_INST_TXT2 ; scoring values
-	ldx #15
-	jsr PrintToScreen
+;	ldy #PRINT_CREDIT_TXT ; culprits responsible
+;	ldx #2
+;	jsr PrintToScreen
 
-	ldy #PRINT_INST_TXT3 ; input controls
-	ldx #19
-	jsr PrintToScreen
+;	ldy #PRINT_INST_TXT1  ; directions.
+;	ldx #6
+;	jsr PrintToScreen
 
-	ldy #PRINT_INST_TXT4_INV  ; prompt to press a key to start.
-	ldx #23
-	jsr PrintToScreen
+;	ldy #PRINT_INST_TXT2 ; scoring values
+;	ldx #15
+;	jsr PrintToScreen
+
+;	ldy #PRINT_INST_TXT3 ; input controls
+;	ldx #19
+;	jsr PrintToScreen
+
+;	ldy #PRINT_INST_TXT4_INV  ; prompt to press a key to start.
+;	ldx #23
+;	jsr PrintToScreen
 
 	lda #1 ; default condition of blinking prompt is inverse
 	sta ToggleState
 
 	rts
+
+TITLE_PRINT_LIST
+	.byte PRINT_TITLE_TXT,PRINT_CREDIT_TXT,PRINT_INST_TXT1
+	.byte PRINT_INST_TXT2,PRINT_INST_TXT3,PRINT_INST_TXT4_INV
+
+TITLE_PRINT_ROWS
+	.byte 0,2,6,15,19,23
 
 
 ; ==========================================================================
@@ -937,9 +962,6 @@ ExitAutoMoveFrog
 ;	jmp KEY              ; Return to keyboard polling.
 
 
-
-
-
 ; ==========================================================================
 ; ANIMATE BOATS
 ; Move the lines of boats around either left or right.
@@ -949,16 +971,9 @@ ExitAutoMoveFrog
 ; --------------------------------------------------------------------------
 AnimateBoats
 MOVESC
+	ldx #6            ; Loop 3 to 18 step 3 -- 6 = 3 times 2 for size of word in SCREEN_ADDR
+
 	; FIRST PART -- Set up for Right Shift... 
-	; MovedCars is a word set to $8078...
-	; which is SCREENMEM + $78 (or 120 decimal [i.e. 3rd line of text])
-;	lda #<[SCREENMEM+$78] ; low byte 
-;	sta MovesCars
-;	lda #>[SCREENMEM+$78] ; high byte
-;	sta MovesCars + 1
-
-	ldx #6            ; Loop 3 to 18 step 3 -- times 2 for size of word in SCREEN_ADDR
-
 RightShiftRow
 	lda SCREEN_ADDR,x ; Get address of this row in X from the screen memeory lookup.
 	sta MovesCars
@@ -972,7 +987,7 @@ RightShiftRow
 	pha               ; Save the character at the end to move to position 0.
 	dey               ; now at offset +38 (dec)
 
-MOVE ; Shift text lines to the right.
+MoveToRight ; Shift text lines to the right.
 	lda (MovesCars),y ; Read byte from screen (start +38)
 	iny
 	sta (MovesCars),y ; Store byte to screen at next position (start +39)
@@ -980,28 +995,14 @@ MOVE ; Shift text lines to the right.
 	dey               ; Back up to the original read position.
 	dey               ; Backup to previous position.
 
-	bpl MOVE          ; Backed up from 0 to FF? No. Do the shift again.
+	bpl MoveToRight   ; Backed up from 0 to FF? No. Do the shift again.
 
 	; Copy character at end of line to the start of the line.
 	pla               ; Get character that was at the end of the line.
 	ldy #$00          ; Offset 0 == start of line
 	sta (MovesCars),y ; Save it at start of line.
 
-
-
-	; Move to the next river/boat line to shift to the right 3 lines lower.
-;	jsr MoveCarsPlus120
-
-;	dex               ; Track a line is done. All six done?
-;	bne RightShiftRow ; No.  Go do right shift on another line.
-
 	; SECOND PART -- Setup for Left Shift...
-	; MovedCars is a word to set to $80A0...
-	; which is SCREENMEM + $A0 (or 160 decimal [i.e. 4th line of text])
-;	lda #>[SCREENMEM+$A0] ; high byte
-;	sta MovesCars + 1 ; 
-;	lda #<[SCREENMEM+$A0] ; low byte 
-;	sta MovesCars
 	lda SCREEN_ADDR,x
 	sta MovesCars
 	inx
@@ -1009,16 +1010,12 @@ MOVE ; Shift text lines to the right.
 	sta MovesCars+1
 	inx 
 
-;	ldx #6            ; Count number of rows to shift
-
-LeftShiftRow
 	ldy #$00          ; Character position, start at +0 (dec)
-
 	lda (MovesCars),y ; Read byte from screen (start +0)
 	pha               ; Save to move to position +39.
 	iny               ; now at offset +1 (dec)
 
-MOVE1 ; Shift text lines to the left.
+MoveToLeft ; Shift text lines to the left.
 	lda (MovesCars),y ; Get byte from screen (start +1)
 	dey
 	sta (MovesCars),y ; Store byte at previous position (start +0)
@@ -1027,7 +1024,7 @@ MOVE1 ; Shift text lines to the left.
 	iny               ; Forward to the next read position. (start +2)
 
 	cpy #$27          ; Reached position $27/39 (dec) (end of line)?
-	bne MOVE1         ; No.  Do the shift again.
+	bne MoveToLeft    ; No.  Do the shift again.
 
 	; Copy character at start of line to the end of the line.
 	pla               ; Get character that was at the end of the line.
@@ -1037,14 +1034,8 @@ MOVE1 ; Shift text lines to the left.
 	inx ; skip the beach line
 	inx
 
-	cpx #40 ; 21st line (20 base 0) times 2  
+	cpx #40 ; 21st line (20 from base 0) times 2  
 	bcc RightShiftRow ; Continue to loop, right, left, right, left
-
-;	; Move to the next river/boat line to shift to the left 3 lines lower.
-;	jsr MoveCarsPlus120
-
-;	dex               ; Track a line is done.  All six done?
-;	bne LeftShiftRow  ; No.  Go do left shift on another line.
 
 	jsr CopyScoreToScreen ; Finish up by updating score display.
 
