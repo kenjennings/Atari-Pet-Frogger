@@ -695,34 +695,35 @@ SCREEN_ADDR ; Direct address lookup for each row of screen memory.
 
 ; ==========================================================================
 ; Clear the screen.  
-; 25 lines of text is divisible by 5 lines, and 5 lines of text is 200 bytes,
-; so the code will loop and clear in multiple, 5 line sections at the same
-; time.
+; 25 lines of text is divisible by 5 lines, and 5 lines of text is 
+; 200 bytes, so the code will loop and clear in multiple, 5 line 
+; sections at the same time.
+;
+; Indexing to 200 means bpl/bmi can't be used to identify continuing 
+; or ending condition of the loop.  Therefore, the loop counts 200 to 
+; 1 and uses value 0 for end of loop.  This means the base address for 
+; the indexing must be one less (-1) from the intended target base.
 ;
 ; Used by code:
-; A = 0 for blank sopace.
-; Y = used to pull values from the tables. 
+; A = 0 for blank space.
+; X = index, 200 to 1
 ; --------------------------------------------------------------------------
 ClearScreen
-	pha   ; Save A and Y, so the caller doesn't need to.
-	tya
-	pha
+	mSaveRegAX ; Save A and X, so the caller doesn't need to.
 
-	lda #INTERNAL_SPACE  ; Blank Space byte.
-	ldy #200             ; Loop 200 to 1, end when 0
+	lda #INTERNAL_SPACE  ; Blank Space byte. (known to be 0)
+	ldx #200             ; Loop 200 to 1, end when 0
 
 ClearScreenLoop
-	sta SCREENMEM-1, y    ; 0   to 199 
-	sta SCREENMEM+200-1,y ; 200 to 399
-	sta SCREENMEM+400-1,y ; 400 to 599
-	sta SCREENMEM+600-1,y ; 600 to 799
-	sta SCREENMEM+800-1,y ; 800 to 999
-	dey
+	sta SCREENMEM-1, x    ; 0   to 199 
+	sta SCREENMEM+200-1,x ; 200 to 399
+	sta SCREENMEM+400-1,x ; 400 to 599
+	sta SCREENMEM+600-1,x ; 600 to 799
+	sta SCREENMEM+800-1,x ; 800 to 999
+	dex
 	bne ClearScreenLoop
 
-	pla   ; Restore Y and A.
-	tay
-	pla
+	mRestoreRegAX ; Restore X and A
 
 	rts
 
@@ -737,8 +738,12 @@ INSTR
 
 	ldx #0
 
+; An individual setup and call to PrintToScreen is 7 bytes which 
+; makes explicit setup for six calls for screen writing 42 bytes long.
 ; Since there are multiple, repeat patterns of the same thing, 
 ; wrap it in a loop and read driving data from a table.
+; The ldx for setup, this code in the loop, plus the actual data
+; in the driving tables is 2+19+12 = 33 bytes long.
 
 LoopDisplayTitleText
 	ldy TITLE_PRINT_LIST,x
@@ -752,30 +757,6 @@ LoopDisplayTitleText
 	inx
 	cpx #6
 	bne LoopDisplayTitleText
-	
-;	ldy #PRINT_TITLE_TXT ; title 
-;	ldx #0
-;	jsr PrintToScreen
-
-;	ldy #PRINT_CREDIT_TXT ; culprits responsible
-;	ldx #2
-;	jsr PrintToScreen
-
-;	ldy #PRINT_INST_TXT1  ; directions.
-;	ldx #6
-;	jsr PrintToScreen
-
-;	ldy #PRINT_INST_TXT2 ; scoring values
-;	ldx #15
-;	jsr PrintToScreen
-
-;	ldy #PRINT_INST_TXT3 ; input controls
-;	ldx #19
-;	jsr PrintToScreen
-
-;	ldy #PRINT_INST_TXT4_INV  ; prompt to press a key to start.
-;	ldx #23
-;	jsr PrintToScreen
 
 	lda #1 ; default condition of blinking prompt is inverse
 	sta ToggleState
@@ -819,7 +800,7 @@ LoopPrintBoats
 	bne LoopPrintBoats      ; No, go back to print another set of lines.
 
 	ldy #PRINT_TEXT2        ; Print TEXT2 - last Beach with the frog
-;	ldx #20
+;	ldx #20                 ; it already is 20.
 	jsr PrintToScreen
 
 	ldy #PRINT_CREDIT_TXT   ; Identify the culprits responsible
@@ -846,11 +827,7 @@ PrintToScreen
 	cpy #PRINT_END
 	bcs ExitPrintToScreen  ; Greater than or equal to END marker, so exit.
 
-	pha   ; Save A and Y and X, so the caller doesn't need to.
-	tya
-	pha
-	txa
-	pha
+	mSaveRegAYX            ; Save A and Y and X, so the caller doesn't need to.
 
 	asl                    ; multiply row number by 2 for address lookup.
 	tax                    ; use as index.
@@ -902,11 +879,7 @@ DoScreenPointer            ; inc screen pointer.
 	bne PrintToScreenLoop  ; The inc above must reasonably be non-zero.
 
 EndPrintToScreen
-	pla  ; Restore X, Y and A
-	tax
-	pla
-	tay
-	pla
+	mRegRestoreAYX         ; Restore X, Y and A
 
 ExitPrintToScreen
 	rts
@@ -933,33 +906,44 @@ ExitMoveCarsPlus120
 ; ==========================================================================
 ; AUTO MOVE FROG
 ; Process automagical movement on the frog in the moving boat lines
+;
+; Data to drive AutoMoveFrog routine.
+; Byte value indicates direction of row movement.
+; 0   = Beach line, no movement.
+; 1   = first boat/river row, move right
+; 255 = second boat/river row, move left.
 ; --------------------------------------------------------------------------
 AutoMoveFrog
-	ldx FrogRow          ; Get the current row number.
-	lda DATA,x           ; Get the movement flag for the row.
-	beq ExitAutoMoveFrog ; Is it 0?  Nothing to do.  Bail.
-	bmi AutoFrogRight    ; is it $ff?  then automatic right move.
+	ldx FrogRow           ; Get the current row number.
+	lda MovingRowStates,x ; Get the movement flag for the row.
+	beq ExitAutoMoveFrog  ; Is it 0?  Nothing to do.  Bail.
+	bmi AutoFrogRight     ; is it $ff?  then automatic right move.
 
-	dey                  ; Move Frog left one character
-;	cpy #0               ; Is it at 0? (Why not check for $FF here (or bmi)?)
-	bpl ExitAutoMoveFrog ; Is it 0 or greater? Then nothing to do.  Bail.
-;	bne ExitAutoMoveFrog ; No.  Bail.
-	inc FrogSafety       ; Yup.  Ran out of river.   Yer Dead!
+	dey                   ; Move Frog left one character
+;	cpy #0                ; Is it at 0? (Why not check for $FF here (or bmi)?)
+	bpl ExitAutoMoveFrog  ; Is it 0 or greater? Then nothing to do.  Bail.
+;	bne ExitAutoMoveFrog  ; No.  Bail.
+	inc FrogSafety        ; Yup.  Ran out of river.   Yer Dead!
 	rts
 
-;	jmp YRDD             ; Yup.  Ran out of river.   Yer Dead!
+;	jmp YRDD              ; Yup.  Ran out of river.   Yer Dead!
 
 AutoFrogRight 
-	iny                  ; Move Frog right one character
-	cpy #$28             ; Did it reach the right side ?    $28/40 (dec)
-	bne ExitAutoMoveFrog ; No.  Bail..
-	inc FrogSafety       ; Yup.  Ran out of river.   Yer Dead!
+	iny                   ; Move Frog right one character
+	cpy #$28              ; Did it reach the right side ?    $28/40 (dec)
+	bne ExitAutoMoveFrog  ; No.  Bail..
+	inc FrogSafety        ; Yup.  Ran out of river.   Yer Dead!
 
-	;	jmp YRDD         ; Yup.  Ran out of river.   Yer Dead!
+	;	jmp YRDD          ; Yup.  Ran out of river.   Yer Dead!
 
 ExitAutoMoveFrog
 	rts
-;	jmp KEY              ; Return to keyboard polling.
+;	jmp KEY               ; Return to keyboard polling.
+
+MovingRowStates           ; Six of Beach (static, 0), Left (1), Right (FF) dircetions.
+	.rept 6
+		.BYTE 0, 1, $FF
+	.endr
 
 
 ; ==========================================================================
@@ -1947,22 +1931,7 @@ CHECK2
 	jmp YRDD               ; Yer Dead!
 
 
-; ==========================================================================
-; Data to drive AUTOMVE routine.
-; Byte value indicates direction of row movement.
-; 0   = Beach line, no movement.
-; 1   = first boat/river row, move right
-; 255 = second boat/river row, move left.
-; --------------------------------------------------------------------------
-DATA
-	.BYTE 0, 1, 255
-	.BYTE 0, 1, 255
-	.BYTE 0, 1, 255
-	.BYTE 0, 1, 255
-	.BYTE 0, 1, 255
-	.BYTE 0, 1, 255
 
-	brk
 
 ; Process automagical movement on the frog in the boat.
 AutoMoveFrog
