@@ -26,7 +26,7 @@
 ;   ported the timing values in the delays are altered to scale the game
 ;   speed more like the original on the Pet.
 ; --------------------------------------------------------------------------
-; Version 01.  
+; Version 01.  December 2018
 ; Atari-specific optimizations, though limited.  Most of the program 
 ; still could assemble on a Pet (with changes for values and registers).
 ; The only doubt I have is monitoring for the start of a frame where the 
@@ -317,7 +317,7 @@ SCREEN_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
 	.by "** Thanks to the Word (John 1:1), Creator of heaven and earth, and "
 	.by "the semiconductor chemistry and physics which makes all this fun possible. ** "
 	.by "Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. ** "
-	.by "Atari port by Ken Jennings, November 2018. Version 01. "
+	.by "Atari port by Ken Jennings, December 2018. Version 01. "
 	.by "IOCB Printing removed. Everything is direct writes to screen RAM. **" 
 	.by "Code reworked into timer/event loop organization. **"
 
@@ -406,7 +406,7 @@ SCREEN_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
 ; 2  |              --- -------               | TITLE
 ; 3  |     (c) November 1983 by DalesOft      | CREDIT
 ; 4  |        Written by John C Dale          | CREDIT
-; 5  |Atari V01 port by Ken Jennings, Nov 2018| CREDIT
+; 5  |Atari V01 port by Ken Jennings, Dec 2018| CREDIT
 ; 6  |                                        |
 ; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
 ; 8  |frog legs fast food franchise! But, the | INSTXT_1
@@ -458,7 +458,7 @@ SCREEN_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
 ; 22 |                                        |
 ; 23 |     (c) November 1983 by DalesOft      | CREDIT
 ; 24 |        Written by John C Dale          | CREDIT
-; 25 |Atari V01 port by Ken Jennings, Nov 2018| CREDIT
+; 25 |Atari V01 port by Ken Jennings, Dec 2018| CREDIT
 ;    +----------------------------------------+
 
 
@@ -484,10 +484,10 @@ TITLE_TXT ; Instructions/Title text.
 CREDIT_TXT ; The perpetrators identified...
 ; 3  |     (c) November 1983 by DalesOft      | CREDIT
 ; 4  |        Written by John C Dale          | CREDIT
-; 5  |Atari V01 port by Ken Jennings, Nov 2018| CREDIT
+; 5  |Atari V01 port by Ken Jennings, Dec 2018| CREDIT
 	.sb "     (c) November 1983 by Dales" ATASCII_HEART "ft      "
 	.sb "        Written by John C. Dale         "
-	.sb "Atari V01 port by Ken Jennings, Nov 2018"
+	.sb "Atari V01 port by Ken Jennings, Dec 2018"
 
 INST_TXT1 ; Basic instructions...
 ; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
@@ -949,9 +949,13 @@ MOVING_ROW_STATES
 ; ==========================================================================
 ; ANIMATE BOATS
 ; Move the lines of boats around either left or right.
-; Changed logic to move lines from the top to the bottom rather than 
-; the original code which moves all the rows going right, then all the 
-; rows going left
+; Changed logic for moving lines.  The original code moved all the 
+; rows going right then all the rows going left.
+; This version does each line in order from the top to the bottom of
+; the screen.  This is done on the chance that the code is racing the 
+; screen rendering and so we don't want main line execution to find 
+; a pattern where the code is updating a text line that is being  
+; displayed and we end up with tearing animation. 
 ; --------------------------------------------------------------------------
 AnimateBoats
 MOVESC
@@ -1052,18 +1056,18 @@ PrintFrogsAndLives
 PRINT2
 	lda #INTERNAL_O     ; On Atari we're using "O" as the frog shape.
 	ldx FrogsCrossed    ; number of times successfully crossed the rivers.
-	beq FINLIV          ; then nothing to display. Skip to Lives.
+	beq WriteLives      ; then nothing to display. Skip to do lives.
 
-SAVED_FROGGIES
+SavedFroggies 
 	sta SCREENMEM+46,x  ; Write to screen. (second line, 16th position)
 	dex                 ; Decrement number of frogs.
-	bne SAVED_FROGGIES  ; then go back and display the next frog counter.
+	bne SavedFroggies   ; then go back and display the next frog counter.
 
-FINLIV ; Write the number of lives to screen memory
-	lda NumberOfLives ; Get number of lives.
-	clc               ; Add to value for  
-	adc #INTERNAL_0   ; Atari internal code for '0'
-	sta SCREENMEM+39  ; Write to screen. Last position of first line.
+WriteLives
+	lda NumberOfLives   ; Get number of lives.
+	clc                 ; Add to value for  
+	adc #INTERNAL_0     ; Atari internal code for '0'
+	sta SCREENMEM+39    ; Write to screen. Last position of first line.
 
 	rts
 
@@ -1115,6 +1119,7 @@ PRINT ; Print TEXT1 -  beaches and boats, six times.
 ;	cpy #PRINT_TEXT1_1+6   
 ;	bcc PRINT               ; Go back and print another set of lines.
 	bcc LoopDisplayBoatsEtc ; Go back and print another set of lines.
+
 ; Print TEXT2 - Beach
 	ldy #PRINT_TEXT2 ; Beach with the frog present
 	jsr PrintToScreen
@@ -1335,11 +1340,11 @@ ToggleFlipFlop
 ; Uses A, X 
 ; --------------------------------------------------------------------------
 Add500ToScore
-	lda #5               ; Represents "10" Since we don't need to add to the ones column.  
-	sta ScoreToAdd       ; Save to add 1
-	ldx #5               ; Offset from start of "00000*00" to do the adding.
-	stx NumberOfChars    ; Position offset in score.
-	jsr SCORE            ; Deal with score update.
+	lda #5            ; Represents "500" Since we don't need to add to the tens and ones columns.  
+	sta ScoreToAdd    ; Save to add 1
+	ldx #5            ; Offset from start of "00000*00" to do the adding.
+	stx NumberOfChars ; Position offset in score.
+	jsr AddToScore    ; Deal with score update.
 
 	rts
 
@@ -1352,11 +1357,49 @@ Add500ToScore
 ; Uses A, X 
 ; --------------------------------------------------------------------------
 Add10ToScore
-	lda #1               ; Represents "10" Since we don't need to add to the ones column.  
-	sta ScoreToAdd       ; Save to add 1
-	ldx #6               ; Offset from start of "000000*0" to do the adding.
-	stx NumberOfChars    ; Position offset in score.
-	jsr SCORE            ; Deal with score update.
+	lda #1            ; Represents "10" Since we don't need to add to the ones column.  
+	sta ScoreToAdd    ; Save to add 1
+	ldx #6            ; Offset from start of "000000*0" to do the adding.
+	stx NumberOfChars ; Position offset in score.
+	jsr AddToScore    ; Deal with score update.
+
+	rts
+
+; ==========================================================================
+; ADD TO SCORE
+; 
+; Add ScoreToAdd to current score at position NumberOfChars relative
+; to the first digit of the score string.
+; 
+; A, Y, X Registers are preserved.
+; --------------------------------------------------------------------------
+AddToScore
+SCORE
+	mRegSaveAYX          ; Save A, X, and Y.
+
+	ldx NumberOfChars    ; index into "00000000" to add score.
+	lda ScoreToAdd       ; value to add to the score
+	clc
+	adc MyScore,x
+	sta MyScore,x
+
+EvaluateCarry            ; (re)evaluate if carry occurred for the current position.
+	lda MyScore,x
+	cmp #[INTERNAL_0+10] ; Did math carry past the "9"?
+	bcc PULL             ; if it does not carry , then go to exit.
+
+; The score carried past "9", so it must be adjusted and
+; the next/greater position is added.
+UPDATE
+	lda #INTERNAL_0      ; Atari internal code for "0".  
+	sta MyScore,x        ; Reset current position to "0"
+	dex                  ; Go to previous position in score
+	inc MyScore,x        ; Add 1 to the next digit.
+	bne EvaluateCarry    ; This cannot go from $FF to 0, so it must be not zero.
+;	jmp SCORE1           ; go (re)evaluate carry for the current position.
+
+PULL                     ; All done.
+	mRegRestoreAYX       ; Restore Y, X, and A
 
 	rts
 
@@ -1398,6 +1441,7 @@ DecrementRows            ; decrement number of rows.
 ; --------------------------------------------------------------------------
 SetupTransitionToWin
 	jsr Add500ToScore
+
 	lda #10                 ; Animation moving speed.
 	jsr ResetTimers
 
