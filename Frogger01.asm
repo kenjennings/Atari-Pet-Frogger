@@ -200,6 +200,11 @@ ToggleState     .byte 0   ; = 0, 1, flipper to drive a blinking thing.
 ; Another event value.  Use for counting things for each pass of a screen/event.
 EventCounter    .byte 0
 
+; Another event value.  Use for multiple sequential actions in an 
+; Event/Screen, because I got too lazy to chain a new event into 
+; sequences.
+EventStage      .byte 0
+
 ; Game Score and High Score.
 MyScore .by $0 $0 $0 $0 $0 $0 $0 $0 
 HiScore .by $0 $0 $0 $0 $0 $0 $0 $0 
@@ -591,7 +596,7 @@ INSTXT_4
 	.sb +$80 "     Hit any key to start the game.     "
 
 
-
+FROG_SAVE_GFX
 ; Graphics chars design, SAVED!
 ; |  |**|**|  |  | *|* |  | *|* | *|* | *|**|**|* | *|**|* |  |  |**|
 ; | *|* |  |  |  |**|**|  | *|* | *|* | *|* |  |  | *|* |**|  |  |**|
@@ -610,6 +615,7 @@ INSTXT_4
 	.by $0,$0,$0,$0,$0,$0,$0,$0,$0,I_S,I_IU,I_IO,I_O,I_IY,I_Y,I_IY,I_Y,I_IY,I_Y,I_IY,I_Y,I_IY,I_II,I_IU,I_S,I_IY,I_Y,I_IY,I_Y,I_S,I_IS,$0,$0,$0,$0,$0,$0,$0,$0,$0
 	.by $0,$0,$0,$0,$0,$0,$0,$0,$0,I_S,I_U,I_IL,I_L,I_IY,I_II,I_IO,I_Y,I_S,I_IO,I_II,I_S,I_IY,I_IK,I_U,I_O,I_IY,I_IK,I_II,I_S,I_S,I_U,$0,$0,$0,$0,$0,$0,$0,$0,$0
 
+FROG_DEAD_GFX
 ; Graphics chars design, DEAD FROG!
 ; | *|**|* |  | *|**|**|* |  | *|* |  | *|**|* |  |  |  |  | *|**|**|* | *|**|**|  |  |**|**|  |  |**|**|* |  |**|
 ; | *|* |**|  | *|* |  |  |  |**|**|  | *|* |**|  |  |  |  | *|* |  |  | *|* | *|* | *|* | *|* | *|* |  |  |  |**|
@@ -628,6 +634,7 @@ INSTXT_4
 	.by $0,$0,I_IY,I_Y,I_IY,I_Y,I_IY,I_I,I_IU,I_S,I_IY,I_Y,I_IY,I_Y,I_IY,I_Y,I_IY,I_Y,I_S,I_S,I_S,I_IY,I_II,I_IU,I_S,I_IY,I_IK,I_IL,I_L,I_IY,I_Y,I_IY,I_Y,I_IY,I_Y,I_U,I_O,I_S,I_IS,$0
 	.by $0,$0,I_IY,I_IK,I_II,I_S,I_IY,I_IK,I_U,I_O,I_IY,I_II,I_IO,I_Y,I_IY,I_IK,I_II,I_S,I_S,I_S,I_S,I_IY,I_Y,I_S,I_S,I_IY,I_Y,I_IO,I_O,I_IK,I_IK,I_IL,I_L,I_IK,I_IK,I_IL,I_IY,I_S,I_U ,$0
 
+GAME_OVER_GFX
 ; Graphics chars design, GAME OVER 
 ; |  |**|**|* |  | *|* |  |**|  | *|* |**|**|**|  |  |  |  |**|**|  | *|* | *|* | *|**|**|* | *|**|**|  |
 ; | *|* |  |  |  |**|**|  |**|* |**|* |**|  |  |  |  |  | *|* | *|* | *|* | *|* | *|* |  |  | *|* | *|* |
@@ -651,7 +658,7 @@ INSTXT_4
 ; Text is static.  The vertical position may vary based on parameter 
 ; by the caller.
 ; So, all we need are lists --  a list of the text and the sizes.
-; To index the lists we neeed enumerated values.
+; To index the lists we need enumerated values.
 ; --------------------------------------------------------------------------
 PRINT_BLANK_TXT     = 0  ; BLANK_TXT     ; Blank line used to erase things.
 PRINT_BLANK_TXT_INV = 1  ; BLANK_TXT_INV ; Inverse blank line used to "animate" things.
@@ -1034,16 +1041,16 @@ MoveToLeft ; Shift text lines to the left.
 ; Copy the score from memory to screen positions.
 ; --------------------------------------------------------------------------
 CopyScoreToScreen
-PRITSC
+;PRITSC
 	ldx #7
 
-REPLACE
+DoUpdateScreenScore
 	lda MyScore,x       ; Read from Score buffer
 	sta SCREENMEM+8,x   ; Screen Memory + 9th character 
 	lda HiScore,x       ; Read from Hi Score buffer
 	sta SCREENMEM+26,x  ; Screen Memory + 27th character
 	dex                 ; Loop 8 bytes - 7 to 0.
-	bpl REPLACE 
+	bpl DoUpdateScreenScore 
 
 	rts
 
@@ -1053,7 +1060,7 @@ REPLACE
 ; Display the number of frogs that crossed the river.
 ; --------------------------------------------------------------------------
 PrintFrogsAndLives
-PRINT2
+;PRINT2
 	lda #INTERNAL_O     ; On Atari we're using "O" as the frog shape.
 	ldx FrogsCrossed    ; number of times successfully crossed the rivers.
 	beq WriteLives      ; then nothing to display. Skip to do lives.
@@ -1102,13 +1109,13 @@ GetSpeedByWayOfFrogs
 ; 19 lines of beaches and boats.
 ; --------------------------------------------------------------------------
 DisplayGameScreen
-PRINTSC 
+;PRINTSC 
 	jsr ClearScreen 
 
 	ldy #PRINT_TEXT1 ; Beach and boats...
 	ldx #2
 LoopDisplayBoatsEtc
-PRINT ; Print TEXT1 -  beaches and boats, six times.
+;PRINT ; Print TEXT1 -  beaches and boats, six times.
 	jsr PrintToScreen
 
 	inx        ; So, is tya, clc, adc #3, tay better?  probably not.
@@ -1407,11 +1414,11 @@ PULL                     ; All done.
 ; ==========================================================================
 ; FROG MOVE UP
 ;
-; Add 10 to to score, move screen memory pointer up one line, and 
+; Add 10 to the score, move screen memory pointer up one line, and 
 ; finally decrement row counter.
 ; (packed into a callable routine to shorten the caller's code.) 
 ;
-; On return BEQ means the frog has reqched safety.
+; On return BEQ means the frog has reached safety.
 ; Thus BNE means continue game.
 ;
 ; Uses A
@@ -1442,11 +1449,12 @@ DecrementRows            ; decrement number of rows.
 SetupTransitionToWin
 	jsr Add500ToScore
 
-	lda #10                 ; Animation moving speed.
+	lda #6                 ; Animation moving speed.
 	jsr ResetTimers
 
-	lda #0                  ; Transition Loops from 
+	lda #0                  ; Zero event controls.
 	sta EventCounter
+	sta EventStage
 
 	lda #SCREEN_TRANS_WIN   ; Next step is operating the transition animation.
 	sta CurrentScreen   
@@ -1457,17 +1465,23 @@ SetupTransitionToWin
 ; ==========================================================================
 ; SETUP TRANSITION TO DEAD SCREEN 
 ;
-; Prep values to run the Transition Event
-;
+; Prep values to run the Transition Event for the dead frog.
+; Splat frog.  
+; Set timer to 1.5 second wait.
 ;
 ; Uses A, X 
 ; --------------------------------------------------------------------------
 SetupTransitionToDead
-	lda #10                 ; Animation moving speed.
+	; splat the frog:
+	lda #INTERNAL_ASTER  ; Atari ASCII $2A/42 (dec) Splattered Frog.
+	sta (FrogLocation),y ; Road kill the frog.
+
+	lda #90                 ; Initial delay moving speed.
 	jsr ResetTimers
 
-	lda #0                  ; Transition Loops from 
+	lda #0                  ; Zero event controls.
 	sta EventCounter
+	sta EventStage
 
 	lda #SCREEN_TRANS_DEAD  ; Next step is operating the transition animation.
 	sta CurrentScreen   
@@ -1683,8 +1697,6 @@ CheckForAnim
 	jsr AnimateBoats     ; Move the boats around.
 	jsr AutoMoveFrog     ; GOTO AUTOMVE
 
-;	ldx DelayNumber      ; Get the Delay counter.
-
 EndGameScreen
 	lda CurrentScreen  
 
@@ -1694,13 +1706,110 @@ EndGameScreen
 ; ==========================================================================
 ; Event Process TRANSITION TO WIN
 ; The Activity in the transition area, based on timer.
+; 1) wipe screen from top to middle, and bottom to middle
+; 2) Display the Frogs SAVED!
+; --------------------------------------------------------------------------
+EventTransitionToWin
+	lda AnimateFrames        ; Did animation counter reach 0 ?
+	bne EndTransitionToWin  ; Nope.  Nothing to do.
+
+	lda #6                  ; yes.  Reset it.
+	jsr ResetTimers
+
+	ldx EventCounter       ; Row number for text.
+	cpx #13                ; From 0 to 12, erase from top to middle
+	beq DoSwitchToWins     ; When at 13 then fill screen is done.
+
+	ldy #PRINT_BLANK_TXT_INV    ; inverse blanks.  
+	jsr PrintToScreen
+
+	lda #24                ; Subtract Row number for text from 24.
+	sec
+	sbc EventCounter
+	tax
+
+	jsr PrintToScreen      ; And print the inverse blanks again.
+
+	inc EventCounter
+	bne EndTransitionToWin  ; Nothing else to do here.
+
+DoSwitchToWins  ; Copy the big text announcement to screen
+	ldx #120
+LoopPrintWinsText
+	lda FROG_SAVE_GFX,x
+	sta SCREENMEM+240,X
+	dex
+	bpl LoopPrintWinsText
+
+	lda #60                 ; Text Blinking speed for prompt on WIN screen.
+	jsr ResetTimers
+
+	lda #SCREEN_WIN         ; Yes, change to game screen.
+	sta CurrentScreen
+
+EndTransitionToWin
+	lda CurrentScreen
+
+	rts
+
+
+; ==========================================================================
+; Event Process WIN SCREEN
+; The Activity in the transition area, based on timer.
+;
+; --------------------------------------------------------------------------
+EventWinScreen
+	lda AnimateFrames            ; Did animation counter reach 0 ?
+	bne CheckWinKey            ; no, then is a key pressed? 
+
+	jsr ToggleFlipFlop           ; Yes! Let's toggle the flashing prompt
+	bne WinPromptInverse       ; If this is 1 then display inverse prompt
+
+	ldy #PRINT_INST_TXT4         ; Display normal prompt
+	ldx #23
+	jsr PrintToScreen
+	jmp ResetWinPromptBlinking
+
+WinPromptInverse
+	ldy #PRINT_INST_TXT4_INV     ; Display inverse prompt
+	ldx #23
+	jsr PrintToScreen
+
+ResetWinPromptBlinking
+	lda #60                      ; Blinking speed.
+	jsr ResetTimers
+
+CheckWinKey
+	jsr CheckKey                 ; Get a key if timer permits.
+	cmp #$FF                     ; Key is pressed?
+	beq EndWinScreen           ; Nothing pressed, done with title screen.
+
+ProcessWinScreenInput          ; a key is pressed. Prepare for the screen transition.
+	lda #10                      ; Text moving speed.
+	jsr ResetTimers
+
+	lda #3                       ; Transition Loops from third row through 21st row.
+	sta EventCounter
+
+	lda #SCREEN_TRANS_GAME       ; Next step is operating the transition animation.
+	sta CurrentScreen   
+
+EndWinScreen
+	lda CurrentScreen            ; Yeah, redundant to when a key is pressed.
+
+	rts
+
+	
+; ==========================================================================
+; Event Process TRANSITION TO DEAD
+; The Activity in the transition area, based on timer.
 ; 1) Progressively reprint the credits on lines from the top of the screen 
 ; to the bottom.
 ; 2) follow with a blank line to erase the highest line of trailing text.
 ; --------------------------------------------------------------------------
-EventTransitionToWin
+EventTransitionToDead
 	lda AnimateFrames        ; Did animation counter reach 0 ?
-	bne EndTransitionToGame  ; Nope.  Nothing to do.
+	bne EndTransitionToDead  ; Nope.  Nothing to do.
 	lda #10                  ; yes.  Reset it.
 	jsr ResetTimers
 
@@ -1714,17 +1823,187 @@ EventTransitionToWin
 	jsr PrintToScreen
 
 	cpx #21                 ; reached bottom of screen?
-	bne EndTransitionToGame ; No.  Remain on this transition event next time.
+	bne EndTransitionToDead ; No.  Remain on this transition event next time.
 
 	jsr DisplayGameScreen   ; Draw game screen.
 
 	lda #0
 	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
 
-	lda #SCREEN_GAME        ; Yes, change to game screen.
+	lda #SCREEN_DEAD        ; Yes, change to game screen.
 	sta CurrentScreen
 
-EndTransitionToWin
+EndTransitionToDead
+	lda CurrentScreen
+
+	rts
+
+	
+; ==========================================================================
+; Event Process DEAD SCREEN
+; The Activity in the transition area, based on timer.
+;
+; --------------------------------------------------------------------------
+EventDeadScreen
+	lda AnimateFrames            ; Did animation counter reach 0 ?
+	bne CheckDeadKey            ; no, then is a key pressed? 
+
+	jsr ToggleFlipFlop           ; Yes! Let's toggle the flashing prompt
+	bne DeadPromptInverse       ; If this is 1 then display inverse prompt
+
+	ldy #PRINT_INST_TXT4         ; Display normal prompt
+	ldx #23
+	jsr PrintToScreen
+	jmp ResetDeadPromptBlinking
+
+DeadPromptInverse
+	ldy #PRINT_INST_TXT4_INV     ; Display inverse prompt
+	ldx #23
+	jsr PrintToScreen
+
+ResetDeadPromptBlinking
+	lda #60                      ; Blinking speed.
+	jsr ResetTimers
+
+CheckWinKey
+	jsr CheckKey                 ; Get a key if timer permits.
+	cmp #$FF                     ; Key is pressed?
+	beq EndDeadScreen           ; Nothing pressed, done with title screen.
+
+ProcessDeadScreenInput          ; a key is pressed. Prepare for the screen transition.
+	lda #10                      ; Text moving speed.
+	jsr ResetTimers
+
+	lda #3                       ; Transition Loops from third row through 21st row.
+	sta EventCounter
+
+	lda #SCREEN_TRANS_GAME       ; Next step is operating the transition animation.
+	sta CurrentScreen   
+
+EndDeadScreen
+	lda CurrentScreen            ; Yeah, redundant to when a key is pressed.
+
+	rts
+
+; ==========================================================================
+; Event Process TRANSITION TO OVER
+; The Activity in the transition area, based on timer.
+; 1) Progressively reprint the credits on lines from the top of the screen 
+; to the bottom.
+; 2) follow with a blank line to erase the highest line of trailing text.
+; --------------------------------------------------------------------------
+EventTransitionGameOver
+	lda AnimateFrames        ; Did animation counter reach 0 ?
+	bne EndTransitionGameOver  ; Nope.  Nothing to do.
+	lda #10                  ; yes.  Reset it.
+	jsr ResetTimers
+
+	ldy #PRINT_BLANK_TXT    ; erase top line
+	ldx EventCounter
+	jsr PrintToScreen
+
+	inx                     ; next row.
+	stx EventCounter        ; Save new row number
+	ldy #PRINT_CREDIT_TXT   ; Print the culprits responsible
+	jsr PrintToScreen
+
+	cpx #21                 ; reached bottom of screen?
+	bne EndTransitionGameOver ; No.  Remain on this transition event next time.
+
+	jsr DisplayGameScreen   ; Draw game screen.
+
+	lda #0
+	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
+
+	lda #SCREEN_OVER        ; Yes, change to game screen.
+	sta CurrentScreen
+
+EndTransitionGameOver
+	lda CurrentScreen
+
+	rts
+
+; ==========================================================================
+; Event Process GAME OVER SCREEN
+; The Activity in the transition area, based on timer.
+;
+; --------------------------------------------------------------------------
+EventGameOverScreen
+	lda AnimateFrames           ; Did animation counter reach 0 ?
+	bne CheckOverKey            ; no, then is a key pressed? 
+
+	jsr ToggleFlipFlop          ; Yes! Let's toggle the flashing prompt
+	bne OverPromptInverse       ; If this is 1 then display inverse prompt
+
+	ldy #PRINT_INST_TXT4        ; Display normal prompt
+	ldx #23
+	jsr PrintToScreen
+	jmp ResetDeadPromptBlinking
+
+DeadPromptInverse
+	ldy #PRINT_INST_TXT4_INV    ; Display inverse prompt
+	ldx #23
+	jsr PrintToScreen
+
+ResetDeadPromptBlinking
+	lda #60                     ; Blinking speed.
+	jsr ResetTimers
+
+CheckWinKey
+	jsr CheckKey                ; Get a key if timer permits.
+	cmp #$FF                    ; Key is pressed?
+	beq EndDeadScreen           ; Nothing pressed, done with title screen.
+
+ProcessDeadScreenInput          ; a key is pressed. Prepare for the screen transition.
+	lda #10                     ; Text moving speed.
+	jsr ResetTimers
+
+	lda #3                      ; Transition Loops from third row through 21st row.
+	sta EventCounter
+
+	lda #SCREEN_TRANS_TITLE     ; Next step is operating the transition animation.
+	sta CurrentScreen   
+
+EndDeadScreen
+	lda CurrentScreen           ; Yeah, redundant to when a key is pressed.
+
+	rts
+
+
+; ==========================================================================
+; Event Process TRANSITION TO TITLE
+; The Activity in the transition area, based on timer.
+; 1) Progressively reprint the credits on lines from the top of the screen 
+; to the bottom.
+; 2) follow with a blank line to erase the highest line of trailing text.
+; --------------------------------------------------------------------------
+EventTransitionToTitle
+	lda AnimateFrames        ; Did animation counter reach 0 ?
+	bne EndTransitionToTitle ; Nope.  Nothing to do.
+	lda #10                  ; yes.  Reset it.
+	jsr ResetTimers
+
+	ldy #PRINT_BLANK_TXT     ; erase top line
+	ldx EventCounter
+	jsr PrintToScreen
+
+	inx                      ; next row.
+	stx EventCounter         ; Save new row number
+	ldy #PRINT_CREDIT_TXT    ; Print the culprits responsible
+	jsr PrintToScreen
+
+	cpx #21                  ; reached bottom of screen?
+	bne EndTransitionToTitle ; No.  Remain on this transition event next time.
+
+	jsr DisplayGameScreen    ; Draw game screen.
+
+	lda #0
+	sta FrogSafety           ; Schrodinger's current frog is known to be alive.
+
+	lda #SCREEN_START        ; Yes, change to beginning of event cycle/start new game.
+	sta CurrentScreen
+
+EndTransitionToTitle
 	lda CurrentScreen
 
 	rts
@@ -1873,7 +2152,7 @@ ContinueTransitionToOver
 	cmp #SCREEN_TRANS_OVER
 	bne ContinueOverScreen
 
-	jsr Event TransitionGameOver
+	jsr EventTransitionGameOver
 
 EndTransitionToOver
 	lda CurrentScreen  
@@ -1888,7 +2167,7 @@ ContinueOverScreen
 	cmp #SCREEN_OVER
 	bne ContinueTransitionToTitle
 
-	jsr EventOverScreen
+	jsr EventGameOverScreen
 
 EndOverScreen
 	lda CurrentScreen 
@@ -1914,183 +2193,9 @@ EndTransitionToTitle
 EndGameLoop
 	jsr TimerLoop    ; Wait for end of frame and update the timers.
 
-	jmp GameLoop
+	jmp GameLoop     ; rinse, repeat, forever.
 
 	rts
-
-
-
-
-
-;START
-
-
-
-
-;	jsr PRINTSC        ; Go clear screen and print game screen
-;	ldy #$13           ; Y = 19 (dec) (again, again)
-
-
-;KEY ; Read keyboard.  (I hate keyboard input.  TO DO - Use a joystick.)
-;	lda CH             ; Atari get key pressed
-;	cmp #$FF           ; Check for no key pressed (same for PET and Atari)
-;	bne KEY1           ; Not $FF, then something is pressed.
-
-
-;DELAY
-	sta LastKeyPressed ; Save $FF, for no key pressed.
-	tya                ; Whatever Y was, probably $13/19 (dec) again,
-	pha                ; and push that to the stack.  must be important.
-	jsr MOVESC         ; Move the boats around.
-
-	ldx DelayNumber    ; Get the Delay counter.
-DEL1
-	ldy #$FF           ; Reset Y to $FF/255 (dec)
-
-DEL
-	dey                ; decrement Y counter
-	bne DEL            ; if Y is not 0, then do the decrement again.
-	dex                ; decrement delay counter.
-	bne DEL1           ; If X is not 0, then wind up Y again and start over.
-
-	pla                ; Pull original Y value
-	tay                ; and return to Y.
-	jmp AutoMoveFrog         ; GOTO AUTOMVE
-
-
-KEY1 ; Process keypress
-	pha                  ; A is a keypress, but the value of
-	lda #$FF             ; CH needs to be cleared.
-	sta CH
-	pla                  ; A has the original keypress again.  Continue....
-
-	cmp LastKeyPressed   ; is this key the same as the last key?
-	BEQ DELAY            ; Yes.  So, probably a key repeat, so ignore it and do delay.
-
-	tax                  ; Save that key in X, too.
-	lda LastCharacter    ; Get the last character (under the frog)
-	sta (FrogLocation),y ; Erase the frog with the last character.
-
-; Test for Left "4" key
-	txa                  ; Restore the key press to A
-	cmp #KEY_4           ; Atari "4", #24
-	bne RIGHT            ; No.  Go test for Right.
-
-	dey                  ; Move Y to left.
-;	cpy #$FF             ; Did it move off the screen?
-;	bne CORR             ; No.  GOTO CORR (Place frog on screen)
-	bpl CORR             ; Not $FF.  GOTO CORR (Place frog on screen)
-	iny                  ; Is $FF.  Correct by adding 1 to Y.
-
-CORR
-	jmp PLACE ; Place frog on screen (?)
-
-
-RIGHT ; Test for Right "6" key
-	cmp #KEY_6           ; Atari "6", #27
-	bne UP               ; Not "6" key, so go test for Up.
-
-	iny                  ; Move Y to right.
-	cpy #$28             ; Did it move off screen? Position $28/40 (dec)
-	bne CORR1            ; No.  GOTO CORR1  (Place frog on screen)
-	DEY                  ; Yes.  Correct by subtracting 1 from Y.
-
-CORR1    ; couldn't the BNE above just go to CORR in order to jump to PLACE?
-	jmp PLACE
-
-
-UP ; Test for Up "S" key
-	cmp #KEY_S           ; Atari "S", #62
-	beq UP1              ; Yes, go do UP.
-
-; No.  key press is not a frog control key.  Replace frog where it came from.
-	lda #INTERNAL_O      ; On Atari we're using "O" as the frog shape.
-	sta (FrogLocation),y ; Return frog to screen
-	jmp DELAY            ; Go to the delay
-
-UP1 ; Move the frog a row up.
-	lda #1               ; Represents "10" Since we don't need to add to the ones column.  
-	sta ScoreToAdd       ; Save to add 1
-	ldx #5               ; Offset from start of "00000000" to do the adding.
-	stx NumberOfChars    ; Position offset in score.
-	jsr SCORE            ; Deal with score update.
-
-	lda FrogLocation     ; subtract $28/40 (dec) from 
-	sec                  ; the address pointing to 
-	sbc #$28             ; the frog.
-	sta FrogLocation
-	bcs CORR2
-	dec FrogLocation + 1 
-
-CORR2 ; decrement number of rows.
-;	sec                  ; ummm.  Does carry affect dec? did not think so.
-	dec FrogRow
-	lda FrogRow          ; If more rows are left (>0) to cross, then 
-	bne PLACE            ; redraw frog on screen. 
-
-	jmp FrogWins         ; No more rows to cross. Update frog reward/stats.
-
-
-
-
-; Get the character that will be under the frog.
-PLACE
-	lda (FrogLocation),y ; Get the character in the new position.
-	sta LastCharacter    ; Save for later when frog moves.
-	jmp CHECK
-
-
-; Draw the frog on screen.
-PLACE2 
-	lda #INTERNAL_O       ; Atari internal code for "O" is frog.
-	sta (FrogLocation),y ; Save to screen memory to display it.
-	jmp DELAY            ; Slow down game speed.
-	rts
-
-
-; Will the Pet Frog land on the Beach?
-CHECK
-	lda LastCharacter      ; Is the character the beach?
-	cmp #INTERNAL_INVSPACE ; Atari uses inverse space for beach
-	bne CHECK1             ; not the beach?  Goto CHECK1
-	jmp PLACE2             ; Draw the frog.
-
-
-; Will the Pet Frog land in the boat?
-CHECK1
-	cmp #INTERNAL_BALL     ; Atari uses ball graphics, ctrl-t
-	bne CHECK2             ; No?   GOTO CHECK2 to die.
-	jmp PLACE2             ; Draw the frog.
-
-
-; Safe locations discarded, so wherever the Frog will land, it is Baaaaad.
-CHECK2
-	jmp YRDD               ; Yer Dead!
-
-
-
-
-; Process automagical movement on the frog in the boat.
-AutoMoveFrog
-	ldx FrogRow   ; Get the current row number.
-	lda DATA,x         ; Get the movement flag for the row.
-	cmp #0             ; Is it 0?  Nothing to do.  Bail and go back to keyboard polling..  
-	beq RETURN         ; (ya know, the cmp was not actually necessary.)
-	cmp #$FF           ; is it $ff?  then automatic right move.
-	bne AUTRIG         ; (ya know, could have done  bmi AUTRIG without the cmp).
-	dey                ; Move Frog left one character
-	cpy #0             ; Is it at 0? (Why not check for $FF here (or bmi)?)
-	bne RETURN         ; No.  Bail and go back to keyboard polling.
-	jmp YRDD           ; Yup.  Ran out of river.   Yer Dead!
-
-AUTRIG 
-	iny                ; Move Frog right one character
-	cpy #$28           ; Did it reach the right side ?    $28/40 (dec)
-	bne RETURN         ; No.  Bail and go back to keyboard polling.
-	jmp YRDD           ; Yup.  Ran out of river.   Yer Dead!
-
-RETURN
-	jmp KEY            ; Return to keyboard polling.
 
 
 
@@ -2100,10 +2205,8 @@ RETURN
 YRDD
 	lda #INTERNAL_ASTER  ; Atari ASCII $2A/42 (dec) Splattered Frog.
 	sta (FrogLocation),y ; Road kill the frog.
-	jsr DELAY1           ; Various pauses....
-	jsr DELAY1           ; Should do this with  jiffy counters. future TO DO.
-	jsr DELAY1
-	jsr DELAY1
+;	jsr DELAY1           ; Various pauses....
+;	jsr DELAY1           ; Should do this with  jiffy counters. future TO DO.
 	jsr FILLSC           ; Fill screen with inverse blanks.
 
 ; Print the dead frog prompt.
@@ -2115,11 +2218,6 @@ GAMEOV
 	lda #0
 ;	sta $9E              ; Zero a Pet interrupt  ?????
 	jsr PRITSC           ; update display.
-	jsr DELAY1
-	jsr DELAY1
-	jsr DELAY1
-	jsr DELAY1
-	jsr DELAY1
 	jsr DELAY1
 	dec NumberOfLives    ; subtract a life.
 	lda NumberOfLives
@@ -2136,8 +2234,6 @@ GOV
 	jmp GOVER ; G A M E   O V E R
 
 
-
-
 FrogWins
 	inc FrogsCrossed     ; Add to frogs successfully crossed the rivers.
 	jsr FILLSC           ; Update the score display
@@ -2149,11 +2245,6 @@ FrogWins1 ; Print the frog wins text.
 FrogWins2  ; More score maintenance.   and delays.
 	jsr SCORE
 ;	jsr PRITSC
-;	jsr DELAY1
-;	jsr DELAY1
-;	jsr DELAY1
-;	jsr DELAY1
-;	jsr DELAY1
 ;	jsr DELAY1
 	jmp NEXTFR
 
@@ -2222,25 +2313,6 @@ START1 ; Manage frog's starting postion.
 	sta FrogRow       ; Save as number of rows to jump
 	
 	jmp KEY                ; GOTO Key input
-
-
-; ==========================================================================
-; D E  L   A    Y          L      O       O        P
-; Count down X=255 to 0 by Y=255 times.
-; --------------------------------------------------------------------------
-DELAY1
-;	ldx #$FF
-
-DELA1
-;	ldy #$FF
-
-DELA
-;	dey
-;	bne DELA
-
-;	dex
-;	bne DELA1
-	rts
 
 
 ; ==========================================================================
@@ -2515,7 +2587,7 @@ bLoopWaitFrame
 ; 13)   Beach 3
 ;
 ; --------------------------------------------------------------------------
-
+ 
 
 ; ==========================================================================
 ; Force the Atari to impersonate the PET 4032 by setting the 40-column
