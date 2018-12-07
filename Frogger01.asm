@@ -1261,7 +1261,7 @@ ResetTimers
 
 
 ; ==========================================================================
-; RESET KEY SCAN TIMER and ANIMATION TIMER
+; RESET ANIMATION TIMER
 ; 
 ; A  is the time to set for animation.
 ; --------------------------------------------------------------------------
@@ -2213,6 +2213,7 @@ EndGameLoop
 
 
 ; Frog is dead.
+YerADeadFrog
 YRDD
 	lda #INTERNAL_ASTER  ; Atari ASCII $2A/42 (dec) Splattered Frog.
 	sta (FrogLocation),y ; Road kill the frog.
@@ -2224,10 +2225,11 @@ YRDD
 ;	ldy #PRINT_YRDDTX
 	jsr PrintToScreen
 
+	
 ; Decide   G A M E   O V E R-ish
+
+DecideGameOver
 GAMEOV
-	lda #0
-;	sta $9E              ; Zero a Pet interrupt  ?????
 	jsr PRITSC           ; update display.
 	jsr DELAY1
 	dec NumberOfLives    ; subtract a life.
@@ -2238,7 +2240,7 @@ GAMEOV
 	sta FlaggedHiScore   ; flag the high score
 	jmp START1
 
-
+VerilyISayGameOver
 GOV
 	lda #$FF
 	sta CH    ; Atari.  Make sure key is cleared.
@@ -2443,8 +2445,8 @@ CheckKey
 	cmp #$FF                  ; No key pressed, so nothing to do.
 	beq ExitCheckKey
 	 
-	lda #$FF                  ; Got a key.  Clear register for next key read
-	sta CH
+	lda #$FF                  ; Got a key.  
+	sta CH                    ; Clear register for next key read.
 
 	lda #KEYSCAN_FRAMES       ; Reset keyboard timer for next key input.
 	sta KeyscanFrames
