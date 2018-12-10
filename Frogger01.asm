@@ -1721,7 +1721,7 @@ EndGameScreen
 ; 2) Display the Frogs SAVED!
 ; --------------------------------------------------------------------------
 EventTransitionToWin
-	lda AnimateFrames        ; Did animation counter reach 0 ?
+	lda AnimateFrames       ; Did animation counter reach 0 ?
 	bne EndTransitionToWin  ; Nope.  Nothing to do.
 
 	lda #6                  ; yes.  Reset it.
@@ -1744,6 +1744,7 @@ EventTransitionToWin
 	inc EventCounter
 	bne EndTransitionToWin  ; Nothing else to do here.
 
+; Clear screen is done.   Display the big prompt.
 DoSwitchToWins  ; Copy the big text announcement to screen
 	ldx #120
 LoopPrintWinsText
@@ -1752,10 +1753,11 @@ LoopPrintWinsText
 	dex
 	bpl LoopPrintWinsText
 
+;Setup for Wins screen (wait for input loop)
 	lda #60                 ; Text Blinking speed for prompt on WIN screen.
 	jsr ResetTimers
 
-	lda #SCREEN_WIN         ; Yes, change to game screen.
+	lda #SCREEN_WIN         ; Change to wins screen.
 	sta CurrentScreen
 
 EndTransitionToWin
@@ -1770,43 +1772,43 @@ EndTransitionToWin
 ;
 ; --------------------------------------------------------------------------
 EventWinScreen
-	lda AnimateFrames            ; Did animation counter reach 0 ?
+	lda AnimateFrames          ; Did animation counter reach 0 ?
 	bne CheckWinKey            ; no, then is a key pressed? 
 
-	jsr ToggleFlipFlop           ; Yes! Let's toggle the flashing prompt
+	jsr ToggleFlipFlop         ; Yes! Let's toggle the flashing prompt
 	bne WinPromptInverse       ; If this is 1 then display inverse prompt
 
-	ldy #PRINT_INST_TXT4         ; Display normal prompt
+	ldy #PRINT_INST_TXT4       ; Display normal prompt
 	ldx #23
 	jsr PrintToScreen
 	jmp ResetWinPromptBlinking
 
 WinPromptInverse
-	ldy #PRINT_INST_TXT4_INV     ; Display inverse prompt
+	ldy #PRINT_INST_TXT4_INV   ; Display inverse prompt
 	ldx #23
 	jsr PrintToScreen
 
 ResetWinPromptBlinking
-	lda #60                      ; Blinking speed.
+	lda #60                    ; Blinking speed.
 	jsr ResetTimers
 
 CheckWinKey
-	jsr CheckKey                 ; Get a key if timer permits.
-	cmp #$FF                     ; Key is pressed?
+	jsr CheckKey               ; Get a key if timer permits.
+	cmp #$FF                   ; Key is pressed?
 	beq EndWinScreen           ; Nothing pressed, done with title screen.
 
 ProcessWinScreenInput          ; a key is pressed. Prepare for the screen transition.
-	lda #10                      ; Text moving speed.
+	lda #10                    ; Text moving speed.
 	jsr ResetTimers
 
-	lda #3                       ; Transition Loops from third row through 21st row.
+	lda #3                     ; Transition Loops from third row through 21st row.
 	sta EventCounter
 
-	lda #SCREEN_TRANS_GAME       ; Next step is operating the transition animation.
+	lda #SCREEN_TRANS_GAME     ; Next step is operating the transition animation.
 	sta CurrentScreen   
 
 EndWinScreen
-	lda CurrentScreen            ; Yeah, redundant to when a key is pressed.
+	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
 
 	rts
 
