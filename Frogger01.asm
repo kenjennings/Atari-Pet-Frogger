@@ -1519,35 +1519,52 @@ EventScreenStart
 
 
 ; ==========================================================================
-; Event Process TITLE SCREEN
-; The activity on the title screen is 
-; 1) blinking the text and 
-; 2) waiting for a key press.
+; RUN PROMPT FOR ANY KEY
+; Maintain blinking timer.
+; Update blink text on line 23.
+; Return 0/BEQ when the any key is not pressed. 
+; Return !0/BNE when the any key is pressed.
+; 
+; A  contains key press.
+; CPU flags are comparison of key value to $FF which means no key press.
 ; --------------------------------------------------------------------------
-EventTitleScreen
-	lda AnimateFrames            ; Did animation counter reach 0 ?
-	bne CheckTitleKey            ; no, then is a key pressed? 
+RunPromptForAnyKey
+	lda AnimateFrames        ; Did animation counter reach 0 ?
+	bne CheckAnyKey          ; no, then is a key pressed? 
 
-	jsr ToggleFlipFlop           ; Yes! Let's toggle the flashing prompt
-	bne TitlePromptInverse       ; If this is 1 then display inverse prompt
+	jsr ToggleFlipFlop       ; Yes! Let's toggle the flashing prompt
+	bne PromptInverse        ; If this is 1 then display inverse prompt
 
-	ldy #PRINT_INST_TXT4         ; Display normal prompt
+	ldy #PRINT_INST_TXT4     ; Display normal prompt
 	ldx #23
 	jsr PrintToScreen
-	jmp ResetTitlePromptBlinking
+	jmp ResetPromptBlinking
 
-TitlePromptInverse
-	ldy #PRINT_INST_TXT4_INV     ; Display inverse prompt
+PromptInverse
+	ldy #PRINT_INST_TXT4_INV ; Display inverse prompt
 	ldx #23
 	jsr PrintToScreen
 
-ResetTitlePromptBlinking
-	lda #60                      ; Blinking speed.
+ResetPromptBlinking
+	lda #60                  ; Blinking speed.
 	jsr ResetTimers
 
-CheckTitleKey
-	jsr CheckKey                 ; Get a key if timer permits.
-	cmp #$FF                     ; Key is pressed?
+CheckAnyKey
+	jsr CheckKey             ; Get a key if timer permits.
+	cmp #$FF                 ; Key is pressed?
+
+	rts
+
+
+; ==========================================================================
+; Event Process TITLE SCREEN
+; The activity on the title screen is 
+; Blink Prompt for ANY key.
+; Wait for Key.
+; Setup for next transition.
+; --------------------------------------------------------------------------
+EventTitleScreen
+	jsr RunPromptForAnyKey       ; Blink Prompt to press ANY key.  check key.
 	beq EndTitleScreen           ; Nothing pressed, done with title screen.
 
 ProcessTitleScreenInput          ; a key is pressed. Prepare for the screen transition.
@@ -1719,12 +1736,13 @@ EndGameScreen
 ; The Activity in the transition area, based on timer.
 ; 1) wipe screen from top to middle, and bottom to middle
 ; 2) Display the Frogs SAVED!
+; 3) Setup to do the Win screen event.
 ; --------------------------------------------------------------------------
 EventTransitionToWin
 	lda AnimateFrames       ; Did animation counter reach 0 ?
 	bne EndTransitionToWin  ; Nope.  Nothing to do.
 
-	lda #6                  ; yes.  Reset it.
+	lda #6                  ; yes.  Reset it. (60 / 6 == 10 updates per second)
 	jsr ResetTimers
 
 	ldx EventCounter       ; Row number for text.
@@ -1769,32 +1787,12 @@ EndTransitionToWin
 ; ==========================================================================
 ; Event Process WIN SCREEN
 ; The Activity in the transition area, based on timer.
-;
+; Blink Prompt for ANY key.
+; Wait for Key.
+; Setup for next transition.
 ; --------------------------------------------------------------------------
 EventWinScreen
-	lda AnimateFrames          ; Did animation counter reach 0 ?
-	bne CheckWinKey            ; no, then is a key pressed? 
-
-	jsr ToggleFlipFlop         ; Yes! Let's toggle the flashing prompt
-	bne WinPromptInverse       ; If this is 1 then display inverse prompt
-
-	ldy #PRINT_INST_TXT4       ; Display normal prompt
-	ldx #23
-	jsr PrintToScreen
-	jmp ResetWinPromptBlinking
-
-WinPromptInverse
-	ldy #PRINT_INST_TXT4_INV   ; Display inverse prompt
-	ldx #23
-	jsr PrintToScreen
-
-ResetWinPromptBlinking
-	lda #60                    ; Blinking speed.
-	jsr ResetTimers
-
-CheckWinKey
-	jsr CheckKey               ; Get a key if timer permits.
-	cmp #$FF                   ; Key is pressed?
+	jsr RunPromptForAnyKey     ; Blink Prompt to press ANY key.  check key.
 	beq EndWinScreen           ; Nothing pressed, done with title screen.
 
 ProcessWinScreenInput          ; a key is pressed. Prepare for the screen transition.
@@ -1812,7 +1810,7 @@ EndWinScreen
 
 	rts
 
-	
+
 ; ==========================================================================
 ; Event Process TRANSITION TO DEAD
 ; The Activity in the transition area, based on timer.
@@ -1851,50 +1849,28 @@ EndTransitionToDead
 
 	rts
 
-	
+
 ; ==========================================================================
 ; Event Process DEAD SCREEN
 ; The Activity in the transition area, based on timer.
 ;
 ; --------------------------------------------------------------------------
 EventDeadScreen
-	lda AnimateFrames            ; Did animation counter reach 0 ?
-	bne CheckDeadKey            ; no, then is a key pressed? 
+	jsr RunPromptForAnyKey     ; Blink Prompt to press ANY key.  check key.
+	beq EndDeadScreen          ; Nothing pressed, done with title screen.
 
-	jsr ToggleFlipFlop           ; Yes! Let's toggle the flashing prompt
-	bne DeadPromptInverse       ; If this is 1 then display inverse prompt
-
-	ldy #PRINT_INST_TXT4         ; Display normal prompt
-	ldx #23
-	jsr PrintToScreen
-	jmp ResetDeadPromptBlinking
-
-DeadPromptInverse
-	ldy #PRINT_INST_TXT4_INV     ; Display inverse prompt
-	ldx #23
-	jsr PrintToScreen
-
-ResetDeadPromptBlinking
-	lda #60                      ; Blinking speed.
+ProcessDeadScreenInput         ; a key is pressed. Prepare for the screen transition.
+	lda #10                    ; Text moving speed.
 	jsr ResetTimers
 
-CheckWinKey
-	jsr CheckKey                 ; Get a key if timer permits.
-	cmp #$FF                     ; Key is pressed?
-	beq EndDeadScreen           ; Nothing pressed, done with title screen.
-
-ProcessDeadScreenInput          ; a key is pressed. Prepare for the screen transition.
-	lda #10                      ; Text moving speed.
-	jsr ResetTimers
-
-	lda #3                       ; Transition Loops from third row through 21st row.
+	lda #3                     ; Transition Loops from third row through 21st row.
 	sta EventCounter
 
-	lda #SCREEN_TRANS_GAME       ; Next step is operating the transition animation.
+	lda #SCREEN_TRANS_GAME     ; Next step is operating the transition animation.
 	sta CurrentScreen   
 
 EndDeadScreen
-	lda CurrentScreen            ; Yeah, redundant to when a key is pressed.
+	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
 
 	rts
 
@@ -1942,43 +1918,21 @@ EndTransitionGameOver
 ;
 ; --------------------------------------------------------------------------
 EventGameOverScreen
-	lda AnimateFrames           ; Did animation counter reach 0 ?
-	bne CheckOverKey            ; no, then is a key pressed? 
+	jsr RunPromptForAnyKey     ; Blink Prompt to press ANY key.  check key.
+	beq EndDeadScreen          ; Nothing pressed, done with title screen.
 
-	jsr ToggleFlipFlop          ; Yes! Let's toggle the flashing prompt
-	bne OverPromptInverse       ; If this is 1 then display inverse prompt
-
-	ldy #PRINT_INST_TXT4        ; Display normal prompt
-	ldx #23
-	jsr PrintToScreen
-	jmp ResetDeadPromptBlinking
-
-DeadPromptInverse
-	ldy #PRINT_INST_TXT4_INV    ; Display inverse prompt
-	ldx #23
-	jsr PrintToScreen
-
-ResetDeadPromptBlinking
-	lda #60                     ; Blinking speed.
+ProcessDeadScreenInput         ; a key is pressed. Prepare for the screen transition.
+	lda #10                    ; Text moving speed.
 	jsr ResetTimers
 
-CheckWinKey
-	jsr CheckKey                ; Get a key if timer permits.
-	cmp #$FF                    ; Key is pressed?
-	beq EndDeadScreen           ; Nothing pressed, done with title screen.
-
-ProcessDeadScreenInput          ; a key is pressed. Prepare for the screen transition.
-	lda #10                     ; Text moving speed.
-	jsr ResetTimers
-
-	lda #3                      ; Transition Loops from third row through 21st row.
+	lda #3                     ; Transition Loops from third row through 21st row.
 	sta EventCounter
 
-	lda #SCREEN_TRANS_TITLE     ; Next step is operating the transition animation.
+	lda #SCREEN_TRANS_TITLE    ; Next step is operating the transition animation.
 	sta CurrentScreen   
 
 EndDeadScreen
-	lda CurrentScreen           ; Yeah, redundant to when a key is pressed.
+	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
 
 	rts
 
