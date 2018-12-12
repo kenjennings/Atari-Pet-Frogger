@@ -821,6 +821,26 @@ LoopPrintBoats
 
 
 ; ==========================================================================
+; Load ScreenPointer From X
+;
+; Parameters:
+; X = row number on screen 0 to 24. (times 2 for index)
+;
+; Used by code:
+; A = used to multiply  move the values.  
+; --------------------------------------------------------------------------
+LoadScreenPointerFromX
+	lda SCREEN_ADDR,x      ; Get screen row address low byte.
+	sta ScreenPointer
+	inx 
+	lda SCREEN_ADDR,x      ; Get screen row address high byte.
+	sta ScreenPointer+1
+	inx                    ; doing this for consistency so the next call pulls correct row
+
+	rts
+
+
+; ==========================================================================
 ; Copy text blocks to screen memory.
 ;
 ; Parameters:
@@ -832,64 +852,61 @@ LoopPrintBoats
 ; --------------------------------------------------------------------------
 PrintToScreen
 	cpy #PRINT_END
-	bcs ExitPrintToScreen  ; Greater than or equal to END marker, so exit.
+	bcs ExitPrintToScreen      ; Greater than or equal to END marker, so exit.
 
-	mSaveRegAYX            ; Save A and Y and X, so the caller doesn't need to.
+	mSaveRegAYX                ; Save A and Y and X, so the caller doesn't need to.
 
-	asl                    ; multiply row number by 2 for address lookup.
-	tax                    ; use as index.
-	lda SCREEN_ADDR,x      ; Get screen row address low byte.
-	sta ScreenPointer
-	inx 
-	lda SCREEN_ADDR,x      ; Get screen row address high byte.
-	sta ScreenPointer+1
+	asl                        ; multiply row number by 2 for address lookup.
+	tax                        ; use as index.
+	jsr LoadScreenPointerFromX ; get row pointer based on X
 
-	tya                    ; get the text identification.
-	asl                    ; multiply by 2 for all the word lookups.
-	tay                    ; use as index.
+	tya                        ; get the text identification.
+	asl                        ; multiply by 2 for all the word lookups.
+	tay                        ; use as index.
 
-	lda TEXT_MESSAGES,y    ; Load up the values from the tables
+	lda TEXT_MESSAGES,y        ; Load up the values from the tables
 	sta TextPointer
 	lda TEXT_SIZES,y
 	sta TextLength
-	iny                    ; now the high bytes
-	lda TEXT_MESSAGES,y    ; Load up the values from the tables.
+	iny                        ; now the high bytes
+	lda TEXT_MESSAGES,y        ; Load up the values from the tables.
 	sta TextPointer+1
 	lda TEXT_SIZES,y
 	sta TextLength+1
 
 	ldy #0
-PrintToScreenLoop          ; sub-optimal copy through page 0 indirect index
-	lda (TextPointer),y    ; Always assumes at least 1 byte to copy
+PrintToScreenLoop              ; sub-optimal copy through page 0 indirect index
+	lda (TextPointer),y        ; Always assumes at least 1 byte to copy
 	sta (ScreenPointer),y
 
-	dec TextLength         ; Decrement length.  Stop when length is 0.
-	bne DoEvaluateLengthHi ; If low byte is not 0, then continue
-	lda TextLength+1       ; Is the high byte also 0?
-	beq EndPrintToScreen   ; Low byte and high byte are 0, so we're done.
+	dec TextLength             ; Decrement length.  Stop when length is 0.
+	bne DoEvaluateLengthHi     ; If low byte is not 0, then continue
+	lda TextLength+1           ; Is the high byte also 0?
+	beq EndPrintToScreen       ; Low byte and high byte are 0, so we're done.
 
-DoEvaluateLengthHi         ; Check if hi byte of length must decrement 
-	lda TextLength         ; If this rolled from 0 to $FF
-	cmp #$FF               ; this means there is a high byte to decrement
-	bne DoTextPointer      ; Nope.  So, continue.
-	dec TextLength+1       ; Yes, low byte went 0 to FF, so decrement high byte.
+DoEvaluateLengthHi             ; Check if hi byte of length must decrement 
+	lda TextLength             ; If this rolled from 0 to $FF
+	cmp #$FF                   ; this means there is a high byte to decrement
+	bne DoTextPointer          ; Nope.  So, continue.
+	dec TextLength+1           ; Yes, low byte went 0 to FF, so decrement high byte.
 
-DoTextPointer              ; inc text pointer.
+DoTextPointer                  ; inc text pointer.
 	inc TextPointer
-	bne DoScreenPointer    ; Did not roll from 255 to 0, so skip hi byte
+	bne DoScreenPointer        ; Did not roll from 255 to 0, so skip hi byte
 	inc TextPointer+1
 
-DoScreenPointer            ; inc screen pointer.
+DoScreenPointer                ; inc screen pointer.
 	inc ScreenPointer
-	bne PrintToScreenLoop  ; Did not roll from 255 to 0, so skip hi byte
+	bne PrintToScreenLoop      ; Did not roll from 255 to 0, so skip hi byte
 	inc ScreenPointer+1
-	bne PrintToScreenLoop  ; The inc above must reasonably be non-zero.
+	bne PrintToScreenLoop      ; The inc above must reasonably be non-zero.
 
 EndPrintToScreen
-	mRegRestoreAYX         ; Restore X, Y and A
+	mRegRestoreAYX             ; Restore X, Y and A
 
 ExitPrintToScreen
 	rts
+
 
 
 ; ==========================================================================
@@ -1796,7 +1813,7 @@ EventWinScreen
 	beq EndWinScreen           ; Nothing pressed, done with title screen.
 
 ProcessWinScreenInput          ; a key is pressed. Prepare for the screen transition.
-	lda #10                    ; Text moving speed.
+	lda #6                     ; line draw speed
 	jsr ResetTimers
 
 	lda #3                     ; Transition Loops from third row through 21st row.
@@ -1814,34 +1831,60 @@ EndWinScreen
 ; ==========================================================================
 ; Event Process TRANSITION TO DEAD
 ; The Activity in the transition area, based on timer.
-; 1) Progressively reprint the credits on lines from the top of the screen 
-; to the bottom.
-; 2) follow with a blank line to erase the highest line of trailing text.
+; 1) Wait (1.5 sec) to observe splattered frog. (timer set from prior event)
+; 2) Wipe screen from sides to center.
+; 3) Print the big yer dead text.  
+; 4) setup for get any key on the Dead screen.
 ; --------------------------------------------------------------------------
 EventTransitionToDead
-	lda AnimateFrames        ; Did animation counter reach 0 ?
-	bne EndTransitionToDead  ; Nope.  Nothing to do.
-	lda #10                  ; yes.  Reset it.
+	lda AnimateFrames           ; Did animation counter reach 0 ?
+	bne EndTransitionToDead     ; Nope.  Nothing to do.
+
+	lda #6                      ; yes.  Reset it. (drawing speed)
 	jsr ResetTimers
 
-	ldy #PRINT_BLANK_TXT    ; erase top line
-	ldx EventCounter
-	jsr PrintToScreen
+	ldy EventCounter            ; column number for text.
+	cpy #20                     ; From 0 to 19, erase from left to middle.
+	beq DoTransitionToDeadPart2 ; wipe done. continue to big dead text.        
 
-	inx                     ; next row.
-	stx EventCounter        ; Save new row number
-	ldy #PRINT_CREDIT_TXT   ; Print the culprits responsible
-	jsr PrintToScreen
+; PART 1 -- Wipe the screen from sides to center.
+DoTransitionToDeadPart1         ; Have not reached the end, wipe more screen
+	ldx #0                      ; use as line index.   
 
-	cpx #21                 ; reached bottom of screen?
-	bne EndTransitionToDead ; No.  Remain on this transition event next time.
+LoopDeadTransition
+	jsr LoadScreenPointerFromX  ; Load ScreenPointer From X index.  duh.
+	stx SAVEX                   ; Keep for later.
 
-	jsr DisplayGameScreen   ; Draw game screen.
+	lda #INTERNAL_INVSPACE      ; inverse space
+	sta (ScreenPointer),y       ; stuff into column Y from the left.
+	sty SAVEY                   ; Save the Y column.
+	lda #39                     ; Subtract ...
+	sec                         ; the column...
+	sbc SAVEY                   ; from 39...
+	tay                         ; for the right side.
+	lda #INTERNAL_INVSPACE
+	sta (ScreenPointer),y       ; And stuff into column Y from the right.
 
-	lda #0
-	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
+	cpx #50 ; Lines 0 to 24 times 2.  Line 25 times 2 is the exit.
+	bne LoopDeadTransition
 
-	lda #SCREEN_DEAD        ; Yes, change to game screen.
+	inc EventCounter            ; Set for next run to the next column
+	bne EndTransitionToDead     ; And this turn is done.
+
+; PART 2 -- Clear screen is done.  Display the Big Dead Frog Text.
+DoTransitionToDeadPart2
+	ldx #120
+LoopPrintDeadText
+	lda FROG_DEAD_GFX,x
+	sta SCREENMEM+240,X
+	dex
+	bpl LoopPrintDeadText
+
+;Setup for Dead screen (wait for input loop)
+	lda #60                 ; Text Blinking speed for prompt on WIN screen.
+	jsr ResetTimers
+
+	lda #SCREEN_DEAD         ; Change to dead screen.
 	sta CurrentScreen
 
 EndTransitionToDead
@@ -1860,7 +1903,7 @@ EventDeadScreen
 	beq EndDeadScreen          ; Nothing pressed, done with title screen.
 
 ProcessDeadScreenInput         ; a key is pressed. Prepare for the screen transition.
-	lda #10                    ; Text moving speed.
+	lda #10                    ; Text flashing speed.
 	jsr ResetTimers
 
 	lda #3                     ; Transition Loops from third row through 21st row.
