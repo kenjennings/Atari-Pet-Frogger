@@ -1351,7 +1351,7 @@ CLNEXT
 ;
 ; Flip toggle state 0, 1, 0, 1, 0, 1,....
 ;
-; Ordinarily should be EOR with #1, but I don;t trust myself that
+; Ordinarily should be EOR with #1, but I don't trust myself that
 ; Toggle state ends up being something greater than 1 due to some 
 ; moment of sloppiness, so the absolute, slower slogging about 
 ; with INC and AND is done here.
@@ -1468,74 +1468,6 @@ DecrementRows            ; decrement number of rows.
 
 
 ; ==========================================================================
-; SETUP TRANSITION TO WIN SCREEN 
-;
-; Prep values to run the Transition Event for the Win screen
-;
-; Uses A, X 
-; --------------------------------------------------------------------------
-SetupTransitionToWin
-	jsr Add500ToScore
-
-	lda #6                 ; Animation moving speed.
-	jsr ResetTimers
-
-	lda #0                  ; Zero event controls.
-	sta EventCounter
-	sta EventStage
-
-	lda #SCREEN_TRANS_WIN   ; Next step is operating the transition animation.
-	sta CurrentScreen   
-
-	rts
-
-
-; ==========================================================================
-; SETUP TRANSITION TO DEAD SCREEN 
-;
-; Prep values to run the Transition Event for the dead frog.
-; Splat frog.  
-; Set timer to 1.5 second wait.
-;
-; Uses A, X 
-; --------------------------------------------------------------------------
-SetupTransitionToDead
-	; splat the frog:
-	lda #INTERNAL_ASTER  ; Atari ASCII $2A/42 (dec) Splattered Frog.
-	sta (FrogLocation),y ; Road kill the frog.
-
-	lda #90                 ; Initial delay moving speed.
-	jsr ResetTimers
-
-	lda #0                  ; Zero event controls.
-	sta EventCounter
-	sta EventStage
-
-	lda #SCREEN_TRANS_DEAD  ; Next step is operating the transition animation.
-	sta CurrentScreen   
-
-	rts
-
-
-; ==========================================================================
-; Event process SCREEN START/NEW GAME
-; Setup for New Game and do transition to Title screen.
-; --------------------------------------------------------------------------
-EventScreenStart
-	jsr NewGameSetup        ; SCREEN_START, Yes. Setup for a new game.
-
-	jsr DisplayTitleScreen  ; Draw title and game instructions.
-
-	lda #60                 ; Text Blinking speed for prompt on Title screen.
-	jsr ResetTimers
-
-	lda #SCREEN_TITLE ; Next step is operating the title screen input.
-	sta CurrentScreen
-
-	rts
-
-
-; ==========================================================================
 ; RUN PROMPT FOR ANY KEY
 ; Maintain blinking timer.
 ; Update blink text on line 23.
@@ -1574,6 +1506,24 @@ CheckAnyKey
 
 
 ; ==========================================================================
+; Event process SCREEN START/NEW GAME
+; Setup for New Game and do transition to Title screen.
+; --------------------------------------------------------------------------
+EventScreenStart
+	jsr NewGameSetup        ; SCREEN_START, Yes. Setup for a new game.
+
+	jsr DisplayTitleScreen  ; Draw title and game instructions.
+
+	lda #60                 ; Text Blinking speed for prompt on Title screen.
+	jsr ResetTimers
+
+	lda #SCREEN_TITLE ; Next step is operating the title screen input.
+	sta CurrentScreen
+
+	rts
+
+
+; ==========================================================================
 ; Event Process TITLE SCREEN
 ; The activity on the title screen is 
 ; Blink Prompt for ANY key.
@@ -1585,14 +1535,7 @@ EventTitleScreen
 	beq EndTitleScreen           ; Nothing pressed, done with title screen.
 
 ProcessTitleScreenInput          ; a key is pressed. Prepare for the screen transition.
-	lda #10                      ; Text moving speed.
-	jsr ResetTimers
-
-	lda #3                       ; Transition Loops from third row through 21st row.
-	sta EventCounter
-
-	lda #SCREEN_TRANS_GAME       ; Next step is operating the transition animation.
-	sta CurrentScreen   
+	jsr SetupTransitionToGame
 
 EndTitleScreen
 	lda CurrentScreen            ; Yeah, redundant to when a key is pressed.
@@ -1625,13 +1568,7 @@ EventTransitionToGame
 	cpx #21                 ; reached bottom of screen?
 	bne EndTransitionToGame ; No.  Remain on this transition event next time.
 
-	jsr DisplayGameScreen   ; Draw game screen.
-
-	lda #0
-	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
-
-	lda #SCREEN_GAME        ; Yes, change to game screen.
-	sta CurrentScreen
+	jsr SetupGame
 
 EndTransitionToGame
 	lda CurrentScreen
@@ -1657,7 +1594,7 @@ EndTransitionToGame
 ; --------------------------------------------------------------------------
 EventGameScreen
 ; ==========================================================================
-; GAME SCREEN - Keyboard section
+; GAME SCREEN - Keyboard Input Section
 ; --------------------------------------------------------------------------
 	jsr CheckKey         ; Get a key if timer permits.
 	cmp #$FF             ; Key is pressed?
@@ -1715,15 +1652,13 @@ CheckBoatLanding
 DoSetupForYerDead
 ;CHECK2
 	jsr SetupTransitionToDead
-	clc
-	bcc EndGameScreen
+	bne EndGameScreen ; last action in function is lda/sta a non-zero value.
 
 	; Safe location at the far beach.  the Frog is saved.
 DoSetupForFrogWins
 ;CHECK2
 	jsr SetupTransitionToWin
-	clc
-	bcc EndGameScreen
+	bne EndGameScreen ; last action in function is lda/sta a non-zero value.
 
 ; Replace frog on screen, continue with boat animation.
 ReplaceFrogOnScreen
@@ -1733,7 +1668,7 @@ ReplaceFrogOnScreen
 	bne CheckForAnim         ; Frog movement complete. (always branch) Do boat animation.
 
 ; ==========================================================================
-; GAME SCREEN - Screen Animation
+; GAME SCREEN - Screen Animation Section
 ; --------------------------------------------------------------------------
 CheckForAnim
 	lda AnimateFrames    ; Does the timer allow the boats to move?
@@ -1788,12 +1723,7 @@ LoopPrintWinsText
 	dex
 	bpl LoopPrintWinsText
 
-;Setup for Wins screen (wait for input loop)
-	lda #60                 ; Text Blinking speed for prompt on WIN screen.
-	jsr ResetTimers
-
-	lda #SCREEN_WIN         ; Change to wins screen.
-	sta CurrentScreen
+	jsr SetupWin ;Setup for Wins screen (which only waits for input )
 
 EndTransitionToWin
 	lda CurrentScreen
@@ -1813,14 +1743,7 @@ EventWinScreen
 	beq EndWinScreen           ; Nothing pressed, done with title screen.
 
 ProcessWinScreenInput          ; a key is pressed. Prepare for the screen transition.
-	lda #6                     ; line draw speed
-	jsr ResetTimers
-
-	lda #3                     ; Transition Loops from third row through 21st row.
-	sta EventCounter
-
-	lda #SCREEN_TRANS_GAME     ; Next step is operating the transition animation.
-	sta CurrentScreen   
+	jsr SetupTransitionToGame 
 
 EndWinScreen
 	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
@@ -1880,12 +1803,7 @@ LoopPrintDeadText
 	dex
 	bpl LoopPrintDeadText
 
-;Setup for Dead screen (wait for input loop)
-	lda #60                 ; Text Blinking speed for prompt on WIN screen.
-	jsr ResetTimers
-
-	lda #SCREEN_DEAD         ; Change to dead screen.
-	sta CurrentScreen
+	jsr SetupDead ; Setup for Dead screen (wait for input loop)
 
 EndTransitionToDead
 	lda CurrentScreen
@@ -1903,19 +1821,20 @@ EventDeadScreen
 	beq EndDeadScreen          ; Nothing pressed, done with title screen.
 
 ProcessDeadScreenInput         ; a key is pressed. Prepare for the screen transition.
-	lda #10                    ; Text flashing speed.
-	jsr ResetTimers
+	lda NumberOfLives          ; Have we run out of frogs?
+	beq SwitchToGameOver       ; Yes.  Game Over.
 
-	lda #3                     ; Transition Loops from third row through 21st row.
-	sta EventCounter
+	jsr SetupTransitionToGame  ; No.  Go back to game screen.
+	bne EndDeadScreen
 
-	lda #SCREEN_TRANS_GAME     ; Next step is operating the transition animation.
-	sta CurrentScreen   
+SwitchToGameOver
+	jsr SetupTransitionToGameOver
 
 EndDeadScreen
 	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
 
 	rts
+
 
 ; ==========================================================================
 ; Event Process TRANSITION TO OVER
@@ -1925,35 +1844,48 @@ EndDeadScreen
 ; 2) follow with a blank line to erase the highest line of trailing text.
 ; --------------------------------------------------------------------------
 EventTransitionGameOver
-	lda AnimateFrames        ; Did animation counter reach 0 ?
+	lda AnimateFrames          ; Did animation counter reach 0 ?
 	bne EndTransitionGameOver  ; Nope.  Nothing to do.
-	lda #10                  ; yes.  Reset it.
+
+	dec EventCounter                ; Decrement pass counter.
+	beq DoTransitionToGameOverPart2 ; When this reaches 0 finish the screen
+
+	lda #2                     ; Running animation loop. Reset timer.
 	jsr ResetTimers
 
-	ldy #PRINT_BLANK_TXT    ; erase top line
-	ldx EventCounter
-	jsr PrintToScreen
+	; Randomize display of Game Over
+	ldy #8                     ; Do 8 random characters per pass.
+GetRandomX
+	lda RANDOM                 ; Get a random value.
+	and #$7F                   ; Mask it down to 0 to 127 value
+	cmp #118                   ; Is it more than 118?
+	bcs GetRandomX             ; Yes, retry it.
+	tax                        ; The index into the image and screen buffers.
+	lda GAME_OVER_GFX,x        ; Get image byte
+	beq SkipGameOverEOR        ; if this is 0 just copy to screen
+	eor SCREENMEM+240,x        ; Exclusive Or with screen
+SkipGameOverEOR
+	sta SCREENMEM+240,x        ; Write to screen
+	dey                 
+	bne GetRandomX             ; Do another random character in this turn.
+	beq EndTransitionGameOver
 
-	inx                     ; next row.
-	stx EventCounter        ; Save new row number
-	ldy #PRINT_CREDIT_TXT   ; Print the culprits responsible
-	jsr PrintToScreen
+	; Finish up.  Draw Complete Game Over
+DoTransitionToGameOverPart2
+	ldx #120
+LoopPrintGameOverText
+	lda GAME_OVER_GFX,x
+	sta SCREENMEM+240,x
+	dex
+	bpl LoopPrintGameOverText
 
-	cpx #21                 ; reached bottom of screen?
-	bne EndTransitionGameOver ; No.  Remain on this transition event next time.
-
-	jsr DisplayGameScreen   ; Draw game screen.
-
-	lda #0
-	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
-
-	lda #SCREEN_OVER        ; Yes, change to game screen.
-	sta CurrentScreen
+	jsr SetupGameOver 
 
 EndTransitionGameOver
 	lda CurrentScreen
 
 	rts
+
 
 ; ==========================================================================
 ; Event Process GAME OVER SCREEN
