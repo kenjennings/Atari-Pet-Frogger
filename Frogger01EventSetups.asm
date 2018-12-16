@@ -1,10 +1,8 @@
 ; ==========================================================================
 ; SETUPS 
 ;
-; All the routines to move from the current screen/state to the 
-; a different screen/state.
+; All the routines to move to a different screen/state.
 ; --------------------------------------------------------------------------
-
 
 
 ; ==========================================================================
