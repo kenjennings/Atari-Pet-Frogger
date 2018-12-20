@@ -4,13 +4,39 @@
 ; All the routines to run for each screen/state.
 ; --------------------------------------------------------------------------
 
+; Screen enumeration states for current processing condition.
+; Note that the order here does not imply the only order of 
+; movement between screens/event activity.  The enumeration 
+; could be entirely random.
+SCREEN_START       = 0  ; Entry Point for New Game setup..
+SCREEN_TITLE       = 1  ; Credits and Instructions.
+SCREEN_TRANS_GAME  = 2  ; Transition animation from Title to Game.
+SCREEN_GAME        = 3  ; GamePlay 
+SCREEN_TRANS_WIN   = 4  ; Transition animation from Game to Win.
+SCREEN_WIN         = 5  ; Crossed the river!
+SCREEN_TRANS_DEAD  = 6  ; Transition animation from Game to Dead.
+SCREEN_DEAD        = 7  ; Yer Dead!
+SCREEN_TRANS_OVER  = 8  ; Transition animation from Dead to Game Over.
+SCREEN_OVER        = 9  ; Game Over.
+SCREEN_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
+
+; Screen Order/Path
+;                       +-------------------------+
+;                       V                         |
+; Screen Title ---> Game Screen -+-> Win Screen  -+
+;       ^               ^        |
+;       |               |        +-> Dead Screen -+-> Game Over -+
+;       |               |                         |              |
+;       |               +-------------------------+              |
+;       +--------------------------------------------------------+
+
 
 ; ==========================================================================
 ; Event process SCREEN START/NEW GAME
 ; Setup for New Game and do transition to Title screen.
 ; --------------------------------------------------------------------------
 EventScreenStart
-	jsr NewGameSetup        ; SCREEN_START, Yes. Setup for a new game.
+	jsr ClearGameScores     ; Zero the score.  And high score if not set.
 
 	jsr DisplayTitleScreen  ; Draw title and game instructions.
 
@@ -239,10 +265,11 @@ EndTransitionToWin
 ; Setup for next transition.
 ; --------------------------------------------------------------------------
 EventWinScreen
-	jsr RunPromptForAnyKey     ; Blink Prompt to press ANY key.  check key.
-	beq EndWinScreen           ; Nothing pressed, done with title screen.
+	jsr RunPromptForAnyKey ; Blink Prompt to press ANY key.  check key.
+	beq EndWinScreen       ; Nothing pressed, done with title screen.
 
-ProcessWinScreenInput          ; a key is pressed. Prepare for the screen transition.
+
+ProcessWinScreenInput    ; a key is pressed. Prepare for the screen transition.
 	jsr SetupTransitionToGame 
 
 EndWinScreen
@@ -318,13 +345,17 @@ EndTransitionToDead
 ; --------------------------------------------------------------------------
 EventDeadScreen
 	jsr RunPromptForAnyKey     ; Blink Prompt to press ANY key.  check key.
-	beq EndDeadScreen          ; Nothing pressed, done with title screen.
+	beq EndDeadScreen          ; Nothing pressed, done with this pass on the screen.
 
 ProcessDeadScreenInput         ; a key is pressed. Prepare for the screen transition.
-	lda NumberOfLives          ; Have we run out of frogs?
+	dec NumberOfLives          ; subtract a life.  Have we run out of frogs?
+;	lda NumberOfLives          ; 
 	beq SwitchToGameOver       ; Yes.  Game Over.
 
-	jsr SetupTransitionToGame  ; No.  Go back to game screen.
+	lda #$FF
+	sta FlaggedHiScore         ; No. Flag the high score. Score must have changed to get here.
+
+	jsr SetupTransitionToGame  ; Go back to game screen.
 	bne EndDeadScreen
 
 SwitchToGameOver
@@ -396,7 +427,7 @@ EventGameOverScreen
 	jsr RunPromptForAnyKey     ; Blink Prompt to press ANY key.  check key.
 	beq EndDeadScreen          ; Nothing pressed, done with title screen.
 
-ProcessDeadScreenInput         ; a key is pressed. Prepare for the screen transition.
+ProcessGameOverScreenInput     ; a key is pressed. Prepare for the screen transition.
 	lda #10                    ; Text moving speed.
 	jsr ResetTimers
 
@@ -406,7 +437,7 @@ ProcessDeadScreenInput         ; a key is pressed. Prepare for the screen transi
 	lda #SCREEN_TRANS_TITLE    ; Next step is operating the transition animation.
 	sta CurrentScreen   
 
-EndDeadScreen
+EndGameOverScreen
 	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
 
 	rts
@@ -431,16 +462,8 @@ EventTransitionToTitle
 
 	inx                      ; next row.
 	stx EventCounter         ; Save new row number
-	ldy #PRINT_CREDIT_TXT    ; Print the culprits responsible
-	jsr PrintToScreen
-
-	cpx #21                  ; reached bottom of screen?
+	cpx #25                  ; reached bottom of screen?
 	bne EndTransitionToTitle ; No.  Remain on this transition event next time.
-
-	jsr DisplayGameScreen    ; Draw game screen.
-
-	lda #0
-	sta FrogSafety           ; Schrodinger's current frog is known to be alive.
 
 	lda #SCREEN_START        ; Yes, change to beginning of event cycle/start new game.
 	sta CurrentScreen
@@ -449,3 +472,5 @@ EndTransitionToTitle
 	lda CurrentScreen
 
 	rts
+
+	
