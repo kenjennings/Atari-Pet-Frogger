@@ -29,12 +29,14 @@ RunPromptForAnyKey
 
 	ldy #PRINT_INST_TXT4     ; Display normal prompt
 	ldx #23
-	jsr PrintToScreen
-	jmp ResetPromptBlinking
+
+	bne PrintAndReset        ; Print to screen then reset
 
 PromptInverse
 	ldy #PRINT_INST_TXT4_INV ; Display inverse prompt
 	ldx #23
+	
+PrintAndReset
 	jsr PrintToScreen
 
 ResetPromptBlinking

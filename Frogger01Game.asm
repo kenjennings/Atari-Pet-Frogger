@@ -35,6 +35,8 @@ GAMESTART
 	lda #1
 	sta CRSINH ; Turn off the displayed cursor.
 
+	sta DoTimers ; and turn on timers.
+
 	lda #0
 	sta DINDEX ; Tell OS screen/cursor control is Text Mode 0
 	sta LMARGN ; Set left margin to 0 (default is 2)
