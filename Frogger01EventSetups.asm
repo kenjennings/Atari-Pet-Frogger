@@ -13,13 +13,13 @@
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupTransitionToGame
-	lda #10                      ; Line draw speed
+	lda #CREDIT_SPEED       ; Credit Draw Speed
 	jsr ResetTimers
 
-	lda #3                       ; Transition Loops from third row through 21st row.
+	lda #2                  ; Transition Loops from third row through 21st row.
 	sta EventCounter
 
-	lda #SCREEN_TRANS_GAME       ; Next step is operating the transition animation.
+	lda #SCREEN_TRANS_GAME  ; Next step is operating the transition animation.
 	sta CurrentScreen
 
 	rts
@@ -40,7 +40,7 @@ SetupGame
 
 	lda #$12                ; 18 (dec), number of screen rows of playfield.
 	sta FrogRow
-
+	
 	lda #$30                ; 48 (dec), delay counter.
 	sta DelayNumber
 
@@ -53,8 +53,10 @@ SetupGame
 	sta FrogLocation + 1
 
 	ldy #$13               ; Frog horizontal coordinate, Y = 19 (dec)
+	sty FrogColumn
+	sty FrogLastColumn
 
-	jsr ClearGameScores    ; Zero the score.  And high score if not set.
+;	jsr ClearGameScores    ; Zero the score.  And high score if not set.
 
 	jsr DisplayGameScreen   ; Draw game screen.
 
@@ -98,7 +100,7 @@ SetupTransitionToWin
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupWin
-	lda #60                 ; Text Blinking speed for prompt on WIN screen.
+	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
 	lda #SCREEN_WIN         ; Change to wins screen.
@@ -121,8 +123,11 @@ SetupTransitionToDead
 	lda #INTERNAL_ASTER  ; Atari ASCII $2A/42 (dec) Splattered Frog.
 	sta (FrogLocation),y ; Road kill the frog.
 
+	jsr CopyScoreToScreen    ; Update the screen information
+	jsr PrintFrogsAndLives     
+
 	inc FrogSafety          ; Schrodinger knows the frog is dead.
-	lda #90                 ; Initial delay moving speed.
+	lda #90                 ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
 	jsr ResetTimers
 
 	lda #0                  ; Zero event controls.
@@ -143,7 +148,7 @@ SetupTransitionToDead
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupDead
-	lda #60                 ; Text Blinking speed for prompt on DEAD screen.
+	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
 	lda #SCREEN_DEAD         ; Change to dead screen.
@@ -180,7 +185,7 @@ SetupTransitionToGameOver
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupGameOver
-	lda #60                 ; Text Blinking speed for prompt on Game Over screen.
+	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
 	lda #SCREEN_OVER         ; Change to Game Over screen.

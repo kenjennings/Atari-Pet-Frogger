@@ -40,7 +40,7 @@ EventScreenStart
 
 	jsr DisplayTitleScreen  ; Draw title and game instructions.
 
-	lda #60                 ; Text Blinking speed for prompt on Title screen.
+	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
 	lda #SCREEN_TITLE ; Next step is operating the title screen input.
@@ -79,7 +79,7 @@ EndTitleScreen
 EventTransitionToGame
 	lda AnimateFrames        ; Did animation counter reach 0 ?
 	bne EndTransitionToGame  ; Nope.  Nothing to do.
-	lda #10                  ; yes.  Reset it.
+	lda #CREDIT_SPEED        ; yes.  Reset it.
 	jsr ResetTimers
 
 	ldy #PRINT_BLANK_TXT    ; erase top line
@@ -91,7 +91,7 @@ EventTransitionToGame
 	ldy #PRINT_CREDIT_TXT   ; Print the culprits responsible
 	jsr PrintToScreen
 
-	cpx #21                 ; reached bottom of screen?
+	cpx #22                 ; reached bottom of screen?
 	bne EndTransitionToGame ; No.  Remain on this transition event next time.
 
 	jsr SetupGame
@@ -200,6 +200,8 @@ CheckForAnim
 	lda AnimateFrames    ; Does the timer allow the boats to move?
 	bne EndGameScreen    ; Nothing at this time. Exit.
 
+	jsr SetBoatSpeed     ; Reset timer for animation based on number of saved frogs.
+
 	jsr AnimateBoats     ; Move the boats around.
 	jsr AutoMoveFrog     ; GOTO AUTOMVE
 
@@ -241,13 +243,8 @@ EventTransitionToWin
 	bne EndTransitionToWin  ; Nothing else to do here.
 
 ; Clear screen is done.   Display the big prompt.
-DoSwitchToWins  ; Copy the big text announcement to screen
-	ldx #120
-LoopPrintWinsText
-	lda FROG_SAVE_GFX,x
-	sta SCREENMEM+240,X
-	dex
-	bpl LoopPrintWinsText
+DoSwitchToWins 
+	jsr PrintWinFrogGfx  ; Copy the big text announcement to screen
 
 	jsr SetupWin ;Setup for Wins screen (which only waits for input )
 
@@ -267,7 +264,6 @@ EndTransitionToWin
 EventWinScreen
 	jsr RunPromptForAnyKey ; Blink Prompt to press ANY key.  check key.
 	beq EndWinScreen       ; Nothing pressed, done with title screen.
-
 
 ProcessWinScreenInput    ; a key is pressed. Prepare for the screen transition.
 	jsr SetupTransitionToGame 
@@ -290,7 +286,7 @@ EventTransitionToDead
 	lda AnimateFrames           ; Did animation counter reach 0 ?
 	bne EndTransitionToDead     ; Nope.  Nothing to do.
 
-	lda #6                      ; yes.  Reset it. (drawing speed)
+	lda #DEAD_FILL_SPEED        ; yes.  Reset it. (drawing speed)
 	jsr ResetTimers
 
 	ldy EventCounter            ; column number for text.
@@ -299,7 +295,7 @@ EventTransitionToDead
 
 ; PART 1 -- Wipe the screen from sides to center.
 DoTransitionToDeadPart1         ; Have not reached the end, wipe more screen
-	ldx #0                      ; use as line index.   
+	ldx #4                      ; use as line index. 2 (*2) to 24 (*2)
 
 LoopDeadTransition
 	jsr LoadScreenPointerFromX  ; Load ScreenPointer From X index.  duh.
@@ -321,14 +317,9 @@ LoopDeadTransition
 	inc EventCounter            ; Set for next run to the next column
 	bne EndTransitionToDead     ; And this turn is done.
 
-; PART 2 -- Clear screen is done.  Display the Big Dead Frog Text.
+; PART 2 -- Clear screen is done.  
 DoTransitionToDeadPart2
-	ldx #120
-LoopPrintDeadText
-	lda FROG_DEAD_GFX,x
-	sta SCREENMEM+240,X
-	dex
-	bpl LoopPrintDeadText
+	jsr PrintDeadFrogGfx ; Display the Big Dead Frog Text.
 
 	jsr SetupDead ; Setup for Dead screen (wait for input loop)
 
@@ -348,8 +339,9 @@ EventDeadScreen
 	beq EndDeadScreen          ; Nothing pressed, done with this pass on the screen.
 
 ProcessDeadScreenInput         ; a key is pressed. Prepare for the screen transition.
-	dec NumberOfLives          ; subtract a life.  Have we run out of frogs?
-;	lda NumberOfLives          ; 
+	dec NumberOfLives          ; subtract a life.  
+	jsr PrintFrogsAndLives     ; Update the screen information
+	lda NumberOfLives          ; Have we run out of frogs?
 	beq SwitchToGameOver       ; Yes.  Game Over.
 
 	lda #$FF
@@ -401,14 +393,9 @@ SkipGameOverEOR
 	bne GetRandomX             ; Do another random character in this turn.
 	beq EndTransitionGameOver
 
-	; Finish up.  Draw Complete Game Over
+	; Finish up. 
 DoTransitionToGameOverPart2
-	ldx #120
-LoopPrintGameOverText
-	lda GAME_OVER_GFX,x
-	sta SCREENMEM+240,x
-	dex
-	bpl LoopPrintGameOverText
+	jsr PrintGameOverGfx       ;  Draw Big Game Over
 
 	jsr SetupGameOver 
 

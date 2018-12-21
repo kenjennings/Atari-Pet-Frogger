@@ -40,7 +40,7 @@ PrintAndReset
 	jsr PrintToScreen
 
 ResetPromptBlinking
-	lda #60                  ; Blinking speed.
+	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
 CheckAnyKey
@@ -56,27 +56,30 @@ CheckAnyKey
 ; If a high score is flagged, then do not clear high score.
 ; --------------------------------------------------------------------------
 ClearGameScores
-	ldx #$07           ; 8 digits. 7 to 0
+	ldx #$07            ; 8 digits. 7 to 0
 
-CLEAR
-	lda #INTERNAL_0    ; Atari internal code for "0"
-	sta MyScore,x      ; Put zero/"0" in score buffer.
+LoopClearScores
+	lda #INTERNAL_0     ; Atari internal code for "0"
+	sta MyScore,x       ; Put zero/"0" in score buffer.
 
-	ldy FlaggedHiScore ; Has a high score been flagged? ($FF)
-	bmi CLNEXT         ; If so, then skip this and go to the next digit.
+	ldy FlaggedHiScore  ; Has a high score been flagged? ($FF)
+	bmi NextScoreDigit  ; If so, then skip this and go to the next digit.
 
-	sta HiScore,x      ; Also put zero/"0" in the high score.
+	sta HiScore,x       ; Also put zero/"0" in the high score.
 
-CLNEXT
-	dex                ; decrement index to score digits.
-	bpl CLEAR          ; went from 0 to $FF? no, loop for next digit.
+NextScoreDigit
+	dex                 ; decrement index to score digits.
+	bpl LoopClearScores ; went from 0 to $FF? no, loop for next digit.
 
-; Hmmmm.  Did modularization eliminate the following ?
-;	tay                ; Now Y also is zero/"0".
-	lda #3             ; Reset number of
-	sta NumberOfLives  ; lives to 3.
-;	tya                ; A  is zero/"0" again.
-	ldy #$13           ; Y = 19 (dec) (again)
+	lda #3              ; Reset number of
+	sta NumberOfLives   ; lives to 3.
+	
+;; Hmmmm.  Did modularization eliminate the following ?
+;;	tay                ; Now Y also is zero/"0".
+;	lda #3             ; Reset number of
+;	sta NumberOfLives  ; lives to 3.
+;;	tya                ; A  is zero/"0" again.
+;	ldy #$13           ; Y = 19 (dec) (again)
 
 	rts
 
