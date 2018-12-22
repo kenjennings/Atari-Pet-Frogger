@@ -806,7 +806,7 @@ PrintFrogsAndLives
 	beq WriteLives      ; then nothing to display. Skip to do lives.
 
 SavedFroggies
-	sta SCREENMEM+46,x  ; Write to screen. (second line, 16th position)
+	sta SCREENMEM+55,x  ; Write to screen. (second line, 16th position)
 	dex                 ; Decrement number of frogs.
 	bne SavedFroggies   ; then go back and display the next frog counter.
 

@@ -37,7 +37,6 @@ SetupTransitionToGame
 SetupGame
 ;	jsr NewGameSetup
 	lda #0
-	sta FrogsCrossed        ; Zero the number of successful crossings.
 	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
 	
 	lda #$30                ; 48 (dec), delay counter.
@@ -114,7 +113,9 @@ SetupWin
 	
 	lda #SCREEN_WIN         ; Change to wins screen.
 	sta CurrentScreen
-
+	
+;	inc FrogsCrossed
+	
 	rts
 
 

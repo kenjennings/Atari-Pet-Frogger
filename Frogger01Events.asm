@@ -203,13 +203,15 @@ ReplaceFrogOnScreen
 ; GAME SCREEN - Screen Animation Section
 ; --------------------------------------------------------------------------
 CheckForAnim
-	lda AnimateFrames    ; Does the timer allow the boats to move?
-	bne EndGameScreen    ; Nothing at this time. Exit.
+	lda AnimateFrames      ; Does the timer allow the boats to move?
+	bne EndGameScreen      ; Nothing at this time. Exit.
 
-	jsr SetBoatSpeed     ; Reset timer for animation based on number of saved frogs.
+	jsr SetBoatSpeed       ; Reset timer for animation based on number of saved frogs.
 
-	jsr AnimateBoats     ; Move the boats around.
-	jsr AutoMoveFrog     ; GOTO AUTOMVE
+	jsr AnimateBoats       ; Move the boats around.
+	jsr AutoMoveFrog       ; GOTO AUTOMVE
+	lda FrogSafety         ; Whay does Schrodinger have to say?
+	bne DoSetupForYerDead  ; Nooooooo!
 
 EndGameScreen
 	lda CurrentScreen  
@@ -253,7 +255,7 @@ DoSwitchToWins
 	jsr PrintWinFrogGfx  ; Copy the big text announcement to screen
 
 	jsr SetupWin ;Setup for Wins screen (which only waits for input )
-
+	
 EndTransitionToWin
 	lda CurrentScreen
 

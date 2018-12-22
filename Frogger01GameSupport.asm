@@ -54,6 +54,7 @@ CheckAnyKey
 ; Clear the score digits to zeros.
 ; That is, internal screen code for "0"
 ; If a high score is flagged, then do not clear high score.
+; other one-time things at game start.
 ; --------------------------------------------------------------------------
 ClearGameScores
 	ldx #$07            ; 8 digits. 7 to 0
@@ -71,9 +72,13 @@ NextScoreDigit
 	dex                 ; decrement index to score digits.
 	bpl LoopClearScores ; went from 0 to $FF? no, loop for next digit.
 
+
+
 	lda #3              ; Reset number of
 	sta NumberOfLives   ; lives to 3.
 	
+	lda #0
+	sta FrogsCrossed        ; Zero the number of successful crossings.
 ;; Hmmmm.  Did modularization eliminate the following ?
 ;;	tay                ; Now Y also is zero/"0".
 ;	lda #3             ; Reset number of
