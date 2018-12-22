@@ -142,8 +142,8 @@
 ; ==========================================================================
 ; Animation speeds of some objects.   Number of frames to wait...
 ; --------------------------------------------------------------------------
-BLINK_SPEED = 36    ; blinking Press Any Key text
-CREDIT_SPEED = 4    ; Animated Credits.
+BLINK_SPEED     = 36    ; blinking Press Any Key text
+CREDIT_SPEED    = 3    ; Animated Credits.
 DEAD_FILL_SPEED = 3 ; Fill the Screen for Dead Frog
 
 
@@ -264,11 +264,11 @@ INST_TXT3 ; Game Controls
 
 INST_TXT4 ; Prompt to start game.
 ; 24 |     Hit any key to start the game.     | INSTXT_4
-	.sb "     Hit any key to start the game.     "
+	.sb "        Hit any key to continue.        "
 
 INST_TXT4_INV ; inverse version to support blinking.
 ; 24 |     Hit any key to start the game.     | INSTXT_4INV
-	.sb +$80 "     Hit any key to start the game.     "
+	.sb +$80 "        Hit any key to continue.        "
 
 ; ==========================================================================
 
@@ -343,14 +343,14 @@ GAME_OVER_GFX
 ; |  |**|**|* | *|* | *|* |**|  | *|* |**|**|**|  |  |  |  |**|**|  |  | *|* |  | *|**|**|* | *|* | *|* |
 
 ; Graphics chars, Game Over.
-; | I|iI|iU| I|  |iL|iK|  |iS| O|iL| Y|i |iU|iU|  |  |  | I|iI|iO| O|iY| Y|iY| Y|iY|iI|iU| L|iY|iI|iO| O|
+; | I|iI|iU| L|  |iL|iK|  |iS| O|iL| Y|i |iU|iU|  |  |  | I|iI|iO| O|iY| Y|iY| Y|iY|iI|iU| L|iY|iI|iO| O|
 ; |iY| Y| U| O|iY| Y|iY| Y|i |iO|iO| Y|i |iU| L|  |  |  |iY| Y|iY| Y|iY| Y|iY| Y|iY|iI|iU|  |iY|iK|iL| L|
 ; | K|iK|iL| Y|iY|iI|iO| Y|i |  |iY| Y|i | U| U|  |  |  | K|iK|iL| L|  |iO|iI|  |iY| K| U| O|iY| Y|iO| O|
 
 ; Graphics data, Game Over.  (34) + 6 spaces.
-	.by $0 $0 $0 I_I  I_II I_IU I_I I_S  I_IL I_IK I_S I_IS I_O  I_IL I_Y I_IS I_IU I_IU I_S I_S I_S I_I  I_II I_IO I_O I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_L I_IY I_II I_IO I_O $0 $0 $0
+	.by $0 $0 $0 I_I  I_II I_IU I_L I_S  I_IL I_IK I_S I_IS I_O  I_IL I_Y I_IS I_IU I_IU I_S I_S I_S I_I  I_II I_IO I_O I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_L I_IY I_II I_IO I_O $0 $0 $0
 	.by $0 $0 $0 I_IY I_Y  I_U  I_O I_IY I_Y  I_IY I_Y I_IS I_IO I_IO I_Y I_IS I_IU I_L  I_S I_S I_S I_IY I_Y  I_IY I_Y I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_S I_IY I_IK I_IL I_L $0 $0 $0
-	.by $0 $0 $0 I_IK I_IK I_IL I_Y I_IY I_II I_IO I_Y I_IS I_S  I_IY I_Y I_IS I_U  I_U  I_S I_S I_S I_IK I_IK I_IL I_L I_S  I_IO I_II I_S I_IY I_IK I_U  I_O I_IY I_Y  I_IO I_O $0 $0 $0
+	.by $0 $0 $0 I_K  I_IK I_IL I_Y I_IY I_II I_IO I_Y I_IS I_S  I_IY I_Y I_IS I_U  I_U  I_S I_S I_S I_K  I_IK I_IL I_L I_S  I_IO I_II I_S I_IY I_IK I_U  I_O I_IY I_Y  I_IO I_O $0 $0 $0
 
 
 ; ==========================================================================
@@ -485,7 +485,7 @@ PrintWinFrogGfx
 	ldx #SIZEOF_BIG_GFX
 LoopPrintWinsText
 	lda FROG_SAVE_GFX,x
-	sta SCREENMEM+240,X
+	sta SCREENMEM+440,X
 	dex
 	bpl LoopPrintWinsText
 
@@ -501,7 +501,7 @@ PrintGameOverGfx
 	ldx #SIZEOF_BIG_GFX
 LoopPrintGameOverText
 	lda GAME_OVER_GFX,x
-	sta SCREENMEM+240,x
+	sta SCREENMEM+440,x
 	dex
 	bpl LoopPrintGameOverText
 	
@@ -564,6 +564,10 @@ PRINTSC
 
 	jsr ClearScreen
 
+	ldy #PRINT_CREDIT_TXT   ; Identify the culprits responsible
+	ldx #22
+	jsr PrintToScreen
+
 	ldy #PRINT_SCORE_TXT    ; Print the lives and score labels
 	ldx #0
 	jsr PrintToScreen
@@ -583,10 +587,6 @@ LoopPrintBoats
 
 	ldy #PRINT_TEXT2        ; Print TEXT2 - last Beach with the frog
 ;	ldx #20                 ; it already is 20.
-	jsr PrintToScreen
-
-	ldy #PRINT_CREDIT_TXT   ; Identify the culprits responsible
-	ldx #22
 	jsr PrintToScreen
 
 	; Display the current score and number of frogs that crossed the river.
@@ -731,8 +731,10 @@ MoveToRight ; Shift text lines to the right.
 	bpl MoveToRight   ; Backed up from 0 to FF? No. Do the shift again.
 
 	; Copy character at end of line to the start of the line.
+	iny               ; Go back from $FF to $00
 	pla               ; Get character that was at the end of the line.
-	ldy #$00          ; Offset 0 == start of line
+
+;	ldy #$00          ; Offset 0 == start of line
 	sta (MovesCars),y ; Save it at start of line.
 
 	; SECOND PART -- Setup for Left Shift...
@@ -743,7 +745,7 @@ MoveToRight ; Shift text lines to the right.
 	sta MovesCars+1
 	inx
 
-	ldy #$00          ; Character position, start at +0 (dec)
+;	ldy #$00          ; Character position, start at +0 (dec)
 	lda (MovesCars),y ; Read byte from screen (start +0)
 	pha               ; Save to move to position +39.
 	iny               ; now at offset +1 (dec)
@@ -756,12 +758,12 @@ MoveToLeft ; Shift text lines to the left.
 	iny               ; Forward to the original read position. (start +1)
 	iny               ; Forward to the next read position. (start +2)
 
-	cpy #$27          ; Reached position $27/39 (dec) (end of line)?
+	cpy #40           ; Reached position $27/39 (dec) (end of line)?
 	bne MoveToLeft    ; No.  Do the shift again.
 
 	; Copy character at start of line to the end of the line.
+	ldy #39          ; Offset $27/39 (dec)
 	pla               ; Get character that was at the end of the line.
-	ldy #$27          ; Offset $27/39 (dec)
 	sta (MovesCars),y ; Save it at end of line.
 
 	inx ; skip the beach line

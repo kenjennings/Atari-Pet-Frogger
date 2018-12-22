@@ -19,6 +19,8 @@ SetupTransitionToGame
 	lda #2                  ; Transition Loops from third row through 21st row.
 	sta EventCounter
 
+	jsr ClearKey
+	
 	lda #SCREEN_TRANS_GAME  ; Next step is operating the transition animation.
 	sta CurrentScreen
 
@@ -37,9 +39,6 @@ SetupGame
 	lda #0
 	sta FrogsCrossed        ; Zero the number of successful crossings.
 	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
-
-	lda #$12                ; 18 (dec), number of screen rows of playfield.
-	sta FrogRow
 	
 	lda #$30                ; 48 (dec), delay counter.
 	sta DelayNumber
@@ -51,8 +50,12 @@ SetupGame
 	sta FrogLocation
 	lda #>[SCREENMEM+$320] ; Hi Byte, Frog position.
 	sta FrogLocation + 1
-
-	ldy #$13               ; Frog horizontal coordinate, Y = 19 (dec)
+	
+	lda #18                ; 18 (dec), number of screen rows of game field. (+2 from top)
+	sta FrogRow
+	sta FrogLastRow
+	
+	ldy #19               ; Frog horizontal coordinate, Y = 19 (dec)
 	sty FrogColumn
 	sty FrogLastColumn
 
@@ -63,6 +66,8 @@ SetupGame
 	lda #INTERNAL_O        ; On Atari we're using "O" as the frog shape.
 	sta (FrogLocation),y   ; SCREENMEM + $320 + $13
 
+	jsr ClearKey
+	
 	lda #SCREEN_GAME        ; Yes, change to game screen.
 	sta CurrentScreen
 
@@ -85,6 +90,8 @@ SetupTransitionToWin
 	lda #0                  ; Zero event controls.
 	sta EventCounter
 	sta EventStage
+	
+	jsr ClearKey
 
 	lda #SCREEN_TRANS_WIN   ; Next step is operating the transition animation.
 	sta CurrentScreen
@@ -102,7 +109,9 @@ SetupTransitionToWin
 SetupWin
 	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
-
+	
+	jsr ClearKey
+	
 	lda #SCREEN_WIN         ; Change to wins screen.
 	sta CurrentScreen
 
@@ -134,6 +143,8 @@ SetupTransitionToDead
 	sta EventCounter
 	sta EventStage
 
+	jsr ClearKey
+	
 	lda #SCREEN_TRANS_DEAD  ; Next step is operating the transition animation.
 	sta CurrentScreen
 
@@ -151,6 +162,8 @@ SetupDead
 	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
+	jsr ClearKey
+	
 	lda #SCREEN_DEAD         ; Change to dead screen.
 	sta CurrentScreen
 
@@ -165,13 +178,15 @@ SetupDead
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupTransitionToGameOver
-	lda #2                           ; Animation moving speed.
+	lda #2                 ; Animation moving speed.
 	jsr ResetTimers
 
-	lda #180
+	lda #60                ; Number of times to do the Game Over EOR effect
 	sta EventCounter
 
-	lda #SCREEN_TRANS_OVER         ; Change to game over transition.
+	jsr ClearKey
+	
+	lda #SCREEN_TRANS_OVER ; Change to game over transition.
 	sta CurrentScreen
 
 	rts
@@ -188,6 +203,8 @@ SetupGameOver
 	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
+	jsr ClearKey
+	
 	lda #SCREEN_OVER         ; Change to Game Over screen.
 	sta CurrentScreen
 
@@ -208,6 +225,8 @@ SetupTransitionToTitle
 	lda #2
 	sta EventCounter                ; start wiping screen at line 2
 
+	jsr ClearKey
+	
 	lda #SCREEN_TRANS_TITLE         ; Change to Title Screen transition.
 	sta CurrentScreen
 

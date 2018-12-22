@@ -129,6 +129,7 @@ EventGameScreen
 	sta LastKeyPressed   ; Save key.
 
 	ldy FrogColumn       ; Current X coordinate
+	sty FrogLastColumn
 	lda LastCharacter    ; Get the last character (under the frog)
 	sta (FrogLocation),y ; Erase the frog with the last character.
 
@@ -139,8 +140,10 @@ ProcessKey ; Process keypress
 	bne RightKeyTest         ; No.  Go test for Right.
 
 	dey                      ; Move Y to left.
+	sty FrogColumn
 	bpl SaveNewFrogLocation  ; Not $FF.  Go place frog on screen.
 	iny                      ; It is $FF.  Correct by adding 1 to Y.
+	sty FrogColumn
 	bpl SaveNewFrogLocation  ; Place frog on screen
 
 RightKeyTest 
@@ -149,8 +152,10 @@ RightKeyTest
 
 	iny                      ; Move Y to right.
 	cpy #$28                 ; Did it move off screen? Position $28/40 (dec)
+	sty FrogColumn
 	bne SaveNewFrogLocation  ; No.  Go place frog on screen.
 	dey                      ; Yes.  Correct by subtracting 1 from Y.
+	sty FrogColumn
 	bne SaveNewFrogLocation  ; Corrected.  Go place frog on screen.
 
 UpKeyTest ; Test for Up "S" key
@@ -163,7 +168,8 @@ UpKeyTest ; Test for Up "S" key
 SaveNewFrogLocation
 	lda (FrogLocation),y     ; Get the character in the new position.
 	sta LastCharacter        ; Save for later when frog moves.
-
+	sty FrogColumn
+	
 ; Will the Pet Frog land on the Beach?
 	cmp #INTERNAL_INVSPACE   ; Atari uses inverse space for beach
 	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
@@ -191,7 +197,7 @@ ReplaceFrogOnScreen
 ;PLACE2 
 	lda #INTERNAL_O          ; Atari internal code for "O" is frog.
 	sta (FrogLocation),y     ; Save to screen memory to display it.
-	bne CheckForAnim         ; Frog movement complete. (always branch) Do boat animation.
+;	bne CheckForAnim         ; Frog movement complete. (always branch) Do boat animation.
 
 ; ==========================================================================
 ; GAME SCREEN - Screen Animation Section
@@ -377,7 +383,7 @@ EventTransitionGameOver
 	jsr ResetTimers
 
 	; Randomize display of Game Over
-	ldy #8                     ; Do 8 random characters per pass.
+	ldy #16                    ; Do 16 random characters per pass.
 GetRandomX
 	lda RANDOM                 ; Get a random value.
 	and #$7F                   ; Mask it down to 0 to 127 value
@@ -386,9 +392,9 @@ GetRandomX
 	tax                        ; The index into the image and screen buffers.
 	lda GAME_OVER_GFX,x        ; Get image byte
 	beq SkipGameOverEOR        ; if this is 0 just copy to screen
-	eor SCREENMEM+240,x        ; Exclusive Or with screen
+	eor SCREENMEM+440,x        ; Exclusive Or with screen
 SkipGameOverEOR
-	sta SCREENMEM+240,x        ; Write to screen
+	sta SCREENMEM+440,x        ; Write to screen
 	dey                 
 	bne GetRandomX             ; Do another random character in this turn.
 	beq EndTransitionGameOver

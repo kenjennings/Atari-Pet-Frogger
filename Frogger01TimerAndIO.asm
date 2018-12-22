@@ -84,6 +84,8 @@ ToggleFlipFlop
 ; A  returns the key pressed.  or returns $FF for no key pressed.
 ; If the timer allows reading, and a key is found, then the timer is
 ; reset for the time of the next key input cycle.
+;
+; Return with flags set for CMP #$FF ; BEQ = No key
 ; --------------------------------------------------------------------------
 CheckKey
 	lda KeyscanFrames         ; Is keyboard timer delay  0?
@@ -103,12 +105,28 @@ CheckKey
 
 ExitCheckKey                  ; exit with some kind of key value in A.
 	pla                       ; restore the pressed key in A.
+	cmp #$FF                  ; set flags for not matching $FF no key value
 	rts
 
 ExitCheckKeyNow               ; exit with no key value in A
 	lda #$FF
+	cmp #$FF                  ; set flags for matching $FF no key value
 	rts
 
+
+; ==========================================================================
+; Clear Key
+;
+; Reset CH to no key read value.
+; --------------------------------------------------------------------------
+ClearKey
+	pha             ; Save whatever is in A
+	lda #$FF
+	sta CH          ; Clear any pending key
+	pla             ; restore  whatever was in A.
+	
+	rts
+	
 
 ; ==========================================================================
 ; Wait for a keypress.
@@ -124,10 +142,7 @@ WaitKeyLoop
 	cmp #$FF        ; No key pressed
 	beq WaitKeyLoop ; Loop until a key is pressed.
 
-	pha             ; Save the key
-	lda #$FF
-	sta CH          ; Clear any pending key
-	pla             ; return the pressed key in A.
+	jsr ClearKey
 
 	rts
 

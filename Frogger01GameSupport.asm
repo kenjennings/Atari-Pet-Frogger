@@ -214,7 +214,10 @@ FrogMoveUp
 	dec FrogLocation+1   ; Smartly done instead of lda/sbc/sta.
 
 DecrementRows            ; decrement number of rows.
-	dec FrogRow
+	ldx FrogRow
+	stx FrogLastRow
+	dex 
+	stx FrogRow
 
 	rts
 
@@ -230,22 +233,30 @@ DecrementRows            ; decrement number of rows.
 ; 255 = second boat/river row, move left.
 ; --------------------------------------------------------------------------
 AutoMoveFrog
+	ldy FrogColumn
+	sty FrogLastcolumn
 	ldx FrogRow             ; Get the current row number.
 	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
 	beq ExitAutoMoveFrog    ; Is it 0?  Nothing to do.  Bail.
-	bmi AutoFrogRight       ; is it $ff?  then automatic right move.
+	bpl AutoFrogRight       ; is it $1?  then automatic right move.
 
-	dey                     ; It is 1, so move Frog left one character
-	bpl ExitAutoMoveFrog    ; Is it 0 or greater? Then nothing to do. Bail.
-
-	inc FrogSafety          ; Yup.  Ran out of river.  Yer Dead!
-	rts
+; Auto Frog Left
+	cpy #0
+	beq FrogDemiseByWallSplat ; at zero means we hit the wall.
+	dey                       ; It is not 0, so move Frog left one character
+	sty FrogColumn
+	bpl ExitAutoMoveFrog    ; Done, successful move.
 
 AutoFrogRight
-	iny                     ; Move Frog right one character
-	cpy #$28                ; Did it reach the right side ?    $28/40 (dec)
-	bne ExitAutoMoveFrog    ; No.  Bail..
-	inc FrogSafety          ; Yup.  Ran out of river.   Yer Dead!
+	cpy #39                   ; 39 is limit
+	beq FrogDemiseByWallSplat ; at limit means we hit the wall
+
+	iny                       ; Move Frog right one character
+	sty FrogColumn
+	bpl ExitAutoMoveFrog      ; Done, successful move.
+
+FrogDemiseByWallSplat         ; Ran out of river.   Yer Dead!
+	inc FrogSafety            ; Schrodinger's frog is known to be dead.
 
 ExitAutoMoveFrog
 	rts
@@ -253,9 +264,9 @@ ExitAutoMoveFrog
 
 MOVING_ROW_STATES
 	.rept 6                 ; 6 occurrences of
-		.BYTE 0, 1, $FF     ; Beach (0), Left (1), Right (FF) directions.
+		.BYTE 0, 1, $FF     ; Beach (0), Right (1), Left (FF) directions.
 	.endr
-
+		.BYTE 0             ; staring position on safe beach
 
 ; ==========================================================================
 ; A little code size optimization.
