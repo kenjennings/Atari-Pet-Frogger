@@ -86,9 +86,9 @@ SetupTransitionToWin
 	lda #6                 ; Animation moving speed.
 	jsr ResetTimers
 
-	lda #0                  ; Zero event controls.
+	lda #2                  ; Zero event controls.
 	sta EventCounter
-	sta EventStage
+;	sta EventStage
 	
 	jsr ClearKey
 

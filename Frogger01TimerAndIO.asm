@@ -39,8 +39,14 @@ ResetTimers
 	sta AnimateFrames
 
 	pha ; preserve it for caller.
+
+	lda KeyscanFrames
+	bne EndResetTimers
+	
 	lda #KEYSCAN_FRAMES
 	sta KeyscanFrames
+
+EndResetTimers
 	pla ; get this back for the caller.
 
 	rts
@@ -97,11 +103,7 @@ CheckKey
 	cmp #$FF                  ; No key pressed, so nothing to do.
 	beq ExitCheckKey
 
-	lda #$FF                  ; Got a key.
-	sta CH                    ; Clear register for next key read.
-
-	lda #KEYSCAN_FRAMES       ; Reset keyboard timer for next key input.
-	sta KeyscanFrames
+	jsr ClearKey              ; Clear register/timer for next key read.
 
 ExitCheckKey                  ; exit with some kind of key value in A.
 	pla                       ; restore the pressed key in A.
@@ -115,14 +117,29 @@ ExitCheckKeyNow               ; exit with no key value in A
 
 
 ; ==========================================================================
-; Clear Key
+; Clear Current/Pending Key
 ;
-; Reset CH to no key read value.
+; This should only be called 
+; 1) when a successful read has just occurred to empty the key 
+;    buffer and rest the key scan timer.
+; 2) when we do not want a keystroke entered in the recent past to be 
+;    automatically read when we get to the next opportunity to read the 
+;    keyboard.  
+;    i.e.  When there was animation occurring which occupies human wait 
+;    time and the code will soon enter an event area that will read a 
+;    character.  
+;    e.g. Press Any Key To Continue.
+;
+; Reset CH to no key read value.  Reset the timer too while we're here.
 ; --------------------------------------------------------------------------
 ClearKey
 	pha             ; Save whatever is in A
 	lda #$FF
 	sta CH          ; Clear any pending key
+
+	lda #KEYSCAN_FRAMES ; Reset keyboard timer for next key input.
+	sta KeyscanFrames
+	
 	pla             ; restore  whatever was in A.
 	
 	rts
