@@ -219,10 +219,11 @@ FrogMoveUp
 	dec FrogLocation+1   ; Smartly done instead of lda/sbc/sta.
 
 DecrementRows            ; decrement number of rows.
+	dec FrogRow
 	ldx FrogRow
-	stx FrogLastRow
-	dex 
-	stx FrogRow
+;	stx FrogLastRow
+;	dex 
+;	stx FrogRow
 
 	rts
 
@@ -239,7 +240,7 @@ DecrementRows            ; decrement number of rows.
 ; --------------------------------------------------------------------------
 AutoMoveFrog
 	ldy FrogColumn
-	sty FrogLastcolumn
+;	sty FrogLastcolumn
 	ldx FrogRow             ; Get the current row number.
 	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
 	beq ExitAutoMoveFrog    ; Is it 0?  Nothing to do.  Bail.

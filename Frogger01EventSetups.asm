@@ -52,13 +52,11 @@ SetupGame
 	
 	lda #18                ; 18 (dec), number of screen rows of game field. (+2 from top)
 	sta FrogRow
-	sta FrogLastRow
+;	sta FrogLastRow
 	
 	ldy #19               ; Frog horizontal coordinate, Y = 19 (dec)
 	sty FrogColumn
-	sty FrogLastColumn
-
-;	jsr ClearGameScores    ; Zero the score.  And high score if not set.
+;	sty FrogLastColumn
 
 	jsr DisplayGameScreen   ; Draw game screen.
 
@@ -83,12 +81,11 @@ SetupGame
 SetupTransitionToWin
 	jsr Add500ToScore
 
-	lda #6                 ; Animation moving speed.
+	lda #WIN_FILL_SPEED                 ; Animation moving speed.
 	jsr ResetTimers
 
-	lda #2                  ; Zero event controls.
+	lda #2                  ; start wiping screen at line 2 (0, 1, 2)
 	sta EventCounter
-;	sta EventStage
 	
 	jsr ClearKey
 
@@ -114,8 +111,6 @@ SetupWin
 	lda #SCREEN_WIN         ; Change to wins screen.
 	sta CurrentScreen
 	
-;	inc FrogsCrossed
-	
 	rts
 
 
@@ -137,7 +132,7 @@ SetupTransitionToDead
 	jsr PrintFrogsAndLives     
 
 	inc FrogSafety          ; Schrodinger knows the frog is dead.
-	lda #90                 ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
+	lda #FROG_WAKE_SPEED                 ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
 	jsr ResetTimers
 
 	lda #0                  ; Zero event controls.
@@ -179,7 +174,7 @@ SetupDead
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupTransitionToGameOver
-	lda #2                 ; Animation moving speed.
+	lda #RES_IN_SPEED                 ; Animation moving speed.
 	jsr ResetTimers
 
 	lda #60                ; Number of times to do the Game Over EOR effect
@@ -220,11 +215,11 @@ SetupGameOver
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupTransitionToTitle
-	lda #10                        ; Animation moving speed.
+	lda #TITLE_SPEED                ; Animation moving speed.
 	jsr ResetTimers
 
 	lda #2
-	sta EventCounter                ; start wiping screen at line 2
+	sta EventCounter                ; start wiping screen at line 2 (0, 1, 2)
 
 	jsr ClearKey
 	

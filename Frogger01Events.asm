@@ -129,7 +129,7 @@ EventGameScreen
 	sta LastKeyPressed   ; Save key.
 
 	ldy FrogColumn       ; Current X coordinate
-	sty FrogLastColumn
+;	sty FrogLastColumn
 	lda LastCharacter    ; Get the last character (under the frog)
 	sta (FrogLocation),y ; Erase the frog with the last character.
 
@@ -182,22 +182,18 @@ CheckBoatLanding
 ; Safe locations have been accounted.
 ; Wherever the Frog will land now, it is Baaaaad.
 DoSetupForYerDead
-;CHECK2
 	jsr SetupTransitionToDead
 	bne EndGameScreen ; last action in function is lda/sta a non-zero value.
 
 	; Safe location at the far beach.  the Frog is saved.
 DoSetupForFrogWins
-;CHECK2
 	jsr SetupTransitionToWin
 	bne EndGameScreen ; last action in function is lda/sta a non-zero value.
 
 ; Replace frog on screen, continue with boat animation.
 ReplaceFrogOnScreen
-;PLACE2 
 	lda #INTERNAL_O          ; Atari internal code for "O" is frog.
 	sta (FrogLocation),y     ; Save to screen memory to display it.
-;	bne CheckForAnim         ; Frog movement complete. (always branch) Do boat animation.
 
 ; ==========================================================================
 ; GAME SCREEN - Screen Animation Section
@@ -230,17 +226,17 @@ EventTransitionToWin
 	lda AnimateFrames       ; Did animation counter reach 0 ?
 	bne EndTransitionToWin  ; Nope.  Nothing to do.
 
-	lda #6                  ; yes.  Reset it. (60 / 6 == 10 updates per second)
+	lda #WIN_FILL_SPEED                  ; yes.  Reset it. (60 / 6 == 10 updates per second)
 	jsr ResetTimers
 
 	ldx EventCounter       ; Row number for text.
-	cpx #13                ; From 0 to 12, erase from top to middle
+	cpx #13                ; From 2 to 12, erase from top to middle
 	beq DoSwitchToWins     ; When at 13 then fill screen is done.
 
 	ldy #PRINT_BLANK_TXT_INV    ; inverse blanks.  
 	jsr PrintToScreen
 
-	lda #24                ; Subtract Row number for text from 24.
+	lda #26                ; Subtract Row number for text from 26 (26-2 = 24)
 	sec
 	sbc EventCounter
 	tax
@@ -381,7 +377,7 @@ EventTransitionGameOver
 	dec EventCounter                ; Decrement pass counter.
 	beq DoTransitionToGameOverPart2 ; When this reaches 0 finish the screen
 
-	lda #2                     ; Running animation loop. Reset timer.
+	lda #RES_IN_SPEED                     ; Running animation loop. Reset timer.
 	jsr ResetTimers
 
 	; Randomize display of Game Over
@@ -420,17 +416,10 @@ EndTransitionGameOver
 ; --------------------------------------------------------------------------
 EventGameOverScreen
 	jsr RunPromptForAnyKey     ; Blink Prompt to press ANY key.  check key.
-	beq EndDeadScreen          ; Nothing pressed, done with title screen.
+	beq EndGameOverScreen      ; Nothing pressed, done with title screen.
 
 ProcessGameOverScreenInput     ; a key is pressed. Prepare for the screen transition.
-	lda #10                    ; Text moving speed.
-	jsr ResetTimers
-
-	lda #3                     ; Transition Loops from third row through 21st row.
-	sta EventCounter
-
-	lda #SCREEN_TRANS_TITLE    ; Next step is operating the transition animation.
-	sta CurrentScreen   
+	jsr SetupTransitionToTitle
 
 EndGameOverScreen
 	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
@@ -448,7 +437,7 @@ EndGameOverScreen
 EventTransitionToTitle
 	lda AnimateFrames        ; Did animation counter reach 0 ?
 	bne EndTransitionToTitle ; Nope.  Nothing to do.
-	lda #10                  ; yes.  Reset it.
+	lda #TITLE_SPEED                ; yes.  Reset it.
 	jsr ResetTimers
 
 	ldy #PRINT_BLANK_TXT     ; erase top line
