@@ -2,6 +2,8 @@
 
  PET FROGGER game for Commodore PET 4032 ported to the Atari 8-bit computers
 
+Video of the game play on YouTube: https://youtu.be/z5lkdjZt3bE    Yes, still no sound in the game.
+  
 Title Screen:
 
 [![Title Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V01_Title.png "Title Screen")](#features1)
@@ -12,16 +14,35 @@ Game Screen:
 
 You're Dead!
 
-[![You Died!](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V01_YerDead.png "You're Dead!")](#features3)
+[![You Died!](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V01_Dead.png "Dead Frog!")](#features3)
 
+Saved a Frog!
 
-Video of the game play on YouTube: https://youtu.be/z5lkdjZt3bE
+[![Frog Saved!](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V01_Saved.png "Saved a Frog!")](#features4)
+
+Game Over:
+
+[![Game Over](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V01_Over.png "Game Over")](#features5)
 
 ---
 
-**Porting PET FROGGER**
+**Porting/Enhancing PET FROGGER for Atari**
 
-[Frogger00.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger00.asm "Frogger01.asm") Atari assembly program.
+[Frogger01.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01.asm "Frogger01.asm") Main assembly source.
+
+[Frogger01Game.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01Game.asm "Frogger01Game.asm") Game start, and main event loop.
+
+[Frogger01GameSupport.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01GameSupport.asm "Frogger01GameSupport.asm") Common routines, score management.
+
+[Frogger01EventSetups.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01EventSetups.asm "Frogger01EventSetups.asm") Setup entry requirements for each event. 
+
+[Frogger01Events.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01Events.asm "Frogger01Events.asm") A routine for each screen/event. 
+
+[Frogger01ScreenGfx.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01ScreenGfx.asm "Frogger01ScreenGfx.asm") Routines for managing the various displays used by the game. 
+
+[Frogger01TimerAndIO.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01TimerAndIO.asm "Frogger01TimerAndIO.asm") Managing Timers, flip-flop/tick-tock, count downs, keyboard I/O.
+
+[Frogger01.xex](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01.asm "Frogger01.xex") Atari executable program.
 
 The assembly code for the Atari depends on my MADS include library here: https://github.com/kenjennings/Atari-Mads-Includes.  
 
@@ -31,27 +52,25 @@ PET FROGGER for Commodore PET 4032
 
 (c) November 1983 by John C. Dale, aka Dalesoft
 
-Ported (parodied) to Atari 8-bit computers November 2018 by Ken Jennings (if this were 1983, aka FTR Enterprises)
+[Version 00](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V00.md "Version 00") Ported (parodied) to Atari 8-bit computers November 2018 by Ken Jennings (if this were 1983, aka FTR Enterprises)
 
-As much of the PET 4032 code is used as possible. In most places only the barest minimum of changes are made to deal with the differences on the Atari.  
+Version 01, December 2018 notable changes:
 
-Notable changes:
+- All text printing to the screen is removed.  Displayed items are written directly into screen memory.  This greatly speeds up creating the game display.
 
-- References to fixed addresses are changed to meaningful labels.  This includes page 0 variables, and score values.
+- Reorganized and modularized the code for easier maintenance and enhancements.
+ 
+- The game structure is remade into an event-like loop driven by monitoring video frame changes.
 
-- Kernel call $FFD2 is replaced with "fputc" subroutine for Atari.
+- The original game used a CPU loop for delays to scale the game speed down to realistic levels.  Driving the game events from the vertical blank timing eliminated the CPU loop, and makes everything move more smoothly and consistently. 
 
-- The Atari screen is a full screen editor, so cursor movement off the right edge of the screen is different from the Pet requiring an extra "DOWN" character to move the cursor to next lines.
+- The reorganization made it easy to add new, "graphics" displays for dead frog, saved frog, and game over as well as animated transitions between the screens.  
 
-- Direct write to screen memory does not use ASCII/ATASCII codes on the Atari.  Instead, internal character codes are used. 
+- Boat movement is now handled for each row from the top to the bottom of the screen.  This should prevent updates occurring while the data is being displayed and eliminate visible tearing.
 
-- Direct keyboard scanning is a little different on the Atari.  The OS register for the key needs to be cleared to the no-key-pressed value ($FF) in order to recognize the next key press.   Also, the keyboard codes are different on the Atari (and they're not ASCII/ATASCII or Internal character set codes.)
+- Other than the timer control routine monitoring for vertical blank changes there is nothing very Atari-specific going on.  Therefore, this code could be ported back to the Pet 4032 provided character and keyboard code values are turned back into the values for the Pet.
 
----
-
-I think I did something that broke the display of multiple frogs that successfully crossed over the rivers.  One is displayed.   But if more frogs cross, still only one is displayed.
-
-I dialed down the game speed a bit in order to shoot the video and make sure my elderly reflexes could manage some successful runs.
+- Have I mentioned there still is no sound?
 
 ---
 

@@ -237,7 +237,7 @@ SAVEY = $FF
 	icl "Frogger01EventSetups.asm" ; Set Entry criteria for the event/screen
 	icl "Frogger01Events.asm"      ; Run the current event/screen
 
-	icl "Frogger01GameSupport"     ; Score and Frog management, Press Any Key
+	icl "Frogger01GameSupport.asm" ; Score and Frog management, Press Any Key
 
 	icl "Frogger01Game.asm"        ; GAMESTART and Game event loop in this file
 

@@ -2,6 +2,8 @@
 
  PET FROGGER game for Commodore PET 4032 ported to the Atari 8-bit computers
 
+Video of the game play on YouTube: https://youtu.be/Aotkgw6ZSfw   The game has no sound as the original Pet version has no sound.
+
 Title Screen:
 
 [![Title Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V00_Title.png "Title Screen")](#features1)
@@ -14,14 +16,13 @@ You're Dead!
 
 [![You Died!](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V00_YerDead.png "You're Dead!")](#features3)
 
-
-Video of the game play on YouTube: https://youtu.be/Aotkgw6ZSfw
-
 ---
 
-**Porting PET FROGGER**
+**Porting PET FROGGER for Atari**
 
-[Frogger00.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger00.asm "Frogger00.asm") Atari assembly program.
+[Frogger00.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger00.asm "Frogger00.asm") Atari assembly source.
+
+[Frogger00.xex](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger00.xex "Frogger00.xex") Atari executable program.
 
 The assembly code for the Atari depends on my MADS include library here: https://github.com/kenjennings/Atari-Mads-Includes.  
 
@@ -33,7 +34,7 @@ PET FROGGER for Commodore PET 4032
 
 Ported (parodied) to Atari 8-bit computers November 2018 by Ken Jennings (if this were 1983, aka FTR Enterprises)
 
-As much of the PET 4032 code is used as possible. In most places only the barest minimum of changes are made to deal with the differences on the Atari.  
+As much of the PET 4032 code is used as possible. In most places only the barest minimum of changes are made to deal with the differences on the Atari.  Yes, there is no sound.
 
 Notable changes:
 
@@ -56,4 +57,3 @@ I dialed down the game speed a bit in order to shoot the video and make sure my 
 ---
 
 [Back to Home](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README.md "Home") 
-
