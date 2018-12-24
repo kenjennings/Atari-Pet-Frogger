@@ -1,8 +1,23 @@
 ; ==========================================================================
-; EVENTS 
+; Pet Frogger
+; (c) November 1983 by John C. Dale, aka Dalesoft
+; for the Commodore Pet 4032
+;
+; ==========================================================================
+; Ported (parodied) to Atari 8-bit computers
+; by Ken Jennings (if this were 1983, aka FTR Enterprises)
+;
+; Version 00, November 2018
+; Version 01, December 2018
+;
+; --------------------------------------------------------------------------
+
+; ==========================================================================
+; Frogger EVENTS 
 ;
 ; All the routines to run for each screen/state.
 ; --------------------------------------------------------------------------
+
 
 ; Screen enumeration states for current processing condition.
 ; Note that the order here does not imply the only order of 
@@ -43,7 +58,7 @@ EventScreenStart
 	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
-	lda #SCREEN_TITLE ; Next step is operating the title screen input.
+	lda #SCREEN_TITLE       ; Next step is operating the title screen input.
 	sta CurrentScreen
 
 	rts
@@ -57,14 +72,14 @@ EventScreenStart
 ; Setup for next transition.
 ; --------------------------------------------------------------------------
 EventTitleScreen
-	jsr RunPromptForAnyKey       ; Blink Prompt to press ANY key.  check key.
-	beq EndTitleScreen           ; Nothing pressed, done with title screen.
+	jsr RunPromptForAnyKey     ; Blink Prompt to press ANY key.  check key.
+	beq EndTitleScreen         ; Nothing pressed, done with title screen.
 
-ProcessTitleScreenInput          ; a key is pressed. Prepare for the screen transition.
+ProcessTitleScreenInput        ; a key is pressed. Prepare for the screen transition.
 	jsr SetupTransitionToGame
 
 EndTitleScreen
-	lda CurrentScreen            ; Yeah, redundant to when a key is pressed.
+	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
 
 	rts
 
@@ -122,16 +137,15 @@ EventGameScreen
 ; ==========================================================================
 ; GAME SCREEN - Keyboard Input Section
 ; --------------------------------------------------------------------------
-	jsr CheckKey         ; Get a key if timer permits.
-	cmp #$FF             ; Key is pressed?
-	beq CheckForAnim     ; Nothing pressed, Skip the input section.
+	jsr CheckKey             ; Get a key if timer permits.
+	cmp #$FF                 ; Key is pressed?
+	beq CheckForAnim         ; Nothing pressed, Skip the input section.
 
-	sta LastKeyPressed   ; Save key.
+	sta LastKeyPressed       ; Save key.
 
-	ldy FrogColumn       ; Current X coordinate
-;	sty FrogLastColumn
-	lda LastCharacter    ; Get the last character (under the frog)
-	sta (FrogLocation),y ; Erase the frog with the last character.
+	ldy FrogColumn           ; Current X coordinate
+	lda LastCharacter        ; Get the last character (under the frog)
+	sta (FrogLocation),y     ; Erase the frog with the last character.
 
 ProcessKey ; Process keypress
 	lda LastKeyPressed       ; Restore the key press to A
@@ -183,12 +197,12 @@ CheckBoatLanding
 ; Wherever the Frog will land now, it is Baaaaad.
 DoSetupForYerDead
 	jsr SetupTransitionToDead
-	bne EndGameScreen ; last action in function is lda/sta a non-zero value.
+	bne EndGameScreen        ; last action in function is lda/sta a non-zero value.
 
 	; Safe location at the far beach.  the Frog is saved.
 DoSetupForFrogWins
 	jsr SetupTransitionToWin
-	bne EndGameScreen ; last action in function is lda/sta a non-zero value.
+	bne EndGameScreen        ; last action in function is lda/sta a non-zero value.
 
 ; Replace frog on screen, continue with boat animation.
 ReplaceFrogOnScreen
@@ -199,15 +213,15 @@ ReplaceFrogOnScreen
 ; GAME SCREEN - Screen Animation Section
 ; --------------------------------------------------------------------------
 CheckForAnim
-	lda AnimateFrames      ; Does the timer allow the boats to move?
-	bne EndGameScreen      ; Nothing at this time. Exit.
+	lda AnimateFrames        ; Does the timer allow the boats to move?
+	bne EndGameScreen        ; Nothing at this time. Exit.
 
-	jsr SetBoatSpeed       ; Reset timer for animation based on number of saved frogs.
+	jsr SetBoatSpeed         ; Reset timer for animation based on number of saved frogs.
 
-	jsr AnimateBoats       ; Move the boats around.
-	jsr AutoMoveFrog       ; GOTO AUTOMVE
-	lda FrogSafety         ; Whay does Schrodinger have to say?
-	bne DoSetupForYerDead  ; Nooooooo!
+	jsr AnimateBoats         ; Move the boats around.
+	jsr AutoMoveFrog         ; GOTO AUTOMVE
+	lda FrogSafety           ; Whay does Schrodinger have to say?
+	bne DoSetupForYerDead    ; Nooooooo!
 
 EndGameScreen
 	lda CurrentScreen  
@@ -223,34 +237,34 @@ EndGameScreen
 ; 3) Setup to do the Win screen event.
 ; --------------------------------------------------------------------------
 EventTransitionToWin
-	lda AnimateFrames       ; Did animation counter reach 0 ?
-	bne EndTransitionToWin  ; Nope.  Nothing to do.
+	lda AnimateFrames        ; Did animation counter reach 0 ?
+	bne EndTransitionToWin   ; Nope.  Nothing to do.
 
-	lda #WIN_FILL_SPEED                  ; yes.  Reset it. (60 / 6 == 10 updates per second)
+	lda #WIN_FILL_SPEED      ; yes.  Reset it. (60 / 6 == 10 updates per second)
 	jsr ResetTimers
 
-	ldx EventCounter       ; Row number for text.
-	cpx #13                ; From 2 to 12, erase from top to middle
-	beq DoSwitchToWins     ; When at 13 then fill screen is done.
+	ldx EventCounter         ; Row number for text.
+	cpx #13                  ; From 2 to 12, erase from top to middle
+	beq DoSwitchToWins       ; When at 13 then fill screen is done.
 
-	ldy #PRINT_BLANK_TXT_INV    ; inverse blanks.  
+	ldy #PRINT_BLANK_TXT_INV ; inverse blanks.  
 	jsr PrintToScreen
 
-	lda #26                ; Subtract Row number for text from 26 (26-2 = 24)
+	lda #26                  ; Subtract Row number for text from 26 (26-2 = 24)
 	sec
 	sbc EventCounter
 	tax
 
-	jsr PrintToScreen      ; And print the inverse blanks again.
+	jsr PrintToScreen        ; And print the inverse blanks again.
 
 	inc EventCounter
-	bne EndTransitionToWin  ; Nothing else to do here.
+	bne EndTransitionToWin   ; Nothing else to do here.
 
 ; Clear screen is done.   Display the big prompt.
 DoSwitchToWins 
-	jsr PrintWinFrogGfx  ; Copy the big text announcement to screen
+	jsr PrintWinFrogGfx      ; Copy the big text announcement to screen
 
-	jsr SetupWin ;Setup for Wins screen (which only waits for input )
+	jsr SetupWin             ; Setup for Wins screen (which only waits for input )
 	
 EndTransitionToWin
 	lda CurrentScreen
@@ -269,11 +283,11 @@ EventWinScreen
 	jsr RunPromptForAnyKey ; Blink Prompt to press ANY key.  check key.
 	beq EndWinScreen       ; Nothing pressed, done with title screen.
 
-ProcessWinScreenInput    ; a key is pressed. Prepare for the screen transition.
+ProcessWinScreenInput      ; a key is pressed. Prepare for the screen transition.
 	jsr SetupTransitionToGame 
 
 EndWinScreen
-	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
+	lda CurrentScreen      ; Yeah, redundant to when a key is pressed.
 
 	rts
 
@@ -323,9 +337,9 @@ LoopDeadTransition
 
 ; PART 2 -- Clear screen is done.  
 DoTransitionToDeadPart2
-	jsr PrintDeadFrogGfx ; Display the Big Dead Frog Text.
+	jsr PrintDeadFrogGfx        ; Display the Big Dead Frog Text.
 
-	jsr SetupDead ; Setup for Dead screen (wait for input loop)
+	jsr SetupDead               ; Setup for Dead screen (wait for input loop)
 
 EndTransitionToDead
 	lda CurrentScreen
@@ -343,8 +357,6 @@ EventDeadScreen
 	beq EndDeadScreen          ; Nothing pressed, done with this pass on the screen.
 
 ProcessDeadScreenInput         ; a key is pressed. Prepare for the screen transition.
-	dec NumberOfLives          ; subtract a life.  
-	jsr PrintFrogsAndLives     ; Update the screen information
 	lda NumberOfLives          ; Have we run out of frogs?
 	beq SwitchToGameOver       ; Yes.  Game Over.
 
@@ -377,7 +389,7 @@ EventTransitionGameOver
 	dec EventCounter                ; Decrement pass counter.
 	beq DoTransitionToGameOverPart2 ; When this reaches 0 finish the screen
 
-	lda #RES_IN_SPEED                     ; Running animation loop. Reset timer.
+	lda #RES_IN_SPEED          ; Running animation loop. Reset timer.
 	jsr ResetTimers
 
 	; Randomize display of Game Over
@@ -437,7 +449,7 @@ EndGameOverScreen
 EventTransitionToTitle
 	lda AnimateFrames        ; Did animation counter reach 0 ?
 	bne EndTransitionToTitle ; Nope.  Nothing to do.
-	lda #TITLE_SPEED                ; yes.  Reset it.
+	lda #TITLE_SPEED         ; yes.  Reset it.
 	jsr ResetTimers
 
 	ldy #PRINT_BLANK_TXT     ; erase top line
@@ -449,6 +461,8 @@ EventTransitionToTitle
 	cpx #25                  ; reached bottom of screen?
 	bne EndTransitionToTitle ; No.  Remain on this transition event next time.
 
+	jsr ClearKey
+	
 	lda #SCREEN_START        ; Yes, change to beginning of event cycle/start new game.
 	sta CurrentScreen
 
@@ -457,4 +471,3 @@ EndTransitionToTitle
 
 	rts
 
-	

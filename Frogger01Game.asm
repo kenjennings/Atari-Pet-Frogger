@@ -1,5 +1,19 @@
+; ==========================================================================
+; Pet Frogger
+; (c) November 1983 by John C. Dale, aka Dalesoft
+; for the Commodore Pet 4032
+;
+; ==========================================================================
+; Ported (parodied) to Atari 8-bit computers
+; by Ken Jennings (if this were 1983, aka FTR Enterprises)
+;
+; Version 00, November 2018
+; Version 01, December 2018
+;
+; --------------------------------------------------------------------------
 
 ; ==========================================================================
+; The Entry Point.
 ; Called once on program start.
 ; Use this to setup Atari display settings to imitate the
 ; PET 4032's 40x25 display.
@@ -20,36 +34,32 @@ GAMESTART
 
 	jsr libScreenWaitFrame ; Wait for display to start next frame.
 
-	; Safe to change Display list pointer now.  Would not be interrupted.
+	; Now it is safe to change Display list pointer now.  
+	; This will not be interrupted.
 	lda #<DISPLAYLIST
 	sta SDLSTL
 	lda #>DISPLAYLIST
 	sta SDLSTH
 
 	; Tell the OS where screen memory starts
-	lda #<SCREENMEM ; low byte screen
+	lda #<SCREENMEM    ; low byte screen
 	sta SAVMSC
-	lda #>SCREENMEM ; hi byte screen
+	lda #>SCREENMEM    ; hi byte screen
 	sta SAVMSC+1
 
 	lda #1
-	sta CRSINH ; Turn off the displayed cursor.
-
-	sta DoTimers ; and turn on timers.
+	sta CRSINH         ; Turn off the displayed cursor.
 
 	lda #0
-	sta DINDEX ; Tell OS screen/cursor control is Text Mode 0
-	sta LMARGN ; Set left margin to 0 (default is 2)
+	sta DINDEX         ; Tell OS screen/cursor control is Text Mode 0
+	sta LMARGN         ; Set left margin to 0 (default is 2)
 
-	lda #COLOR_GREEN ; Set screen base color dark green
-	sta COLOR2       ; Background and
-	sta COLOR4       ; Border
+	lda #COLOR_GREEN   ; Set screen base color dark green
+	sta COLOR2         ; Background and
+	sta COLOR4         ; Border
 	lda #$0A
-	sta COLOR1       ; Text brightness
+	sta COLOR1         ; Text brightness
 
-	; End of Atari initialization stuff.
-
-	; Continue with regular Pet Frogger initialization
 	; Zero these values...
 	lda #0
 	sta FlaggedHiScore
@@ -58,10 +68,7 @@ GAMESTART
 	lda #SCREEN_START  ; Set main game loop to start new game at title screen.
 	sta CurrentScreen
 
-	jmp GameLoop ; Ready to go.
-
-
-
+; Ready to go to main game loop . . . .
 
 ; ==========================================================================
 ; GAME LOOP
@@ -73,7 +80,7 @@ GAMESTART
 ;
 ; Rules:  "Continue" labels for the next screen/event block must
 ;         be called with screen value in A.  Therefore, each Event
-;         routine should end by lda CurrentScreen.
+;         routine must end by lda CurrentScreen.
 ; --------------------------------------------------------------------------
 
 GameLoop
@@ -146,9 +153,6 @@ ContinueTransitionToWin
 
 	jsr EventTransitionToWin
 
-;EndTransitionToWin
-;	lda CurrentScreen
-
 ; ==========================================================================
 ; WIN SCREEN
 ; The activity in the WIN screen.
@@ -161,9 +165,6 @@ ContinueWinScreen
 
 	jsr EventWinScreen
 
-;EndWinScreen
-;	lda CurrentScreen
-
 ; ==========================================================================
 ; TRANSITION TO DEAD SCREEN
 ; The Activity in the transition area, based on timer.
@@ -175,9 +176,6 @@ ContinueTransitionToDead
 	bne ContinueDeadScreen
 
 	jsr EventTransitionToDead
-
-;EndTransitionToDead
-;	lda CurrentScreen
 
 ; ==========================================================================
 ; DEAD SCREEN
@@ -193,9 +191,6 @@ ContinueDeadScreen
 
 	jsr EventDeadScreen
 
-;EndDeadScreen
-;	lda CurrentScreen
-
 ; ==========================================================================
 ; TRANSITION TO GAME OVER SCREEN
 ; The Activity in the transition area, based on timer.
@@ -207,9 +202,6 @@ ContinueTransitionToOver
 	bne ContinueOverScreen
 
 	jsr EventTransitionGameOver
-
-;EndTransitionToOver
-;	lda CurrentScreen
 
 ; ==========================================================================
 ; GAME OVER SCREEN
@@ -223,9 +215,6 @@ ContinueOverScreen
 
 	jsr EventGameOverScreen
 
-;EndOverScreen
-;	lda CurrentScreen
-
 ; ==========================================================================
 ; TRANSITION TO TITLE
 ; The Activity in the transition area, based on timer.
@@ -238,9 +227,6 @@ ContinueTransitionToTitle
 
 	jsr EventTransitionToTitle
 
-;EndTransitionToTitle
-;	lda CurrentScreen
-
 ; ==========================================================================
 ; END OF GAME EVENT LOOP
 ; --------------------------------------------------------------------------
@@ -250,5 +236,4 @@ EndGameLoop
 	jmp GameLoop     ; rinse, repeat, forever.
 
 	rts
-
 

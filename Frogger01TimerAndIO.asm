@@ -1,7 +1,23 @@
 ; ==========================================================================
+; Pet Frogger
+; (c) November 1983 by John C. Dale, aka Dalesoft
+; for the Commodore Pet 4032
+;
+; ==========================================================================
+; Ported (parodied) to Atari 8-bit computers
+; by Ken Jennings (if this were 1983, aka FTR Enterprises)
+;
+; Version 00, November 2018
+; Version 01, December 2018
+;
+; --------------------------------------------------------------------------
+
+; ==========================================================================
 ; TIMER STUFF AND INPUT
 ;
 ; Miscellaneous:
+; Timer ranges
+; Key Values
 ; Tick Tock value,
 ; Count downs,
 ; Check for Key I/O,
@@ -14,7 +30,10 @@
 KEYSCAN_FRAMES = $09
 
 ; based on number of frogs, how many frames between boat movements...
-ANIMATION_FRAMES .byte 30,25,20,18,15,13,11,10,9,8,7,6
+ANIMATION_FRAMES .byte 30,25,20,18,15,13,11,10,9,8,7,6,5,4,3
+
+MAX_FROG_SPEED=14
+
 
 ; Timer values.  PAL ?? guesses...
 ; About 7 keys per second.
@@ -48,17 +67,6 @@ ResetTimers
 
 EndResetTimers
 	pla ; get this back for the caller.
-
-	rts
-
-
-; ==========================================================================
-; RESET ANIMATION TIMER
-;
-; A  is the time to set for animation.
-; --------------------------------------------------------------------------
-ResetAnimateTimer
-	sta AnimateFrames
 
 	rts
 
@@ -121,7 +129,7 @@ ExitCheckKeyNow               ; exit with no key value in A
 ;
 ; This should only be called 
 ; 1) when a successful read has just occurred to empty the key 
-;    buffer and rest the key scan timer.
+;    buffer and reset the key scan timer.
 ; 2) when we do not want a keystroke entered in the recent past to be 
 ;    automatically read when we get to the next opportunity to read the 
 ;    keyboard.  
@@ -133,34 +141,15 @@ ExitCheckKeyNow               ; exit with no key value in A
 ; Reset CH to no key read value.  Reset the timer too while we're here.
 ; --------------------------------------------------------------------------
 ClearKey
-	pha             ; Save whatever is in A
+	pha                 ; Save whatever is in A
 	lda #$FF
-	sta CH          ; Clear any pending key
+	sta CH              ; Clear any pending key
 
 	lda #KEYSCAN_FRAMES ; Reset keyboard timer for next key input.
 	sta KeyscanFrames
 	
-	pla             ; restore  whatever was in A.
+	pla                 ; restore  whatever was in A.
 	
-	rts
-	
-
-; ==========================================================================
-; Wait for a keypress.
-;
-; A  returns the key pressed.
-; --------------------------------------------------------------------------
-WaitKey
-	lda #$FF
-	sta CH          ; Clear any pending key
-
-WaitKeyLoop
-	lda CH
-	cmp #$FF        ; No key pressed
-	beq WaitKeyLoop ; Loop until a key is pressed.
-
-	jsr ClearKey
-
 	rts
 
 
@@ -187,9 +176,6 @@ WaitKeyLoop
 TimerLoop
 	mRegSaveAYX
 
-	lda DoTimers           ; Are timers turned on or off?
-	beq ExitEventLoop      ; Off, skip it all.
-
 	jsr libScreenWaitFrame ; Wait until end of frame
 
 	lda KeyscanFrames      ; Is keyboard delay already 0?
@@ -205,35 +191,6 @@ ExitEventLoop
 	mRegRestoreAYX
 
 	rts
-
-
-;==============================================================================
-;                                                       SCREENWAITFRAMES  A  Y
-;==============================================================================
-; Subroutine to wait for a number of frames.
-;
-; FYI:
-; Calling with A = 1 is the same thing as directly calling ScreenWaitFrame.
-;
-; ScreenWaitFrames expects A to contain the number of frames.
-;
-; ScreenWaitFrames uses  Y
-;==============================================================================
-
-libScreenWaitFrames
-	sty SAVEY           ;  Save what is here, can't go to stack due to tay
-	tay
-	beq bExitWaitFrames
-
-bLoopWaitFrames
-	jsr libScreenWaitFrame
-
-	dey
-	bne bLoopWaitFrames ; Still more frames to count?   go
-
-bExitWaitFrames
-	ldy SAVEY           ; restore Y
-	rts                 ; No.  Clock changed means frame ended.  exit.
 
 
 ;==============================================================================

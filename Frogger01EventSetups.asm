@@ -1,4 +1,18 @@
 ; ==========================================================================
+; Pet Frogger
+; (c) November 1983 by John C. Dale, aka Dalesoft
+; for the Commodore Pet 4032
+;
+; ==========================================================================
+; Ported (parodied) to Atari 8-bit computers
+; by Ken Jennings (if this were 1983, aka FTR Enterprises)
+;
+; Version 00, November 2018
+; Version 01, December 2018
+;
+; --------------------------------------------------------------------------
+
+; ==========================================================================
 ; SETUPS
 ;
 ; All the routines to move to a different screen/state.
@@ -35,11 +49,10 @@ SetupTransitionToGame
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupGame
-;	jsr NewGameSetup
 	lda #0
-	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
+	sta FrogSafety         ; Schrodinger's current frog is known to be alive.
 	
-	lda #$30                ; 48 (dec), delay counter.
+	lda #$30               ; 48 (dec), delay counter.
 	sta DelayNumber
 
 	lda #INTERNAL_INVSPACE ; On Atari use inverse space for beach.
@@ -52,20 +65,18 @@ SetupGame
 	
 	lda #18                ; 18 (dec), number of screen rows of game field. (+2 from top)
 	sta FrogRow
-;	sta FrogLastRow
 	
-	ldy #19               ; Frog horizontal coordinate, Y = 19 (dec)
+	ldy #19                ; Frog horizontal coordinate, Y = 19 (dec)
 	sty FrogColumn
-;	sty FrogLastColumn
 
-	jsr DisplayGameScreen   ; Draw game screen.
+	jsr DisplayGameScreen  ; Draw game screen.
 
 	lda #INTERNAL_O        ; On Atari we're using "O" as the frog shape.
 	sta (FrogLocation),y   ; SCREENMEM + $320 + $13
 
 	jsr ClearKey
 	
-	lda #SCREEN_GAME        ; Yes, change to game screen.
+	lda #SCREEN_GAME       ; Yes, change to game screen.
 	sta CurrentScreen
 
 	rts
@@ -81,7 +92,10 @@ SetupGame
 SetupTransitionToWin
 	jsr Add500ToScore
 
-	lda #WIN_FILL_SPEED                 ; Animation moving speed.
+	jsr CopyScoreToScreen   ; Update the screen information
+	jsr PrintFrogsAndLives     
+	
+	lda #WIN_FILL_SPEED     ; Animation moving speed.
 	jsr ResetTimers
 
 	lda #2                  ; start wiping screen at line 2 (0, 1, 2)
@@ -103,12 +117,12 @@ SetupTransitionToWin
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupWin
-	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
+	lda #BLINK_SPEED    ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 	
 	jsr ClearKey
 	
-	lda #SCREEN_WIN         ; Change to wins screen.
+	lda #SCREEN_WIN     ; Change to wins screen.
 	sta CurrentScreen
 	
 	rts
@@ -125,19 +139,19 @@ SetupWin
 ; --------------------------------------------------------------------------
 SetupTransitionToDead
 	; splat the frog:
-	lda #INTERNAL_ASTER  ; Atari ASCII $2A/42 (dec) Splattered Frog.
-	sta (FrogLocation),y ; Road kill the frog.
+	lda #INTERNAL_ASTER     ; Atari ASCII $2A/42 (dec) Splattered Frog.
+	sta (FrogLocation),y    ; Road kill the frog.
 
-	jsr CopyScoreToScreen    ; Update the screen information
+	dec NumberOfLives       ; subtract a life.
+	jsr CopyScoreToScreen   ; Update the screen information
 	jsr PrintFrogsAndLives     
 
 	inc FrogSafety          ; Schrodinger knows the frog is dead.
-	lda #FROG_WAKE_SPEED                 ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
+	lda #FROG_WAKE_SPEED    ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
 	jsr ResetTimers
 
 	lda #0                  ; Zero event controls.
 	sta EventCounter
-	sta EventStage
 
 	jsr ClearKey
 	
@@ -155,12 +169,12 @@ SetupTransitionToDead
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupDead
-	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
+	lda #BLINK_SPEED     ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
 	jsr ClearKey
 	
-	lda #SCREEN_DEAD         ; Change to dead screen.
+	lda #SCREEN_DEAD    ; Change to dead screen.
 	sta CurrentScreen
 
 	rts
@@ -174,7 +188,7 @@ SetupDead
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupTransitionToGameOver
-	lda #RES_IN_SPEED                 ; Animation moving speed.
+	lda #RES_IN_SPEED      ; Animation moving speed.
 	jsr ResetTimers
 
 	lda #60                ; Number of times to do the Game Over EOR effect
@@ -196,12 +210,12 @@ SetupTransitionToGameOver
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupGameOver
-	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
+	lda #BLINK_SPEED     ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
 	jsr ClearKey
 	
-	lda #SCREEN_OVER         ; Change to Game Over screen.
+	lda #SCREEN_OVER     ; Change to Game Over screen.
 	sta CurrentScreen
 
 	rts
@@ -215,15 +229,15 @@ SetupGameOver
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupTransitionToTitle
-	lda #TITLE_SPEED                ; Animation moving speed.
+	lda #TITLE_SPEED          ; Animation moving speed.
 	jsr ResetTimers
 
 	lda #2
-	sta EventCounter                ; start wiping screen at line 2 (0, 1, 2)
+	sta EventCounter         ; start wiping screen at line 2 (0, 1, 2)
 
 	jsr ClearKey
 	
-	lda #SCREEN_TRANS_TITLE         ; Change to Title Screen transition.
+	lda #SCREEN_TRANS_TITLE ; Change to Title Screen transition.
 	sta CurrentScreen
 
 	rts

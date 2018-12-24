@@ -1,12 +1,17 @@
 ; ==========================================================================
 ; Pet Frogger
 ; (c) November 1983 by John C. Dale, aka Dalesoft
+; for the Commodore Pet 4032
 ;
 ; ==========================================================================
 ; Ported (parodied) to Atari 8-bit computers
-; November 2018 by Ken Jennings (if this were 1983, aka FTR Enterprises)
+; by Ken Jennings (if this were 1983, aka FTR Enterprises)
 ;
+; Version 00, November 2018
+; Version 01, December 2018
 ; --------------------------------------------------------------------------
+
+; ==========================================================================
 ; Version 00.
 ; As much of the Pet code is used as possible.
 ; In most places only the barest minimum of changes are made to deal with
@@ -157,9 +162,7 @@ MovesCars       .word $00 ; = Moves Cars
 
 FrogLocation    .word $00 ; = Pointer to start of Frog's current row in screen memory.
 FrogColumn      .byte $00 ; = Frog X coord
-FrogRow         .word $00 ; = Frog Y row position (on the playfield not counting score lines)
-FrogLastColumn  .byte $00 ; = Frog's last X coordinate
-FrogLastRow     .byte $00 ; = Frog's last Y row position
+FrogRow         .byte $00 ; = Frog Y row position (on the playfield not counting score lines)
 LastCharacter   .byte 0   ; = Last Character Under Frog
 
 FrogSafety      .byte 0   ; = 0 When Frog OK.  !0 == Yer Dead.
@@ -178,11 +181,6 @@ TextPointer     .word $00 ; = Pointer to text message to write.
 TextLength      .word $00 ; = Length of text message to write.
 
 ; Timers and event control.
-DoTimers        .byte $00 ; = 0 means stop timer features.  Return from event polling. Main line
-						  ; code would inc DoTimers to make sure accidental animation does not
-						  ; occur while the code switches between screens.  This will become
-						  ; more important when the game logic is enhanced to an event loop.
-
 ; Frame counters are decremented each frame.
 ; Once they decrement to  0 they enable the related activity.
 
@@ -206,11 +204,6 @@ ToggleState     .byte 0   ; = 0, 1, flipper to drive a blinking thing.
 ; Another event value.  Use for counting things for each pass of a screen/event.
 EventCounter    .byte 0
 
-; Another event value.  Use for multiple sequential actions in an
-; Event/Screen, because I got too lazy to chain a new event into
-; sequences.
-EventStage      .byte 0
-
 ; Game Score and High Score.
 MyScore .by $0 $0 $0 $0 $0 $0 $0 $0
 HiScore .by $0 $0 $0 $0 $0 $0 $0 $0
@@ -222,6 +215,7 @@ SAVEY = $FF
 
 ; Programmer's unintelligently chosen higher address on Atari
 ; to account for DOS, etc.
+
 	ORG $5000
 
 	; Label and Credit
@@ -234,13 +228,14 @@ SAVEY = $FF
 
 
 ; ==========================================================================
-; Main Code Parts
+; Include the Main Code Parts
+
 	icl "Frogger01ScreenGfx.asm"   ; Physically drawing on the screen
 
-	icl "Frogger01TimerAndIO.asm"  ; Timer, ticktock, countdowns, key I/O.
+	icl "Frogger01TimerAndIO.asm"  ; Timer, tick tock, countdowns, key I/O.
 
-	icl "Frogger01Events.asm"      ; Run the current event/screen
 	icl "Frogger01EventSetups.asm" ; Set Entry criteria for the event/screen
+	icl "Frogger01Events.asm"      ; Run the current event/screen
 
 	icl "Frogger01GameSupport"     ; Score and Frog management, Press Any Key
 
@@ -258,7 +253,7 @@ SAVEY = $FF
 
 
 ; ==========================================================================
-; Custom Character Set Planning . . . **Minimum setup.
+; Custom Character Set Planning for V02  . . . **Minimum setup.
 ;
 ;  1) **Frog
 ;  2) **Boat Front Right
@@ -297,8 +292,8 @@ DISPLAYLIST
 	.rept 24
 		.byte DL_TEXT_2                      ; 24 more lines of Mode 2 text.
 	.endr
-	.byte DL_JUMP_VB
-	.word DISPLAYLIST
+	.byte DL_JUMP_VB                         ; End list, Vertical Blank 
+	.word DISPLAYLIST                        ; Restart display at the same display list.
 
 
 ; ==========================================================================

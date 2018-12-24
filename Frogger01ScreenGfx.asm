@@ -1,4 +1,20 @@
 ; ==========================================================================
+; Pet Frogger
+; (c) November 1983 by John C. Dale, aka Dalesoft
+; for the Commodore Pet 4032
+;
+; ==========================================================================
+; Ported (parodied) to Atari 8-bit computers
+; by Ken Jennings (if this were 1983, aka FTR Enterprises)
+;
+; Version 00, November 2018
+; Version 01, December 2018
+;
+; --------------------------------------------------------------------------
+
+; ==========================================================================
+; SCREEN GRAPHICS
+;
 ; All "printed" items declared.  All screen data and various lookups
 ; related to real "printed' data.
 
@@ -50,7 +66,7 @@
 ;  Original V00 Main Game Play Screen:
 ;    +----------------------------------------+
 ; 1  |Successful Crossings =                  | SCORE_TXT
-; 2  |Score = 0000000      Hi = 0000000   Lv:3| SCORE_TXT
+; 2  |Score = 00000000     Hi = 00000000  Lv:3| SCORE_TXT
 ; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
 ; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
 ; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
@@ -111,8 +127,8 @@
 
 ; Revised V01 Main Game Play Screen:
 ;    +----------------------------------------+
-; 1  |Score = 0000000      Hi = 0000000   Lv:3| SCORE_TXT
-; 2  |  Frogs Saved =                         | SCORE_TXT
+; 1  |Score:00000000               00000000:Hi| SCORE_TXT
+; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
 ; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
 ; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
@@ -140,15 +156,15 @@
 
 
 ; ==========================================================================
-; Animation speeds of some objects.   Number of frames to wait...
+; Animation speeds of various displayed items.   Number of frames to wait...
 ; --------------------------------------------------------------------------
-BLINK_SPEED     = 36    ; blinking Press Any Key text
-CREDIT_SPEED    = 3    ; Animated Credits.
-DEAD_FILL_SPEED = 3 ; Fill the Screen for Dead Frog
-WIN_FILL_SPEED  = 4 ; Fill screen for Win
+BLINK_SPEED     = 36 ; blinking Press Any Key text
+CREDIT_SPEED    = 3  ; Animated Credits.
+DEAD_FILL_SPEED = 3  ; Fill the Screen for Dead Frog
+WIN_FILL_SPEED  = 4  ; Fill screen for Win
 FROG_WAKE_SPEED = 90 ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
-RES_IN_SPEED    = 2 ; Speed of Game over Res in animation
-TITLE_SPEED     = 6 ; Fill screen to present title
+RES_IN_SPEED    = 2  ; Speed of Game over Res in animation
+TITLE_SPEED     = 6  ; Fill screen to present title
 
 ; ==========================================================================
 ; Some Atari character things for convenience, or that can't be easily
@@ -187,7 +203,7 @@ INTERNAL_ASTER    = $0A ; Character for '*' splattered frog.
 INTERNAL_HEART    = $40 ; heart graphics
 INTERNAL_HLINE    = $52 ; underline for title text.
 
-; Graphics chars shorthanded due to frequency....
+; Graphics chars shorthanded due to frequency in the code....
 I_I  = 73      ; Internal ctrl-I
 I_II = 73+$80  ; Internal ctrl-I Inverse
 I_K  = 75      ; Internal ctrl-K
@@ -275,13 +291,18 @@ INST_TXT4_INV ; inverse version to support blinking.
 
 ; ==========================================================================
 
+
 SCORE_TXT  ; Labels for crossings counter, scores, and lives
-; 1  |Score = 0000000      Hi = 0000000   Lv:3| SCORE_TXT
-; 2  |  Frogs Saved =                         | SCORE_TXT
-	.sb "Score =              Hi =           Lv: "
-	.sb "  Saved Frogs =                         "
+; 1  |Score:00000000               00000000:Hi| SCORE_TXT
+; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
+	.sb "Score:                               :Hi"
+	.sb "Frogs:     Frogs Saved:                 "
+
+
 
 TEXT1 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
+; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
+; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
 	.sb +$80 "                                        " ; "Beach"
 	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
 	.sb "[" A_B A_B A_B A_B ">       "
@@ -383,16 +404,12 @@ TEXT_MESSAGES ; Starting addresses of each of the text messages
 	.word TITLE_TXT,CREDIT_TXT,INST_TXT1,INST_TXT2,INST_TXT3,INST_TXT4,INST_TXT4_INV
 	.word SCORE_TXT,TEXT1,TEXT2
 
-;	.word YRDDTX,FROGTXT,OVER
-;	.word INSTXT_1,INSTXT_2,INSTXT_3,INSTXT_4,PORTBYTEXT
 
 TEXT_SIZES ; length of message.  Each should be a multiple of 40.
 	.word 40,40
 	.word 80,120,320,120,120,40,40
 	.word 80,120,40
-	
-;	.word 80,40,40,40
-;	.word 120,280,120,40,40
+
 
 SCREEN_ADDR ; Direct address lookup for each row of screen memory.
 	.rept 25,#
@@ -464,7 +481,7 @@ LoopClearForGfx
 
 
 ; ==========================================================================
-; Print the text announcement for dead frog.
+; Print the big text announcement for dead frog.
 ; --------------------------------------------------------------------------
 PrintDeadFrogGfx
 	jsr ClearForGfx
@@ -472,7 +489,7 @@ PrintDeadFrogGfx
 	ldx #SIZEOF_BIG_GFX
 LoopPrintDeadText
 	lda FROG_DEAD_GFX,x
-	sta SCREENMEM+440,X  ; 
+	sta SCREENMEM+440,X 
 	dex
 	bpl LoopPrintDeadText
 
@@ -480,7 +497,7 @@ LoopPrintDeadText
 
 
 ; ==========================================================================
-; Print the text announcement for Winning frog.
+; Print the big text announcement for Winning frog.
 ; --------------------------------------------------------------------------
 PrintWinFrogGfx
 	jsr ClearForGfx
@@ -496,7 +513,7 @@ LoopPrintWinsText
 
 
 ; ==========================================================================
-; Print the text announcement for Game Over.
+; Print the big text announcement for Game Over.
 ; --------------------------------------------------------------------------
 PrintGameOverGfx
 	jsr ClearForGfx
@@ -516,7 +533,6 @@ LoopPrintGameOverText
 ; Set state of the text line that is blinking.
 ; --------------------------------------------------------------------------
 DisplayTitleScreen
-INSTR
 	jsr ClearScreen
 
 	ldx #0
@@ -524,7 +540,7 @@ INSTR
 ; An individual setup and call to PrintToScreen is 7 bytes which
 ; makes explicit setup for six calls for screen writing 42 bytes long.
 ; Since there are multiple, repeat patterns of the same thing,
-; wrap it in a loop and read driving data from a table.
+; wrap it in a loop and read the driving data from a table.
 ; The ldx for setup, this code in the loop, plus the actual data
 ; in the driving tables is 2+19+12 = 33 bytes long.
 
@@ -541,7 +557,7 @@ LoopDisplayTitleText
 	cpx #6
 	bne LoopDisplayTitleText
 
-	lda #1 ; default condition of blinking prompt is inverse
+	lda #1                   ; default condition of blinking prompt is inverse
 	sta ToggleState
 
 	rts
@@ -562,8 +578,7 @@ TITLE_PRINT_ROWS
 ; are overdrawn.
 ; --------------------------------------------------------------------------
 DisplayGameScreen
-PRINTSC
-	mRegSaveAYX                ; Save A and Y and X, so the caller doesn't need to.
+	mRegSaveAYX             ; Save A and Y and X, so the caller doesn't need to.
 
 	jsr ClearScreen
 
@@ -581,24 +596,23 @@ PRINTSC
 LoopPrintBoats
 	jsr PrintToScreen
 
-	inx
+	inx                     ; Skip forward three lines
 	inx
 	inx
 
 	cpx #20                 ; Printed six times? (18 lines total)
 	bne LoopPrintBoats      ; No, go back to print another set of lines.
 
-	ldy #PRINT_TEXT2        ; Print TEXT2 - last Beach with the frog
-;	ldx #20                 ; it already is 20.
+	ldy #PRINT_TEXT2        ; Print TEXT2 - last Beach with the frog (X is 20 here)
 	jsr PrintToScreen
 
 	; Display the current score and number of frogs that crossed the river.
 	jsr CopyScoreToScreen
 	jsr PrintFrogsAndLives
 	
-	jsr SetBoatSpeed
+	jsr SetBoatSpeed        ; Animation speed set by number of saved frogs
 	
-	mRegRestoreAYX             ; Restore X, Y and A
+	mRegRestoreAYX          ; Restore X, Y and A
 
 	rts
 
@@ -691,9 +705,6 @@ ExitPrintToScreen
 	rts
 
 
-
-
-
 ; ==========================================================================
 ; ANIMATE BOATS
 ; Move the lines of boats around either left or right.
@@ -706,39 +717,36 @@ ExitPrintToScreen
 ; displayed and we end up with tearing animation.
 ; --------------------------------------------------------------------------
 AnimateBoats
-MOVESC
-	ldx #6            ; Loop 3 to 18 step 3 -- 6 = 3 times 2 for size of word in SCREEN_ADDR
+	ldx #6                ; Loop 3 to 18 step 3 -- 6 = 3 times 2 for size of word in SCREEN_ADDR
 
 	; FIRST PART -- Set up for Right Shift...
 RightShiftRow
-	lda SCREEN_ADDR,x ; Get address of this row in X from the screen memeory lookup.
+	lda SCREEN_ADDR,x     ; Get address of this row in X from the screen memeory lookup.
 	sta MovesCars
 	inx
 	lda SCREEN_ADDR,x
 	sta MovesCars+1
 	inx
 
-	ldy #$27          ; Character position, start at +39 (dec)
-	lda (MovesCars),y ; Read byte from screen (start +39)
-	pha               ; Save the character at the end to move to position 0.
-	dey               ; now at offset +38 (dec)
+	ldy #$27              ; Character position, start at +39 (dec)
+	lda (MovesCars),y     ; Read byte from screen (start +39)
+	pha                   ; Save the character at the end to move to position 0.
+	dey                   ; now at offset +38 (dec)
 
 MoveToRight ; Shift text lines to the right.
-	lda (MovesCars),y ; Read byte from screen (start +38)
+	lda (MovesCars),y     ; Read byte from screen (start +38)
 	iny
-	sta (MovesCars),y ; Store byte to screen at next position (start +39)
+	sta (MovesCars),y     ; Store byte to screen at next position (start +39)
 
-	dey               ; Back up to the original read position.
-	dey               ; Backup to previous position.
+	dey                   ; Back up to the original read position.
+	dey                   ; Backup to previous position.
 
-	bpl MoveToRight   ; Backed up from 0 to FF? No. Do the shift again.
+	bpl MoveToRight       ; Backed up from 0 to FF? No. Do the shift again.
 
 	; Copy character at end of line to the start of the line.
-	iny               ; Go back from $FF to $00
-	pla               ; Get character that was at the end of the line.
-
-;	ldy #$00          ; Offset 0 == start of line
-	sta (MovesCars),y ; Save it at start of line.
+	iny                   ; Go back from $FF to $00
+	pla                   ; Get character that was at the end of the line.
+	sta (MovesCars),y     ; Save it at start of line.
 
 	; SECOND PART -- Setup for Left Shift...
 	lda SCREEN_ADDR,x
@@ -748,32 +756,31 @@ MoveToRight ; Shift text lines to the right.
 	sta MovesCars+1
 	inx
 
-;	ldy #$00          ; Character position, start at +0 (dec)
-	lda (MovesCars),y ; Read byte from screen (start +0)
-	pha               ; Save to move to position +39.
-	iny               ; now at offset +1 (dec)
+	lda (MovesCars),y     ; Read byte from screen (start +0)
+	pha                   ; Save to move to position +39.
+	iny                   ; now at offset +1 (dec)
 
-MoveToLeft ; Shift text lines to the left.
-	lda (MovesCars),y ; Get byte from screen (start +1)
+MoveToLeft                ; Shift text lines to the left.
+	lda (MovesCars),y     ; Get byte from screen (start +1)
 	dey
-	sta (MovesCars),y ; Store byte at previous position (start +0)
+	sta (MovesCars),y     ; Store byte at previous position (start +0)
 
-	iny               ; Forward to the original read position. (start +1)
-	iny               ; Forward to the next read position. (start +2)
+	iny                   ; Forward to the original read position. (start +1)
+	iny                   ; Forward to the next read position. (start +2)
 
-	cpy #40           ; Reached position $27/39 (dec) (end of line)?
-	bne MoveToLeft    ; No.  Do the shift again.
+	cpy #40               ; Reached position $27/39 (dec) (end of line)?
+	bne MoveToLeft        ; No.  Do the shift again.
 
 	; Copy character at start of line to the end of the line.
-	ldy #39          ; Offset $27/39 (dec)
-	pla               ; Get character that was at the end of the line.
-	sta (MovesCars),y ; Save it at end of line.
+	ldy #39               ; Offset $27/39 (dec)
+	pla                   ; Get character that was at the end of the line.
+	sta (MovesCars),y     ; Save it at end of line.
 
-	inx ; skip the beach line
+	inx                   ; skip the beach line
 	inx
 
-	cpx #40 ; 21st line (20 from base 0) times 2
-	bcc RightShiftRow ; Continue to loop, right, left, right, left
+	cpx #40               ; 21st line (20 from base 0) times 2
+	bcc RightShiftRow     ; Continue to loop, right, left, right, left
 
 	jsr CopyScoreToScreen ; Finish up by updating score display.
 
@@ -782,16 +789,18 @@ MoveToLeft ; Shift text lines to the left.
 
 ; ==========================================================================
 ; Copy the score from memory to screen positions.
+;
+; 1  |Score:00000000               00000000:Hi| SCORE_TXT
+; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; --------------------------------------------------------------------------
 CopyScoreToScreen
-;PRITSC
 	ldx #7
 
 DoUpdateScreenScore
 	lda MyScore,x       ; Read from Score buffer
-	sta SCREENMEM+8,x   ; Screen Memory + 9th character
+	sta SCREENMEM+6,x   
 	lda HiScore,x       ; Read from Hi Score buffer
-	sta SCREENMEM+26,x  ; Screen Memory + 27th character
+	sta SCREENMEM+29,x  
 	dex                 ; Loop 8 bytes - 7 to 0.
 	bpl DoUpdateScreenScore
 
@@ -800,16 +809,22 @@ DoUpdateScreenScore
 
 ; ==========================================================================
 ; PRINT FROGS AND LIVES
-; Display the number of frogs that crossed the river.
+; Display the number of frogs that crossed the river and lives.
+;
+; 1  |0000000:Score                 Hi:0000000| SCORE_TXT
+; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; --------------------------------------------------------------------------
 PrintFrogsAndLives
-;PRINT2
 	lda #INTERNAL_O     ; On Atari we're using "O" as the frog shape.
 	ldx FrogsCrossed    ; number of times successfully crossed the rivers.
 	beq WriteLives      ; then nothing to display. Skip to do lives.
 
+	cpx #18             ; Limit saved frogs to the remaining width of screen
+	bcc SavedFroggies
+	ldx #17
+
 SavedFroggies
-	sta SCREENMEM+55,x  ; Write to screen. (second line, 16th position)
+	sta SCREENMEM+62,x  ; Write to screen. (second line, 24th position)
 	dex                 ; Decrement number of frogs.
 	bne SavedFroggies   ; then go back and display the next frog counter.
 
@@ -817,7 +832,7 @@ WriteLives
 	lda NumberOfLives   ; Get number of lives.
 	clc                 ; Add to value for
 	adc #INTERNAL_0     ; Atari internal code for '0'
-	sta SCREENMEM+39    ; Write to screen. Last position of first line.
+	sta SCREENMEM+46    ; Write to screen. *7th char on second line.)
 
 	rts
 

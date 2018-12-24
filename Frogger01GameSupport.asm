@@ -1,13 +1,32 @@
 ; ==========================================================================
+; Pet Frogger
+; (c) November 1983 by John C. Dale, aka Dalesoft
+; for the Commodore Pet 4032
+;
+; ==========================================================================
+; Ported (parodied) to Atari 8-bit computers
+; by Ken Jennings (if this were 1983, aka FTR Enterprises)
+;
+; Version 00, November 2018
+; Version 01, December 2018
+;
+; --------------------------------------------------------------------------
+
+; ==========================================================================
 ; GAME SUPPORT
 ;
 ; Miscellaneous:
-; Press ANY Key.
-; Score management.
-; Frog Management.
-; Game Level Speed management.
+; Prompt for ANY Key.
+; Clear game scores.
+; Add 500 to game score (and increment saved Frogs)
+; Add 10 to game score.
+; Determine if current score is high score
+; Move the frog up a row.
+; Automatic, logical frog horizontal movement when boats move.
+; Set boat speed based on number of frogs saved.
 ;
 ; --------------------------------------------------------------------------
+
 
 ; ==========================================================================
 ; RUN PROMPT FOR ANY KEY
@@ -40,7 +59,7 @@ PrintAndReset
 	jsr PrintToScreen
 
 ResetPromptBlinking
-	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
+	lda #BLINK_SPEED         ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
 CheckAnyKey
@@ -72,19 +91,11 @@ NextScoreDigit
 	dex                 ; decrement index to score digits.
 	bpl LoopClearScores ; went from 0 to $FF? no, loop for next digit.
 
-
-
 	lda #3              ; Reset number of
 	sta NumberOfLives   ; lives to 3.
 	
 	lda #0
-	sta FrogsCrossed        ; Zero the number of successful crossings.
-;; Hmmmm.  Did modularization eliminate the following ?
-;;	tay                ; Now Y also is zero/"0".
-;	lda #3             ; Reset number of
-;	sta NumberOfLives  ; lives to 3.
-;;	tya                ; A  is zero/"0" again.
-;	ldy #$13           ; Y = 19 (dec) (again)
+	sta FrogsCrossed    ; Zero the number of successful crossings.
 
 	rts
 
@@ -156,7 +167,7 @@ EvaluateCarry            ; (re)evaluate if carry occurred for the current positi
 	bne EvaluateCarry    ; This cannot go from $FF to 0, so it must be not zero.
 
 ExitAddToScore           ; All done.
-	jsr HighScoreOrNot     ; If My score is high score, then copy to high score.
+	jsr HighScoreOrNot   ; If My score is high score, then copy to high score.
 
 	mRegRestoreAYX       ; Restore Y, X, and A
 
@@ -221,9 +232,6 @@ FrogMoveUp
 DecrementRows            ; decrement number of rows.
 	dec FrogRow
 	ldx FrogRow
-;	stx FrogLastRow
-;	dex 
-;	stx FrogRow
 
 	rts
 
@@ -240,7 +248,6 @@ DecrementRows            ; decrement number of rows.
 ; --------------------------------------------------------------------------
 AutoMoveFrog
 	ldy FrogColumn
-;	sty FrogLastcolumn
 	ldx FrogRow             ; Get the current row number.
 	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
 	beq ExitAutoMoveFrog    ; Is it 0?  Nothing to do.  Bail.
@@ -272,24 +279,7 @@ MOVING_ROW_STATES
 	.rept 6                 ; 6 occurrences of
 		.BYTE 0, 1, $FF     ; Beach (0), Right (1), Left (FF) directions.
 	.endr
-		.BYTE 0             ; staring position on safe beach
-
-; ==========================================================================
-; A little code size optimization.
-; Add 120 (dec) to the current MovesCars pointer.
-; This moves the pointer to the next river/boat line 3 lines lower,
-; so the current shift logic can be repeated.
-; --------------------------------------------------------------------------
-MoveCarsPlus120
-	clc
-	lda MovesCars           ; Add $78/120 (dec) to the start of line pointer
-	adc #$78                ; to set new position 3 lines lower.
-	sta MovesCars
-	bcc ExitMoveCarsPlus120 ; No carry?  Then exit.
-	inc MovesCars + 1       ; Smartly done instead of lda/adc #0/sta.
-
-ExitMoveCarsPlus120
-	rts
+		.BYTE 0             ; starting position on safe beach
 
 
 ; ==========================================================================
@@ -305,9 +295,9 @@ SetBoatSpeed
 	mRegSaveAX
 
 	ldx FrogsCrossed          ; How many frogs crossed?
-	cpx #12                   ; Limit this index from 0 to 11.
+	cpx #MAX_FROG_SPEED+1     ; Limit this index from 0 to 14.
 	bcc GetSpeedByWayOfFrogs  ; Anything bigger than that
-	ldx #11                   ; must be truncated to the limit.
+	ldx #MAX_FROG_SPEED       ; must be truncated to the limit.
 
 GetSpeedByWayOfFrogs
 	lda ANIMATION_FRAMES,x    ; Set timer for animation based on frogs.
