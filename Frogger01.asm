@@ -205,8 +205,8 @@ ToggleState     .byte 0   ; = 0, 1, flipper to drive a blinking thing.
 EventCounter    .byte 0
 
 ; Game Score and High Score.
-MyScore .by $0 $0 $0 $0 $0 $0 $0 $0
-HiScore .by $0 $0 $0 $0 $0 $0 $0 $0
+MyScore .sb "00000000" 
+HiScore .sb "00000000" 
 
 ; In the event X and/or Y can't be saved on stack, protect them here....
 SAVEX = $FE

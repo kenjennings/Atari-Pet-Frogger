@@ -77,13 +77,13 @@ CheckAnyKey
 ; --------------------------------------------------------------------------
 ClearGameScores
 	ldx #$07            ; 8 digits. 7 to 0
+	lda #INTERNAL_0     ; Atari internal code for "0"
 
 LoopClearScores
-	lda #INTERNAL_0     ; Atari internal code for "0"
 	sta MyScore,x       ; Put zero/"0" in score buffer.
 
 	ldy FlaggedHiScore  ; Has a high score been flagged? ($FF)
-	bmi NextScoreDigit  ; If so, then skip this and go to the next digit.
+	bmi NextScoreDigit  ; If so, then skip clearing Hi score and go to the next digit.
 
 	sta HiScore,x       ; Also put zero/"0" in the high score.
 
@@ -156,14 +156,14 @@ AddToScore
 EvaluateCarry            ; (re)evaluate if carry occurred for the current position.
 	lda MyScore,x
 	cmp #[INTERNAL_0+10] ; Did math carry past the "9"?
-	bcc ExitAddToScore   ; if it does not carry , then go to exit.
+	bcc ExitAddToScore   ; less than.  it did not carry. go to exit.
 
 ; The score carried past "9", so it must be adjusted and
 ; the next/greater position is added.
-	lda #INTERNAL_0      ; Atari internal code for "0".
-	sta MyScore,x        ; Reset current position to "0"
-	dex                  ; Go to previous position in score
-	inc MyScore,x        ; Add 1 to the next digit.
+	sbc #10              ; Subtract 10 from current value (carry is already set)
+	sta MyScore,x        ; update current position.
+	dex                  ; Go to previous position in score.
+	inc MyScore,x        ; Add 1 to carry to the previous digit.
 	bne EvaluateCarry    ; This cannot go from $FF to 0, so it must be not zero.
 
 ExitAddToScore           ; All done.
@@ -186,10 +186,11 @@ HighScoreOrNot
 	ldx #0
 
 CompareScoreToHighScore
-	lda MyScore,x               ; Get my score.
-	cmp HiScore,x               ; Compare to high score.
-	beq ContinueCheckingScores  ; Equals?  then so far it is not high score
-	bcs CopyNewHighScore        ; Greater than.  Would be new high score.
+	lda HiScore,x
+	cmp MyScore,x
+	beq ContinueCheckingScores  ; They are the same, keep trying
+	bcc CopyNewHighScore        ; Hi score less than My score.
+	rts                         ; Hi score greater than My Score.  stop checking.
 
 ContinueCheckingScores
 	inx
@@ -204,6 +205,10 @@ CopyNewHighScore                ; It is a high score.
 	cpx #7                      ; Copy until the remaining 7 digits are done.
 	bne CopyNewHighScore
 
+	lda #$FF
+	sta FlaggedHiScore         ; Flag the high score. Score must have changed to get here.
+
+ExitHighScoreOrNot
 	rts
 
 

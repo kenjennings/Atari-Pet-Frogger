@@ -360,9 +360,6 @@ ProcessDeadScreenInput         ; a key is pressed. Prepare for the screen transi
 	lda NumberOfLives          ; Have we run out of frogs?
 	beq SwitchToGameOver       ; Yes.  Game Over.
 
-	lda #$FF
-	sta FlaggedHiScore         ; No. Flag the high score. Score must have changed to get here.
-
 	jsr SetupTransitionToGame  ; Go back to game screen.
 	bne EndDeadScreen
 
