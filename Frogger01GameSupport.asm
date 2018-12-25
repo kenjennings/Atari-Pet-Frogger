@@ -261,17 +261,14 @@ AutoMoveFrog
 ; Auto Frog Left
 	cpy #0
 	beq FrogDemiseByWallSplat ; at zero means we hit the wall.
-	dey                       ; It is not 0, so move Frog left one character
-	sty FrogColumn
-	bpl ExitAutoMoveFrog    ; Done, successful move.
+	dec FrogColumn            ; It is not 0, so move Frog left one character
+	rts                       ; Done, successful move.
 
 AutoFrogRight
 	cpy #39                   ; 39 is limit
 	beq FrogDemiseByWallSplat ; at limit means we hit the wall
-
-	iny                       ; Move Frog right one character
-	sty FrogColumn
-	bpl ExitAutoMoveFrog      ; Done, successful move.
+	inc FrogColumn            ; Move Frog right one character
+	rts                       ; Done, successful move.
 
 FrogDemiseByWallSplat         ; Ran out of river.   Yer Dead!
 	inc FrogSafety            ; Schrodinger's frog is known to be dead.
