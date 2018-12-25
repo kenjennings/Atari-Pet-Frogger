@@ -22,7 +22,7 @@ Saved a Frog!
 
 Game Over:
 
-[![Game Over](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V01_Over.png "Game Over")](#features5)
+[![Game Over](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V01_GameOver.png "Game Over")](#features5)
 
 ---
 
