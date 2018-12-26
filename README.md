@@ -36,4 +36,22 @@ Other than the timer control routine monitoring for vertical blank changes there
 
 ---
 
+Version 02 PET FROGGER -- WORK IN PROGRESS
+
+The plan for Version 02 is to continue to maintain the game in the same text mode (ANTIC mode 2, OS Text Mode 0), but to Atari-cize everything about the screen and game operation.  Ideas under contemplation....
+
+- Add at least simple sound effects.
+
+- Change to joystick control.   Buh-bye keyboard.
+
+- Formalize timer updates, and other important frame-oriented decisions and updates into a deferred Vertical Blank Interrrupt.
+
+- Custom character set to make the Frog look like a frog, and the boats look like boats, possible other graphics.
+
+- Use Display List LMS updates to move the boats rather than reloading screen memory.  (Debating whether to go full bore and fine scroll the boats too.)
+
+- Add color.  Use a DLI for each text line to set a different base color for every line.  The colors would be syncronized to the screen content.
+
+---
+
 More to come.
