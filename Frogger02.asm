@@ -9,6 +9,8 @@
 ;
 ; Version 00, November 2018
 ; Version 01, December 2018
+; Version 02, December 2018
+;
 ; --------------------------------------------------------------------------
 
 ; ==========================================================================
@@ -157,13 +159,23 @@
 ; variables and load directly into them at the same time...
 ; --------------------------------------------------------------------------
 	ORG $88
-	
-COLPF1_TABLE
-	.ds 25
-	
-COLPF2_TABLE
-	.ds 25
-	
+
+COLPF2_TABLE ; Text background color. ; Default Green
+	.by COLOR_GREEN COLOR_GREEN COLOR_GREEN COLOR_GREEN COLOR_GREEN
+	.by COLOR_GREEN COLOR_GREEN COLOR_GREEN COLOR_GREEN COLOR_GREEN
+	.by COLOR_GREEN COLOR_GREEN COLOR_GREEN COLOR_GREEN COLOR_GREEN
+	.by COLOR_GREEN COLOR_GREEN COLOR_GREEN COLOR_GREEN COLOR_GREEN
+	.by COLOR_GREEN COLOR_GREEN COLOR_GREEN COLOR_GREEN COLOR_GREEN
+		
+COLPF1_TABLE ; Text color (luminance)
+	.by $0A $0A $0A $0A $0A ; default all to $0A/10 (dec)
+	.by $0A $0A $0A $0A $0A
+	.by $0A $0A $0A $0A $0A
+	.by $0A $0A $0A $0A $0A
+	.by $0A $0A $0A $0A $0A
+
+ThisDLI         .byte $00 ; = counts the instance of the DLI for indexing into the color tables. 
+
 MovesCars       .word $00 ; = Moves Cars
 
 FrogLocation    .word $00 ; = Pointer to start of Frog's current row in screen memory.
@@ -228,9 +240,9 @@ SAVEY = $FF
 	.by "** Thanks to the Word (John 1:1), Creator of heaven, and earth, and "
 	.by "semiconductor chemistry and physics which makes all this fun possible. ** "
 	.by "Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. ** "
-	.by "Atari port by Ken Jennings, December 2018. Version 01. "
-	.by "IOCB Printing removed. Everything is direct writes to screen RAM. **"
-	.by "Code reworked into timer/event loop organization. **"
+	.by "Atari port by Ken Jennings, December 2018. Version 02. "
+	.by "Added color with DLIs, joystick interface **"
+	.by "Event loop properly managed by VBI **"
 
 
 ; ==========================================================================
@@ -293,12 +305,13 @@ SAVEY = $FF
 	ORG $7FAE  ; $xxD8 to xxFF - more than enough space for Display List
 
 DISPLAYLIST
-	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4 ; 20 blank scan lines.
-	.rept 25,#
-		mDL_LMS DL_TEXT_2,[[40*:1]+SCREENMEM] ; Mode 2 text and Load Memory Scan for text/graphics
+	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4|DL_DLI ; 20 blank scan lines.
+	.rept 24,#
+		mDL_LMS DL_TEXT_2|DL_DLI,[[40*:1]+SCREENMEM] ; Mode 2 text and Load Memory Scan for text/graphics
 	.endr
-	.byte DL_JUMP_VB                         ; End list, Vertical Blank 
-	.word DISPLAYLIST                        ; Restart display at the same display list.
+	mDL_LMS DL_TEXT_2,[[40*24]+SCREENMEM]            ; One last line without DLI
+	.byte DL_JUMP_VB                                 ; End list, Vertical Blank 
+	.word DISPLAYLIST                                ; Restart display at the same display list.
 
 
 ; ==========================================================================

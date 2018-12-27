@@ -55,6 +55,8 @@ EventScreenStart
 
 	jsr DisplayTitleScreen  ; Draw title and game instructions.
 
+	jsr CopyTitleColorsToDLI
+	
 	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 

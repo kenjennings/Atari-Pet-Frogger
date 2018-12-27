@@ -71,6 +71,8 @@ SetupGame
 
 	jsr DisplayGameScreen  ; Draw game screen.
 
+	jsr CopyGameColorsToDLI
+
 	lda #INTERNAL_O        ; On Atari we're using "O" as the frog shape.
 	sta (FrogLocation),y   ; SCREENMEM + $320 + $13
 

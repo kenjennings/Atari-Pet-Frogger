@@ -9,6 +9,7 @@
 ;
 ; Version 00, November 2018
 ; Version 01, December 2018
+; Version 02, December 2018
 ;
 ; --------------------------------------------------------------------------
 
@@ -211,5 +212,56 @@ bLoopWaitFrame
 
 	pla                ; restore A
 	rts                ; No.  Clock changed means frame ended.  exit.
+
+
+;==============================================================================
+;                                                           MyDLI
+;==============================================================================
+; Display List Interrupt
+;
+; Get background color from table.
+; Get text luminace from table.
+; sync display.
+; Store background color.
+; store text color (luminance.)
+; Increment index for next call.
+;
+; Note the DLIs don't care where the index ends as this is managed by the VBI.
+;==============================================================================
+
+MyDLI
+
+	mRegSaveAX
+	
+	ldx ThisDLI
+	lda COLPF2_TABLE,x   ; Get background color;
+	pha                  ; Save for a moment.
+	lda COLPF1_TABLE,x   ; Get text color (luminance)
+	tax                  ; X = text color (luminance)
+	pla                  ; A = background color.
+	sta WSYNC            ; sync to end of scan line
+	sta COLPF2           ; Write new background color
+	stx COLPF1           ; write new text color.
+	inc ThisDLI          ;
+
+	mRegRestoreAX
+	
+	rti
+	
+	
+;==============================================================================
+;                                                           MyDeferredVBI
+;==============================================================================
+; Vertical Blank Interrupt.
+;
+; Manage timers and countdowns.
+; Force steady state of DLI.
+;==============================================================================
+
+MyDeferredVBI
+	lda #$00
+	sta ThisDLI
+	
+	jmp XITVBV ; Return to OS.
 
 	

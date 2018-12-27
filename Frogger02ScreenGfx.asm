@@ -9,6 +9,7 @@
 ;
 ; Version 00, November 2018
 ; Version 01, December 2018
+; Version 02, December 2018
 ;
 ; --------------------------------------------------------------------------
 
@@ -242,10 +243,10 @@ TITLE_TXT ; Instructions/Title text.
 CREDIT_TXT ; The perpetrators identified...
 ; 3  |     (c) November 1983 by DalesOft      | CREDIT
 ; 4  |        Written by John C Dale          | CREDIT
-; 5  |Atari V01 port by Ken Jennings, Dec 2018| CREDIT
+; 5  |Atari V02 port by Ken Jennings, Dec 2018| CREDIT
 	.sb "     (c) November 1983 by Dales" ATASCII_HEART "ft      "
 	.sb "        Written by John C. Dale         "
-	.sb "Atari V01 port by Ken Jennings, Dec 2018"
+	.sb "Atari V02 port by Ken Jennings, Dec 2018"
 
 INST_TXT1 ; Basic instructions...
 ; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
@@ -416,6 +417,71 @@ SCREEN_ADDR ; Direct address lookup for each row of screen memory.
 		.word [40*:1+SCREENMEM]
 	.endr
 
+
+; ==========================================================================
+; Color Layouts for the screens.
+; --------------------------------------------------------------------------
+
+TITLE_BACK_COLORS
+	.by COLOR_GREEN COLOR_GREEN ; Title line
+    .by COLOR_BLACK COLOR_BLACK COLOR_BLACK COLOR_BLACK ; Credits
+	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
+	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
+	.by COLOR_BLACK
+	.by COLOR_ORANGE2 COLOR_ORANGE2 COLOR_ORANGE2 ; Scoring
+	.by COLOR_BLACK
+	.by COLOR_PINK COLOR_PINK COLOR_PINK ; Controls
+	.by COLOR_BLACK
+	.by COLOR_BLUE_GREEN ; Press Any Key.
+	.by COLOR_BLACK
+
+TITLE_TEXT_COLORS
+	.rept 25
+		.by $0A ; TRext luminance
+	.endr 
+
+CopyTitleColorsToDLI
+	ldx #24
+LoopCopyTitleColors
+	lda TITLE_BACK_COLORS,x
+	sta COLPF2_TABLE,x
+	lda TITLE_TEXT_COLORS,x
+	sta COLPF1_TABLE,x
+	dex
+	bpl LoopCopyTitleColors
+
+	rts
+
+
+GAME_BACK_COLORS
+    .by COLOR_BLACK COLOR_BLACK ; Scores
+	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
+	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
+	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
+	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
+	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
+	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
+	.by COLOR_ORANGE1 ; one last Beach.
+	.by COLOR_GREEN ; gap 
+    .by COLOR_BLACK COLOR_BLACK COLOR_BLACK  ; Credits
+
+
+GAME_TEXT_COLORS
+	.rept 25
+		.by $0A ; TRext luminance
+	.endr 
+
+CopyGameColorsToDLI
+	ldx #24
+LoopCopyGameColors
+	lda GAME_BACK_COLORS,x
+	sta COLPF2_TABLE,x
+	lda GAME_TEXT_COLORS,x
+	sta COLPF1_TABLE,x
+	dex
+	bpl LoopCopyGameColors
+
+	rts
 
 ; ==========================================================================
 ; "Printing" things to the screen.
