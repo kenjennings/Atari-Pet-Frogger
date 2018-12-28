@@ -26,7 +26,7 @@ As much of the original PET 4032 assembly code is used as possible.  In most pla
 
 [Version 01 PET FROGGER](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V01.md "Version 01 Atari PET FROGGER") 
 
-[![V01 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V01_ProtoComposite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V01.md)
+[![V01 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V01_Composite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V01.md)
 
 Reorganized, rewritten, and refactored to implement modular code.  The game structure is remade into an event-like loop driven by monitoring video frame changes.  Yes, there still is no sound.
 
@@ -40,7 +40,7 @@ Version 02 PET FROGGER -- WORK IN PROGRESS
 
 PROTOTYPE COLORIZATION (same game as V01, but with colors from DLI.  Actually easy to do. The screen memory handling will be more trouble.):
 
-[![V02 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V02_Composite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V02.md)
+[![V02 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V02_ProtoComposite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V02.md)
 
 The plan for Version 02 is to continue to maintain the game in the same text mode (ANTIC mode 2, OS Text Mode 0), but to Atari-cize everything about the screen and game operation.  Ideas under contemplation....
 
