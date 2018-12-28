@@ -26,7 +26,7 @@ As much of the original PET 4032 assembly code is used as possible.  In most pla
 
 [Version 01 PET FROGGER](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V01.md "Version 01 Atari PET FROGGER") 
 
-[![V01 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V01_Composite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V01.md)
+[![V01 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V01_ProtoComposite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V01.md)
 
 Reorganized, rewritten, and refactored to implement modular code.  The game structure is remade into an event-like loop driven by monitoring video frame changes.  Yes, there still is no sound.
 
