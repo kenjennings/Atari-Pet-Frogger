@@ -9,6 +9,7 @@
 ;
 ; Version 00, November 2018
 ; Version 01, December 2018
+; Version 02, December 2018
 ;
 ; --------------------------------------------------------------------------
 
@@ -102,8 +103,10 @@ SetupTransitionToWin
 
 	lda #2                  ; start wiping screen at line 2 (0, 1, 2)
 	sta EventCounter
-	
+
 	jsr ClearKey
+
+	jsr CopyWinColorsToDLI
 
 	lda #SCREEN_TRANS_WIN   ; Next step is operating the transition animation.
 	sta CurrentScreen
@@ -121,9 +124,9 @@ SetupTransitionToWin
 SetupWin
 	lda #BLINK_SPEED    ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
-	
+
 	jsr ClearKey
-	
+
 	lda #SCREEN_WIN     ; Change to wins screen.
 	sta CurrentScreen
 	
@@ -156,7 +159,9 @@ SetupTransitionToDead
 	sta EventCounter
 
 	jsr ClearKey
-	
+
+	jsr CopyDeadColorsToDLI
+
 	lda #SCREEN_TRANS_DEAD  ; Next step is operating the transition animation.
 	sta CurrentScreen
 
@@ -197,7 +202,9 @@ SetupTransitionToGameOver
 	sta EventCounter
 
 	jsr ClearKey
-	
+
+	jsr CopyOverColorsToDLI 
+
 	lda #SCREEN_TRANS_OVER ; Change to game over transition.
 	sta CurrentScreen
 

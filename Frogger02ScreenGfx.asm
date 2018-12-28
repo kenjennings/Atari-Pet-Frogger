@@ -94,7 +94,7 @@
 ;    +----------------------------------------+
 
 
-; Revised V01 Title Screen and Instructions:
+; Revised V01 and V02 Title Screen and Instructions:
 ;    +----------------------------------------+
 ; 1  |              PET FROGGER               | TITLE
 ; 2  |              --- -------               | TITLE
@@ -126,7 +126,7 @@
 ; Transition Title screen to Game Screen.
 ; Animate Credit lines down from Line 3 to Line 23.
 
-; Revised V01 Main Game Play Screen:
+; Revised V01 and V02 Main Game Play Screen:
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
@@ -424,7 +424,7 @@ SCREEN_ADDR ; Direct address lookup for each row of screen memory.
 
 TITLE_BACK_COLORS
 	.by COLOR_GREEN COLOR_GREEN ; Title line
-    .by COLOR_BLACK COLOR_BLACK COLOR_BLACK COLOR_BLACK ; Credits
+	.by COLOR_BLACK COLOR_BLACK COLOR_BLACK COLOR_BLACK ; Credits
 	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
 	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
 	.by COLOR_BLACK
@@ -437,7 +437,7 @@ TITLE_BACK_COLORS
 
 TITLE_TEXT_COLORS
 	.rept 25
-		.by $0A ; TRext luminance
+		.by $0A ; Text luminance
 	.endr 
 
 CopyTitleColorsToDLI
@@ -454,7 +454,7 @@ LoopCopyTitleColors
 
 
 GAME_BACK_COLORS
-    .by COLOR_BLACK COLOR_BLACK ; Scores
+	.by COLOR_BLACK COLOR_BLACK ; Scores
 	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
 	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
 	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
@@ -463,12 +463,11 @@ GAME_BACK_COLORS
 	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
 	.by COLOR_ORANGE1 ; one last Beach.
 	.by COLOR_GREEN ; gap 
-    .by COLOR_BLACK COLOR_BLACK COLOR_BLACK  ; Credits
-
+	.by COLOR_BLACK COLOR_BLACK COLOR_BLACK  ; Credits
 
 GAME_TEXT_COLORS
 	.rept 25
-		.by $0A ; TRext luminance
+		.by $0A ; Text luminance
 	.endr 
 
 CopyGameColorsToDLI
@@ -482,6 +481,103 @@ LoopCopyGameColors
 	bpl LoopCopyGameColors
 
 	rts
+
+
+DEAD_BACK_COLORS
+	.by COLOR_BLACK 
+	.by COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE
+	.by COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE
+
+	.by COLOR_BLACK COLOR_PINK COLOR_PINK COLOR_PINK COLOR_BLACK
+
+	.by COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE
+	.by COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE
+	
+	.by COLOR_BLACK COLOR_GREEN COLOR_BLACK  ; Credits
+
+DEAD_TEXT_COLORS
+	.by $00; Text luminance
+	.by $0E $0C $0A $08 $06 $04 $02 $00
+	.by $00 $0A $08 $06 $00
+	.by $00 $02 $04 $06 $08 $0A $0C $0E
+	.by $00 $0A $00
+
+CopyDeadColorsToDLI
+	ldx #24
+LoopCopyDeadColors
+	lda DEAD_BACK_COLORS,x
+	sta COLPF2_TABLE,x
+	lda DEAD_TEXT_COLORS,x
+	sta COLPF1_TABLE,x
+	dex
+	bpl LoopCopyDeadColors
+
+	rts
+
+
+WIN_BACK_COLORS
+	.by COLOR_BLACK  ; Scores
+	.by COLOR_ORANGE1 COLOR_ORANGE2 COLOR_RED_ORANGE COLOR_PINK
+	.by COLOR_PURPLE COLOR_PURPLE_BLUE COLOR_BLUE1 COLOR_BLUE2
+	
+	.by COLOR_BLACK COLOR_GREEN COLOR_GREEN COLOR_GREEN COLOR_BLACK
+	
+	.by COLOR_LITE_BLUE COLOR_AQUA COLOR_BLUE_GREEN COLOR_GREEN
+	.by COLOR_YELLOW_GREEN COLOR_ORANGE_GREEN COLOR_LITE_ORANGE COLOR_ORANGE2
+	
+	.by COLOR_BLACK COLOR_GREEN COLOR_BLACK 
+
+WIN_TEXT_COLORS
+	.by $00; Text luminance
+	.by $0A $0A $0A $0A $0A $0A $0A $0A
+	.by $00 $0C $08 $04 $00
+	.by $0A $0A $0A $0A $0A $0A $0A $0A
+	.by $00 $0A $00
+
+CopyWinColorsToDLI
+	ldx #24
+LoopCopyWinColors
+	lda WIN_BACK_COLORS,x
+	sta COLPF2_TABLE,x
+	lda WIN_TEXT_COLORS,x
+	sta COLPF1_TABLE,x
+	dex
+	bpl LoopCopyWinColors
+
+	rts
+
+
+OVER_BACK_COLORS
+	.by COLOR_BLACK 
+	.by COLOR_PINK COLOR_PINK COLOR_PINK COLOR_PINK
+	.by COLOR_PINK COLOR_PINK COLOR_PINK COLOR_PINK
+
+	.by COLOR_BLACK COLOR_BLACK COLOR_BLACK COLOR_BLACK COLOR_BLACK
+
+	.by COLOR_PINK COLOR_PINK COLOR_PINK COLOR_PINK
+	.by COLOR_PINK COLOR_PINK COLOR_PINK COLOR_PINK
+
+	.by COLOR_BLACK COLOR_GREEN COLOR_BLACK  
+
+OVER_TEXT_COLORS
+	.by $00; Text luminance
+	.by $00 $02 $04 $06 $08 $0A $0C $0E
+	.by $00 $0A $08 $06 $00
+	.by $0E $0C $0A $08 $06 $04 $02 $00
+	.by $00 $0A $00
+
+CopyOverColorsToDLI
+	ldx #24
+LoopCopyOverColors
+	lda OVER_BACK_COLORS,x
+	sta COLPF2_TABLE,x
+	lda OVER_TEXT_COLORS,x
+	sta COLPF1_TABLE,x
+	dex
+	bpl LoopCopyOverColors
+
+	rts	
+
 
 ; ==========================================================================
 ; "Printing" things to the screen.
@@ -537,8 +633,8 @@ ClearForGfx
 	lda #INTERNAL_SPACE
 	
 LoopClearForGfx
-	sta SCREENMEM+400,x ; Line 10 
-	sta SCREENMEM+560,x ; Line 14 
+	sta SCREENMEM+360,x ; Line 10 
+	sta SCREENMEM+520,x ; Line 14 
 
 	dex
 	bpl LoopClearForGfx
@@ -555,7 +651,7 @@ PrintDeadFrogGfx
 	ldx #SIZEOF_BIG_GFX
 LoopPrintDeadText
 	lda FROG_DEAD_GFX,x
-	sta SCREENMEM+440,X 
+	sta SCREENMEM+400,X 
 	dex
 	bpl LoopPrintDeadText
 
@@ -571,7 +667,7 @@ PrintWinFrogGfx
 	ldx #SIZEOF_BIG_GFX
 LoopPrintWinsText
 	lda FROG_SAVE_GFX,x
-	sta SCREENMEM+440,X
+	sta SCREENMEM+400,X
 	dex
 	bpl LoopPrintWinsText
 
@@ -587,7 +683,7 @@ PrintGameOverGfx
 	ldx #SIZEOF_BIG_GFX
 LoopPrintGameOverText
 	lda GAME_OVER_GFX,x
-	sta SCREENMEM+440,x
+	sta SCREENMEM+400,x
 	dex
 	bpl LoopPrintGameOverText
 	

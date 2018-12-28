@@ -51,6 +51,36 @@
 ;   game functions and facilitate future Atari-fication and other features.
 ;
 ; --------------------------------------------------------------------------
+; Version 02.  December 2018
+; The design principle continues to maintain the original presentation 
+; of a full screen of basic text.  (In Atari terms, this is ANTIC mode 2, 
+; or OS mode 0).  Everything else in the game is subject to Atari-fication.
+; * Color.  Every line of the text mode has a DLI to set background color
+;   and the foreground text luminance.  The color is also used as an 
+;   animation tool on the screens for dead frog, game over, and saving 
+;   a frog.
+; * Joystick controller input.  Game controller input is a standard for
+;   Atari games.  Say goodbye to the keyboard.  
+; * Sound.  Add at least simple sound effects for water/boats moving, 
+;   frog jumping, frog dying, rescuing a frog, joystick input.
+; * Custom character set to make the frog look like a frog, and boats 
+;   look like plus other graphics enhancements.
+; * Formalize game timing by implementing deferred vertical blank 
+;   interrupt to maintain the game activity and timings.
+; * Screen memory is no longer declared at the same location as on the 
+;   Pet computer, and due to display lists is no longer contiguous RAM.
+; * Display List LMS updates present the information on screen. 
+;   Displayed items can be presented by updating a few display list 
+;   LMS pointers rather than bulk movement of data through screen memory.
+;   This is also used to move the boats around the screen by coarse 
+;   scrolling through the LMS.  This permits the screen memory to be
+;   non-contiguous, and data can then be aligned in memory pages allowing
+;   code to update either high byte or low byte of addresses.  Since the 
+;   frog is a character on screen it must move through screen memory 
+;   and so the game still requires six groups of beaches and boats 
+;   separately declared in memory.
+;
+; --------------------------------------------------------------------------
 
 
 ; ==========================================================================
@@ -147,7 +177,7 @@
 ; ==========================================================================
 ; Macros (No code/data declared)
 	icl "macros.asm"
-	
+
 ; --------------------------------------------------------------------------
 
 ; ==========================================================================

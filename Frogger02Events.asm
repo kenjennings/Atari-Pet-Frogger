@@ -9,6 +9,7 @@
 ;
 ; Version 00, November 2018
 ; Version 01, December 2018
+; Version 02, December 2018
 ;
 ; --------------------------------------------------------------------------
 
@@ -401,9 +402,9 @@ GetRandomX
 	tax                        ; The index into the image and screen buffers.
 	lda GAME_OVER_GFX,x        ; Get image byte
 	beq SkipGameOverEOR        ; if this is 0 just copy to screen
-	eor SCREENMEM+440,x        ; Exclusive Or with screen
+	eor SCREENMEM+400,x        ; Exclusive Or with screen
 SkipGameOverEOR
-	sta SCREENMEM+440,x        ; Write to screen
+	sta SCREENMEM+400,x        ; Write to screen
 	dey                 
 	bne GetRandomX             ; Do another random character in this turn.
 	beq EndTransitionGameOver

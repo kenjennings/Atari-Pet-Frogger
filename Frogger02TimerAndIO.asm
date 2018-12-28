@@ -233,15 +233,24 @@ MyDLI
 
 	mRegSaveAX
 	
+;	ldx ThisDLI
+;	lda COLPF2_TABLE,x   ; Get background color;
+;	pha                  ; Save for a moment.
+;	lda COLPF1_TABLE,x   ; Get text color (luminance)
+;	tax                  ; X = text color (luminance)
+;	pla                  ; A = background color.
+;	sta WSYNC            ; sync to end of scan line
+;	sta COLPF2           ; Write new background color
+;	stx COLPF1           ; write new text color.
+;	inc ThisDLI          ;
+
 	ldx ThisDLI
 	lda COLPF2_TABLE,x   ; Get background color;
-	pha                  ; Save for a moment.
-	lda COLPF1_TABLE,x   ; Get text color (luminance)
-	tax                  ; X = text color (luminance)
-	pla                  ; A = background color.
 	sta WSYNC            ; sync to end of scan line
 	sta COLPF2           ; Write new background color
-	stx COLPF1           ; write new text color.
+	lda COLPF1_TABLE,x   ; Get text color (luminance)
+	sta COLPF1           ; write new text color.
+
 	inc ThisDLI          ;
 
 	mRegRestoreAX
