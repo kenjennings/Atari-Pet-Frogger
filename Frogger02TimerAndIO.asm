@@ -26,6 +26,17 @@
 ;
 ; --------------------------------------------------------------------------
 
+; ==========================================================================
+; Animation speeds of various displayed items.   Number of frames to wait...
+; --------------------------------------------------------------------------
+BLINK_SPEED     = 36 ; blinking Press Any Key text
+CREDIT_SPEED    = 3  ; Animated Credits.
+DEAD_FILL_SPEED = 3  ; Fill the Screen for Dead Frog
+WIN_FILL_SPEED  = 4  ; Fill screen for Win
+FROG_WAKE_SPEED = 90 ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
+RES_IN_SPEED    = 2  ; Speed of Game over Res in animation
+TITLE_SPEED     = 6  ; Fill screen to present title
+
 ; Timer values.  NTSC.
 ; About 7 keys per second.
 KEYSCAN_FRAMES = $09
@@ -232,17 +243,6 @@ bLoopWaitFrame
 MyDLI
 
 	mRegSaveAX
-	
-;	ldx ThisDLI
-;	lda COLPF2_TABLE,x   ; Get background color;
-;	pha                  ; Save for a moment.
-;	lda COLPF1_TABLE,x   ; Get text color (luminance)
-;	tax                  ; X = text color (luminance)
-;	pla                  ; A = background color.
-;	sta WSYNC            ; sync to end of scan line
-;	sta COLPF2           ; Write new background color
-;	stx COLPF1           ; write new text color.
-;	inc ThisDLI          ;
 
 	ldx ThisDLI
 	lda COLPF2_TABLE,x   ; Get background color;
@@ -251,7 +251,7 @@ MyDLI
 	lda COLPF1_TABLE,x   ; Get text color (luminance)
 	sta COLPF1           ; write new text color.
 
-	inc ThisDLI          ;
+	inc ThisDLI          ; next DLI.
 
 	mRegRestoreAX
 	
@@ -270,7 +270,17 @@ MyDLI
 MyDeferredVBI
 	lda #$00
 	sta ThisDLI
-	
+
+	lda VBICurrentDL       ; Main code signals to change screens?
+	bmi ExitMyDeferredVBI  ; Negative value is no change.
+
+; magic happens here.
+
+	sta CurrentDL          ; Tell main code the new screen is set.
+
+	lda #$FF               ; Turn off the signal to change screens.
+	sta VBICurrentDL
+
+ExitMyDeferredVBI
 	jmp XITVBV ; Return to OS.
 
-	

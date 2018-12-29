@@ -33,54 +33,40 @@ GAMESTART
 	; this should be done by managing SDMCTL too, but this is overkill for a
 	; program with only one display.
 
+	lda #<CHARACTER_SET ; Set custom character set.  Global to game, forever.
+	sta CHBAS
+
 	lda #NMI_VBI ; Turn Off DLI
 	sta NMIEN
+
+	lda #<MyDLI ; Set DLI vector.
+	sta VDSLST
+	lda #>MyDLI
+	sta VDSLST+1
 
 	ldy #<MyDeferredVBI  ; Add the deferred VBI to the system
 	ldx #>MyDeferredVBI
 	lda #7               ; 7 = Deferred VBI 
 	jsr SETVBV           ; Tell OS to set it
 
+	; what we should do here is tell the VBI what screen to initialize.
+
 	jsr libScreenWaitFrame ; Wait for display to start next frame.
 
 	; Now it is safe to change Display list pointer.  
-	; This should  not be interrupted.
+	; This should not be interrupted.
 	lda #<DISPLAYLIST
 	sta SDLSTL
 	lda #>DISPLAYLIST
 	sta SDLSTH
 
-	lda #<MyDLI ; Set DLI vector.
-	sta VDSLST
-	lda #>MyDLI
-	sta VDSLST+1
-	
 	lda #[NMI_DLI|NMI_VBI] ; Turn On DLI
 	sta NMIEN
 
-	; Tell the OS where screen memory starts
-	lda #<SCREENMEM    ; low byte screen
-	sta SAVMSC
-	lda #>SCREENMEM    ; hi byte screen
-	sta SAVMSC+1
 
-	lda #1
-	sta CRSINH         ; Turn off the displayed cursor.
 
 	lda #0
-	sta DINDEX         ; Tell OS screen/cursor control is Text Mode 0
-	sta LMARGN         ; Set left margin to 0 (default is 2)
-
-	; These colors will not matter due to the DLIs.
-	lda #COLOR_GREEN   ; Set screen base color dark green
-	sta COLOR2         ; Background and
-	lda #0
-	sta COLOR4         ; Border
-	lda #$0A
-	sta COLOR1         ; Text brightness
-
-	; Zero these values...
-	lda #0
+	sta COLOR4         ; Border color, 0 is black.
 	sta FlaggedHiScore
 	sta LastKeyPressed
 
