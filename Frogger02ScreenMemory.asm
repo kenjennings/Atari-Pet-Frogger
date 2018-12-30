@@ -68,6 +68,7 @@ I_Y  = 89      ; Internal ctrl-Y
 I_IY = 89+$80  ; Internal ctrl-Y Inverse
 I_S  = 0       ; Internal Space
 I_IS = 0+$80   ; Internal Space Inverse
+
 I_T  = $54     ; Internal ctrl-t (ball)
 I_IT = $54+$80 ; Internal ctrl-t Inverse
 
@@ -168,10 +169,12 @@ INSTRUCT_MEM6
 
 INSTRUCT_MEM7
 ; 13 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
-	.sb "rivers like this:  <" A_B A_B A_B "]  Land only on  "
+	.sb "rivers like this:  "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "  Land only on  "
 INSTRUCT_MEM8
-; 14 |the seats in the boats ('Q').           | INSTXT_1
-	.sb "the seats in the boats ('" A_B "').           "
+; 14 |the seats in the boats.                 | INSTXT_1
+	.sb "the seats in the boats.                 "
 
 SCORING_MEM1 ; Scoring
 ; 16 |Scoring:                                | INSTXT_2
@@ -184,23 +187,23 @@ SCORING_MEM3
 	.sb "   500 points for each rescued frog.    "
 
 CONTROLS_MEM1 ; Game Controls
-; 20 |Game controls:                          | INSTXT_3
-	.sb "Game controls:                          "
+; 20 |Use Joystick Controller:                | INSTXT_3
+	.sb "Use Joystick Controller:                "
 
 ; Six lines times 40 characters is 240 bytes of data.  
 ; Realign to next page.
 	.align $0100
 
 CONTROLS_MEM2
-; 21 |                 S = Up                 | INSTXT_3
-	.sb "                 S = Up                 "
+; 21 |                   Up                   | INSTXT_3
+	.sb "                   Up                   "
 CONTROLS_MEM3 
-; 22 |      left = 4           6 = right      | INSTXT_3
-	.sb "      left = 4           6 = right      "
+; 22 |      left                   right      | INSTXT_3
+	.sb "      left                   right      "
 
 ANYKEY_MEM ; Prompt to start game.
-; 24 |     Hit any key to start the game.     | INSTXT_4
-	.sb "        Hit any key to continue.        "
+; 24 |   Press joystick button to continue.   | INSTXT_4
+	.sb "   Press joystick button to continue.   "
 
 
 ; Revised V01 and V02 Main Game Play Screen:
@@ -234,10 +237,20 @@ ANYKEY_MEM ; Prompt to start game.
 
 SCORE_MEM1 ; Labels for crossings counter, scores, and lives
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
-	.sb "Score:00000000               00000000:Hi"
+	.by I_BS I_SC I_SO I_SR I_SE I_CO
+SCREEN_MYSCORE
+	.sb "00000000               "
+SCREEN_HISCORE
+	.sb "00000000"
+	.by I_CO I_BH I_SI
 SCORE_MEM2 
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
-	.sb "Frogs:0    Frogs Saved:                 "
+	.by I_BF I_SR I_SO I_SG I_SS I_CO
+SCREEN_LIVES
+	.sb"0    "
+	.by I_BF I_SR I_SO I_SG I_SS $00 I_BS I_BS I_SV I_SE I_SD
+SCREEN_SAVED
+	.sb "                 "
 
 ; Playfield groups.  
 ; Each beach line is 40 characters, because it is not scrolled.
@@ -251,141 +264,261 @@ SCORE_MEM2
 
 PLAYFIELD_MEM0 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
-	.sb "                                        " ; "Beach"
+	.sb "         "
+	.by I_BEACH1
+	.sb "      "
+	.by I_BEACH2
+	.sb "              "
+	.by I_BEACH3
+	.sb "        " ; "Beach"
 PLAYFIELD_MEM1
-; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
-	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
-	.sb "[" A_B A_B A_B A_B ">       "
-	.sb "[" A_B A_B A_B A_B ">      "
-	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
-	.sb "[" A_B A_B A_B A_B ">       "
-	.sb "[" A_B A_B A_B A_B ">      "
+; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1 ; Boats Right
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "        "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "       "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "      "
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "        "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "       "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "      "
 PLAYFIELD_MEM2
-; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
-	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
-	.sb "        <" A_B A_B A_B A_B "]"
-	.sb "    <" A_B A_B A_B A_B "]    "
-	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
-	.sb "        <" A_B A_B A_B A_B "]"
-	.sb "    <" A_B A_B A_B A_B "]    "
+; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1 ; Boats Left
+	.sb "      "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "        "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "          "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "        "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
 
 
 	.align $0100
 
 PLAYFIELD_MEM3 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 6  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
-	.sb "                                        " ; "Beach"
+	.sb "      "
+	.by I_BEACH3
+	.sb "    "
+	.by I_BEACH1
+	.sb "                "
+	.by I_BEACH3
+	.sb "           " ; "Beach"
 PLAYFIELD_MEM4
-; 7  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
-	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
-	.sb "[" A_B A_B A_B A_B ">       "
-	.sb "[" A_B A_B A_B A_B ">      "
-	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
-	.sb "[" A_B A_B A_B A_B ">       "
-	.sb "[" A_B A_B A_B A_B ">      "
+; 7  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2 ; Boats Right
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "        "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "       "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "      "
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "        "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "       "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "      "
 PLAYFIELD_MEM5
-; 8  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
-	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
-	.sb "        <" A_B A_B A_B A_B "]"
-	.sb "    <" A_B A_B A_B A_B "]    "
-	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
-	.sb "        <" A_B A_B A_B A_B "]"
-	.sb "    <" A_B A_B A_B A_B "]    "
+; 8  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2 ; Boats Left
+	.sb "      "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "        "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "          "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "        "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
 
 
 	.align $0100
 
 PLAYFIELD_MEM6 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 9  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
-	.sb "                                        " ; "Beach"
+	.sb "     "
+	.by I_BEACH2
+	.sb "       "
+	.by I_BEACH3
+	.sb "              "
+	.by I_BEACH1
+	.sb "           " ; "Beach"
 PLAYFIELD_MEM7
-; 10  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3
-	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
-	.sb "[" A_B A_B A_B A_B ">       "
-	.sb "[" A_B A_B A_B A_B ">      "
-	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
-	.sb "[" A_B A_B A_B A_B ">       "
-	.sb "[" A_B A_B A_B A_B ">      "
+; 10  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3 ; Boats Right
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "        "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "       "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "      "
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "        "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "       "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "      "
 PLAYFIELD_MEM8
-; 11  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3
-	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
-	.sb "        <" A_B A_B A_B A_B "]"
-	.sb "    <" A_B A_B A_B A_B "]    "
-	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
-	.sb "        <" A_B A_B A_B A_B "]"
-	.sb "    <" A_B A_B A_B A_B "]    "
+; 11  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3 ; Boats Left
+	.sb "      "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "        "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "          "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "        "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
 
 
 	.align $0100
 
 PLAYFIELD_MEM9 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 12  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
-	.sb "                                        " ; "Beach"
+	.sb "          "
+	.by I_BEACH1
+	.sb "         "
+	.by I_BEACH3
+	.sb "           "
+	.by I_BEACH2
+	.sb "       " ; "Beach"
 PLAYFIELD_MEM10
-; 13  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4
-	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
-	.sb "[" A_B A_B A_B A_B ">       "
-	.sb "[" A_B A_B A_B A_B ">      "
-	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
-	.sb "[" A_B A_B A_B A_B ">       "
-	.sb "[" A_B A_B A_B A_B ">      "
+; 13  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4 ; Boats Right
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF"
+	.sb "        "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "       "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "      "
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "        "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "       "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "      "
 PLAYFIELD_MEM11
-; 14  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4
-	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
-	.sb "        <" A_B A_B A_B A_B "]"
-	.sb "    <" A_B A_B A_B A_B "]    "
-	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
-	.sb "        <" A_B A_B A_B A_B "]"
-	.sb "    <" A_B A_B A_B A_B "]    "
+; 14  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4 ; Boats Left
+	.sb "      "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "        "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "          "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "        "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
 
 
 	.align $0100
 
 PLAYFIELD_MEM12 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 15  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
-	.sb "                                        " ; "Beach"
+	.sb "       "
+	.by I_BEACH2
+	.sb "      "
+	.by I_BEACH2
+	.sb "              "
+	.by I_BEACH1
+	.sb "          " ; "Beach"
 PLAYFIELD_MEM13
-; 16  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5
-	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
-	.sb "[" A_B A_B A_B A_B ">       "
-	.sb "[" A_B A_B A_B A_B ">      "
-	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
-	.sb "[" A_B A_B A_B A_B ">       "
-	.sb "[" A_B A_B A_B A_B ">      "
+; 16  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5 ; Boats Right
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "        "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "       "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "      "
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "        "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "       "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "      "
 PLAYFIELD_MEM14
-; 17  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5
-	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
-	.sb "        <" A_B A_B A_B A_B "]"
-	.sb "    <" A_B A_B A_B A_B "]    "
-	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
-	.sb "        <" A_B A_B A_B A_B "]"
-	.sb "    <" A_B A_B A_B A_B "]    "
+; 17  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5 ; Boats Left
+	.sb "      "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "        "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "          "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "        "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
 
 
 	.align $0100
 
 PLAYFIELD_MEM15 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 18  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
-	.sb "                                        " ; "Beach"
+	.sb "           "
+	.by I_BEACH1
+	.sb "         "
+	.by I_BEACH2
+	.sb "          "
+	.by I_BEACH3
+	.sb "       " ; "Beach"
 PLAYFIELD_MEM16
-; 19  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
-	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
-	.sb "[" A_B A_B A_B A_B ">       "
-	.sb "[" A_B A_B A_B A_B ">      "
-	.sb " [" A_B A_B A_B A_B ">        " ; Boats Right
-	.sb "[" A_B A_B A_B A_B ">       "
-	.sb "[" A_B A_B A_B A_B ">      "
+; 19  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6 ; Boats Right
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "        "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "       "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "      "
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "        "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "       "
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
+	.sb "      "
 PLAYFIELD_MEM17
-; 20  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
-	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
-	.sb "        <" A_B A_B A_B A_B "]"
-	.sb "    <" A_B A_B A_B A_B "]    "
-	.sb "      <" A_B A_B A_B A_B "]" ; Boats Left
-	.sb "        <" A_B A_B A_B A_B "]"
-	.sb "    <" A_B A_B A_B A_B "]    "
+; 20  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6 ; Boats Left
+	.sb "      "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "        "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "          "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "        "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "    "
 PLAYFIELD_MEM18 ; One last line of Beach
 ; 21  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT2
-	.sb "                                        " ; "Beach"
+	.sb "        "
+	.by I_BEACH3
+	.sb "        "
+	.by I_BEACH1
+	.sb "                 "
+	.by I_BEACH1
+	.sb "    " ; "Beach"
 
 
 	.align $0100
@@ -473,13 +606,6 @@ GAMEOVER_MEM
 	.by $0 $0 $0 I_K  I_IK I_IL I_Y I_IY I_II I_IO I_Y I_IS I_S  I_IY I_Y I_IS I_U  I_U  I_S I_S I_S I_K  I_IK I_IL I_L I_S  I_IO I_II I_S I_IY I_IK I_U  I_O I_IY I_Y  I_IO I_O $0 $0 $0
 
 
-
-
-
-
-
-
-; ==========================================================================
 
 
 
