@@ -92,7 +92,7 @@ TITLE_DISPLAYLIST
 	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM3 
 	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM     ; An empty line.
 	mDL_LMS DL_TEXT_2|DL_DLI,ANYKEY_MEM    ; Prompt to start game.
-	mDL_LMS DL_TEXT_2,BLANK_MEM     ; An empty line.
+	mDL_LMS DL_TEXT_2,BLANK_MEM            ; An empty line.
 
 	.byte DL_JUMP_VB                       ; End list, Vertical Blank 
 	.word TITLE_DISPLAYLIST                ; Restart display at the same display list.
@@ -132,25 +132,43 @@ GAME_DISPLAYLIST
 
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1      ; Labels for crossings counter, scores, and lives
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM2    
-	
+PF_LMS0 ; Plus 1 is the address of the display list LMS
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM0  ; "Beach", and the two lines of Boats
+PF_LMS1
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM1  ; Right Boats.
+PF_LMS2
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM2  ; Left Boats.
+PF_LMS3
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM3  ; "Beach", and the two lines of Boats
+PF_LMS4
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM4
+PF_LMS5
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM5
+PF_LMS6
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM6  ; "Beach", and the two lines of Boats
+PF_LMS7
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM7
+PF_LMS8
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM8
+PF_LMS9
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM9  ; "Beach", and the two lines of Boats
+PF_LMS10
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM11
+PF_LMS11
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM10
+PF_LMS12
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM12 ; "Beach", and the two lines of Boats
+PF_LMS13
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM13
+PF_LMS14
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM14
+PF_LMS15
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM15 ; "Beach", and the two lines of Boats
+PF_LMS16
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM16
+PF_LMS17
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM17
+PF_LMS18
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM18 ; Frog starting beach.
 
 	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM       ; An empty line.

@@ -44,9 +44,9 @@ GAMESTART
 	lda #>MyDLI
 	sta VDSLST+1
 
-	ldy #<MyDeferredVBI  ; Add the deferred VBI to the system
-	ldx #>MyDeferredVBI
-	lda #7               ; 7 = Deferred VBI 
+	ldy #<MyImmediateVBI  ; Add the deferred VBI to the system
+	ldx #>MyImmediateVBI
+	lda #6               ; 6 = Immediate VBI 
 	jsr SETVBV           ; Tell OS to set it
 
 	; what we should do here is tell the VBI what screen to initialize.

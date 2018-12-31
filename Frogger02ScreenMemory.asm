@@ -399,7 +399,7 @@ PLAYFIELD_MEM9 ; Default display of "Beach", for lack of any other description, 
 	.sb "       " ; "Beach"
 PLAYFIELD_MEM10
 ; 13  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4 ; Boats Right
-	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF"
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
 	.sb "        "
 	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
 	.sb "       "
@@ -616,39 +616,105 @@ GAMEOVER_MEM
 ; So, all we need are lists --  a list of the text and the sizes.
 ; To index the lists we need enumerated values.
 ; --------------------------------------------------------------------------
-PRINT_BLANK_TXT     = 0  ; BLANK_TXT     ; Blank line used to erase things.
-PRINT_BLANK_TXT_INV = 1  ; BLANK_TXT_INV ; Inverse blank line used to "animate" things.
-PRINT_TITLE_TXT     = 2  ; TITLE_TXT     ; Instructions/Title text.
-PRINT_CREDIT_TXT    = 3  ; CREDIT_TXT    ; The perpetrators identified...
-PRINT_INST_TXT1     = 4  ; INST_TXT1     ; Basic instructions...
-PRINT_INST_TXT2     = 5  ; INST_TXT2     ; Scoring
-PRINT_INST_TXT3     = 6  ; INST_TXT3     ; Game Controls
-PRINT_INST_TXT4     = 7  ; INST_TXT4     ; Prompt to start game.
-PRINT_INST_TXT4_INV = 8  ; INST_TXT4_INV ; inverse version to support blinking.
-PRINT_SCORE_TXT     = 9  ; SCORE_TXT     ; Labels for crossings counter, scores, and lives
-PRINT_TEXT1         = 10 ; TEXT1         ; Beach and boats.
-PRINT_TEXT2         = 11 ; TEXT2         ; Beach with frog (starting line)
+;PRINT_BLANK_TXT     = 0  ; BLANK_TXT     ; Blank line used to erase things.
+;PRINT_BLANK_TXT_INV = 1  ; BLANK_TXT_INV ; Inverse blank line used to "animate" things.
+;PRINT_TITLE_TXT     = 2  ; TITLE_TXT     ; Instructions/Title text.
+;PRINT_CREDIT_TXT    = 3  ; CREDIT_TXT    ; The perpetrators identified...
+;PRINT_INST_TXT1     = 4  ; INST_TXT1     ; Basic instructions...
+;PRINT_INST_TXT2     = 5  ; INST_TXT2     ; Scoring
+;PRINT_INST_TXT3     = 6  ; INST_TXT3     ; Game Controls
+;PRINT_INST_TXT4     = 7  ; INST_TXT4     ; Prompt to start game.
+;PRINT_INST_TXT4_INV = 8  ; INST_TXT4_INV ; inverse version to support blinking.
+;PRINT_SCORE_TXT     = 9  ; SCORE_TXT     ; Labels for crossings counter, scores, and lives
+;PRINT_TEXT1         = 10 ; TEXT1         ; Beach and boats.
+;PRINT_TEXT2         = 11 ; TEXT2         ; Beach with frog (starting line)
 
-PRINT_END           = 12 ; value marker for end of list.
-
-
-TEXT_MESSAGES ; Starting addresses of each of the text messages
-	.word BLANK_TXT,BLANK_TXT_INV
-	.word TITLE_TXT,CREDIT_TXT,INST_TXT1,INST_TXT2,INST_TXT3,INST_TXT4,INST_TXT4_INV
-	.word SCORE_TXT,TEXT1,TEXT2
+;PRINT_END           = 12 ; value marker for end of list.
 
 
-TEXT_SIZES ; length of message.  Each should be a multiple of 40.
-	.word 40,40
-	.word 80,120,320,120,120,40,40
-	.word 80,120,40
+;TEXT_MESSAGES ; Starting addresses of each of the text messages
+;	.word BLANK_TXT,BLANK_TXT_INV
+;	.word TITLE_TXT,CREDIT_TXT,INST_TXT1,INST_TXT2,INST_TXT3,INST_TXT4,INST_TXT4_INV
+;	.word SCORE_TXT,TEXT1,TEXT2
 
 
-SCREEN_ADDR ; Direct address lookup for each row of screen memory.
-	.rept 25,#
-		.word [40*:1+SCREENMEM]
-	.endr
+;TEXT_SIZES ; length of message.  Each should be a multiple of 40.
+;	.word 40,40
+;	.word 80,120,320,120,120,40,40
+;	.word 80,120,40
 
+
+;SCREEN_ADDR ; Direct address lookup for each row of screen memory.
+;	.rept 25,#
+;		.word [40*:1+SCREENMEM]
+;	.endr
+
+CopyTitleColorsToDLI
+	ldx #24
+LoopCopyTitleColors
+	lda TITLE_BACK_COLORS,x
+	sta COLPF2_TABLE,x
+	lda TITLE_TEXT_COLORS,x
+	sta COLPF1_TABLE,x
+	dex
+	bpl LoopCopyTitleColors
+
+	rts
+
+
+CopyGameColorsToDLI
+	ldx #24
+LoopCopyGameColors
+	lda GAME_BACK_COLORS,x
+	sta COLPF2_TABLE,x
+	lda GAME_TEXT_COLORS,x
+	sta COLPF1_TABLE,x
+	dex
+	bpl LoopCopyGameColors
+
+	rts
+
+
+CopyDeadColorsToDLI
+	ldx #24
+LoopCopyDeadColors
+	lda DEAD_BACK_COLORS,x
+	sta COLPF2_TABLE,x
+	lda DEAD_TEXT_COLORS,x
+	sta COLPF1_TABLE,x
+	dex
+	bpl LoopCopyDeadColors
+
+	rts
+
+
+CopyWinColorsToDLI
+	ldx #24
+LoopCopyWinColors
+	lda WIN_BACK_COLORS,x
+	sta COLPF2_TABLE,x
+	lda WIN_TEXT_COLORS,x
+	sta COLPF1_TABLE,x
+	dex
+	bpl LoopCopyWinColors
+
+	rts
+
+
+CopyOverColorsToDLI
+	ldx #24
+LoopCopyOverColors
+	lda OVER_BACK_COLORS,x
+	sta COLPF2_TABLE,x
+	lda OVER_TEXT_COLORS,x
+	sta COLPF1_TABLE,x
+	dex
+	bpl LoopCopyOverColors
+
+	rts
+
+
+	.align $0100
 
 ; ==========================================================================
 ; Color Layouts for the screens.
@@ -672,18 +738,6 @@ TITLE_TEXT_COLORS
 		.by $0A ; Text luminance
 	.endr 
 
-CopyTitleColorsToDLI
-	ldx #24
-LoopCopyTitleColors
-	lda TITLE_BACK_COLORS,x
-	sta COLPF2_TABLE,x
-	lda TITLE_TEXT_COLORS,x
-	sta COLPF1_TABLE,x
-	dex
-	bpl LoopCopyTitleColors
-
-	rts
-
 
 GAME_BACK_COLORS
 	.by COLOR_BLACK COLOR_BLACK ; Scores
@@ -701,18 +755,6 @@ GAME_TEXT_COLORS
 	.rept 25
 		.by $0A ; Text luminance
 	.endr 
-
-CopyGameColorsToDLI
-	ldx #24
-LoopCopyGameColors
-	lda GAME_BACK_COLORS,x
-	sta COLPF2_TABLE,x
-	lda GAME_TEXT_COLORS,x
-	sta COLPF1_TABLE,x
-	dex
-	bpl LoopCopyGameColors
-
-	rts
 
 
 DEAD_BACK_COLORS
@@ -734,18 +776,6 @@ DEAD_TEXT_COLORS
 	.by $00 $02 $04 $06 $08 $0A $0C $0E
 	.by $00 $0A $00
 
-CopyDeadColorsToDLI
-	ldx #24
-LoopCopyDeadColors
-	lda DEAD_BACK_COLORS,x
-	sta COLPF2_TABLE,x
-	lda DEAD_TEXT_COLORS,x
-	sta COLPF1_TABLE,x
-	dex
-	bpl LoopCopyDeadColors
-
-	rts
-
 
 WIN_BACK_COLORS
 	.by COLOR_BLACK  ; Scores
@@ -765,18 +795,6 @@ WIN_TEXT_COLORS
 	.by $00 $0C $08 $04 $00
 	.by $0A $0A $0A $0A $0A $0A $0A $0A
 	.by $00 $0A $00
-
-CopyWinColorsToDLI
-	ldx #24
-LoopCopyWinColors
-	lda WIN_BACK_COLORS,x
-	sta COLPF2_TABLE,x
-	lda WIN_TEXT_COLORS,x
-	sta COLPF1_TABLE,x
-	dex
-	bpl LoopCopyWinColors
-
-	rts
 
 
 OVER_BACK_COLORS
@@ -798,16 +816,159 @@ OVER_TEXT_COLORS
 	.by $0E $0C $0A $08 $06 $04 $02 $00
 	.by $00 $0A $00
 
-CopyOverColorsToDLI
-	ldx #24
-LoopCopyOverColors
-	lda OVER_BACK_COLORS,x
-	sta COLPF2_TABLE,x
-	lda OVER_TEXT_COLORS,x
-	sta COLPF1_TABLE,x
-	dex
-	bpl LoopCopyOverColors
 
-	rts	
+	.align $0100
+
+; ==========================================================================
+; Tables listing pointers to all the assets.
+; --------------------------------------------------------------------------
+
+; ==========================================================================
+; Give a display number below the VBI routine can set the Display List, 
+; and populate zero page pointers for other routines. 
+; --------------------------------------------------------------------------
+
+DISPLAY_TITLE = 0
+DISPLAY_GAME  = 1
+DISPLAY_WIN   = 2
+DISPLAY_DEAD  = 3
+DISPLAY_OVER  = 4
+
+DISPLAYLIST_LO_TABLE
+	.byte <TITLE_DISPLAYLIST
+	.byte <GAME_DISPLAYLIST
+	.byte <FROGSAVED_DISPLAYLIST
+	.byte <FROGDEAD_DISPLAYLIST
+	.byte <GAMEOVER_DISPLAYLIST
+
+DISPLAYLIST_HI_TABLE
+	.byte >TITLE_DISPLAYLIST
+	.byte >GAME_DISPLAYLIST
+	.byte >FROGSAVED_DISPLAYLIST
+	.byte >FROGDEAD_DISPLAYLIST
+	.byte >GAMEOVER_DISPLAYLIST
+
+COLOR_BACK_LO_TABLE
+	.byte <TITLE_BACK_COLORS
+	.byte <GAME_BACK_COLORS
+	.byte <WIN_BACK_COLORS
+	.byte <DEAD_BACK_COLORS
+	.byte <OVER_BACK_COLORS
+
+COLOR_BACK_HI_TABLE
+	.byte >TITLE_BACK_COLORS
+	.byte >GAME_BACK_COLORS
+	.byte >WIN_BACK_COLORS
+	.byte >DEAD_BACK_COLORS
+	.byte >OVER_BACK_COLORS
+	
+COLOR_TEXT_LO_TABLE
+	.byte <TITLE_TEXT_COLORS
+	.byte <GAME_TEXT_COLORS
+	.byte <WIN_TEXT_COLORS
+	.byte <DEAD_TEXT_COLORS
+	.byte <OVER_TEXT_COLORS
+	
+COLOR_TEXT_HI_TABLE
+	.byte >TITLE_TEXT_COLORS
+	.byte >GAME_TEXT_COLORS
+	.byte >WIN_TEXT_COLORS
+	.byte >DEAD_TEXT_COLORS
+	.byte >OVER_TEXT_COLORS
+	
+; ==========================================================================
+; A list of the game playfield screen memory locations.  Note this is 
+; only the part of the game screen that presents the beaches and boats.  
+; It does not include anything else before or after the playfield.
+; --------------------------------------------------------------------------
+PLAYFIELD_MEM_LO_TABLE
+	.byte <PLAYFIELD_MEM0
+	.byte <PLAYFIELD_MEM1
+	.byte <PLAYFIELD_MEM2
+	.byte <PLAYFIELD_MEM3
+	.byte <PLAYFIELD_MEM4
+	.byte <PLAYFIELD_MEM5
+	.byte <PLAYFIELD_MEM6
+	.byte <PLAYFIELD_MEM7
+	.byte <PLAYFIELD_MEM8
+	.byte <PLAYFIELD_MEM9
+	.byte <PLAYFIELD_MEM10
+	.byte <PLAYFIELD_MEM11
+	.byte <PLAYFIELD_MEM12
+	.byte <PLAYFIELD_MEM13
+	.byte <PLAYFIELD_MEM14
+	.byte <PLAYFIELD_MEM15
+	.byte <PLAYFIELD_MEM16
+	.byte <PLAYFIELD_MEM17
+	.byte <PLAYFIELD_MEM18
+
+PLAYFIELD_MEM_HI_TABLE
+	.byte >PLAYFIELD_MEM0
+	.byte >PLAYFIELD_MEM1
+	.byte >PLAYFIELD_MEM2
+	.byte >PLAYFIELD_MEM3
+	.byte >PLAYFIELD_MEM4
+	.byte >PLAYFIELD_MEM5
+	.byte >PLAYFIELD_MEM6
+	.byte >PLAYFIELD_MEM7
+	.byte >PLAYFIELD_MEM8
+	.byte >PLAYFIELD_MEM9
+	.byte >PLAYFIELD_MEM10
+	.byte >PLAYFIELD_MEM11
+	.byte >PLAYFIELD_MEM12
+	.byte >PLAYFIELD_MEM13
+	.byte >PLAYFIELD_MEM14
+	.byte >PLAYFIELD_MEM15
+	.byte >PLAYFIELD_MEM16
+	.byte >PLAYFIELD_MEM17
+	.byte >PLAYFIELD_MEM18
+
+; ==========================================================================
+; A list of the game playfield's LMS address locations.
+; --------------------------------------------------------------------------
+
+PLAYFIELD_LMS_LO_TABLE
+	.byte <PF_LMS0
+	.byte <PF_LMS1
+	.byte <PF_LMS2
+	.byte <PF_LMS3
+	.byte <PF_LMS4
+	.byte <PF_LMS5
+	.byte <PF_LMS6
+	.byte <PF_LMS7
+	.byte <PF_LMS8
+	.byte <PF_LMS9
+	.byte <PF_LMS10
+	.byte <PF_LMS11
+	.byte <PF_LMS12
+	.byte <PF_LMS13
+	.byte <PF_LMS14
+	.byte <PF_LMS15
+	.byte <PF_LMS16
+	.byte <PF_LMS17
+	.byte <PF_LMS18
+
+PLAYFIELD_LMS_HI_TABLE
+	.byte >PF_LMS0
+	.byte >PF_LMS1
+	.byte >PF_LMS2
+	.byte >PF_LMS3
+	.byte >PF_LMS4
+	.byte >PF_LMS5
+	.byte >PF_LMS6
+	.byte >PF_LMS7
+	.byte >PF_LMS8
+	.byte >PF_LMS9
+	.byte >PF_LMS10
+	.byte >PF_LMS11
+	.byte >PF_LMS12
+	.byte >PF_LMS13
+	.byte >PF_LMS14
+	.byte >PF_LMS15
+	.byte >PF_LMS16
+	.byte >PF_LMS17
+	.byte >PF_LMS18
+
+
 
 

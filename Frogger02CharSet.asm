@@ -56,7 +56,7 @@ I_BF = $3B ; "F", [
 I_SG = $3D ; "g", ]
 I_SS = $3C ; "s", \
 
-I_BS = $45 ; "a", ctrl-E
+I_BA = $45 ; "a", ctrl-E
 I_SV = $48 ; "v", ctrl-H
 I_SD = $4A ; "d", ctrl-J
 

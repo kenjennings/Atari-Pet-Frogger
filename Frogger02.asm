@@ -334,10 +334,14 @@ VBICurrentDL    .byte $FF ; = Direct VBI to change screens.
 ; The actual physical screen being displayed.  Updated by VBI to let main code 
 ; know the the current physical display.
 CurrentDL       .byte $00
+CurrentDLPointer .word $0000 ; the address of the Display list.  a copy of the OS pointer.
 
 ; Pointer to the current color table sources in use.
 COLPF2Pointer   .word $0000
 COLPF1Pointer   .word $0000
+
+; Pointer to an LMS instructions in the game screen.
+PlayfieldLMSPointer .word $0000
 
 ; This is a 0, 1, toggle to remember the last state of
 ; something. For example, a blinking thing on screen.
@@ -395,9 +399,9 @@ SAVEY = $FF
 
 	icl "Frogger02CharSet.asm"      ; Aligns to 1K and defines CHARACTER_SET
 
-	icl "Frogger02DisplayLists.asm" ; Aligns to 1K for display lists.
+	icl "Frogger02DisplayLists.asm" ; Aligns for display lists.
 
-	icl "Frogger02ScreenMemory.asm" ; Aligns to 4K for screen memory
+	icl "Frogger02ScreenMemory.asm" ; Aligns for screen memory
 
 ; --------------------------------------------------------------------------
 

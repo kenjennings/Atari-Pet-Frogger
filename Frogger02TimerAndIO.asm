@@ -190,14 +190,7 @@ TimerLoop
 
 	jsr libScreenWaitFrame ; Wait until end of frame
 
-	lda KeyscanFrames      ; Is keyboard delay already 0?
-	beq DoAnimateClock     ; Yes, do not decrement it again.
-	dec KeyscanFrames      ; Minus 1.
 
-DoAnimateClock
-	lda AnimateFrames      ; Is animation countdown already 0?
-	beq ExitEventLoop      ; Yes, do not decrement now.
-	dec AnimateFrames      ; Minus 1
 
 ExitEventLoop
 	mRegRestoreAYX
@@ -259,7 +252,7 @@ MyDLI
 	
 	
 ;==============================================================================
-;                                                           MyDeferredVBI
+;                                                           MyImmediateVBI
 ;==============================================================================
 ; Vertical Blank Interrupt.
 ;
@@ -267,20 +260,48 @@ MyDLI
 ; Force steady state of DLI.
 ;==============================================================================
 
-MyDeferredVBI
+MyImmediateVBI
 	lda #$00
 	sta ThisDLI
 
-	lda VBICurrentDL       ; Main code signals to change screens?
-	bmi ExitMyDeferredVBI  ; Negative value is no change.
+	lda KeyscanFrames      ; Is keyboard delay already 0?
+	beq DoAnimateClock     ; Yes, do not decrement it again.
+	dec KeyscanFrames      ; Minus 1.
 
-; magic happens here.
+DoAnimateClock
+	lda AnimateFrames       ; Is animation countdown already 0?
+	beq DoDisplayListSwitch ; Yes, do not decrement now.
+	dec AnimateFrames       ; Minus 1
 
-	sta CurrentDL          ; Tell main code the new screen is set.
+DoDisplayListSwitch
+	lda VBICurrentDL           ; Main code signals to change screens?
+	bmi ExitMyImmediateVBI     ; Negative value is no change.
+
+	tax                        ; Use this as index to tables.
+
+	lda DISPLAYLIST_LO_TABLE,x ; Copy Display List Pointer.
+	sta SDLSTL                 ; One for the OS
+	sta CurrentDLPointer       ; One in page 0 for the code.
+	lda DISPLAYLIST_HI_TABLE,x
+	sta SDLSTH
+	sta CurrentDLPointer+1
+
+	lda COLOR_BACK_LO_TABLE,x  ; Get pointer to the source color table
+	sta COLPF2POINTER
+	lda COLOR_BACK_HI_TABLE,x  
+	sta COLPF2POINTER+1
+
+	lda COLOR_TEXT_LO_TABLE,x  ; Get pointer to the source text table
+	sta COLPF1POINTER
+	lda COLOR_TEXT_HI_TABLE,x  
+	sta COLPF1POINTER+1
+
+	stx CurrentDL          ; Tell main code the new screen is set.
 
 	lda #$FF               ; Turn off the signal to change screens.
 	sta VBICurrentDL
 
-ExitMyDeferredVBI
+
+ExitMyImmediateVBI
 	jmp XITVBV ; Return to OS.
 
