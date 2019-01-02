@@ -132,43 +132,43 @@ GAME_DISPLAYLIST
 
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1      ; Labels for crossings counter, scores, and lives
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM2    
-PF_LMS0 ; Plus 1 is the address of the display list LMS
+PF_LMS0 = [* + 1] ; Plus 1 is the address of the display list LMS
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM0  ; "Beach", and the two lines of Boats
-PF_LMS1
+PF_LMS1 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM1  ; Right Boats.
-PF_LMS2
+PF_LMS2 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM2  ; Left Boats.
-PF_LMS3
+PF_LMS3 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM3  ; "Beach", and the two lines of Boats
-PF_LMS4
+PF_LMS4 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM4
-PF_LMS5
+PF_LMS5 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM5
-PF_LMS6
+PF_LMS6 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM6  ; "Beach", and the two lines of Boats
-PF_LMS7
+PF_LMS7 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM7
-PF_LMS8
+PF_LMS8 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM8
-PF_LMS9
+PF_LMS9 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM9  ; "Beach", and the two lines of Boats
-PF_LMS10
+PF_LMS10 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM11
-PF_LMS11
+PF_LMS11 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM10
-PF_LMS12
+PF_LMS12 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM12 ; "Beach", and the two lines of Boats
-PF_LMS13
+PF_LMS13 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM13
-PF_LMS14
+PF_LMS14 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM14
-PF_LMS15
+PF_LMS15 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM15 ; "Beach", and the two lines of Boats
-PF_LMS16
+PF_LMS16 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM16
-PF_LMS17
+PF_LMS17 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM17
-PF_LMS18
+PF_LMS18 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM18 ; Frog starting beach.
 
 	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM       ; An empty line.

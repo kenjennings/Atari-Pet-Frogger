@@ -34,8 +34,8 @@ SetupTransitionToGame
 	lda #2                  ; Transition Loops from third row through 21st row.
 	sta EventCounter
 
-	jsr ClearKey
-	
+;	jsr ClearKey
+
 	lda #SCREEN_TRANS_GAME  ; Next step is operating the transition animation.
 	sta CurrentScreen
 
@@ -53,32 +53,33 @@ SetupGame
 	lda #0
 	sta FrogSafety         ; Schrodinger's current frog is known to be alive.
 	
-	lda #$30               ; 48 (dec), delay counter.
-	sta DelayNumber
+;	lda #$30               ; 48 (dec), delay counter.
+;	sta DelayNumber
 
 	lda #INTERNAL_INVSPACE ; On Atari use inverse space for beach.
 	sta LastCharacter      ; Preset the character under the frog.
 
-	lda #<[SCREENMEM+$320] ; Low Byte, Frog position.
+PLAYFIELD_MEM18
+	lda #<PLAYFIELD_MEM18 ; Low Byte, Frog position.
 	sta FrogLocation
-	lda #>[SCREENMEM+$320] ; Hi Byte, Frog position.
+	lda #>PLAYFIELD_MEM18 ; Hi Byte, Frog position.
 	sta FrogLocation + 1
 	
-	lda #18                ; 18 (dec), number of screen rows of game field. (+2 from top)
+	lda #18                ; 18 (dec), number of screen rows of game field. 
 	sta FrogRow
 	
 	ldy #19                ; Frog horizontal coordinate, Y = 19 (dec)
 	sty FrogColumn
 
+	lda #I_FROG            ; On Atari we're using $7F as the frog shape.
+	sta (FrogLocation),y   ; PLAYFIELD_MEM18 (beach) + $13/19 (dec)
+
 	jsr DisplayGameScreen  ; Draw game screen.
 
-	jsr CopyGameColorsToDLI
+;	jsr CopyGameColorsToDLI
 
-	lda #INTERNAL_O        ; On Atari we're using "O" as the frog shape.
-	sta (FrogLocation),y   ; SCREENMEM + $320 + $13
+;	jsr ClearKey
 
-	jsr ClearKey
-	
 	lda #SCREEN_GAME       ; Yes, change to game screen.
 	sta CurrentScreen
 
@@ -104,9 +105,9 @@ SetupTransitionToWin
 	lda #2                  ; start wiping screen at line 2 (0, 1, 2)
 	sta EventCounter
 
-	jsr ClearKey
+;	jsr ClearKey
 
-	jsr CopyWinColorsToDLI
+;	jsr CopyWinColorsToDLI
 
 	lda #SCREEN_TRANS_WIN   ; Next step is operating the transition animation.
 	sta CurrentScreen
@@ -125,7 +126,7 @@ SetupWin
 	lda #BLINK_SPEED    ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
-	jsr ClearKey
+;	jsr ClearKey
 
 	lda #SCREEN_WIN     ; Change to wins screen.
 	sta CurrentScreen
@@ -144,7 +145,7 @@ SetupWin
 ; --------------------------------------------------------------------------
 SetupTransitionToDead
 	; splat the frog:
-	lda #INTERNAL_ASTER     ; Atari ASCII $2A/42 (dec) Splattered Frog.
+	lda #I_SPLAT            ; Atari ASCII $2A/42 (dec) Splattered Frog.
 	sta (FrogLocation),y    ; Road kill the frog.
 
 	dec NumberOfLives       ; subtract a life.
@@ -158,9 +159,9 @@ SetupTransitionToDead
 	lda #0                  ; Zero event controls.
 	sta EventCounter
 
-	jsr ClearKey
+;	jsr ClearKey
 
-	jsr CopyDeadColorsToDLI
+;	jsr CopyDeadColorsToDLI
 
 	lda #SCREEN_TRANS_DEAD  ; Next step is operating the transition animation.
 	sta CurrentScreen
@@ -179,7 +180,7 @@ SetupDead
 	lda #BLINK_SPEED     ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
-	jsr ClearKey
+;	jsr ClearKey
 	
 	lda #SCREEN_DEAD    ; Change to dead screen.
 	sta CurrentScreen
@@ -201,9 +202,9 @@ SetupTransitionToGameOver
 	lda #60                ; Number of times to do the Game Over EOR effect
 	sta EventCounter
 
-	jsr ClearKey
+;	jsr ClearKey
 
-	jsr CopyOverColorsToDLI 
+;	jsr CopyOverColorsToDLI 
 
 	lda #SCREEN_TRANS_OVER ; Change to game over transition.
 	sta CurrentScreen
@@ -222,7 +223,7 @@ SetupGameOver
 	lda #BLINK_SPEED     ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
-	jsr ClearKey
+;	jsr ClearKey
 	
 	lda #SCREEN_OVER     ; Change to Game Over screen.
 	sta CurrentScreen
@@ -244,7 +245,7 @@ SetupTransitionToTitle
 	lda #2
 	sta EventCounter         ; start wiping screen at line 2 (0, 1, 2)
 
-	jsr ClearKey
+;	jsr ClearKey
 	
 	lda #SCREEN_TRANS_TITLE ; Change to Title Screen transition.
 	sta CurrentScreen

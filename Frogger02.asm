@@ -307,8 +307,6 @@ ScreenPointer   .word $0000 ; = Pointer to location in screen memory.
 TextPointer     .word $0000 ; = Pointer to text message to write.
 TextLength      .word $0000 ; = Length of text message to write.
 
-
-
 ; Timers and event control.
 ; Frame counters are decremented each frame.
 ; Once they decrement to  0 they enable the related activity.
@@ -328,12 +326,12 @@ CurrentScreen   .byte $00 ; = identity of current screen.
 
 ; A screen number written here by main code directs the VBI to update the 
 ; screen pointers and the pointers to the color tables. Updated by VBI to 
-; $FF when update is completed.
+; $FF when update is completed. 
 VBICurrentDL    .byte $FF ; = Direct VBI to change screens. 
 
 ; The actual physical screen being displayed.  Updated by VBI to let main code 
 ; know the the current physical display.
-CurrentDL       .byte $00
+CurrentDL        .byte $FF
 CurrentDLPointer .word $0000 ; the address of the Display list.  a copy of the OS pointer.
 
 ; Pointer to the current color table sources in use.
@@ -342,6 +340,10 @@ COLPF1Pointer   .word $0000
 
 ; Pointer to an LMS instructions in the game screen.
 PlayfieldLMSPointer .word $0000
+
+; Scrolling offsets for LMS in the playfield
+CurrentRightOffset .byte $00
+CurrentLeftOffset  .byte $80
 
 ; This is a 0, 1, toggle to remember the last state of
 ; something. For example, a blinking thing on screen.

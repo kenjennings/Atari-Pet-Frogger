@@ -205,7 +205,6 @@ ANYKEY_MEM ; Prompt to start game.
 ; 24 |   Press joystick button to continue.   | INSTXT_4
 	.sb "   Press joystick button to continue.   "
 
-
 ; Revised V01 and V02 Main Game Play Screen:
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
@@ -253,12 +252,11 @@ SCREEN_SAVED
 	.sb "                 "
 
 ; Playfield groups.  
-; Each beach line is 40 characters, because it is not scrolled.
-; Each boat line is doubled at 80 characters for horizontal coarse 
-; scrolling.  Each group is aligned to a 256 byte boundary to make sure 
-; they are all one page, and none will cross a 4K boundary.  This makes 
-; the scrolling math easier by being sure only the low byte of the LMS 
-; needs to be changed.
+; Here's where Atari's indirection of indirect indirection allows 
+; for mind-boggling problem solving. Each beach line is 40 characters, 
+; because the beaches do not move.  Since they do not change they can 
+; be declared together in memory.  In other words, screen memory need 
+; not be contiguous from line to line.  Freaky, mind-bending stuff.
 
 	.align $0100
 
@@ -271,6 +269,86 @@ PLAYFIELD_MEM0 ; Default display of "Beach", for lack of any other description, 
 	.sb "              "
 	.by I_BEACH3
 	.sb "        " ; "Beach"
+
+PLAYFIELD_MEM3 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
+; 6  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
+	.sb "      "
+	.by I_BEACH3
+	.sb "    "
+	.by I_BEACH1
+	.sb "                "
+	.by I_BEACH3
+	.sb "           " ; "Beach"
+
+	PLAYFIELD_MEM6 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
+; 9  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
+	.sb "     "
+	.by I_BEACH2
+	.sb "       "
+	.by I_BEACH3
+	.sb "              "
+	.by I_BEACH1
+	.sb "           " ; "Beach"
+
+PLAYFIELD_MEM9 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
+; 12  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
+	.sb "          "
+	.by I_BEACH1
+	.sb "         "
+	.by I_BEACH3
+	.sb "           "
+	.by I_BEACH2
+	.sb "       " ; "Beach"
+
+PLAYFIELD_MEM12 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
+; 15  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
+	.sb "       "
+	.by I_BEACH2
+	.sb "      "
+	.by I_BEACH2
+	.sb "              "
+	.by I_BEACH1
+	.sb "          " ; "Beach"
+
+PLAYFIELD_MEM15 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
+; 18  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
+	.sb "           "
+	.by I_BEACH1
+	.sb "         "
+	.by I_BEACH2
+	.sb "          "
+	.by I_BEACH3
+	.sb "       " ; "Beach"
+
+; Oooops.  Seven lines times 40 characters IS more than one page.  
+; And so, align again.
+
+	.align $0100
+	
+PLAYFIELD_MEM18 ; One last line of Beach
+; 21  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT2
+	.sb "        "
+	.by I_BEACH3
+	.sb "        "
+	.by I_BEACH1
+	.sb "                 "
+	.by I_BEACH1
+	.sb "    " ; "Beach"
+
+	
+; Playfield groups II
+; Remember the part about screen memory not needing to be contiguous? 
+; Here we do another weird thing with screen memory.  Declaring each 
+; boat row at specific places relative to page alignments makes the
+; low byte of each screen memory address location the same value for
+; each row.  This means the math for the LMS is the same for each row.
+ 
+; All the moving rows of boats...
+; Right rows start at low byte $00/0 (dec)
+; Left rows start at low byte $80/120 (dec)
+   
+	.align $0100 
+
 PLAYFIELD_MEM1
 ; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1 ; Boats Right
 	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
@@ -285,6 +363,9 @@ PLAYFIELD_MEM1
 	.sb "       "
 	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
 	.sb "      "
+
+	.align $0080
+
 PLAYFIELD_MEM2
 ; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1 ; Boats Left
 	.sb "      "
@@ -301,18 +382,8 @@ PLAYFIELD_MEM2
 	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
 	.sb "    "
 
-
 	.align $0100
 
-PLAYFIELD_MEM3 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
-; 6  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
-	.sb "      "
-	.by I_BEACH3
-	.sb "    "
-	.by I_BEACH1
-	.sb "                "
-	.by I_BEACH3
-	.sb "           " ; "Beach"
 PLAYFIELD_MEM4
 ; 7  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2 ; Boats Right
 	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
@@ -327,6 +398,9 @@ PLAYFIELD_MEM4
 	.sb "       "
 	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
 	.sb "      "
+
+	.align $0080
+
 PLAYFIELD_MEM5
 ; 8  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2 ; Boats Left
 	.sb "      "
@@ -343,18 +417,8 @@ PLAYFIELD_MEM5
 	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
 	.sb "    "
 
-
 	.align $0100
 
-PLAYFIELD_MEM6 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
-; 9  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
-	.sb "     "
-	.by I_BEACH2
-	.sb "       "
-	.by I_BEACH3
-	.sb "              "
-	.by I_BEACH1
-	.sb "           " ; "Beach"
 PLAYFIELD_MEM7
 ; 10  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3 ; Boats Right
 	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
@@ -369,6 +433,9 @@ PLAYFIELD_MEM7
 	.sb "       "
 	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
 	.sb "      "
+
+	.align $0080
+
 PLAYFIELD_MEM8
 ; 11  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3 ; Boats Left
 	.sb "      "
@@ -385,18 +452,8 @@ PLAYFIELD_MEM8
 	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
 	.sb "    "
 
-
 	.align $0100
 
-PLAYFIELD_MEM9 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
-; 12  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
-	.sb "          "
-	.by I_BEACH1
-	.sb "         "
-	.by I_BEACH3
-	.sb "           "
-	.by I_BEACH2
-	.sb "       " ; "Beach"
 PLAYFIELD_MEM10
 ; 13  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4 ; Boats Right
 	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
@@ -411,6 +468,9 @@ PLAYFIELD_MEM10
 	.sb "       "
 	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
 	.sb "      "
+
+	.align $0080
+
 PLAYFIELD_MEM11
 ; 14  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4 ; Boats Left
 	.sb "      "
@@ -427,18 +487,8 @@ PLAYFIELD_MEM11
 	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
 	.sb "    "
 
-
 	.align $0100
 
-PLAYFIELD_MEM12 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
-; 15  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
-	.sb "       "
-	.by I_BEACH2
-	.sb "      "
-	.by I_BEACH2
-	.sb "              "
-	.by I_BEACH1
-	.sb "          " ; "Beach"
 PLAYFIELD_MEM13
 ; 16  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5 ; Boats Right
 	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
@@ -453,6 +503,9 @@ PLAYFIELD_MEM13
 	.sb "       "
 	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
 	.sb "      "
+
+	.align $0080
+
 PLAYFIELD_MEM14
 ; 17  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5 ; Boats Left
 	.sb "      "
@@ -469,18 +522,8 @@ PLAYFIELD_MEM14
 	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
 	.sb "    "
 
-
 	.align $0100
 
-PLAYFIELD_MEM15 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
-; 18  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
-	.sb "           "
-	.by I_BEACH1
-	.sb "         "
-	.by I_BEACH2
-	.sb "          "
-	.by I_BEACH3
-	.sb "       " ; "Beach"
 PLAYFIELD_MEM16
 ; 19  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6 ; Boats Right
 	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
@@ -495,6 +538,9 @@ PLAYFIELD_MEM16
 	.sb "       "
 	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
 	.sb "      "
+
+	.align $0080
+
 PLAYFIELD_MEM17
 ; 20  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6 ; Boats Left
 	.sb "      "
@@ -510,16 +556,6 @@ PLAYFIELD_MEM17
 	.sb "    "
 	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
 	.sb "    "
-PLAYFIELD_MEM18 ; One last line of Beach
-; 21  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT2
-	.sb "        "
-	.by I_BEACH3
-	.sb "        "
-	.by I_BEACH1
-	.sb "                 "
-	.by I_BEACH1
-	.sb "    " ; "Beach"
-
 
 	.align $0100
 
@@ -604,114 +640,6 @@ GAMEOVER_MEM
 	.by $0 $0 $0 I_I  I_II I_IU I_L I_S  I_IL I_IK I_S I_IS I_O  I_IL I_Y I_IS I_IU I_IU I_S I_S I_S I_I  I_II I_IO I_O I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_L I_IY I_II I_IO I_O $0 $0 $0
 	.by $0 $0 $0 I_IY I_Y  I_U  I_O I_IY I_Y  I_IY I_Y I_IS I_IO I_IO I_Y I_IS I_IU I_L  I_S I_S I_S I_IY I_Y  I_IY I_Y I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_S I_IY I_IK I_IL I_L $0 $0 $0
 	.by $0 $0 $0 I_K  I_IK I_IL I_Y I_IY I_II I_IO I_Y I_IS I_S  I_IY I_Y I_IS I_U  I_U  I_S I_S I_S I_K  I_IK I_IL I_L I_S  I_IO I_II I_S I_IY I_IK I_U  I_O I_IY I_Y  I_IO I_O $0 $0 $0
-
-
-
-
-
-
-; ==========================================================================
-; Text is static.  The vertical position may vary based on parameter
-; by the caller.
-; So, all we need are lists --  a list of the text and the sizes.
-; To index the lists we need enumerated values.
-; --------------------------------------------------------------------------
-;PRINT_BLANK_TXT     = 0  ; BLANK_TXT     ; Blank line used to erase things.
-;PRINT_BLANK_TXT_INV = 1  ; BLANK_TXT_INV ; Inverse blank line used to "animate" things.
-;PRINT_TITLE_TXT     = 2  ; TITLE_TXT     ; Instructions/Title text.
-;PRINT_CREDIT_TXT    = 3  ; CREDIT_TXT    ; The perpetrators identified...
-;PRINT_INST_TXT1     = 4  ; INST_TXT1     ; Basic instructions...
-;PRINT_INST_TXT2     = 5  ; INST_TXT2     ; Scoring
-;PRINT_INST_TXT3     = 6  ; INST_TXT3     ; Game Controls
-;PRINT_INST_TXT4     = 7  ; INST_TXT4     ; Prompt to start game.
-;PRINT_INST_TXT4_INV = 8  ; INST_TXT4_INV ; inverse version to support blinking.
-;PRINT_SCORE_TXT     = 9  ; SCORE_TXT     ; Labels for crossings counter, scores, and lives
-;PRINT_TEXT1         = 10 ; TEXT1         ; Beach and boats.
-;PRINT_TEXT2         = 11 ; TEXT2         ; Beach with frog (starting line)
-
-;PRINT_END           = 12 ; value marker for end of list.
-
-
-;TEXT_MESSAGES ; Starting addresses of each of the text messages
-;	.word BLANK_TXT,BLANK_TXT_INV
-;	.word TITLE_TXT,CREDIT_TXT,INST_TXT1,INST_TXT2,INST_TXT3,INST_TXT4,INST_TXT4_INV
-;	.word SCORE_TXT,TEXT1,TEXT2
-
-
-;TEXT_SIZES ; length of message.  Each should be a multiple of 40.
-;	.word 40,40
-;	.word 80,120,320,120,120,40,40
-;	.word 80,120,40
-
-
-;SCREEN_ADDR ; Direct address lookup for each row of screen memory.
-;	.rept 25,#
-;		.word [40*:1+SCREENMEM]
-;	.endr
-
-CopyTitleColorsToDLI
-	ldx #24
-LoopCopyTitleColors
-	lda TITLE_BACK_COLORS,x
-	sta COLPF2_TABLE,x
-	lda TITLE_TEXT_COLORS,x
-	sta COLPF1_TABLE,x
-	dex
-	bpl LoopCopyTitleColors
-
-	rts
-
-
-CopyGameColorsToDLI
-	ldx #24
-LoopCopyGameColors
-	lda GAME_BACK_COLORS,x
-	sta COLPF2_TABLE,x
-	lda GAME_TEXT_COLORS,x
-	sta COLPF1_TABLE,x
-	dex
-	bpl LoopCopyGameColors
-
-	rts
-
-
-CopyDeadColorsToDLI
-	ldx #24
-LoopCopyDeadColors
-	lda DEAD_BACK_COLORS,x
-	sta COLPF2_TABLE,x
-	lda DEAD_TEXT_COLORS,x
-	sta COLPF1_TABLE,x
-	dex
-	bpl LoopCopyDeadColors
-
-	rts
-
-
-CopyWinColorsToDLI
-	ldx #24
-LoopCopyWinColors
-	lda WIN_BACK_COLORS,x
-	sta COLPF2_TABLE,x
-	lda WIN_TEXT_COLORS,x
-	sta COLPF1_TABLE,x
-	dex
-	bpl LoopCopyWinColors
-
-	rts
-
-
-CopyOverColorsToDLI
-	ldx #24
-LoopCopyOverColors
-	lda OVER_BACK_COLORS,x
-	sta COLPF2_TABLE,x
-	lda OVER_TEXT_COLORS,x
-	sta COLPF1_TABLE,x
-	dex
-	bpl LoopCopyOverColors
-
-	rts
 
 
 	.align $0100
@@ -875,7 +803,7 @@ COLOR_TEXT_HI_TABLE
 	.byte >WIN_TEXT_COLORS
 	.byte >DEAD_TEXT_COLORS
 	.byte >OVER_TEXT_COLORS
-	
+
 ; ==========================================================================
 ; A list of the game playfield screen memory locations.  Note this is 
 ; only the part of the game screen that presents the beaches and boats.  
@@ -969,6 +897,41 @@ PLAYFIELD_LMS_HI_TABLE
 	.byte >PF_LMS17
 	.byte >PF_LMS18
 
+; ==========================================================================
+; A list of the game playfield's LMS address locations for ONLY the 
+; moving rows of boats based on direction.
+; --------------------------------------------------------------------------
+
+PLAYFIELD_LMS_RIGHT_LO_TABLE
+	.byte <PF_LMS1
+	.byte <PF_LMS4
+	.byte <PF_LMS7
+	.byte <PF_LMS10
+	.byte <PF_LMS13
+	.byte <PF_LMS16
+
+PLAYFIELD_LMS_RIGHT_HI_TABLE
+	.byte >PF_LMS1
+	.byte >PF_LMS4
+	.byte >PF_LMS7
+	.byte >PF_LMS10
+	.byte >PF_LMS13
+	.byte >PF_LMS16
 
 
+PLAYFIELD_LMS_LEFT_LO_TABLE
+	.byte <PF_LMS2
+	.byte <PF_LMS5
+	.byte <PF_LMS8
+	.byte <PF_LMS11
+	.byte <PF_LMS14
+	.byte <PF_LMS17
+
+PLAYFIELD_LMS_LEFT_HI_TABLE
+	.byte >PF_LMS2
+	.byte >PF_LMS5
+	.byte >PF_LMS8
+	.byte >PF_LMS11
+	.byte >PF_LMS14
+	.byte >PF_LMS17
 

@@ -44,26 +44,16 @@ GAMESTART
 	lda #>MyDLI
 	sta VDSLST+1
 
-	ldy #<MyImmediateVBI  ; Add the deferred VBI to the system
+	lda #[NMI_DLI|NMI_VBI] ; Turn On DLI
+	sta NMIEN
+
+	ldy #<MyImmediateVBI  ; Add the VBI to the system
 	ldx #>MyImmediateVBI
 	lda #6               ; 6 = Immediate VBI 
 	jsr SETVBV           ; Tell OS to set it
 
-	; what we should do here is tell the VBI what screen to initialize.
-
-	jsr libScreenWaitFrame ; Wait for display to start next frame.
-
-	; Now it is safe to change Display list pointer.  
-	; This should not be interrupted.
-	lda #<DISPLAYLIST
-	sta SDLSTL
-	lda #>DISPLAYLIST
-	sta SDLSTH
-
-	lda #[NMI_DLI|NMI_VBI] ; Turn On DLI
-	sta NMIEN
-
-
+	lda #DISPLAY_TITLE  ; Tell VBI to change screens. 
+	jsr ChangeScreen    ; Then copy the color tables. 
 
 	lda #0
 	sta COLOR4         ; Border color, 0 is black.
