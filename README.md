@@ -48,7 +48,7 @@ The plan for Version 02 is to continue to maintain the game in the same text mod
 
 - Change to joystick control.   Buh-bye keyboard.
 
-- Formalize timer updates, and other important frame-oriented decisions and updates into a deferred Vertical Blank Interrrupt.
+- Formalize timer updates, and other important frame-oriented decisions and updates into a Vertical Blank Interrrupt.
 
 - Custom character set to make the Frog look like a frog, and the boats look like boats, possible other graphics.
 
