@@ -311,10 +311,13 @@ TextLength      .word $0000 ; = Length of text message to write.
 ; Frame counters are decremented each frame.
 ; Once they decrement to  0 they enable the related activity.
 
-; In the case of key press this counter value is set whenever a key is
-; pressed to force a delay between key presses to limit the speed of
-; the frog movement.
-KeyscanFrames   .byte $00 ; = KEYSCAN_FRAMES
+; After processing input (from the joystick) this is the number of frames
+; to count before new input is accepted.  This prevents moving the frog at 
+; 60 fps and compensates for any jitter/uneven toggling of the joystick 
+; bits by flaky controllers.
+InputScanFrames   .byte $00 ; = INPUTSCAN_FRAMES
+InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits.
+; And then it is safe to use STRIG0 directly for the joystick button.
 
 ; In the case of animation frames the value is set from the ANIMATION_FRAMES
 ; table based on the number of frogs that crossed the river (difficulty level)
@@ -324,13 +327,13 @@ AnimateFrames   .byte $00 ; = ANIMATION_FRAMES,X.
 ; features are in effect.  Value is enumerated from SCREEN_LIST table.
 CurrentScreen   .byte $00 ; = identity of current screen.
 
-; A screen number written here by main code directs the VBI to update the 
+; A display number written here by main code directs the VBI to update the 
 ; screen pointers and the pointers to the color tables. Updated by VBI to 
 ; $FF when update is completed. 
 VBICurrentDL    .byte $FF ; = Direct VBI to change screens. 
 
-; The actual physical screen being displayed.  Updated by VBI to let main code 
-; know the the current physical display.
+; The actual display in use. Updated by VBI from the input provided by 
+; VBICurrentDL to let main code  know the the current physical display.
 CurrentDL        .byte $FF
 CurrentDLPointer .word $0000 ; the address of the Display list.  a copy of the OS pointer.
 
@@ -342,7 +345,9 @@ COLPF1Pointer   .word $0000
 PlayfieldLMSPointer .word $0000
 
 ; Scrolling offsets for LMS in the playfield
-CurrentRightOffset .byte $00
+; Right scrolling rows occupy page data from 0 to 79. (scroll 39 to 0)
+; Left scrolling rows occupy page data from 128 to 207. (scroll 128 to 167)
+CurrentRightOffset .byte $39
 CurrentLeftOffset  .byte $80
 
 ; This is a 0, 1, toggle to remember the last state of
@@ -351,6 +356,8 @@ ToggleState     .byte 0   ; = 0, 1, flipper to drive a blinking thing.
 
 ; Another event value.  Use for counting things for each pass of a screen/event.
 EventCounter    .byte 0
+EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
+
 
 ; Game Score and High Score.
 ; This stays here and is copied to screen memory, because the math could
