@@ -9,7 +9,7 @@
 ;
 ; Version 00, November 2018
 ; Version 01, December 2018
-; Version 02, December 2018
+; Version 02, January 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -100,7 +100,7 @@
 ; 2  |              --- -------               | TITLE
 ; 3  |     (c) November 1983 by DalesOft      | CREDIT
 ; 4  |        Written by John C Dale          | CREDIT
-; 5  |Atari V01 port by Ken Jennings, Dec 2018| CREDIT
+; 5  |Atari V02 port by Ken Jennings, Jan 2019| CREDIT
 ; 6  |                                        |
 ; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
 ; 8  |frog legs fast food franchise! But, the | INSTXT_1
@@ -152,7 +152,7 @@
 ; 22 |                                        |
 ; 23 |     (c) November 1983 by DalesOft      | CREDIT
 ; 24 |        Written by John C Dale          | CREDIT
-; 25 |Atari V01 port by Ken Jennings, Dec 2018| CREDIT
+; 25 |Atari V01 port by Ken Jennings, Jan 2019| CREDIT
 ;    +----------------------------------------+
 
 
@@ -243,10 +243,10 @@ TITLE_SPEED     = 6  ; Fill screen to present title
 ; CREDIT_TXT ; The perpetrators identified...
 ; ; 3  |     (c) November 1983 by DalesOft      | CREDIT
 ; ; 4  |        Written by John C Dale          | CREDIT
-; ; 5  |Atari V02 port by Ken Jennings, Dec 2018| CREDIT
+; ; 5  |Atari V02 port by Ken Jennings, Jan 2019| CREDIT
 	; .sb "     (c) November 1983 by Dales" ATASCII_HEART "ft      "
 	; .sb "        Written by John C. Dale         "
-	; .sb "Atari V02 port by Ken Jennings, Dec 2018"
+	; .sb "Atari V02 port by Ken Jennings, Jan 2019"
 
 ; INST_TXT1 ; Basic instructions...
 ; ; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
