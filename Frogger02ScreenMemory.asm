@@ -76,69 +76,112 @@ I_IT = $54+$80 ; Internal ctrl-t Inverse
 SIZEOF_LINE    = 39  ; That is, 40 - 1
 SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
-; Ordinarily, this would start at ANTIC's 4K boundary for screen memory.
-; But, we can simply align each set of lines into pages to prevent any 
-; line from crossing over a 4K boundary.
+
+
+; Revised V02 Title Screen and Instructions:
+;    +----------------------------------------+
+; 1  |              PET FROGGER               | TITLE
+; 2  |              PET FROGGER               | TITLE
+; 3  |              PET FROGGER               | TITLE
+; 4  |              --- -------               | TITLE
+; 5  |                                        |
+; 6  |Help the frogs escape from Doc Hopper's | INSTXT_1
+; 7  |frog legs fast food franchise! But, the | INSTXT_1
+; 8  |frogs must cross piranha-infested rivers| INSTXT_1
+; 9  |to reach freedom. You have three chances| INSTXT_1
+; 10 |to prove your frog management skills by | INSTXT_1
+; 11 |directing frogs to jump on boats in the | INSTXT_1
+; 12 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
+; 13 |the seats in the boats ('Q').           | INSTXT_1
+; 14 |                                        |
+; 15 |Scoring:                                | INSTXT_2
+; 16 |    10 points for each jump forward.    | INSTXT_2
+; 17 |   500 points for each rescued frog.    | INSTXT_2
+; 18 |                                        |
+; 19 |Game controls:                          | INSTXT_3
+; 20 |                 S = Up                 | INSTXT_3
+; 21 |      left = 4           6 = right      | INSTXT_3
+; 22 |                                        |
+; 23 |                                        |
+; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
+; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
+;    +----------------------------------------+
+
+; ANTIC's has a 4K boundary for screen memory.
+; But, we can simply align each set of lines into pages and that 
+; will prevent any line of screen data from crossing over a 
+; 4K boundary.
 
 	.align $0100 
-;Below the declarations will make sure 
+; Below the declarations will make sure 
 ; each line of data fits within 256 byte pages.
 
-; Revised V01 and V02 Title Screen and Instructions:
-;    +----------------------------------------+
-; 1  |              PET FROGGER               | TITLE
-; 2  |              --- -------               | TITLE
-; 3  |     (c) November 1983 by DalesOft      | CREDIT
-; 4  |        Written by John C Dale          | CREDIT
-; 5  |Atari V02 port by Ken Jennings, Jan 2019| CREDIT
+; Remember, lines of screen data need not be contiguous, to
+; each other since LMS for each line tells where to start 
+; reading screen memory.  Therefore we can declare lines in 
+; any order....
+
+; First the Credit text.  Rather than three lines on the main 
+; and game screen  let's make this a continuously scrolling 
+; line of text.  This gives us two more blank lines for 
+; spacing out sections of the screen.  Or other displayable
+; doo-dads.  To scroll this we convincingly we need some blank 
+; space at the start and end....
+
+; Hmmm.  Like it does now below.  
+
+SCROLLING_CREDIT
+BLANK_MEM ; Blank text also used a blank in many other places. 
 ; 6  |                                        |
-; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
-; 8  |frog legs fast food franchise! But, the | INSTXT_1
-; 9  |frogs must cross piranha-infested rivers| INSTXT_1
-; 10 |to reach freedom. You have three chances| INSTXT_1
-; 11 |to prove your frog management skills by | INSTXT_1
-; 12 |directing frogs to jump on boats in the | INSTXT_1
-; 13 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
-; 14 |the seats in the boats ('Q').           | INSTXT_1
-; 15 |                                        |
-; 16 |Scoring:                                | INSTXT_2
-; 17 |    10 points for each jump forward.    | INSTXT_2
-; 18 |   500 points for each rescued frog.    | INSTXT_2
-; 19 |                                        |
-; 20 |Game controls:                          | INSTXT_3
-; 21 |                 S = Up                 | INSTXT_3
-; 22 |      left = 4           6 = right      | INSTXT_3
-; 23 |                                        |
-; 24 |     Hit any key to start the game.     | INSTXT_4
-; 25 |                                        |
-;    +----------------------------------------+
-
-TITLE_MEM1 ; Instructions/Title text.
-; 1  |              PET FROGGER               | TITLE
-	.sb "              PET FROGGER               "
-
-TITLE_MEM2
-; 2  |              --- -------               | TITLE
-	.sb "              "
-	.sb A_H A_H A_H " " A_H A_H A_H A_H
-	.sb A_H A_H A_H "               "
+	.sb "                                        "
 
 CREDIT_MEM1 ; The perpetrators identified...
 ; 3  |     (c) November 1983 by DalesOft      | CREDIT
 	.sb "     (c) November 1983 by Dales" ATASCII_HEART "ft      "
-
 CREDIT_MEM2
 ; 4  |        Written by John C Dale          | CREDIT
 	.sb "        Written by John C. Dale         "
-
 CREDIT_MEM3
 ; 5  |Atari V02 port by Ken Jennings, Jan 2019| CREDIT
 	.sb "Atari V02 port by Ken Jennings, Jan 2019"
 
-	
-BLANK_MEM ; Blank line used to erase things. 
+EXTRA_BLANK_MEM ; Trailing line for credit scrolling. 
 ; 6  |                                        |
 	.sb "                                        "
+
+TITLE_MEM2
+; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE
+	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H "  " 
+	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " " 
+	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " "
+
+
+; Six lines times 40 characters is 240 bytes of data.  
+; Realign to next page.
+	.align $0100
+
+; Graphics chars design, PET FROGGER
+; |**|**|* |  |**|**|**|  |**|**|**|  |  |**|**|**|  |**|**|* |  | *|**|* |  | *|**|**|  | *|**|**|  |**|**|**|  |**|**|* |
+; |**|  |**|  |**|  |  |  |  |**|  |  |  |**|  |  |  |**|  |**|  |**|  |**|  |**|  |  |  |**|  |  |  |**|  |  |  |**|  |**|
+; |**|  |**|  |**|**|* |  |  |**|  |  |  |**|**|* |  |**|  |**|  |**|  |**|  |**|  |  |  |**|  |  |  |**|**|* |  |**|  |**|
+; |**|**|* |  |**|  |  |  |  |**|  |  |  |**|  |  |  |**|**|* |  |**|  |**|  |**| *|**|  |**| *|**|  |**|  |  |  |**|**|* |
+; |**|  |  |  |**|  |  |  |  |**|  |  |  |**|  |  |  |**| *|* |  |**|  |**|  |**|  |**|  |**|  |**|  |**|  |  |  |**| *|* |
+; |**|  |  |  |**|**|**|  |  |**|  |  |  |**|  |  |  |**|  |**|  | *|**|* |  | *|**|**|  | *|**|**|  |**|**|**|  |**|  |**|
+
+; Graphics chars, PET FROGGER
+; |i |iU|iK|  |i |iU|iU|  |iU|i |iU|  |  |i |iU|iU|  |i |iU|iK|  |iL|iU|iK|  |iL|iU|iU|  |iL|iU|iU|  |i |iU|iU|  |i |iU|iK|
+; |i |U |iI|  |i |iU|L |  |  |i |  |  |  |i |iU|L |  |i |U |iI|  |i |  |i |  |i |I |U |  |i |I |U |  |i |iU|L |  |i |U |iI|
+; |i |  |  |  |i |U |U |  |  |i |  |  |  |i |  |  |  |i |K |iK|  |iO|U |iO|  |iO|U |i |  |iO|U |i |  |i |U |U |  |i |K |iK|
+
+; Graphics data, DEAD FROG!  (40).  To make this scroll will need some leading spaces.
+
+TITLE_MEM1 ; Title text.
+	.sb "                                        " ; Leading blanks  for  scrolling. 
+	.by I_iS I_iU I_iK I_S I_iS I_iU I_iU I_S I_iU I_iS I_iU I_S I_S I_iS I_iU I_iU I_S I_iS I_iU I_iK I_S I_iL I_iU I_iK I_S I_iL I_iU I_iU I_S I_iL I_iU I_iU I_S I_iS I_iU I_iU I_S I_iS I_iU I_iK
+	.sb "                                        "  ; Leading blanks  for  scrolling. 
+	.by I_iS I_U  I_iI I_S I_iS I_iU I_L  I_S I_S  I_iS I_S  I_S I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI I_S I_iS I_S  I_iS I_S I_iS I_iS I_U  I_S I_iS I_iS I_U  I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI
+	.sb "                                        "  ; Leading blanks  for  scrolling. 
+	.by I_iS I_S  I_S  I_S I_iS I_U  I_U  I_S I_S  I_iS I_S  I_S I_S I_iS I_S  I_S  I_S I_iS I_K  I_iK I_S I_iO I_U  I_iO I_S I_iO I_U  I_iS I_S I_iO I_U  I_iS I_S I_iS I_U  I_U  I_S I_iS I_K  I_iK
 
 ; Six lines times 40 characters is 240 bytes of data.  
 ; Realign to next page.
@@ -163,6 +206,7 @@ INSTRUCT_MEM6
 ; 12 |directing frogs to jump on boats in the | INSTXT_1
 	.sb "directing frogs to jump on boats in the "
 
+
 ; Six lines times 40 characters is 240 bytes of data.  
 ; Realign to next page.
 	.align $0100
@@ -175,7 +219,6 @@ INSTRUCT_MEM7
 INSTRUCT_MEM8
 ; 14 |the seats in the boats.                 | INSTXT_1
 	.sb "the seats in the boats.                 "
-
 SCORING_MEM1 ; Scoring
 ; 16 |Scoring:                                | INSTXT_2
 	.sb "Scoring:                                "
@@ -190,48 +233,49 @@ CONTROLS_MEM1 ; Game Controls
 ; 20 |Use Joystick Controller:                | INSTXT_3
 	.sb "Use Joystick Controller:                "
 
+
 ; Six lines times 40 characters is 240 bytes of data.  
 ; Realign to next page.
 	.align $0100
-
+	
 CONTROLS_MEM2
 ; 21 |                   Up                   | INSTXT_3
 	.sb "                   Up                   "
 CONTROLS_MEM3 
 ; 22 |      left                   right      | INSTXT_3
 	.sb "      left                   right      "
-
-ANYKEY_MEM ; Prompt to start game.
+ANYBUTTON_MEM ; Prompt to start game.
 ; 24 |   Press joystick button to continue.   | INSTXT_4
 	.sb "   Press joystick button to continue.   "
 
-; Revised V01 and V02 Main Game Play Screen:
+
+; Revised V02 Main Game Play Screen:
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
-; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
-; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
-; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
-; 6  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
-; 7  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
-; 8  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
-; 9  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
-; 10 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3
-; 11 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3
-; 12 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
-; 13 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4
-; 14 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4
-; 15 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
-; 16 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5
-; 17 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5
-; 18 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
-; 19 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
-; 20 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
-; 21 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
-; 22 |                                        |
-; 23 |     (c) November 1983 by DalesOft      | CREDIT
-; 24 |        Written by John C Dale          | CREDIT
-; 25 |Atari V01 port by Ken Jennings, Jan 2019| CREDIT
+; 3  |                                        |
+; 4  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
+; 5  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
+; 6  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
+; 7  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
+; 8  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
+; 9  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
+; 10 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
+; 11 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3
+; 12 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3
+; 13 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
+; 14 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4
+; 15 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4
+; 16 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
+; 17 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5
+; 18 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5
+; 19 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
+; 20 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
+; 21 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
+; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
+; 23 |   Press joystick button to continue.   | ANYBUTTON_MEM
+; 24 |                                        |
+; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
 
 SCORE_MEM1 ; Labels for crossings counter, scores, and lives
@@ -556,6 +600,7 @@ PLAYFIELD_MEM17
 	.sb "    "
 	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
 	.sb "    "
+
 
 	.align $0100
 
@@ -935,3 +980,22 @@ PLAYFIELD_LMS_LEFT_HI_TABLE
 	.byte >PF_LMS14
 	.byte >PF_LMS17
 
+
+; =========================================================================
+; A list of the game LMS addresses for scrolling the credit line. 
+; --------------------------------------------------------------------------
+
+PLAYFIELD_LMS_SCROLL_LO_TABLE
+	.byte <SCROLL_LMS0
+	.byte <SCROLL_LMS1
+	.byte <SCROLL_LMS2
+	.byte <SCROLL_LMS3
+	.byte <SCROLL_LMS4
+
+
+PLAYFIELD_LMS_SCROLL_HI_TABLE
+	.byte >SCROLL_LMS0
+	.byte >SCROLL_LMS1
+	.byte >SCROLL_LMS2
+	.byte >SCROLL_LMS3
+	.byte >SCROLL_LMS4

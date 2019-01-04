@@ -51,7 +51,7 @@
 ;   game functions and facilitate future Atari-fication and other features.
 ;
 ; --------------------------------------------------------------------------
-; Version 02.  January 2019
+; Version 02.  December 2018
 ; The design principle continues to maintain the original presentation 
 ; of a full screen of basic text.  (In Atari terms, this is ANTIC mode 2, 
 ; or OS mode 0).  Everything else in the game is subject to Atari-fication.
@@ -323,6 +323,13 @@ InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits.
 ; table based on the number of frogs that crossed the river (difficulty level)
 AnimateFrames   .byte $00 ; = ANIMATION_FRAMES,X.
 
+; Animation counter for scrolling the credit line. when it reaches 0, then scroll.
+ScrollCounter   .byte 8
+; Current low byte of the LMS value for scrolling the credit line.
+ScrollCredit    .byte <SCROLLING_CREDIT 
+; Pointer to the current display LMS for the credits.
+CurrentCreditLMS .word SCROLL_LMS0
+
 ; Identify the current screen.  This is what drives which timer/event loop
 ; features are in effect.  Value is enumerated from SCREEN_LIST table.
 CurrentScreen   .byte $00 ; = identity of current screen.
@@ -381,7 +388,7 @@ SAVEY = $FF
 	.by "** Thanks to the Word (John 1:1), Creator of heaven, and earth, and "
 	.by "semiconductor chemistry and physics which makes all this fun possible. ** "
 	.by "Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. ** "
-	.by "Atari port by Ken Jennings, January 2019. Version 02. "
+	.by "Atari port by Ken Jennings, December 2018. Version 02. "
 	.by "Added color with DLIs, joystick interface **"
 	.by "Event loop properly managed by VBI **"
 

@@ -351,13 +351,16 @@ MyDLI
 ;
 ; Manage timers and countdowns.
 ; Force steady state of DLI.
+; Manage switching displays.
+; Scroll the line of credit text.
 ;==============================================================================
 
 MyImmediateVBI
-	lda #$00
-	sta ThisDLI
+	lda #$00                 ; Initialize.
+	tay                      ; I want Y = 0 too.
+	sta ThisDLI              ; Make the DLI index restarts at 0.
 
-	lda InputScanFrames      ; Is keyboard delay already 0?
+	lda InputScanFrames      ; Is input delay already 0?
 	beq DoAnimateClock       ; Yes, do not decrement it again.
 	dec InputScanFrames      ; Minus 1.
 
@@ -368,7 +371,7 @@ DoAnimateClock
 
 DoDisplayListSwitch
 	lda VBICurrentDL           ; Main code signals to change screens?
-	bmi ExitMyImmediateVBI     ; Negative value is no change.
+	bmi ScrollTheCreditLine     ; Negative value is no change.
 
 	tax                        ; Use this as index to tables.
 
@@ -389,11 +392,37 @@ DoDisplayListSwitch
 	lda COLOR_TEXT_HI_TABLE,x  
 	sta COLPF1POINTER+1
 
+	lda PLAYFIELD_LMS_SCROLL_LO_TABLE,x ; Gewt the pointer to the LMS for the scrolling credit line.
+	sta CurrentCreditLMS
+	lda PLAYFIELD_LMS_SCROLL_HI_TABLE,x
+	sta CurrentCreditLMS+1
+                    
+	lda ScrollCredit         ; Update current screen to have the current credit scroll value.
+	sta (CurrentCreditLMS),y
+
 	stx CurrentDL          ; Tell main code the new screen is set.
 
 	lda #$FF               ; Turn off the signal to change screens.
 	sta VBICurrentDL
 
+
+
+ScrollTheCreditLine        ; scroll the text identifying the perpetrators
+	dec ScrollCounter      ; subtract from scroll delay counter
+	bne ExitMyImmediateVBI ; Not 0 yet, so no scrolling.
+	lda #8                 ; Reset counter to original value.
+	sta ScrollCounter      
+	
+	inc ScrollCredit       ; Move text left one position.
+	lda ScrollCredit       
+	cmp #<EXTRA_BLANK_MEM         ; Did scroll position reach the end of the text?
+	bne UpdateCurrentScrollCredit ; No.  Just update with current value.
+	
+	lda #<SCROLLING_CREDIT       ; Yes, restart scroll from the beginning position.
+	sta ScrollCredit
+	
+UpdateCurrentScrollCredit    ; Note that only the low byte of the LMS needs to be updated, since all the 
+	sta (CurrentCreditLMS),y ; text of the scrolling line fits inside one page of memory.
 
 ExitMyImmediateVBI
 	jmp XITVBV ; Return to OS.

@@ -23,42 +23,42 @@
 ; The Atari OS text printing is not being used, therefore the Atari screen
 ; editor's 24-line limitation is not an issue.
 ;
-; Blank lines in the display are done by referring to an empty line of data.
+; "Blank" lines in the display are done by referring to a line of spaces.
 ; This makes it easy to "animate" with color changes.  Also, the screen 
 ; transitions are easier when the screen geometry is consistent.  Truly
-; blank scan lines are displayed by COLPF4 (border) instead of the COLPF2
-; (background) used in ANTIC mode 2.
+; blank scan lines (via ANTIC Blank line instructions) display using 
+; COLPF4 (border) instead of the COLPF2 (background) used in ANTIC mode 2.
 ; --------------------------------------------------------------------------
 
 	.align $0400 ; Start at ANTIC's 1K boundary for display lists. 
 
-; Revised V01 and V02 Title Screen and Instructions:
+; Revised V02 Title Screen and Instructions:
 ;    +----------------------------------------+
 ; 1  |              PET FROGGER               | TITLE
-; 2  |              --- -------               | TITLE
-; 3  |     (c) November 1983 by DalesOft      | CREDIT
-; 4  |        Written by John C Dale          | CREDIT
-; 5  |Atari V01 port by Ken Jennings, Jan 2019| CREDIT
-; 6  |                                        |
-; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
-; 8  |frog legs fast food franchise! But, the | INSTXT_1
-; 9  |frogs must cross piranha-infested rivers| INSTXT_1
-; 10 |to reach freedom. You have three chances| INSTXT_1
-; 11 |to prove your frog management skills by | INSTXT_1
-; 12 |directing frogs to jump on boats in the | INSTXT_1
-; 13 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
-; 14 |the seats in the boats ('Q').           | INSTXT_1
-; 15 |                                        |
-; 16 |Scoring:                                | INSTXT_2
-; 17 |    10 points for each jump forward.    | INSTXT_2
-; 18 |   500 points for each rescued frog.    | INSTXT_2
-; 19 |                                        |
-; 20 |Game controls:                          | INSTXT_3
-; 21 |                 S = Up                 | INSTXT_3
-; 22 |      left = 4           6 = right      | INSTXT_3
-; 23 |                                        |
-; 24 |     Hit any key to start the game.     | INSTXT_4
-; 25 |                                        |
+; 2  |              PET FROGGER               | TITLE
+; 3  |              PET FROGGER               | TITLE
+; 4  |              --- -------               | TITLE
+; 5  |                                        |
+; 6  |Help the frogs escape from Doc Hopper's | INSTXT_1
+; 7  |frog legs fast food franchise! But, the | INSTXT_1
+; 8  |frogs must cross piranha-infested rivers| INSTXT_1
+; 9  |to reach freedom. You have three chances| INSTXT_1
+; 10 |to prove your frog management skills by | INSTXT_1
+; 11 |directing frogs to jump on boats in the | INSTXT_1
+; 12 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
+; 13 |the seats in the boats ('Q').           | INSTXT_1
+; 14 |                                        |
+; 15 |Scoring:                                | INSTXT_2
+; 16 |    10 points for each jump forward.    | INSTXT_2
+; 17 |   500 points for each rescued frog.    | INSTXT_2
+; 18 |                                        |
+; 19 |Game controls:                          | INSTXT_3
+; 20 |                 S = Up                 | INSTXT_3
+; 21 |      left = 4           6 = right      | INSTXT_3
+; 22 |                                        |
+; 23 |   Press joystick button to continue.   | ANYBUTTON_MEM
+; 24 |                                        |
+; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
 
 ; Mode 2 text and Load Memory Scan for text/graphics
@@ -68,13 +68,13 @@
 TITLE_DISPLAYLIST
 	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4|DL_DLI ; 20 blank scan lines.
 
-	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1    ; Instructions/Title text.
-	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM2    ; Underlines
-	mDL_LMS DL_TEXT_2|DL_DLI,CREDIT_MEM1   ; The perpetrators identified
-	mDL_LMS DL_TEXT_2|DL_DLI,CREDIT_MEM2 
-	mDL_LMS DL_TEXT_2|DL_DLI,CREDIT_MEM3
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM     ; An empty line.
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1 ; Basic instructions...
+	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1       ; Title.
+	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1+80    ; Title
+	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1+160   ; Title.
+	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM2       ; Underlines
+	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
+
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1    ; Basic instructions...
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM2 
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM3
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM4 
@@ -82,49 +82,54 @@ TITLE_DISPLAYLIST
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM6 
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM7 
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM8 
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM     ; An empty line.
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM1  ; Scoring
+	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
+	
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM1     ; Scoring
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM2 
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM3
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM     ; An empty line.
-	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM1 ; Game Controls
+	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
+	
+	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM1    ; Game Controls
 	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM2
 	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM3 
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM     ; An empty line.
-	mDL_LMS DL_TEXT_2|DL_DLI,ANYKEY_MEM    ; Prompt to start game.
-	mDL_LMS DL_TEXT_2,BLANK_MEM            ; An empty line.
+	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
+	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
 
-	.byte DL_JUMP_VB                       ; End list, Vertical Blank 
-	.word TITLE_DISPLAYLIST                ; Restart display at the same display list.
+	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to start game.
+SCROLL_LMS0 = [* + 1] 
+	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
+
+	.byte DL_JUMP_VB                          ; End list, Vertical Blank 
+	.word TITLE_DISPLAYLIST                   ; Restart display at the same display list.
 
 
-; Revised V01 and V02 Main Game Play Screen:
+; Revised V02 Main Game Play Screen:
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
-; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
-; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
-; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
-; 6  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
-; 7  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
-; 8  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
-; 9  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
-; 10 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3
-; 11 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3
-; 12 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
-; 13 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4
-; 14 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4
-; 15 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
-; 16 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5
-; 17 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5
-; 18 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
-; 19 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
-; 20 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
-; 21 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
-; 22 |                                        |
-; 23 |     (c) November 1983 by DalesOft      | CREDIT
-; 24 |        Written by John C Dale          | CREDIT
-; 25 |Atari V01 port by Ken Jennings, Jan 2019| CREDIT
+; 3  |                                        |
+; 4  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
+; 5  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
+; 6  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
+; 7  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
+; 8  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
+; 9  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
+; 10 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
+; 11 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3
+; 12 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3
+; 13 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
+; 14 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4
+; 15 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4
+; 16 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
+; 17 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5
+; 18 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5
+; 19 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
+; 20 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
+; 21 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
+; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
+; 23 |   Press joystick button to continue.   | ANYBUTTON_MEM
+; 24 |                                        |
+; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
 
 GAME_DISPLAYLIST
@@ -132,6 +137,8 @@ GAME_DISPLAYLIST
 
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1      ; Labels for crossings counter, scores, and lives
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM2    
+	mDL_LMS DL_TEXT_2,BLANK_MEM               ; An empty line of spaces.
+
 PF_LMS0 = [* + 1] ; Plus 1 is the address of the display list LMS
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM0  ; "Beach", and the two lines of Boats
 PF_LMS1 = [* + 1] 
@@ -170,11 +177,11 @@ PF_LMS17 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM17
 PF_LMS18 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM18 ; Frog starting beach.
+	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
 
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM       ; An empty line.
-	mDL_LMS DL_TEXT_2|DL_DLI,CREDIT_MEM1     ; The perpetrators identified
-	mDL_LMS DL_TEXT_2|DL_DLI,CREDIT_MEM2 
-	mDL_LMS DL_TEXT_2,CREDIT_MEM3
+	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
+SCROLL_LMS1 = [* + 1] 
+	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
 	.byte DL_JUMP_VB                         ; End list, Vertical Blank 
 	.word GAME_DISPLAYLIST                   ; Restart display at the same display list.
@@ -202,8 +209,9 @@ FROGSAVED_DISPLAYLIST
 		mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM          ; An empty line. times 10
 	.endr
 
-	mDL_LMS DL_TEXT_2|DL_DLI,ANYKEY_MEM             ; Prompt to start game.
-	mDL_LMS DL_TEXT_2,BLANK_MEM                     ; An empty line.
+	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to continue.
+SCROLL_LMS2 = [* + 1] 
+	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
 	.byte DL_JUMP_VB                                ; End list, Vertical Blank 
 	.word FROGSAVED_DISPLAYLIST                     ; Restart display at the same display list.
@@ -233,8 +241,9 @@ FROGDEAD_DISPLAYLIST
 		mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM          ; An empty line. times 10
 	.endr
 
-	mDL_LMS DL_TEXT_2|DL_DLI,ANYKEY_MEM             ; Prompt to start game.
-	mDL_LMS DL_TEXT_2,BLANK_MEM                     ; An empty line.
+	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to continue.
+SCROLL_LMS3 = [* + 1] 
+	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
 	.byte DL_JUMP_VB                                ; End list, Vertical Blank 
 	.word FROGDEAD_DISPLAYLIST                      ; Restart display at the same display list.
@@ -262,8 +271,9 @@ GAMEOVER_DISPLAYLIST
 		mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM          ; An empty line. times 10
 	.endr
 
-	mDL_LMS DL_TEXT_2|DL_DLI,ANYKEY_MEM             ; Prompt to start game.
-	mDL_LMS DL_TEXT_2,BLANK_MEM                     ; An empty line.
+	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to continue.
+SCROLL_LMS4 = [* + 1] 
+	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
 	.byte DL_JUMP_VB                                ; End list, Vertical Blank 
 	.word GAMEOVER_DISPLAYLIST                      ; Restart display at the same display list.
