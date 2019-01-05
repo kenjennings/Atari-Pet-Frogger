@@ -56,8 +56,8 @@
 ; 20 |                 S = Up                 | INSTXT_3
 ; 21 |      left = 4           6 = right      | INSTXT_3
 ; 22 |                                        |
-; 23 |   Press joystick button to continue.   | ANYBUTTON_MEM
-; 24 |                                        |
+; 23 |                                        |
+; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
 
@@ -68,9 +68,12 @@
 TITLE_DISPLAYLIST
 	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4|DL_DLI ; 20 blank scan lines.
 
-	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1       ; Title.
-	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1+80    ; Title
-	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1+160   ; Title.
+SCROLL_TITLE_LMS0 = [* + 1] 
+	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1       ; Scroll In Title.
+SCROLL_TITLE_LMS1 = [* + 1] 
+	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1+80    ; Scroll In Title
+SCROLL_TITLE_LMS1 = [* + 1] 
+	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1+160   ; Scroll In Title.
 	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM2       ; Underlines
 	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
 
@@ -127,7 +130,7 @@ SCROLL_LMS0 = [* + 1]
 ; 20 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
 ; 21 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
 ; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
-; 23 |   Press joystick button to continue.   | ANYBUTTON_MEM
+; 23 |                                        |
 ; 24 |                                        |
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+

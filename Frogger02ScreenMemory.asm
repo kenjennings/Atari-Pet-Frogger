@@ -122,38 +122,28 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; any order....
 
 ; First the Credit text.  Rather than three lines on the main 
-; and game screen  let's make this a continuously scrolling 
-; line of text.  This gives us two more blank lines for 
-; spacing out sections of the screen.  Or other displayable
-; doo-dads.  To scroll this we convincingly we need some blank 
-; space at the start and end....
+; and game screen let's make this a continuously scrolling 
+; line of text on all screens.  This requires two more blank 
+; lines for spacing out the start/end of the test.  
 
-; Hmmm.  Like it does now below.  
-
-SCROLLING_CREDIT
-BLANK_MEM ; Blank text also used a blank in many other places. 
-; 6  |                                        |
-	.sb "                                        "
-
-CREDIT_MEM1 ; The perpetrators identified...
+; Formerly:
 ; 3  |     (c) November 1983 by DalesOft      | CREDIT
-	.sb "     (c) November 1983 by Dales" ATASCII_HEART "ft      "
-CREDIT_MEM2
 ; 4  |        Written by John C Dale          | CREDIT
-	.sb "        Written by John C. Dale         "
-CREDIT_MEM3
 ; 5  |Atari V02 port by Ken Jennings, Jan 2019| CREDIT
-	.sb "Atari V02 port by Ken Jennings, Jan 2019"
-
-EXTRA_BLANK_MEM ; Trailing line for credit scrolling. 
 ; 6  |                                        |
-	.sb "                                        "
 
-TITLE_MEM2
-; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE
-	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H "  " 
-	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " " 
-	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " "
+; Now:
+SCROLLING_CREDIT   ; 40+47+61+56+40 == 244;
+BLANK_MEM ; Blank text also used a blank in many other places. 
+	.sb "                                        " ; 40
+CREDIT_MEM1 ; The perpetrators identified...
+	.sb "PET FROGGER   (c) November 1983 by Dales" ATASCII_HEART "ft.   " ; 47
+CREDIT_MEM2
+	.sb "Original program for CBM PET 4032 written by John C. Dale.   " ; 61
+CREDIT_MEM3
+	.sb "Atari 8-bit computer port by Ken Jennings, V02, Jan 2019" ; 56
+EXTRA_BLANK_MEM ; Trailing line for credit scrolling. 
+	.sb "                                        " ; 40
 
 
 ; Six lines times 40 characters is 240 bytes of data.  
@@ -187,6 +177,13 @@ TITLE_MEM1 ; Title text.
 ; Realign to next page.
 	.align $0100
 
+	
+TITLE_MEM2
+; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE
+	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H "  " 
+	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " " 
+	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " "
+
 INSTRUCT_MEM1 ; Basic instructions...
 ; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
 	.sb "Help the frogs escape from Doc Hopper's "
@@ -202,15 +199,15 @@ INSTRUCT_MEM4
 INSTRUCT_MEM5
 ; 11 |to prove your frog management skills by | INSTXT_1
 	.sb "to prove your frog management skills by "
-INSTRUCT_MEM6
-; 12 |directing frogs to jump on boats in the | INSTXT_1
-	.sb "directing frogs to jump on boats in the "
 
 
 ; Six lines times 40 characters is 240 bytes of data.  
 ; Realign to next page.
 	.align $0100
 
+INSTRUCT_MEM6
+; 12 |directing frogs to jump on boats in the | INSTXT_1
+	.sb "directing frogs to jump on boats in the "
 INSTRUCT_MEM7
 ; 13 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
 	.sb "rivers like this:  "
@@ -229,15 +226,14 @@ SCORING_MEM3
 ; 18 |   500 points for each rescued frog.    | INSTXT_2
 	.sb "   500 points for each rescued frog.    "
 
-CONTROLS_MEM1 ; Game Controls
-; 20 |Use Joystick Controller:                | INSTXT_3
-	.sb "Use Joystick Controller:                "
-
 
 ; Six lines times 40 characters is 240 bytes of data.  
 ; Realign to next page.
 	.align $0100
-	
+
+CONTROLS_MEM1 ; Game Controls
+; 20 |Use Joystick Controller:                | INSTXT_3
+	.sb "Use Joystick Controller:                "
 CONTROLS_MEM2
 ; 21 |                   Up                   | INSTXT_3
 	.sb "                   Up                   "
@@ -273,7 +269,7 @@ ANYBUTTON_MEM ; Prompt to start game.
 ; 20 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
 ; 21 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
 ; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
-; 23 |   Press joystick button to continue.   | ANYBUTTON_MEM
+; 23 |                                        |
 ; 24 |                                        |
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
@@ -294,6 +290,7 @@ SCREEN_LIVES
 	.by I_BF I_SR I_SO I_SG I_SS $00 I_BS I_BS I_SV I_SE I_SD
 SCREEN_SAVED
 	.sb "                 "
+
 
 ; Playfield groups.  
 ; Here's where Atari's indirection of indirect indirection allows 

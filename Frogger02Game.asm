@@ -52,16 +52,12 @@ GAMESTART
 	lda #6               ; 6 = Immediate VBI 
 	jsr SETVBV           ; Tell OS to set it
 
-	lda #DISPLAY_TITLE  ; Tell VBI to change screens. 
-	jsr ChangeScreen    ; Then copy the color tables. 
-
 	lda #0
 	sta COLOR4         ; Border color, 0 is black.
 	sta FlaggedHiScore
 	sta LastKeyPressed
 
-	lda #SCREEN_START  ; Set main game loop to start new game at title screen.
-	sta CurrentScreen
+	jsr SetupTransitionToTitle ; will set CurrentScreen = SCREEN_TRANS_TITLE
 
 ; Ready to go to main game loop . . . .
 
@@ -212,9 +208,10 @@ ContinueOverScreen
 
 ; ==========================================================================
 ; TRANSITION TO TITLE
-; The Activity in the transition area, based on timer.
-; 1) Animate something.
-; 2) End With going to the Title Screen.
+; Setup Transition to Title turned on the title display.
+; Stage 1: Scroll in the Title.
+; Stage 2: Brighten line 4 luminance.
+; Stage 3: Initialize setup for Press Button on Title screen.
 ; --------------------------------------------------------------------------
 ContinueTransitionToTitle
 	cmp #SCREEN_TRANS_TITLE

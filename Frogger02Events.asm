@@ -49,15 +49,21 @@ SCREEN_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
 
 ; ==========================================================================
 ; Event process SCREEN START/NEW GAME
-; Setup for New Game and do transition to Title screen.
+; Clear the Game Scores
 ; --------------------------------------------------------------------------
-EventScreenStart
+EventScreenStart            ; This is New Game and Transition to title.
+
 	jsr ClearGameScores     ; Zero the score.  And high score if not set.
 
-	jsr DisplayTitleScreen  ; Draw title and game instructions.
+;	jsr DisplayTitleScreen  ; Draw title and game instructions.
 
-	jsr CopyTitleColorsToDLI
-	
+;	jsr CopyTitleColorsToDLI
+
+
+
+
+
+
 	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
@@ -441,10 +447,10 @@ EndGameOverScreen
 
 ; ==========================================================================
 ; Event Process TRANSITION TO TITLE
-; The Activity in the transition area, based on timer.
-; 1) Progressively reprint the credits on lines from the top of the screen 
-; to the bottom.
-; 2) follow with a blank line to erase the highest line of trailing text.
+; Setup Transition to Title turned on the title display.
+; Stage 1: Scroll in the Title.
+; Stage 2: Brighten line 4 luminance.
+; Stage 3: Initialize setup for Press Button on Title screen.
 ; --------------------------------------------------------------------------
 EventTransitionToTitle
 	lda AnimateFrames        ; Did animation counter reach 0 ?
@@ -452,19 +458,45 @@ EventTransitionToTitle
 	lda #TITLE_SPEED         ; yes.  Reset it.
 	jsr ResetTimers
 
-	ldy #PRINT_BLANK_TXT     ; erase top line
-	ldx EventCounter
-	jsr PrintToScreen
+	lda EventCounter         ; What stage are we in?
+	cmp #1
+	bne TestTransTitle2      ; 
+
+	; Do Scroll for Title.
+	lda SCROLL_TITLE_LMS0
+	cmp #<[TITLE_MEM1+40] ; That should actually be 40.
+	beq FinishedNowSetupStage2
+	inc SCROLL_TITLE_LMS0
+	inc SCROLL_TITLE_LMS1
+	inc SCROLL_TITLE_LMS2
+	bne EndTransitionToTitle
+
+FinishedNowSetupStage2
+	lda #2
+	sta EventCounter
+	bne EndTransitionToTitle
+
+TestTransTitle2
+	cmp #2
+	bne TestTransTitle3
+
+
+
+TestTransTitle3
+
+
+
 
 	inx                      ; next row.
 	stx EventCounter         ; Save new row number
 	cpx #25                  ; reached bottom of screen?
 	bne EndTransitionToTitle ; No.  Remain on this transition event next time.
 
-	jsr ClearKey
-	
+
+
 	lda #SCREEN_START        ; Yes, change to beginning of event cycle/start new game.
 	sta CurrentScreen
+
 
 EndTransitionToTitle
 	lda CurrentScreen

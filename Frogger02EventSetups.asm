@@ -56,7 +56,7 @@ SetupGame
 ;	lda #$30               ; 48 (dec), delay counter.
 ;	sta DelayNumber
 
-	lda #INTERNAL_INVSPACE ; On Atari use inverse space for beach.
+	lda #INTERNAL_SPACE    ; Default position.
 	sta LastCharacter      ; Preset the character under the frog.
 
 PLAYFIELD_MEM18
@@ -64,10 +64,10 @@ PLAYFIELD_MEM18
 	sta FrogLocation
 	lda #>PLAYFIELD_MEM18 ; Hi Byte, Frog position.
 	sta FrogLocation + 1
-	
+
 	lda #18                ; 18 (dec), number of screen rows of game field. 
 	sta FrogRow
-	
+
 	ldy #19                ; Frog horizontal coordinate, Y = 19 (dec)
 	sty FrogColumn
 
@@ -234,20 +234,36 @@ SetupGameOver
 ; ==========================================================================
 ; SETUP TRANSITION TO TITLE
 ;
-; Prep values to run the Transition Event for the Title Screen.
+; Prep values to begin the Transition Event for the Title Screen. That is:
+; Initialize scrolling line in title text.
+; Tell VBI to switch to title screen.
+; 
+; Transition events:
+; Stage 1: Scroll in the Title.
+; Stage 2: Brighten line 4 luminance.
+; Stage 3: Initialize setup for Press Button on Title screen.
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupTransitionToTitle
-	lda #TITLE_SPEED          ; Animation moving speed.
+	lda #TITLE_SPEED         ; Animation moving speed.
 	jsr ResetTimers
 
-	lda #2
-	sta EventCounter         ; start wiping screen at line 2 (0, 1, 2)
+	lda #1
+	sta EventCounter         ; Declare stage 1 behavior for scrolling.
 
-;	jsr ClearKey
+	lda #<TITLE_MEM1         ; Initialize the
+	sta SCROLL_TITLE_LMS0    ; Display List
+	lda #<[TITLE_MEM1+80]    ; LMS 
+	sta SCROLL_TITLE_LMS1    ; Addresses
+	lda #<[TITLE_MEM1+160]   ; for scrolling
+	sta SCROLL_TITLE_LMS2    ; in the title.
+
+	lda #DISPLAY_TITLE       ; Tell VBI to change screens. 
+	jsr ChangeScreen         ; Then copy the color tables.
+
 	
-	lda #SCREEN_TRANS_TITLE ; Change to Title Screen transition.
+	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
 	sta CurrentScreen
 
 	rts
