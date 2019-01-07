@@ -239,7 +239,7 @@ SetupGameOver
 ; Tell VBI to switch to title screen.
 ; 
 ; Transition events:
-; Stage 1: Scroll in the Title.
+; Stage 1: Scroll in the Title. (three lines, one at a time.)
 ; Stage 2: Brighten line 4 luminance.
 ; Stage 3: Initialize setup for Press Button on Title screen.
 ;
@@ -254,9 +254,9 @@ SetupTransitionToTitle
 
 	lda #<TITLE_MEM1         ; Initialize the
 	sta SCROLL_TITLE_LMS0    ; Display List
-	lda #<[TITLE_MEM1+80]    ; LMS 
+	lda #<[TITLE_MEM2]       ; LMS 
 	sta SCROLL_TITLE_LMS1    ; Addresses
-	lda #<[TITLE_MEM1+160]   ; for scrolling
+	lda #<[TITLE_MEM3]       ; for scrolling
 	sta SCROLL_TITLE_LMS2    ; in the title.
 
 	lda #DISPLAY_TITLE       ; Tell VBI to change screens. 

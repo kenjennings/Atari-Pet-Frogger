@@ -49,7 +49,12 @@ SCREEN_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
 
 ; ==========================================================================
 ; Event process SCREEN START/NEW GAME
-; Clear the Game Scores
+; Clear the Game Scores and get ready for the Press A Button prompt.
+;
+; Sidebar: This is oddly inserted between Transition to Title and Title
+; to finish internal initialization per game, due to doofus-level lack
+; of design planning, blah blah.   
+; The title screen has already been presented by Transition To Title.
 ; --------------------------------------------------------------------------
 EventScreenStart            ; This is New Game and Transition to title.
 
@@ -58,11 +63,6 @@ EventScreenStart            ; This is New Game and Transition to title.
 ;	jsr DisplayTitleScreen  ; Draw title and game instructions.
 
 ;	jsr CopyTitleColorsToDLI
-
-
-
-
-
 
 	lda #BLINK_SPEED        ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
@@ -448,7 +448,7 @@ EndGameOverScreen
 ; ==========================================================================
 ; Event Process TRANSITION TO TITLE
 ; Setup Transition to Title turned on the title display.
-; Stage 1: Scroll in the Title.
+; Stage 1: Scroll in the Title. (three lines, one at a time.)
 ; Stage 2: Brighten line 4 luminance.
 ; Stage 3: Initialize setup for Press Button on Title screen.
 ; --------------------------------------------------------------------------
@@ -460,14 +460,28 @@ EventTransitionToTitle
 
 	lda EventCounter         ; What stage are we in?
 	cmp #1
-	bne TestTransTitle2      ; 
+	bne TestTransTitle2      ; Not the Title Scroll, try next stage
 
-	; Do Scroll for Title.
+	; === STAGE 1 === 
+	; Each line is 40 spaces followed by the graphics. 
+	; Scroll each one one at a time. 
 	lda SCROLL_TITLE_LMS0
-	cmp #<[TITLE_MEM1+40] ; That should actually be 40.
-	beq FinishedNowSetupStage2
+	cmp #<[TITLE_MEM1+40] 
+	beq NowScroll2
 	inc SCROLL_TITLE_LMS0
+	bne EndTransitionToTitle
+
+NowScroll2
+	lda SCROLL_TITLE_LMS1
+	cmp #<[TITLE_MEM2+40] 
+	beq NowScroll3
 	inc SCROLL_TITLE_LMS1
+	bne EndTransitionToTitle
+
+NowScroll3
+	lda SCROLL_TITLE_LMS2
+	cmp #<[TITLE_MEM3+40] 
+	beq FinishedNowSetupStage2
 	inc SCROLL_TITLE_LMS2
 	bne EndTransitionToTitle
 
@@ -476,27 +490,33 @@ FinishedNowSetupStage2
 	sta EventCounter
 	bne EndTransitionToTitle
 
+	; === STAGE 2 === 
+	; Ramp up luminace of line 4. 
+
 TestTransTitle2
 	cmp #2
 	bne TestTransTitle3
 
+	lda [COLPF1_TABLE+3]
+	cmp #$0E               ; It is maximum brightness?
+	beq FinishedNowSetupStage3
+	inc [COLPF1_TABLE+3]   +1.
+	bne EndTransitionToTitle
 
+FinishedNowSetupStage3
+	lda #3
+	sta EventCounter
+	bne EndTransitionToTitle
+
+	; === STAGE 3 === 
+	; Set Up Press Any Button  and get ready to runtitle.
 
 TestTransTitle3
+	cmp #3
+	bne EndTransitionToTitle  ; Really shouldn't get to that point
 
-
-
-
-	inx                      ; next row.
-	stx EventCounter         ; Save new row number
-	cpx #25                  ; reached bottom of screen?
-	bne EndTransitionToTitle ; No.  Remain on this transition event next time.
-
-
-
-	lda #SCREEN_START        ; Yes, change to beginning of event cycle/start new game.
+	lda #SCREEN_START         ; Yes, change to beginning of event cycle/start new game.
 	sta CurrentScreen
-
 
 EndTransitionToTitle
 	lda CurrentScreen

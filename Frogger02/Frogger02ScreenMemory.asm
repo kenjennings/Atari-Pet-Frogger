@@ -168,8 +168,10 @@ EXTRA_BLANK_MEM ; Trailing line for credit scrolling.
 TITLE_MEM1 ; Title text.
 	.sb "                                        " ; Leading blanks  for  scrolling. 
 	.by I_iS I_iU I_iK I_S I_iS I_iU I_iU I_S I_iU I_iS I_iU I_S I_S I_iS I_iU I_iU I_S I_iS I_iU I_iK I_S I_iL I_iU I_iK I_S I_iL I_iU I_iU I_S I_iL I_iU I_iU I_S I_iS I_iU I_iU I_S I_iS I_iU I_iK
+TITLE_MEM2
 	.sb "                                        "  ; Leading blanks  for  scrolling. 
 	.by I_iS I_U  I_iI I_S I_iS I_iU I_L  I_S I_S  I_iS I_S  I_S I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI I_S I_iS I_S  I_iS I_S I_iS I_iS I_U  I_S I_iS I_iS I_U  I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI
+TITLE_MEM3
 	.sb "                                        "  ; Leading blanks  for  scrolling. 
 	.by I_iS I_S  I_S  I_S I_iS I_U  I_U  I_S I_S  I_iS I_S  I_S I_S I_iS I_S  I_S  I_S I_iS I_K  I_iK I_S I_iO I_U  I_iO I_S I_iO I_U  I_iS I_S I_iO I_U  I_iS I_S I_iS I_U  I_U  I_S I_iS I_K  I_iK
 
@@ -178,7 +180,7 @@ TITLE_MEM1 ; Title text.
 	.align $0100
 
 	
-TITLE_MEM2
+TITLE_MEM4
 ; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE
 	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H "  " 
 	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " " 
@@ -689,25 +691,57 @@ GAMEOVER_MEM
 ; ==========================================================================
 ; Color Layouts for the screens.
 ; --------------------------------------------------------------------------
+; Revised V02 Title Screen and Instructions:
+;    +----------------------------------------+
+; 1  |              PET FROGGER               | TITLE
+; 2  |              PET FROGGER               | TITLE
+; 3  |              PET FROGGER               | TITLE
+; 4  |              --- -------               | TITLE
+; 5  |                                        |
+; 6  |Help the frogs escape from Doc Hopper's | INSTXT_1
+; 7  |frog legs fast food franchise! But, the | INSTXT_1
+; 8  |frogs must cross piranha-infested rivers| INSTXT_1
+; 9  |to reach freedom. You have three chances| INSTXT_1
+; 10 |to prove your frog management skills by | INSTXT_1
+; 11 |directing frogs to jump on boats in the | INSTXT_1
+; 12 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
+; 13 |the seats in the boats ('Q').           | INSTXT_1
+; 14 |                                        |
+; 15 |Scoring:                                | INSTXT_2
+; 16 |    10 points for each jump forward.    | INSTXT_2
+; 17 |   500 points for each rescued frog.    | INSTXT_2
+; 18 |                                        |
+; 19 |Game controls:                          | INSTXT_3
+; 20 |                 S = Up                 | INSTXT_3
+; 21 |      left = 4           6 = right      | INSTXT_3
+; 22 |                                        |
+; 23 |                                        |
+; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
+; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
+;    +----------------------------------------+
 
 TITLE_BACK_COLORS
-	.by COLOR_GREEN COLOR_GREEN ; Title line
-	.by COLOR_BLACK COLOR_BLACK COLOR_BLACK COLOR_BLACK ; Credits
+	.by COLOR_GREEN COLOR_GREEN 
+	.by COLOR_GREEN COLOR_GREEN                     ; Title line
+	.by COLOR_BLACK                                 ; Space
 	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
 	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
-	.by COLOR_BLACK
-	.by COLOR_ORANGE2 COLOR_ORANGE2 COLOR_ORANGE2 ; Scoring
-	.by COLOR_BLACK
-	.by COLOR_PINK COLOR_PINK COLOR_PINK ; Controls
-	.by COLOR_BLACK
-	.by COLOR_BLUE_GREEN ; Press Any Key.
-	.by COLOR_BLACK
+	.by COLOR_BLACK                                 ; Space
+	.by COLOR_ORANGE2 COLOR_ORANGE2 COLOR_ORANGE2   ; Scoring
+	.by COLOR_BLACK                                 ; Space
+	.by COLOR_PINK COLOR_PINK COLOR_PINK            ; Controls
+	.by COLOR_BLACK COLOR_BLACK                     ; Space 
+	.by COLOR_BLACK                                 ; Press Button (turned off)
+	.by COLOR_BLACK                                 ; Credits
 
-TITLE_TEXT_COLORS
-	.rept 25
-		.by $0A ; Text luminance
+TITLE_TEXT_COLORS ; Text luminance
+	.by $0C $08 $04 $00                             ; Scrolling title
+	.rept 19
+		.by $0A                                     ; The rest of the text on screen
 	.endr 
-
+	.by $00                                         ; Press Button
+	.by $0A                                         ; Credits
+	
 
 GAME_BACK_COLORS
 	.by COLOR_BLACK COLOR_BLACK ; Scores

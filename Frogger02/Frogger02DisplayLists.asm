@@ -71,10 +71,10 @@ TITLE_DISPLAYLIST
 SCROLL_TITLE_LMS0 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1       ; Scroll In Title.
 SCROLL_TITLE_LMS1 = [* + 1] 
-	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1+80    ; Scroll In Title
+	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM2       ; Scroll In Title
 SCROLL_TITLE_LMS1 = [* + 1] 
-	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1+160   ; Scroll In Title.
-	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM2       ; Underlines
+	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM3       ; Scroll In Title.
+	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM4       ; Underlines
 	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
 
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1    ; Basic instructions...
