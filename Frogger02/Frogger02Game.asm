@@ -24,14 +24,13 @@ GAMESTART
 
 	; Changing the Display List is potentially tricky.  If the update is
 	; interrupted by the Vertical blank, then it could mess up the display
-	; list address and crash the Atari.  So, the code must make sure the
-	; system is not near the end of the screen to make the change.
-	; The jiffy counter is updated during the vertical blank.  When the
-	; main code sees the counter change then it means the vertical blank is
-	; over, the electron beam is near the top of the screen thus there is
-	; now plenty of time to set the new display list pointer.  Technically,
-	; this should be done by managing SDMCTL too, but this is overkill for a
-	; program with only one display.
+	; list address and crash the Atari.  
+	; 
+	; So, this problem is solved by giving responsibility for Display List
+	; changes to a custom Vertical Blank Interrupt. The main code simply 
+	; writes a byte to a page 0 location monitored by the vertical blank 
+	; interrupt and this directs the interrupt to change the current 
+	; display list.  Easy-peasy and never updated at the wrong time.
 
 	lda #<CHARACTER_SET ; Set custom character set.  Global to game, forever.
 	sta CHBAS
@@ -75,11 +74,31 @@ GAMESTART
 ; --------------------------------------------------------------------------
 
 GameLoop
+	jsr TimerLoop    ; Wait for end of frame to update the timers.
+
+; Due to the timer sync above, now here at this point the code 
+; is running at/near the top of the screen refresh.
+
 	lda CurrentScreen
+
+; ==========================================================================
+; TRANSITION TO TITLE
+; Setup Transition to Title routine turned on the title display.
+; Stage 1: Scroll in the Title.
+; Stage 2: Brighten line 4 luminance.
+; Stage 3: Initialize setup for Press Button on Title screen.
+; --------------------------------------------------------------------------
+ContinueTransitionToTitle
+	cmp #SCREEN_TRANS_TITLE
+	bne ContinueStartNewGame
+
+	jsr EventTransitionToTitle
+
 ; ==========================================================================
 ; SCREEN START/NEW GAME
-; Setup for New Game and do transition to Title screen.
+; Setup for New Game.  (Internal value updates)
 ; --------------------------------------------------------------------------
+ContinueStartNewGame
 	cmp #SCREEN_START
 	bne ContinueTitleScreen ; SCREEN_START=0?  No?
 
@@ -202,28 +221,14 @@ ContinueTransitionToOver
 ; --------------------------------------------------------------------------
 ContinueOverScreen
 	cmp #SCREEN_OVER
-	bne ContinueTransitionToTitle
-
-	jsr EventGameOverScreen
-
-; ==========================================================================
-; TRANSITION TO TITLE
-; Setup Transition to Title turned on the title display.
-; Stage 1: Scroll in the Title.
-; Stage 2: Brighten line 4 luminance.
-; Stage 3: Initialize setup for Press Button on Title screen.
-; --------------------------------------------------------------------------
-ContinueTransitionToTitle
-	cmp #SCREEN_TRANS_TITLE
 	bne EndGameLoop
 
-	jsr EventTransitionToTitle
+	jsr EventGameOverScreen
 
 ; ==========================================================================
 ; END OF GAME EVENT LOOP
 ; --------------------------------------------------------------------------
 EndGameLoop
-	jsr TimerLoop    ; Wait for end of frame and update the timers.
 
 	jmp GameLoop     ; rinse, repeat, forever.
 

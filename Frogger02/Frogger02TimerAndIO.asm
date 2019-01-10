@@ -40,8 +40,8 @@ TITLE_SPEED     = 6  ; Fill screen to present title
 ; Timer values.  NTSC.
 ; About 7 Inputs per second.
 ; After processing input (from the joystick) this is the number of frames
-; to count before new input is accepted.  This prevents moving the frog at 
-; 60 fps and compensates for any jitter/uneven toggling of the joystick 
+; to count before new input is accepted.  This prevents moving the frog at
+; 60 fps and compensates for any jitter/uneven toggling of the joystick
 ; bits by flaky controllers.
 INPUTSCAN_FRAMES = $09
 
@@ -75,9 +75,9 @@ ResetTimers
 
 	pha ; preserve it for caller.
 
-	lda KeyscanFrames
+	lda InputScanFrames
 	bne EndResetTimers
-	
+
 	lda #INPUTSCAN_FRAMES
 	sta InputScanFrames
 
@@ -109,38 +109,58 @@ ToggleFlipFlop
 
 
 ; ==========================================================================
-; Check for input from the controller. 
+; Check for input from the controller....
 ;
-; STICK0 Joystick Bits:
-; NA NA NA NA Right Left Down Up, 0 bit means joystick is pushed.
-; Cook the bits to turn on the directions we care about and zero the other 
+; Eliminate Down direction.
+; Eliminate conflicting directions.
+; Add trigger to the input stick value.
+;
+; STICK0 Joystick Bits:  00001111
+; "NA NA NA NA Right Left Down Up", 0 bit means joystick is pushed.
+; Cook the bits to turn on the directions we care about and zero the other
 ; bits, therefore, if stick value is 0 then it means no input.
-; - Down input is ignored (masked out).  
-; - Since up movement is the most likely to result in death the up movement 
-;    must be exclusively up.  If a horizontal movement is also on at the 
+; - Down input is ignored (masked out).
+; - Since up movement is the most likely to result in death the up movement
+;    must be exclusively up.  If a horizontal movement is also on at the
 ;    same time then the up movement will be masked out.
+;
+; Arcade controllers with individual buttons would allow both left and
+; right to be pressed at the same time.  To avoid unnecessary fiddling
+; with the frog in this situation eliminate both motions if both are
+; engaged.
 ;
 ; STRIG0 Button
 ; 0 is button pressed., !0 is not pressed.
-; 
-; A  returns the Direction.  key pressed.  or returns $FF for no key pressed.
-; If the timer allows reading, and a key is found, then the timer is
-; reset for the time of the next key input cycle.
+; If STRIG0 input then set bit $10 for trigger.
 ;
-; Return with flags set for CMP #$FF ; BEQ = No key
+; Return  A  with InputStick value where direction
+; and trigger set are 1 bits.  Bit values:   00011101
+; "NA NA NA Trigger Right Left NA Up"
+;
+; Wow, but this became a sloppy mess.
 ; --------------------------------------------------------------------------
 CheckInput
 	lda InputScanFrames       ; Is input timer delay  0?
-	bne ExitCheckInputNow     ; No. thus nothing to scan.
+	bne SetNoInput            ; No. thus nothing to scan. (and exit)
 
+	jsr SetNoInput           ; Make sure the official stick starts with no input.
+
+ProcessJoystickBits
 	lda STICK0                ; The OS nicely separates PIA nybbles for us
+	and #%00001111            ; Make sure only low bits kept.  (Is this necessary?)
+	cmp #$0F                  ; Any direction is moved?
+	beq AddTriggerInput       ; No.  If the trigger button is pressed, then add that.
+
+ChefOfJoystickBits  ; Cook STICK0 into the safe stick directions.
+; Flip input bits.
+	eor #%00001111            ; Reverse direction bits.
 	and #%00001101            ; Mask out the Down.
-	eor #%00001101            ; Reverse direction bits.
 	sta InputStick            ; Save it.
 
+; Fix Up+Right Bits
 	and #%00001001            ; Looking at only Up and Right
 	cmp #%00001001            ; Are both bits set ?
-	bne FixUpLeftBits         ; no, go do same for Up and Left.
+	bne FixUpLeftBits         ; no, go try same for Up and Left.
 	lda InputStick
 	and #%00001100            ; turn off the UP bit.
 	sta InputStick            ; Save it.
@@ -154,20 +174,37 @@ FixUpLeftBits
 	and #%00001100            ; turn off the UP bit.
 	sta InputStick            ; Save it.
 
-; Arcade controllers with individual buttons would allow both left and 
-; right to be pressed at the same time.  To avoid unnecessary fiddling 
-; with the frog eliminate both motions if both are engaged. 
-FixLeftRightBits              
+FixLeftRightBits              ; Don't allow Left and Right to be on together.
 	lda InputStick
 	and #%00001100            ; Looking at only Up and Left
 	cmp #%00001100            ; Are both bits set ?
-	bne DoneWithDirection     ; Nope.  Go do something else.
+	bne AddTriggerInput       ; Nope.  Go do something else.
 	lda InputStick
 	and #%00000001            ; turn off the Left and Right bits.
 	sta InputStick            ; Save it.
 
-DoneWithDirection
+AddTriggerInput
+	lda STRIG0                ; 0 is button pressed., !0 is not pressed.
+	bne DoneWithBitCookery    ; if non-zero, then no button pressed.
 
+	lda InputStick            ; Return the input value.
+	ora #%00010000            ; Turn on 5th bit/$10 for trigger.
+	sta InputStick
+
+DoneWithBitCookery            ; Some input was captured?
+	lda InputStick            ; Return the input value?
+	beq ExitInputCollection   ; No, nothing happened here.  Just exit.
+
+	lda #INPUTSCAN_FRAMES     ; Because there was input collected, then
+	sta InputScanFrames       ; reset the input timer.
+
+ExitInputCollection
+	lda InputStick            ; Return the input value.
+	rts
+
+SetNoInput
+	lda #0
+	sta InputStick
 	rts
 
 
@@ -192,29 +229,49 @@ CheckKey
 
 ;	jsr ClearKey              ; Clear register/timer for next key read.
 
-ExitCheckKey                  ; exit with some kind of key value in A.
+;ExitCheckKey                  ; exit with some kind of key value in A.
 ;	pla                       ; restore the pressed key in A.
 ;	cmp #$FF                  ; set flags for not matching $FF no key value
 	rts
 
-ExitCheckKeyNow               ; exit with no key value in A
+;ExitCheckKeyNow               ; exit with no key value in A
 ;	lda #$FF
 ;	cmp #$FF                  ; set flags for matching $FF no key value
 	rts
 
 
 ; ==========================================================================
+; Clear Input.
+;
+; Joystick and trigger input is real-time on-off without
+; a buffer, so there is substantially less purpose for this
+; routine than the same need for keyboard input.
+;
+; All it really does is reset the input scan timer.
+; --------------------------------------------------------------------------
+ClearInput
+	pha                 ; Save whatever is in A
+
+	lda #INPUTSCAN_FRAMES     ; Because there was input collected, then
+	sta InputScanFrames       ; reset the input timer.
+
+	pla                 ; restore  whatever was in A.
+
+	rts
+
+
+; ==========================================================================
 ; Clear Current/Pending Key
 ;
-; This should only be called 
-; 1) when a successful read has just occurred to empty the key 
+; This should only be called
+; 1) when a successful read has just occurred to empty the key
 ;    buffer and reset the key scan timer.
-; 2) when we do not want a keystroke entered in the recent past to be 
-;    automatically read when we get to the next opportunity to read the 
-;    keyboard.  
-;    i.e.  When there was animation occurring which occupies human wait 
-;    time and the code will soon enter an event area that will read a 
-;    character.  
+; 2) when we do not want a keystroke entered in the recent past to be
+;    automatically read when we get to the next opportunity to read the
+;    keyboard.
+;    i.e.  When there was animation occurring which occupies human wait
+;    time and the code will soon enter an event area that will read a
+;    character.
 ;    e.g. Press Any Key To Continue.
 ;
 ; Reset CH to no key read value.  Reset the timer too while we're here.
@@ -226,9 +283,9 @@ ClearKey
 
 ;	lda #KEYSCAN_FRAMES ; Reset keyboard timer for next key input.
 ;	sta KeyscanFrames
-	
+
 ;	pla                 ; restore  whatever was in A.
-	
+
 	rts
 
 
@@ -333,17 +390,17 @@ MyDLI
 ;	pla                  ; and restore from stack
 ;	sta COLPF1           ; write new text color.
 
-; The only way to speed that up is to have 25 specific DLI routines, one for 
-; each screen line, and then use immediate mode load (lda #00 ; sta foo).  
-; Then the code would need a lookup table of addresses to directly update the 
+; The only way to speed that up is to have 25 specific DLI routines, one for
+; each screen line, and then use immediate mode load (lda #00 ; sta foo).
+; Then the code would need a lookup table of addresses to directly update the
 ; immediate mode values in the routines.
 	inc ThisDLI          ; next DLI.
 
 	mRegRestoreAX
-	
+
 	rti
-	
-	
+
+
 ;==============================================================================
 ;                                                           MyImmediateVBI
 ;==============================================================================
@@ -384,19 +441,19 @@ DoDisplayListSwitch
 
 	lda COLOR_BACK_LO_TABLE,x  ; Get pointer to the source color table
 	sta COLPF2POINTER
-	lda COLOR_BACK_HI_TABLE,x  
+	lda COLOR_BACK_HI_TABLE,x
 	sta COLPF2POINTER+1
 
 	lda COLOR_TEXT_LO_TABLE,x  ; Get pointer to the source text table
 	sta COLPF1POINTER
-	lda COLOR_TEXT_HI_TABLE,x  
+	lda COLOR_TEXT_HI_TABLE,x
 	sta COLPF1POINTER+1
 
 	lda PLAYFIELD_LMS_SCROLL_LO_TABLE,x ; Gewt the pointer to the LMS for the scrolling credit line.
 	sta CurrentCreditLMS
 	lda PLAYFIELD_LMS_SCROLL_HI_TABLE,x
 	sta CurrentCreditLMS+1
-                    
+
 	lda ScrollCredit         ; Update current screen to have the current credit scroll value.
 	sta (CurrentCreditLMS),y
 
@@ -411,17 +468,17 @@ ScrollTheCreditLine        ; scroll the text identifying the perpetrators
 	dec ScrollCounter      ; subtract from scroll delay counter
 	bne ExitMyImmediateVBI ; Not 0 yet, so no scrolling.
 	lda #8                 ; Reset counter to original value.
-	sta ScrollCounter      
-	
+	sta ScrollCounter
+
 	inc ScrollCredit       ; Move text left one position.
-	lda ScrollCredit       
+	lda ScrollCredit
 	cmp #<EXTRA_BLANK_MEM         ; Did scroll position reach the end of the text?
 	bne UpdateCurrentScrollCredit ; No.  Just update with current value.
-	
+
 	lda #<SCROLLING_CREDIT       ; Yes, restart scroll from the beginning position.
 	sta ScrollCredit
-	
-UpdateCurrentScrollCredit    ; Note that only the low byte of the LMS needs to be updated, since all the 
+
+UpdateCurrentScrollCredit    ; Note that only the low byte of the LMS needs to be updated, since all the
 	sta (CurrentCreditLMS),y ; text of the scrolling line fits inside one page of memory.
 
 ExitMyImmediateVBI

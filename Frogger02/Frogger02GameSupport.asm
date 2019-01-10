@@ -28,9 +28,44 @@
 ;
 ; --------------------------------------------------------------------------
 
+; ==========================================================================
+; TOGGLE BUTTON PROMPT
+; Set blinking prompt.
+;
+; On entry the CPU flags should indicate current toggle state:
+;   Z or 0   v   !Z or !0
+;
+; If toggle 0, then dark background, light text.
+; If toggle 1, then light background and dark text.
+; 
+; Do not allow color black, since the credits are always black.
+; --------------------------------------------------------------------------
+ToggleButtonPrompt
+	bne PromptLightAndDark ; 1 = Light background and dark text
+
+; Therefore, Prompt Dark and Light
+PromptDarkAndLight
+	lda RANDOM             ; A random color
+	and #%11110000         ; Mask out the lumninance for Dark.
+	beq PromptDarkAndLight ; Do again if black/color 0 turned up
+	sta COLPF2_TABLE+23    ; Set background
+	lda #$0C               ; Light text
+	sta COLPF1_TABLE+23    ; Set text.
+	rts
+
+PromptLightAndDark
+	lda RANDOM             ; A random color
+	and #%11110000         ; Mask out the lumninance for Dark.
+	beq PromptLightAndDark ; Do again if black/color 0 turned up
+	ora #$0C               ; Light Background
+	sta COLPF2_TABLE+23    ; Set background
+	lda #$00               ; Dark text
+	sta COLPF1_TABLE+23    ; Set text.
+	rts
+
 
 ; ==========================================================================
-; RUN PROMPT FOR ANY KEY
+; RUN PROMPT FOR BUTTON
 ; Maintain blinking timer.
 ; Update/blink text on line 23.
 ; Return 0/BEQ when the any key is not pressed.
@@ -40,32 +75,19 @@
 ; A  contains key press.
 ; CPU flags are comparison of key value to $FF which means no key press.
 ; --------------------------------------------------------------------------
-RunPromptForAnyKey
+RunPromptForButton
 	lda AnimateFrames        ; Did animation counter reach 0 ?
-	bne CheckAnyKey          ; no, then is a key pressed?
+	bne CheckButton          ; no, then is a key pressed?
 
 	jsr ToggleFlipFlop       ; Yes! Let's toggle the flashing prompt
-	bne PromptInverse        ; If this is 1 then display inverse prompt
-
-	ldy #PRINT_INST_TXT4     ; Display normal prompt
-	ldx #23
-
-	bne PrintAndReset        ; Print to screen then reset
-
-PromptInverse
-	ldy #PRINT_INST_TXT4_INV ; Display inverse prompt
-	ldx #23
-	
-PrintAndReset
-	jsr PrintToScreen
+	jsr ToggleButtonPrompt   ; Set prompt based on CPU flags from Toggle bit.
 
 ResetPromptBlinking
 	lda #BLINK_SPEED         ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
-CheckAnyKey
-	jsr CheckKey             ; Get a key if timer permits.
-	cmp #$FF                 ; Key is pressed?
+CheckButton
+	jsr CheckInput           ; Get an input if timer permits. Non Zero is input.
 
 	rts
 

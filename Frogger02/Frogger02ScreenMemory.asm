@@ -739,29 +739,33 @@ TITLE_TEXT_COLORS ; Text luminance
 	.rept 19
 		.by $0A                                     ; The rest of the text on screen
 	.endr 
-	.by $00                                         ; Press Button
+	.by $00                                         ; Press Button (turned off)
 	.by $0A                                         ; Credits
 	
 
 GAME_BACK_COLORS
-	.by COLOR_BLACK COLOR_BLACK ; Scores
+	.by COLOR_BLACK COLOR_BLACK               ; Scores
+	.by COLOR_GREEN                           ; Grassy gap 
 	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
 	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
 	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
 	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
 	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
 	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
-	.by COLOR_ORANGE1 ; one last Beach.
-	.by COLOR_GREEN ; gap 
-	.by COLOR_BLACK COLOR_BLACK COLOR_BLACK  ; Credits
-
-GAME_TEXT_COLORS
-	.rept 25
-		.by $0A ; Text luminance
+	.by COLOR_ORANGE1                         ; one last Beach.
+	.by COLOR_GREEN                           ; grassy gap 
+	.by COLOR_BLACK                           ; Press Button (turned off)
+	.by COLOR_BLACK                           ; Credits
+	
+GAME_TEXT_COLORS ; Text luminance
+	.rept 23
+		.by $0A                                     ; The rest of the text on screen
 	.endr 
+	.by $00                                         ; Press Button (turned off)
+	.by $0A                                         ; Credits
 
 
-DEAD_BACK_COLORS
+DEAD_BACK_COLORS ; Text luminance
 	.by COLOR_BLACK 
 	.by COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE
 	.by COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE
@@ -771,14 +775,18 @@ DEAD_BACK_COLORS
 	.by COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE
 	.by COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE
 	
-	.by COLOR_BLACK COLOR_GREEN COLOR_BLACK  ; Credits
+	.by COLOR_BLACK 
+	.by COLOR_BLACK                                 ; Press Button (turned off)
+	.by COLOR_BLACK                                 ; Credits
 
-DEAD_TEXT_COLORS
-	.by $00; Text luminance
+DEAD_TEXT_COLORS ; Text luminance
+	.by $00
 	.by $0E $0C $0A $08 $06 $04 $02 $00
 	.by $00 $0A $08 $06 $00
 	.by $00 $02 $04 $06 $08 $0A $0C $0E
-	.by $00 $0A $00
+	.by $00 
+	.by $00                                         ; Press Button (turned off)
+	.by $0A                                         ; Credits
 
 
 WIN_BACK_COLORS
@@ -791,15 +799,18 @@ WIN_BACK_COLORS
 	.by COLOR_LITE_BLUE COLOR_AQUA COLOR_BLUE_GREEN COLOR_GREEN
 	.by COLOR_YELLOW_GREEN COLOR_ORANGE_GREEN COLOR_LITE_ORANGE COLOR_ORANGE2
 	
-	.by COLOR_BLACK COLOR_GREEN COLOR_BLACK 
+	.by COLOR_BLACK 
+	.by COLOR_BLACK                                 ; Press Button (turned off)
+	.by COLOR_BLACK                                 ; Credits
 
 WIN_TEXT_COLORS
 	.by $00; Text luminance
 	.by $0A $0A $0A $0A $0A $0A $0A $0A
 	.by $00 $0C $08 $04 $00
 	.by $0A $0A $0A $0A $0A $0A $0A $0A
-	.by $00 $0A $00
-
+	.by $00 
+	.by $00                                         ; Press Button (turned off)
+	.by $0A                                         ; Credits
 
 OVER_BACK_COLORS
 	.by COLOR_BLACK 
@@ -811,14 +822,18 @@ OVER_BACK_COLORS
 	.by COLOR_PINK COLOR_PINK COLOR_PINK COLOR_PINK
 	.by COLOR_PINK COLOR_PINK COLOR_PINK COLOR_PINK
 
-	.by COLOR_BLACK COLOR_GREEN COLOR_BLACK  
+	.by COLOR_BLACK 
+	.by COLOR_BLACK                                 ; Press Button (turned off)
+	.by COLOR_BLACK                                 ; Credits
 
 OVER_TEXT_COLORS
 	.by $00; Text luminance
 	.by $00 $02 $04 $06 $08 $0A $0C $0E
 	.by $00 $0A $08 $06 $00
 	.by $0E $0C $0A $08 $06 $04 $02 $00
-	.by $00 $0A $00
+	.by $00 
+	.by $00                                         ; Press Button (turned off)
+	.by $0A                                         ; Credits
 
 
 	.align $0100

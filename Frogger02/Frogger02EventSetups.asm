@@ -21,6 +21,43 @@
 
 
 ; ==========================================================================
+; SETUP TRANSITION TO TITLE
+;
+; Prep values to begin the Transition Event for the Title Screen. That is:
+; Initialize scrolling line in title text.
+; Tell VBI to switch to title screen.
+; 
+; Transition events:
+; Stage 1: Scroll in the Title. (three lines, one at a time.)
+; Stage 2: Brighten line 4 luminance.
+; Stage 3: Initialize setup for Press Button on Title screen.
+;
+; Uses A, X
+; --------------------------------------------------------------------------
+SetupTransitionToTitle
+	lda #TITLE_SPEED         ; Animation moving speed.
+	jsr ResetTimers
+
+	lda #1
+	sta EventCounter         ; Declare stage 1 behavior for scrolling.
+
+	lda #<TITLE_MEM1         ; Initialize the
+	sta SCROLL_TITLE_LMS0    ; Display List
+	lda #<[TITLE_MEM2]       ; LMS 
+	sta SCROLL_TITLE_LMS1    ; Addresses
+	lda #<[TITLE_MEM3]       ; for scrolling
+	sta SCROLL_TITLE_LMS2    ; in the title.
+
+	lda #DISPLAY_TITLE       ; Tell VBI to change screens. 
+	jsr ChangeScreen         ; Then copy the color tables.
+
+	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
+	sta CurrentScreen
+
+	rts
+
+
+; ==========================================================================
 ; SETUP TRANSITION TO GAME SCREEN
 ;
 ; Prep values to run the game screen.
@@ -74,7 +111,10 @@ PLAYFIELD_MEM18
 	lda #I_FROG            ; On Atari we're using $7F as the frog shape.
 	sta (FrogLocation),y   ; PLAYFIELD_MEM18 (beach) + $13/19 (dec)
 
-	jsr DisplayGameScreen  ; Draw game screen.
+	lda #DISPLAY_GAME        ; Tell VBI to change screens. 
+	jsr ChangeScreen         ; Then copy the color tables.
+
+;	jsr DisplayGameScreen  ; Draw game screen.
 
 ;	jsr CopyGameColorsToDLI
 
@@ -98,12 +138,15 @@ SetupTransitionToWin
 
 	jsr CopyScoreToScreen   ; Update the screen information
 	jsr PrintFrogsAndLives     
-	
-	lda #WIN_FILL_SPEED     ; Animation moving speed.
-	jsr ResetTimers
 
-	lda #2                  ; start wiping screen at line 2 (0, 1, 2)
-	sta EventCounter
+;	lda #WIN_FILL_SPEED     ; Animation moving speed.
+;	jsr ResetTimers
+
+;	lda #2                  ; start wiping screen at line 2 (0, 1, 2)
+;	sta EventCounter
+
+	lda #DISPLAY_WIN         ; Tell VBI to change screens. 
+	jsr ChangeScreen         ; Then copy the color tables.
 
 ;	jsr ClearKey
 
@@ -130,7 +173,7 @@ SetupWin
 
 	lda #SCREEN_WIN     ; Change to wins screen.
 	sta CurrentScreen
-	
+
 	rts
 
 
@@ -158,6 +201,9 @@ SetupTransitionToDead
 
 	lda #0                  ; Zero event controls.
 	sta EventCounter
+
+	lda #DISPLAY_DEAD        ; Tell VBI to change screens. 
+	jsr ChangeScreen         ; Then copy the color tables.
 
 ;	jsr ClearKey
 
@@ -202,6 +248,9 @@ SetupTransitionToGameOver
 	lda #60                ; Number of times to do the Game Over EOR effect
 	sta EventCounter
 
+	lda #DISPLAY_OVER        ; Tell VBI to change screens. 
+	jsr ChangeScreen         ; Then copy the color tables.
+
 ;	jsr ClearKey
 
 ;	jsr CopyOverColorsToDLI 
@@ -230,41 +279,4 @@ SetupGameOver
 
 	rts
 
-
-; ==========================================================================
-; SETUP TRANSITION TO TITLE
-;
-; Prep values to begin the Transition Event for the Title Screen. That is:
-; Initialize scrolling line in title text.
-; Tell VBI to switch to title screen.
-; 
-; Transition events:
-; Stage 1: Scroll in the Title. (three lines, one at a time.)
-; Stage 2: Brighten line 4 luminance.
-; Stage 3: Initialize setup for Press Button on Title screen.
-;
-; Uses A, X
-; --------------------------------------------------------------------------
-SetupTransitionToTitle
-	lda #TITLE_SPEED         ; Animation moving speed.
-	jsr ResetTimers
-
-	lda #1
-	sta EventCounter         ; Declare stage 1 behavior for scrolling.
-
-	lda #<TITLE_MEM1         ; Initialize the
-	sta SCROLL_TITLE_LMS0    ; Display List
-	lda #<[TITLE_MEM2]       ; LMS 
-	sta SCROLL_TITLE_LMS1    ; Addresses
-	lda #<[TITLE_MEM3]       ; for scrolling
-	sta SCROLL_TITLE_LMS2    ; in the title.
-
-	lda #DISPLAY_TITLE       ; Tell VBI to change screens. 
-	jsr ChangeScreen         ; Then copy the color tables.
-
-	
-	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
-	sta CurrentScreen
-
-	rts
 
