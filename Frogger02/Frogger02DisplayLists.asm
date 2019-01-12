@@ -23,11 +23,13 @@
 ; The Atari OS text printing is not being used, therefore the Atari screen
 ; editor's 24-line limitation is not an issue.
 ;
-; "Blank" lines in the display are done by referring to a line of spaces.
-; This makes it easy to "animate" with color changes.  Also, the screen 
-; transitions are easier when the screen geometry is consistent.  Truly
-; blank scan lines (via ANTIC Blank line instructions) display using 
-; COLPF4 (border) instead of the COLPF2 (background) used in ANTIC mode 2.
+; Where the display expects completely static, blank, black lines the 
+; display list real blank line instructions.  Where the display needs 
+; color it uses an empty text line. This is done, because actual blank 
+; lines use COLPF4 for the background (same as the border color) while 
+; the Antic mode 2 text for the game display uses COLPF2 for the 
+; background behind the text.  This makes it easy to "animate" with color 
+; changes to the text background.  
 ; --------------------------------------------------------------------------
 
 	.align $0400 ; Start at ANTIC's 1K boundary for display lists. 
@@ -52,9 +54,9 @@
 ; 16 |    10 points for each jump forward.    | INSTXT_2
 ; 17 |   500 points for each rescued frog.    | INSTXT_2
 ; 18 |                                        |
-; 19 |Game controls:                          | INSTXT_3
-; 20 |                 S = Up                 | INSTXT_3
-; 21 |      left = 4           6 = right      | INSTXT_3
+; 19 |Use joystick control to jump forward,   | INSTXT_3
+; 20 |left, and right.                        | INSTXT_3
+; 21 |                                        | 
 ; 22 |                                        |
 ; 23 |                                        |
 ; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
@@ -75,7 +77,7 @@ SCROLL_TITLE_LMS1 = [* + 1]
 SCROLL_TITLE_LMS1 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM3       ; Scroll In Title.
 	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM4       ; Underlines
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
+	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
 
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1    ; Basic instructions...
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM2 
@@ -85,18 +87,18 @@ SCROLL_TITLE_LMS1 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM6 
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM7 
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM8 
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
+	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
 	
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM1     ; Scoring
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM2 
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM3
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
-	
+	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
+
 	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM1    ; Game Controls
 	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM2
-	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM3 
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
+	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
+	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
+	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
 
 	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to start game.
 SCROLL_LMS0 = [* + 1] 
@@ -140,7 +142,7 @@ GAME_DISPLAYLIST
 
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1      ; Labels for crossings counter, scores, and lives
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM2    
-	mDL_LMS DL_TEXT_2,BLANK_MEM               ; An empty line of spaces.
+	mDL_LMS DL_TEXT_2,BLANK_MEM               ; An empty line of spaces.  (green grass)
 
 PF_LMS0 = [* + 1] ; Plus 1 is the address of the display list LMS
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM0  ; "Beach", and the two lines of Boats
@@ -180,9 +182,9 @@ PF_LMS17 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM17
 PF_LMS18 = [* + 1] 
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM18 ; Frog starting beach.
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
+	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.  (green grass)
 
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.
+	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
 SCROLL_LMS1 = [* + 1] 
 	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 

@@ -270,7 +270,7 @@
 ; --------------------------------------------------------------------------
 	ORG $82
 
-; Data read by the Display List Interupts to change the colors for each line.
+; Data read by the Display List Interrupts to change the colors for each line.
 
 COLPF2_TABLE ; Text background color. ; Default Green
 	.rept 25
@@ -288,7 +288,9 @@ ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into
 MovesCars       .word $00   ; = Moves Cars
 
 FrogLocation    .word $0000 ; = Pointer to start of Frog's current row in screen memory.
-FrogColumn      .byte $00   ; = Frog X coord
+FrogColumn      .byte $00   ; = Frog X coord (logical to screen)
+FrogRealColumn  .byte $00   ; = Frog physical offset into current row
+
 FrogRow         .byte $00   ; = Frog Y row position (in the beach/boat playfield not counting score lines)
 LastCharacter   .byte 0     ; = Last Character Under Frog
 

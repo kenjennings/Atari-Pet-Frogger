@@ -171,15 +171,15 @@
 ; 10 |to prove your frog management skills by | INSTXT_1
 ; 11 |directing frogs to jump on boats in the | INSTXT_1
 ; 12 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
-; 13 |the seats in the boats ('Q').           | INSTXT_1
+; 13 |the seats in the boats.                 | INSTXT_1
 ; 14 |                                        |
 ; 15 |Scoring:                                | INSTXT_2
 ; 16 |    10 points for each jump forward.    | INSTXT_2
 ; 17 |   500 points for each rescued frog.    | INSTXT_2
 ; 18 |                                        |
-; 19 |Game controls:                          | INSTXT_3
-; 20 |                 S = Up                 | INSTXT_3
-; 21 |      left = 4           6 = right      | INSTXT_3
+; 19 |Use joystick control to jump forward,   | INSTXT_3
+; 20 |left, and right.                        | INSTXT_3
+; 21 |                                        | 
 ; 22 |                                        |
 ; 23 |                                        |
 ; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
@@ -330,7 +330,7 @@ PrintWinFrogGfx
 ; ==========================================================================
 ; Print the big text announcement for Game Over.
 ; --------------------------------------------------------------------------
-;PrintGameOverGfx
+PrintGameOverGfx
 ;	jsr ClearForGfx
 	
 ;	ldx #SIZEOF_BIG_GFX
@@ -341,8 +341,41 @@ PrintWinFrogGfx
 ;	bpl LoopPrintGameOverText
 	
 	rts
+
+; ==========================================================================
+; Remove the frog from the screen.
+; 
+; Score/Lives, and the frog are the only place where screen memory 
+; is being changed.  The actual movements of boats does not move in 
+; screen memory.  Coarse scrolling is done by updating LMS in the 
+; Display List.
+;
+; The 80 characters of scrolling (twice the visible screen width) means 
+; there must be two frogs in the screen memory for the current row.  
+; One frog at the X location, one at the X location + 40. Whichever one 
+; is actually seen on screen depends on current scroll offset.  The scroll 
+; offset could be reset to the origin at any time, therefore the frog must 
+; be displayed in the adjusted place.
+;
+; In the future the Frog will be a P/M graphics object, and then this 
+; discussion is a complete non-issue as moving the frog will only require
+; changing the P/MG HPOS value. 
+;
+;
+; --------------------------------------------------------------------------
+RemoveFrog
+;	jsr ClearForGfx
 	
-		
+;	ldx #SIZEOF_BIG_GFX
+;LoopPrintGameOverText
+;	lda GAME_OVER_GFX,x
+;	sta SCREENMEM+400,x
+;	dex
+;	bpl LoopPrintGameOverText
+	
+	rts
+
+
 ; ==========================================================================
 ; Print the instruction/title screen text.
 ; Set state of the text line that is blinking.

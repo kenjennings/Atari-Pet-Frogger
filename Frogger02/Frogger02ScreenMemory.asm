@@ -23,11 +23,13 @@
 ; The Atari OS text printing is not being used, therefore the Atari screen
 ; editor's 24-line limitation is not an issue.
 ;
-; Blank lines in the display are done by referring to an empty line of data.
-; This makes it easy to "animate" with color changes.  Also, the screen 
-; transitions are easier when the screen geometry is consistent.  Truly
-; blank scan lines are displayed by COLPF4 (border) instead of the COLPF2
-; (background) used in ANTIC mode 2.
+; Where the display expects completely static, blank, black lines the 
+; display list real blank line instructions.  Where the display needs 
+; color it uses an empty text line. This is done, because actual blank 
+; lines use COLPF4 for the background (same as the border color) while 
+; the Antic mode 2 text for the game display uses COLPF2 for the 
+; background behind the text.  This makes it easy to "animate" with color 
+; changes to the text background.  
 ; --------------------------------------------------------------------------
 
 ATASCII_HEART  = $00 ; heart graphics
@@ -98,9 +100,9 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 16 |    10 points for each jump forward.    | INSTXT_2
 ; 17 |   500 points for each rescued frog.    | INSTXT_2
 ; 18 |                                        |
-; 19 |Game controls:                          | INSTXT_3
-; 20 |                 S = Up                 | INSTXT_3
-; 21 |      left = 4           6 = right      | INSTXT_3
+; 19 |Use joystick control to jump forward,   | INSTXT_3
+; 20 |left, and right.                        | INSTXT_3
+; 21 |                                        | 
 ; 22 |                                        |
 ; 23 |                                        |
 ; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
@@ -187,19 +189,19 @@ TITLE_MEM4
 	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " "
 
 INSTRUCT_MEM1 ; Basic instructions...
-; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
+; 6  |Help the frogs escape from Doc Hopper's | INSTXT_1
 	.sb "Help the frogs escape from Doc Hopper's "
 INSTRUCT_MEM2
-; 8  |frog legs fast food franchise! But, the | INSTXT_1
+; 7  |frog legs fast food franchise! But, the | INSTXT_1
 	.sb "frog legs fast food franchise! But, the "
 INSTRUCT_MEM3
-; 9  |frogs must cross piranha-infested rivers| INSTXT_1
+; 8  |frogs must cross piranha-infested rivers| INSTXT_1
 	.sb "frogs must cross piranha-infested rivers"
 INSTRUCT_MEM4
-; 10 |to reach freedom. You have three chances| INSTXT_1
+; 9  |to reach freedom. You have three chances| INSTXT_1
 	.sb "to reach freedom. You have three chances"
 INSTRUCT_MEM5
-; 11 |to prove your frog management skills by | INSTXT_1
+; 10 |to prove your frog management skills by | INSTXT_1
 	.sb "to prove your frog management skills by "
 
 
@@ -208,24 +210,24 @@ INSTRUCT_MEM5
 	.align $0100
 
 INSTRUCT_MEM6
-; 12 |directing frogs to jump on boats in the | INSTXT_1
+; 11 |directing frogs to jump on boats in the | INSTXT_1
 	.sb "directing frogs to jump on boats in the "
 INSTRUCT_MEM7
-; 13 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
+; 12 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
 	.sb "rivers like this:  "
 	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
 	.sb "  Land only on  "
 INSTRUCT_MEM8
-; 14 |the seats in the boats.                 | INSTXT_1
+; 13 |the seats in the boats.                 | INSTXT_1
 	.sb "the seats in the boats.                 "
 SCORING_MEM1 ; Scoring
-; 16 |Scoring:                                | INSTXT_2
+; 15 |Scoring:                                | INSTXT_2
 	.sb "Scoring:                                "
 SCORING_MEM2 
-; 17 |    10 points for each jump forward.    | INSTXT_2
+; 16 |    10 points for each jump forward.    | INSTXT_2
 	.sb "    10 points for each jump forward.    "
 SCORING_MEM3
-; 18 |   500 points for each rescued frog.    | INSTXT_2
+; 17 |   500 points for each rescued frog.    | INSTXT_2
 	.sb "   500 points for each rescued frog.    "
 
 
@@ -234,14 +236,12 @@ SCORING_MEM3
 	.align $0100
 
 CONTROLS_MEM1 ; Game Controls
-; 20 |Use Joystick Controller:                | INSTXT_3
-	.sb "Use Joystick Controller:                "
+; 19 |Use joystick control to jump forward,   | INSTXT_3
+	.sb "Use joystick control to jump forward,   "
 CONTROLS_MEM2
-; 21 |                   Up                   | INSTXT_3
-	.sb "                   Up                   "
-CONTROLS_MEM3 
-; 22 |      left                   right      | INSTXT_3
-	.sb "      left                   right      "
+; 20 |left, and right.                        | INSTXT_3
+	.sb "left, and right.                        "
+
 ANYBUTTON_MEM ; Prompt to start game.
 ; 24 |   Press joystick button to continue.   | INSTXT_4
 	.sb "   Press joystick button to continue.   "
@@ -711,9 +711,9 @@ GAMEOVER_MEM
 ; 16 |    10 points for each jump forward.    | INSTXT_2
 ; 17 |   500 points for each rescued frog.    | INSTXT_2
 ; 18 |                                        |
-; 19 |Game controls:                          | INSTXT_3
-; 20 |                 S = Up                 | INSTXT_3
-; 21 |      left = 4           6 = right      | INSTXT_3
+; 19 |Use joystick control to jump forward,   | INSTXT_3
+; 20 |left, and right                         | INSTXT_3
+; 21 |                                        | 
 ; 22 |                                        |
 ; 23 |                                        |
 ; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM

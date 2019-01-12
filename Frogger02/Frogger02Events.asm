@@ -210,21 +210,23 @@ EndTransitionToGame
 	rts
 
 
+
+
 ; ==========================================================================
 ; Event Process GAME SCREEN
 ; Play the game.
-; 1) When the input timer allows, get a key.
+; 1) When the input timer allows, get controller input.
 ; 2) Evaluate frog Movement
 ; 2.a) Determine exit to Win screen
 ; 2.b) Determine exit to Dead screen.
 ; 3) When the animation timer expires, shift the boat rows.
 ; 3.a) Determine if frog hits screen border to go to Dead screen.
-; As a timer based pattern the key input is first.
-; Keyboard input updates the frog's logical and physical position 
+; As a timer based pattern the controller input is first.
+; Joystick input updates the frog's logical and physical position 
 ; and updates screen memory.
-; The animation update forces an automatic movement of the frog 
-; logically, as the frog moves with the boats and remains static
-; relative to the boats.
+; The animation update forces an automatic logical movement of the 
+; frog as the frog moves with the boats and remains static relative
+; to the boats.
 ; --------------------------------------------------------------------------
 EventGameScreen
 ; ==========================================================================
