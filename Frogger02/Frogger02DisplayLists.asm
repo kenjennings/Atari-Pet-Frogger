@@ -101,7 +101,7 @@ SCROLL_TITLE_LMS1 = [* + 1]
 	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
 
 	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to start game.
-SCROLL_LMS0 = [* + 1] 
+SCROLL_CREDIT_LMS0 = [* + 1] 
 	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
 	.byte DL_JUMP_VB                          ; End list, Vertical Blank 
@@ -185,7 +185,7 @@ PF_LMS18 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.  (green grass)
 
 	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
-SCROLL_LMS1 = [* + 1] 
+SCROLL_CREDIT_LMS1 = [* + 1] 
 	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
 	.byte DL_JUMP_VB                         ; End list, Vertical Blank 
@@ -215,7 +215,7 @@ FROGSAVED_DISPLAYLIST
 	.endr
 
 	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to continue.
-SCROLL_LMS2 = [* + 1] 
+SCROLL_CREDIT_LMS2 = [* + 1] 
 	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
 	.byte DL_JUMP_VB                                ; End list, Vertical Blank 
@@ -247,7 +247,7 @@ FROGDEAD_DISPLAYLIST
 	.endr
 
 	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to continue.
-SCROLL_LMS3 = [* + 1] 
+SCROLL_CREDIT_LMS3 = [* + 1] 
 	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
 	.byte DL_JUMP_VB                                ; End list, Vertical Blank 
@@ -277,7 +277,7 @@ GAMEOVER_DISPLAYLIST
 	.endr
 
 	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to continue.
-SCROLL_LMS4 = [* + 1] 
+SCROLL_CREDIT_LMS4 = [* + 1] 
 	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
 	.byte DL_JUMP_VB                                ; End list, Vertical Blank 
