@@ -289,7 +289,8 @@ MovesCars       .word $00   ; = Moves Cars
 
 FrogLocation    .word $0000 ; = Pointer to start of Frog's current row in screen memory.
 FrogColumn      .byte $00   ; = Frog X coord (logical to screen)
-FrogRealColumn  .byte $00   ; = Frog physical offset into current row
+FrogRealColumn1 .byte $00   ; = Frog physical offset into current row
+FrogRealColumn2 .byte $00   ; = Frog physical offset into current row (second at +40 for scrolling)
 
 FrogRow         .byte $00   ; = Frog Y row position (in the beach/boat playfield not counting score lines)
 LastCharacter   .byte 0     ; = Last Character Under Frog
@@ -353,11 +354,12 @@ COLPF1Pointer   .word $0000
 ; Pointer to an LMS instructions in the game screen.
 PlayfieldLMSPointer .word $0000
 
-; Scrolling offsets for LMS in the playfield
-; Right scrolling rows occupy page data from 0 to 79. (scroll 39 to 0)
-; Left scrolling rows occupy page data from 128 to 207. (scroll 128 to 167)
-CurrentRightOffset .byte $39
-CurrentLeftOffset  .byte $80
+; Scrolling offsets for LMS in the playfield.
+; All scroll data occupies page data from  0 to 79. 
+; Left scroll moves from LMS offset 0 to 39 
+; Right scroll moves from LMS offset 39 to 0
+CurrentRightOffset .byte $00
+CurrentLeftOffset  .byte $00
 
 ; This is a 0, 1, toggle to remember the last state of
 ; something. For example, a blinking thing on screen.

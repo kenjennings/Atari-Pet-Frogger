@@ -264,9 +264,63 @@ DecrementRows            ; decrement number of rows.
 	rts
 
 
+
+
+FrogLocation    .word $0000 ; = Pointer to start of Frog's current row in screen memory.
+FrogColumn      .byte $00   ; = Frog X coord (logical to screen)
+FrogRealColumn1 .byte $00   ; = Frog physical offset into current row
+FrogRealColumn2 .byte $00   ; = Frog physical offset into current row (second at +40 for scrolling)
+
+FrogRow         .byte $00   ; = Frog Y row position (in the beach/boat playfield not counting score lines)
+LastCharacter   .byte 0     ; = Last Character Under Frog
+
+; ==========================================================================
+; ANTICIPATE FROG DEATH
+; If the boat moves will the frog die?
+;
+; Due to the change to scrolling by LMS the frog must be shown dead in its 
+; current position BEFORE the boat woould move it off screen.
+; Therefore the game logic tilts a little from collision detection to 
+; collision avoidance.  
+;
+; Data to drive AutoMoveFrog routine.
+; Byte value indicates direction of row movement.
+; 0   = Beach line, no movement.
+; 1   = first boat/river row, move right
+; 255 = second boat/river row, move left.
+;
+; FrogSafety (and Z flag) indicates frog is now dead.
+; --------------------------------------------------------------------------
+AnticipateFrogDeath
+	ldy FrogColumn          ; Logical position (where visible on screen)
+	ldx FrogRow             ; Get the current row number.
+	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
+	beq ExitFrogNowAlive    ; Is it 0?  Beach. Nothing to do.  Bail.
+	bpl CheckFrogGoRight    ; is it $1?  then check right move.
+
+; Check Frog Go Left
+	cpy #0
+	bne ExitFrogNowAlive      ; Not at limit means frog is still alive.
+	beq FrogDemiseByWallSplat ; At zero means frog will leave screen.
+
+CheckFrogGoRight
+	cpy #39                   ; 39 is limit or frog would leave screen
+	bne ExitFrogNowAlive      ; Not at limit means frog is still alive.
+
+FrogDemiseByWallSplat              
+	inc FrogSafety            ; Schrodinger's frog is known to be dead.
+
+ExitFrogNowAlive
+	lda FrogSafety            ; branching here is no change, so we assume frog is alive.
+	rts
+
+
 ; ==========================================================================
 ; AUTO MOVE FROG
 ; Process automagical movement on the frog in the moving boat lines
+; 
+; The code calls AnticipateFrogDeath first, so it knows the auto
+; movement will be safe.
 ;
 ; Data to drive AutoMoveFrog routine.
 ; Byte value indicates direction of row movement.
@@ -275,29 +329,19 @@ DecrementRows            ; decrement number of rows.
 ; 255 = second boat/river row, move left.
 ; --------------------------------------------------------------------------
 AutoMoveFrog
-	ldy FrogColumn
-	ldx FrogRow             ; Get the current row number.
+	ldy FrogColumn          ; Logical position (where visible on screen)
+	ldx FrogRow             ; Get the current row number 
 	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
 	beq ExitAutoMoveFrog    ; Is it 0?  Nothing to do.  Bail.
 	bpl AutoFrogRight       ; is it $1?  then automatic right move.
 
 ; Auto Frog Left
-	cpy #0
-	beq FrogDemiseByWallSplat ; at zero means we hit the wall.
 	dec FrogColumn            ; It is not 0, so move Frog left one character
 	rts                       ; Done, successful move.
 
 AutoFrogRight
-	cpy #39                   ; 39 is limit
-	beq FrogDemiseByWallSplat ; at limit means we hit the wall
 	inc FrogColumn            ; Move Frog right one character
 	rts                       ; Done, successful move.
-
-FrogDemiseByWallSplat         ; Ran out of river.   Yer Dead!
-	inc FrogSafety            ; Schrodinger's frog is known to be dead.
-
-ExitAutoMoveFrog
-	rts
 
 
 MOVING_ROW_STATES
@@ -305,6 +349,7 @@ MOVING_ROW_STATES
 		.BYTE 0, 1, $FF     ; Beach (0), Right (1), Left (FF) directions.
 	.endr
 		.BYTE 0             ; starting position on safe beach
+
 
 
 ; ==========================================================================
