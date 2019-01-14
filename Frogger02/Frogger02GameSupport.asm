@@ -41,9 +41,9 @@
 ; Do not allow color black, since the credits are always black.
 ; --------------------------------------------------------------------------
 ToggleButtonPrompt
-	bne PromptLightAndDark ; 1 = Light background and dark text
+	bne PromptLightAndDark ; 1 = Light background and dark text?
 
-; Therefore, Prompt Dark and Light
+; Otherwise, therefore, Prompt Dark and Light
 PromptDarkAndLight
 	lda RANDOM             ; A random color
 	and #%11110000         ; Mask out the lumninance for Dark.
@@ -238,41 +238,30 @@ ExitHighScoreOrNot
 ; ==========================================================================
 ; FROG MOVE UP
 ;
-; Add 10 to the score, move screen memory pointer up one line, and
-; finally decrement row counter.
-; (packed into a callable routine to shorten the caller's code.)
+; Add 10 to the score.
+; Decrement the Row counter.
+; Update Playfield pointer based from table based on row number.
 ;
 ; On return BEQ means the frog has reached safety.
 ; Thus BNE means continue game.
 ;
-; Uses A
+; Uses A, X
 ; --------------------------------------------------------------------------
 FrogMoveUp
 	jsr Add10ToScore
 
-	lda FrogLocation     ; subtract $28/40 (dec) from
-	sec                  ; the address pointing to
-	sbc #$28             ; the frog.
-	sta FrogLocation
-	bcs DecrementRows    ; If carry is still set, skip high byte decrement.
-	dec FrogLocation+1   ; Smartly done instead of lda/sbc/sta.
-
-DecrementRows            ; decrement number of rows.
 	dec FrogRow
 	ldx FrogRow
 
+	lda PLAYFIELD_MEM_LO_TABLE,x
+	sta FrogLocation
+	lda PLAYFIELD_MEM_HI_TABLE,x
+	sta FrogLocation+1
+
+	ldx FrogRow ; Make sure CPU flags reflect X = 0 or !0
+
 	rts
 
-
-
-
-FrogLocation    .word $0000 ; = Pointer to start of Frog's current row in screen memory.
-FrogColumn      .byte $00   ; = Frog X coord (logical to screen)
-FrogRealColumn1 .byte $00   ; = Frog physical offset into current row
-FrogRealColumn2 .byte $00   ; = Frog physical offset into current row (second at +40 for scrolling)
-
-FrogRow         .byte $00   ; = Frog Y row position (in the beach/boat playfield not counting score lines)
-LastCharacter   .byte 0     ; = Last Character Under Frog
 
 ; ==========================================================================
 ; ANTICIPATE FROG DEATH

@@ -342,8 +342,38 @@ PrintGameOverGfx
 	
 	rts
 
+
+
+; ==========================================================================
+; Set the splattered frog on the screen.
+; 
+; Write the splat frog character into screen memeory.
+; --------------------------------------------------------------------------
+SetSplatteredOnScreen
+	lda #I_SPLAT
+	bne UpdateFrogInScreenMemory
+
+; ==========================================================================
+; Set the frog on the screen.
+; 
+; Write the Frog character into screen memeory.
+; --------------------------------------------------------------------------
+SetFrogOnScreen
+	lda #I_FROG
+	bne UpdateFrogInScreenMemory
+
 ; ==========================================================================
 ; Remove the frog from the screen.
+; 
+; Restore the character that is under the frog.
+; 
+; Note this falls right into UpdateFrogInMemory.
+; --------------------------------------------------------------------------
+RemoveFrogOnScreen
+	lda lastCharacter
+
+; ==========================================================================
+; Update the frog image in screen memeory. 
 ; 
 ; Score/Lives, and the frog are the only place where screen memory 
 ; is being changed.  The actual movements of boats does not move in 
@@ -361,18 +391,29 @@ PrintGameOverGfx
 ; discussion is a complete non-issue as moving the frog will only require
 ; changing the P/MG HPOS value. 
 ;
-;
+; A  is the byte value to store.   
+; It could be the frog, splattered frog, or the character under the frog. 
 ; --------------------------------------------------------------------------
-RemoveFrog
-;	jsr ClearForGfx
-	
-;	ldx #SIZEOF_BIG_GFX
-;LoopPrintGameOverText
-;	lda GAME_OVER_GFX,x
-;	sta SCREENMEM+400,x
-;	dex
-;	bpl LoopPrintGameOverText
-	
+UpdateFrogInScreenMemory
+	ldy FrogRealColumn1 
+	sta (FrogLocation),y
+	ldy FrogRealColumn2
+	sta (FrogLocation),y
+
+	rts
+
+
+; ==========================================================================
+; Get the character from screen memory where the frog will reside. 
+;
+; A  is the byte value to store.   
+; It could be the frog, splattered frog, or the character under the frog. 
+; --------------------------------------------------------------------------
+GetScreenMemoryUnderFrog
+	ldy FrogRealColumn1 
+	lda (FrogLocation),y
+	sta lastCharacter
+
 	rts
 
 
@@ -607,9 +648,9 @@ AnimateBoats
 IncLeftOffset
 	inc CurrentLeftOffset  ; Add one to  position  to move screen contents left.
 	lda CurrentLeftOffset
-	cmp #[$80+40]          ; 40th position is identical to 0th, 
+	cmp #[40]              ; 40th position is identical to 0th, 
 	bne UpdatePlayfieldLMS
-	lda #$80               ; so, go back to origination point,
+	lda #0                 ; so, go back to origination point,
 	sta CurrentLeftOffset  ; reset to scroll start.
 
 UpdatePlayfieldLMS

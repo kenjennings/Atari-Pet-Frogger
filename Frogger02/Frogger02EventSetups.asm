@@ -88,39 +88,35 @@ SetupTransitionToGame
 ; --------------------------------------------------------------------------
 SetupGame
 	lda #0
-	sta FrogSafety         ; Schrodinger's current frog is known to be alive.
-	
-;	lda #$30               ; 48 (dec), delay counter.
-;	sta DelayNumber
+	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
 
-	lda #INTERNAL_SPACE    ; Default position.
-	sta LastCharacter      ; Preset the character under the frog.
+	lda #INTERNAL_SPACE     ; Default position.
+	sta LastCharacter       ; Preset the character under the frog.
 
-PLAYFIELD_MEM18
-	lda #<PLAYFIELD_MEM18 ; Low Byte, Frog position.
+	lda #<PLAYFIELD_MEM18   ; Low Byte, Frog position.
 	sta FrogLocation
-	lda #>PLAYFIELD_MEM18 ; Hi Byte, Frog position.
+	lda #>PLAYFIELD_MEM18   ; Hi Byte, Frog position.
 	sta FrogLocation + 1
 
-	lda #18                ; 18 (dec), number of screen rows of game field. 
+	lda #18                 ; 18 (dec), number of screen rows of game field. 
 	sta FrogRow
 
-	ldy #19                ; Frog horizontal coordinate, Y = 19 (dec)
-	sty FrogColumn
+	ldy #19                 ; Frog horizontal coordinate, Y = 19 (dec)
+	sty FrogColumn          ; Logical X coordinate
+	sty FrogRealColumn1     ; On a Beach row the physical locations are the same
+	sty FrogRealColumn2     ; If a scroll row then they are different.
 
-	lda #I_FROG            ; On Atari we're using $7F as the frog shape.
-	sta (FrogLocation),y   ; PLAYFIELD_MEM18 (beach) + $13/19 (dec)
+	lda #I_FROG             ; On Atari we're using $7F as the frog shape.
+	sta (FrogLocation),y    ; PLAYFIELD_MEM18 (beach) + $13/19 (dec)
 
-	lda #DISPLAY_GAME        ; Tell VBI to change screens. 
-	jsr ChangeScreen         ; Then copy the color tables.
+	lda #0                  ; Scrolling LMS offset
+	tax                     ; and for the L?MS in other direction.
+	jsr UpdateGamePlayfield ; Reset Game screen to initial position.
 
-;	jsr DisplayGameScreen  ; Draw game screen.
+	lda #DISPLAY_GAME       ; Tell VBI to change screens. 
+	jsr ChangeScreen        ; Then copy the color tables.
 
-;	jsr CopyGameColorsToDLI
-
-;	jsr ClearKey
-
-	lda #SCREEN_GAME       ; Yes, change to game screen.
+	lda #SCREEN_GAME        ; Yes, change to game screen.
 	sta CurrentScreen
 
 	rts
@@ -145,8 +141,8 @@ SetupTransitionToWin
 ;	lda #2                  ; start wiping screen at line 2 (0, 1, 2)
 ;	sta EventCounter
 
-	lda #DISPLAY_WIN         ; Tell VBI to change screens. 
-	jsr ChangeScreen         ; Then copy the color tables.
+	lda #DISPLAY_WIN        ; Tell VBI to change screens. 
+	jsr ChangeScreen        ; Then copy the color tables.
 
 ;	jsr ClearKey
 
@@ -202,8 +198,8 @@ SetupTransitionToDead
 	lda #0                  ; Zero event controls.
 	sta EventCounter
 
-	lda #DISPLAY_DEAD        ; Tell VBI to change screens. 
-	jsr ChangeScreen         ; Then copy the color tables.
+	lda #DISPLAY_DEAD       ; Tell VBI to change screens. 
+	jsr ChangeScreen        ; Then copy the color tables.
 
 ;	jsr ClearKey
 
@@ -228,7 +224,7 @@ SetupDead
 
 ;	jsr ClearKey
 	
-	lda #SCREEN_DEAD    ; Change to dead screen.
+	lda #SCREEN_DEAD     ; Change to dead screen.
 	sta CurrentScreen
 
 	rts
@@ -248,8 +244,8 @@ SetupTransitionToGameOver
 	lda #60                ; Number of times to do the Game Over EOR effect
 	sta EventCounter
 
-	lda #DISPLAY_OVER        ; Tell VBI to change screens. 
-	jsr ChangeScreen         ; Then copy the color tables.
+	lda #DISPLAY_OVER      ; Tell VBI to change screens. 
+	jsr ChangeScreen       ; Then copy the color tables.
 
 ;	jsr ClearKey
 
