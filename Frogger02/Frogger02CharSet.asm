@@ -16,7 +16,7 @@
 ; ==========================================================================
 ; Custom Character Set for V02  . . . 
 ; 
-; Internal Codes for redfined objects.
+; Internal Codes for redefined objects.
 ; The usual text, A-z, a-z, 0-9, and necessary punctuation are 
 ; redefined in their natural positions, so every character does
 ; not need to be declared.  There are special characters for the

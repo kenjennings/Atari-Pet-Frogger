@@ -23,26 +23,32 @@
 ; The Atari OS text printing is not being used, therefore the Atari screen
 ; editor's 24-line limitation is not an issue.
 ;
-; Where the display expects completely static, blank, black lines the 
-; display list uses real blank line instructions.  Where the display needs 
-; color it uses an empty text line. This is done, because actual blank 
-; lines use COLPF4 for the background (same as the border color) while 
-; the Antic mode 2 text for the game display uses COLPF2 for the 
-; background behind the text.  This makes it easy to "animate" with color 
-; changes to the text background.  
+; Where a display expects completely static, blank, black lines a  
+; display list would use real, blank line instructions.  However, the 
+; ANTIC mode 2 text uses color differently from other text modes.  
+; The "background" behind text uses COLPF2 and COLPF4 for the border.
+; Other modes use COLPF4 as true background through the border and 
+; empty background behind text.  Therefore where the program expects 
+; to use color in the background behind text, it uses a text instruction
+; pointing to an empty line of blank spaces, so that COLPF2 can be used
+; to show color within the same horizontal limits as the other text
+; in the screen. This makes it easy to "animate" with color changes to 
+; the text background.
 ;
 ; Remember, screen memory need not be contiguous from line to line.
 ; Therefore, we can re-think the declaration of screen contents and
-; rearrange it in ways to benefit the code.
-; The first thing is that data for display on screen IS the screen memory.
-; It is not something that must be copied to screen memory, it already is
-; the screen memeory. 
-; The second thing is that all the scrolling lines can be put at the 
-; beginning of pages to simplify the math for the LMS address. But, this 
-; would be pretty wasteful using only 80 bytes of a 256 byte page.  The 
-; other lines on the display, and even the other lines on different screens
-; can be dropped into the unused spaces on pages between scrolling 
-; sections.
+; rearrange it in ways to benefit the code:
+;
+; 1) The first thing is that data declared for display on screen IS the 
+;    screen memory.  It is not something that must be copied to screen 
+;    memory.  Data properly placed in any memory makes it the actual   
+;    screen memory thanks to the Display List LMS instructions.
+; 2) All the scrolling boats lines can be put at the beginning of pages 
+;    to simplify the math for the LMS address. Only the low byte of the
+;    LMS need be updated to perform scrolling.  But, this would be pretty 
+;    wasteful using only 80 bytes of a 256 byte page.  What to do?
+; 3) To avoid wasting space the lines of data from other displays can be 
+;    dropped into the unused spaces between scrolling sections.
 ; --------------------------------------------------------------------------
 
 ATASCII_HEART  = $00 ; heart graphics
@@ -69,6 +75,9 @@ INTERNAL_HEART    = $40 ; heart graphics
 INTERNAL_HLINE    = $52 ; underline for title text.
 
 ; Graphics chars shorthanded due to frequency in the code....
+; These characters "draw" the huge text on the screens for 
+; the title, Dead Frog, Saved, and Game Over messages.
+
 I_I  = 73      ; Internal ctrl-I
 I_II = 73+$80  ; Internal ctrl-I Inverse
 I_K  = 75      ; Internal ctrl-K
@@ -127,7 +136,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
-; 3  |                                        |
+; 3  |                                        | <-Grassy color
 ; 4  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
 ; 5  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
 ; 6  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
@@ -147,7 +156,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 20 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
 ; 21 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
 ; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
-; 23 |                                        |
+; 23 |                                        | <-Grassy color
 ; 24 |                                        |
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
@@ -711,34 +720,6 @@ PLAYFIELD_MEM17
 ; ==========================================================================
 ; Color Layouts for the screens.
 ; --------------------------------------------------------------------------
-; Revised V02 Title Screen and Instructions:
-;    +----------------------------------------+
-; 1  |              PET FROGGER               | TITLE
-; 2  |              PET FROGGER               | TITLE
-; 3  |              PET FROGGER               | TITLE
-; 4  |              --- -------               | TITLE
-; 5  |                                        |
-; 6  |Help the frogs escape from Doc Hopper's | INSTXT_1
-; 7  |frog legs fast food franchise! But, the | INSTXT_1
-; 8  |frogs must cross piranha-infested rivers| INSTXT_1
-; 9  |to reach freedom. You have three chances| INSTXT_1
-; 10 |to prove your frog management skills by | INSTXT_1
-; 11 |directing frogs to jump on boats in the | INSTXT_1
-; 12 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
-; 13 |the seats in the boats ('Q').           | INSTXT_1
-; 14 |                                        |
-; 15 |Scoring:                                | INSTXT_2
-; 16 |    10 points for each jump forward.    | INSTXT_2
-; 17 |   500 points for each rescued frog.    | INSTXT_2
-; 18 |                                        |
-; 19 |Use joystick control to jump forward,   | INSTXT_3
-; 20 |left, and right                         | INSTXT_3
-; 21 |                                        | 
-; 22 |                                        |
-; 23 |                                        |
-; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
-; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
-;    +----------------------------------------+
 
 TITLE_BACK_COLORS
 	.by COLOR_GREEN COLOR_GREEN 

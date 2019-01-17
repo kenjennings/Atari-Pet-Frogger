@@ -17,7 +17,7 @@
 ; GAME SUPPORT
 ;
 ; Miscellaneous:
-; Prompt for ANY Key.
+; Prompt for Button press.
 ; Clear game scores.
 ; Add 500 to game score (and increment saved Frogs)
 ; Add 10 to game score.

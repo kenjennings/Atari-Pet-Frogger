@@ -68,10 +68,16 @@ SetupTransitionToGame
 	lda #CREDIT_SPEED       ; Credit Draw Speed
 	jsr ResetTimers
 
-	lda #2                  ; Transition Loops from third row through 21st row.
+	lda #24
+	sta EventCounter2       ; Prep the first transition loop. 
+
+	lda #1                  ; First transition stage: Loop from bottom to top
 	sta EventCounter
 
-;	jsr ClearKey
+	lda #0                  ; Make background black for the Prompt text.
+	sta COLPF2_TABLE+23    
+	lda #$0C                ; Set prompt text luminance.
+	sta COLPF1_TABLE+23
 
 	lda #SCREEN_TRANS_GAME  ; Next step is operating the transition animation.
 	sta CurrentScreen
@@ -109,14 +115,14 @@ SetupGame
 	lda #I_FROG             ; On Atari we're using $7F as the frog shape.
 	sta (FrogLocation),y    ; PLAYFIELD_MEM18 (beach) + $13/19 (dec)
 
-	lda #0                  ; Scrolling LMS offset
-	tax                     ; and for the L?MS in other direction.
-	jsr UpdateGamePlayfield ; Reset Game screen to initial position.
+;	lda #0                  ; Scrolling LMS offset
+;	tax                     ; and for the LMS in other direction.
+;	jsr UpdateGamePlayfield ; Reset Game screen to initial position.
 
-	lda #DISPLAY_GAME       ; Tell VBI to change screens. 
-	jsr ChangeScreen        ; Then copy the color tables.
+;	lda #DISPLAY_GAME       ; Tell VBI to change screens. 
+;	jsr ChangeScreen        ; Then copy the color tables.
 
-	lda #SCREEN_GAME        ; Yes, change to game screen.
+	lda #SCREEN_GAME        ; Yes, change to game screen event.
 	sta CurrentScreen
 
 	rts

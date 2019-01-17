@@ -23,16 +23,25 @@
 ; The Atari OS text printing is not being used, therefore the Atari screen
 ; editor's 24-line limitation is not an issue.
 ;
-; Where the display expects completely static, blank, black lines the 
-; display list real blank line instructions.  Where the display needs 
-; color it uses an empty text line. This is done, because actual blank 
-; lines use COLPF4 for the background (same as the border color) while 
-; the Antic mode 2 text for the game display uses COLPF2 for the 
-; background behind the text.  This makes it easy to "animate" with color 
-; changes to the text background.  
+; Where a display expects completely static, blank, black lines a  
+; display list would use real, blank line instructions.  However, the 
+; ANTIC mode 2 text uses color differently from other text modes.  
+; The "background" behind text uses COLPF2 and COLPF4 for the border.
+; Other modes use COLPF4 as true background through the border and 
+; empty background behind text.  Therefore where the program expects 
+; to use color in the background behind text, it uses a text instruction
+; pointing to an empty line of blank spaces, so that COLPF2 can be used
+; to show color within the same horizontal limits as the other text
+; in the screen. This makes it easy to "animate" with color changes to 
+; the text background.  
+;
+; We could start at ANTIC's 1K boundary for display lists.  But, 
+; we can make due with aligning to pages and just making sure none of 
+; the display lists cross a page boundary and by extension would not 
+; cross a 1K boundary. 
 ; --------------------------------------------------------------------------
 
-	.align $0400 ; Start at ANTIC's 1K boundary for display lists. 
+	.align $0100 
 
 ; Revised V02 Title Screen and Instructions:
 ;    +----------------------------------------+
@@ -112,7 +121,7 @@ SCROLL_CREDIT_LMS0 = [* + 1]
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
-; 3  |                                        |
+; 3  |                                        | <-Grassy color
 ; 4  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
 ; 5  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
 ; 6  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
@@ -132,7 +141,7 @@ SCROLL_CREDIT_LMS0 = [* + 1]
 ; 20 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
 ; 21 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
 ; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
-; 23 |                                        |
+; 23 |                                        | <-Grassy color
 ; 24 |                                        |
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
@@ -214,12 +223,13 @@ FROGSAVED_DISPLAYLIST
 		mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM          ; An empty line. times 10
 	.endr
 
-	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to continue.
+	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM          ; Prompt to continue.
 SCROLL_CREDIT_LMS2 = [* + 1] 
-	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
+	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT              ; The perpetrators identified
 
 	.byte DL_JUMP_VB                                ; End list, Vertical Blank 
 	.word FROGSAVED_DISPLAYLIST                     ; Restart display at the same display list.
+
 
 
 	.align $0100 ; Align in the next page.

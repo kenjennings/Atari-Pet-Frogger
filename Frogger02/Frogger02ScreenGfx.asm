@@ -648,7 +648,7 @@ AnimateBoats
 IncLeftOffset
 	inc CurrentLeftOffset  ; Add one to  position  to move screen contents left.
 	lda CurrentLeftOffset
-	cmp #[40]              ; 40th position is identical to 0th, 
+	cmp #40                ; 40th position is identical to 0th, 
 	bne UpdatePlayfieldLMS
 	lda #0                 ; so, go back to origination point,
 	sta CurrentLeftOffset  ; reset to scroll start.
@@ -835,6 +835,9 @@ UpdateGamePlayfield
 	stx PF_LMS16
 	sta PF_LMS17
 
+	stx CurrentLeftOffset
+	sta CurrentRightOffset
+
 	rts
 
 
@@ -849,9 +852,7 @@ UpdateGamePlayfield
 ResetGamePlayfield
 
 	lda #$00               ; Reset the actual position trackers.
-	sta CurrentRightOffset
-	ldx #$80
-	stx CurrentLeftOffset
+	ldx #$39
 
 	jsr UpdateGamePlayfield
 
@@ -878,6 +879,43 @@ ResetGamePlayfield
 
 ;	rts
 
+; ==========================================================================
+; ZERO CURRENT COLORS                                                 A  Y
+; --------------------------------------------------------------------------
+; Force all the colors in the current table to black.
+;
+; Needed because the ChangeScreen routine automatically populates the 
+; current color table and when I want to fade up the game screen 
+; it needs to start that loop from black colors.
+;
+; --------------------------------------------------------------------------
+ZeroCurrentColors
+	ldy #24
+	lda #0
+LoopZeroColors
+	sta COLPF2_TABLE,y
+	sta COLPF1_TABLE,y
+	dey
+	bpl LoopZeroColors
+	rts
+
+
+; ==========================================================================
+; HIDE BUTTON PROMPT                                                   A
+; --------------------------------------------------------------------------
+; In case of sloppy programmer, force color black to 
+; hide the Prompt for Button on setup.
+;
+; Uses A
+; --------------------------------------------------------------------------
+
+HideButtonPrompt
+	lda #COLOR_BLACK
+	sta COLPF2_TABLE+23
+	sta COLPF1_TABLE+23
+
+	rts
+
 
 ; ==========================================================================
 ; CHANGE SCREEN                                                        A
@@ -887,17 +925,17 @@ ResetGamePlayfield
 ; Tell the VBI the screen ID.  
 ; Wait for the VBI to change the current display and update the 
 ; other pointers to the color tables.
-; Copy the color tables to the current lookups. 
+; Copy the color tables to the current lookups.
 ;
 ; A  is the DISPLAY_* value (defined below) corresponding to the screen.
 ; --------------------------------------------------------------------------
 
 ChangeScreen 
-	sta VBICurrentDL        ; Tell VBI to change to new mode.
+	sta VBICurrentDL               ; Tell VBI to change to new mode.
 
 LoopChangeScreenWaitForVBI
-	cmp VBICurrentDL        ; Is the value unchanged?
-	beq WaitForVBI          ; Yes.
+	cmp VBICurrentDL               ; Is the value unchanged?
+	beq LoopChangeScreenWaitForVBI ; Yes.
 
 	; The VBI has changed the display and loaded page zero pointers.
 	; Now update the color tables.
@@ -913,3 +951,4 @@ LoopCopyColors
 
 	rts
 
+	

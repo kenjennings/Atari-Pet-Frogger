@@ -427,29 +427,29 @@ DoAnimateClock
 	dec AnimateFrames       ; Minus 1
 
 DoDisplayListSwitch
-	lda VBICurrentDL           ; Main code signals to change screens?
+	lda VBICurrentDL            ; Main code signals to change screens?
 	bmi ScrollTheCreditLine     ; Negative value is no change.
 
-	tax                        ; Use this as index to tables.
+	tax                         ; Use this as index to tables.
 
-	lda DISPLAYLIST_LO_TABLE,x ; Copy Display List Pointer.
-	sta SDLSTL                 ; One for the OS
-	sta CurrentDLPointer       ; One in page 0 for the code.
+	lda DISPLAYLIST_LO_TABLE,x  ; Copy Display List Pointer.
+	sta SDLSTL                  ; One for the OS
+	sta CurrentDLPointer        ; One in page 0 for the code.
 	lda DISPLAYLIST_HI_TABLE,x
 	sta SDLSTH
 	sta CurrentDLPointer+1
 
-	lda COLOR_BACK_LO_TABLE,x  ; Get pointer to the source color table
+	lda COLOR_BACK_LO_TABLE,x   ; Get pointer to the source color table
 	sta COLPF2POINTER
 	lda COLOR_BACK_HI_TABLE,x
 	sta COLPF2POINTER+1
 
-	lda COLOR_TEXT_LO_TABLE,x  ; Get pointer to the source text table
+	lda COLOR_TEXT_LO_TABLE,x   ; Get pointer to the source text table
 	sta COLPF1POINTER
 	lda COLOR_TEXT_HI_TABLE,x
 	sta COLPF1POINTER+1
 
-	lda PLAYFIELD_LMS_SCROLL_LO_TABLE,x ; Gewt the pointer to the LMS for the scrolling credit line.
+	lda PLAYFIELD_LMS_SCROLL_LO_TABLE,x ; Get the pointer to the LMS for the scrolling credit line.
 	sta CurrentCreditLMS
 	lda PLAYFIELD_LMS_SCROLL_HI_TABLE,x
 	sta CurrentCreditLMS+1
@@ -461,8 +461,6 @@ DoDisplayListSwitch
 
 	lda #$FF               ; Turn off the signal to change screens.
 	sta VBICurrentDL
-
-
 
 ScrollTheCreditLine        ; scroll the text identifying the perpetrators
 	dec ScrollCounter      ; subtract from scroll delay counter

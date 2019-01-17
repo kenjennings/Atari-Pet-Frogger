@@ -142,9 +142,9 @@ EndTransitionToTitle
 ; Event process SCREEN START/NEW GAME
 ; Clear the Game Scores and get ready for the Press A Button prompt.
 ;
-; Sidebar: This is oddly inserted between Transition to Title and Title
-; to finish internal initialization per game, due to doofus-level lack
-; of design planning, blah blah.   
+; Sidebar: This is oddly inserted between Transition to Title and the 
+; Title to finish internal initialization per game, due to doofus-level 
+; lack of design planning, blah blah.   
 ; The title screen has already been presented by Transition To Title.
 ; --------------------------------------------------------------------------
 EventScreenStart            ; This is New Game and Transition to title.
@@ -180,27 +180,97 @@ EndTitleScreen
 ; ==========================================================================
 ; Event Process TRANSITION TO GAME SCREEN
 ; The Activity in the transition area, based on timer.
-; 1) Progressively reprint the credits on lines from the top of the screen 
-; to the bottom.
-; 2) follow with a blank line to erase the highest line of trailing text.
+; Stage 1) Fade out text lines  from bottom to top. 
+;          Decrease COLPF1 brightness from bottom   to top.
+;          When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK. 
+; Stage 2) Setup Game screen display.  Set all colors to black.
+; Stage 3) Fade in text lines from top to bottom. 
+;          Decrease COLPF1 brightness from top to bottom.
+;          When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK. 
 ; --------------------------------------------------------------------------
 EventTransitionToGame
 	lda AnimateFrames        ; Did animation counter reach 0 ?
-	bne EndTransitionToGame  ; Nope.  Nothing to do.
+	bne EndTransitionToGame ; Nope.  Nothing to do.
 	lda #CREDIT_SPEED        ; yes.  Reset it.
 	jsr ResetTimers
 
-;	ldy #PRINT_BLANK_TXT    ; erase top line
-;	ldx EventCounter
-;	jsr PrintToScreen
+	lda EventCounter         ; What stage are we in?
+	cmp #1
+	bne TestTransGame2      ; Not the fade out, try next stage
 
-	inx                     ; next row.
-	stx EventCounter        ; Save new row number
-;	ldy #PRINT_CREDIT_TXT   ; Print the culprits responsible
-;	jsr PrintToScreen
+	; === STAGE 1 === 
+	; Fade out text lines  from bottom to top. 
+	; Decrease COLPF1 brightness from bottom   to top.
+	; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK. 
+	ldy EventCounter2
+	dec COLPF1_TABLE,y
+	lda COLPF1_TABLE,y 
+	bne EndTransitionToGame  
+	sta COLPF2_TABLE,Y
 
-	cpx #22                 ; reached bottom of screen?
-	bne EndTransitionToGame ; No.  Remain on this transition event next time.
+	dec EventCounter2
+	bpl EndTransitionToGame
+
+	; Finished stage 1, now setup Stage 2
+	lda #2
+	sta EventCounter
+	inc EventCounter2 ; return to 0.
+	beq EndTransitionToGame
+
+	; === STAGE 2 === 
+	; Setup Game screen display.  
+	; Set all colors to black.
+TestTransGame2
+	cmp #2
+	bne TestTransGame3
+
+	; Reset the game screen positions, Scrolling LMS offsets
+	jsr ResetGamePlayfield
+
+	lda #DISPLAY_GAME        ; Tell VBI to change screens. 
+	jsr ChangeScreen         ; Then copy the color tables.
+
+	jsr ZeroCurrentColors    ; Need the screen to start black.
+
+	; Finished stage 2, now setup Stage 3
+	lda #3
+	sta EventCounter
+	lda #0 
+	sta EventCounter2 ; return to 0.
+	beq EndTransitionToGame
+
+	
+	; === STAGE 3 === 
+	; Fade in text lines from top to bottom. 
+	; Decrease COLPF1 brightness from top to bottom.
+	; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK. 
+TestTransGame3
+	cmp #3
+	bne EndTransitionToGame
+
+	ldy EventCounter2
+	lda GAME_BACK_COLORS,y ; (redundantly) copy the background color.
+	sta COLPF2_TABLE,y
+
+	lda COLPF1_TABLE,y
+	cmp GAME_TEXT_COLORS,y 
+	beq TransGameNextLine
+
+	inc COLPF1_TABLE,y
+	bne EndTransitionToGame
+
+TransGameNextLine
+	inc EventCounter2
+	lda EventCounter2
+	cmp #25
+	bne EndTransitionToGame
+
+	; Finished stage 3, now goto the main event.
+	lda #SCREEN_START         ; Yes, change to event to start new game.
+	sta CurrentScreen
+
+	lda #BLINK_SPEED          ; Text Blinking speed for prompt on Title screen.
+	jsr ResetTimers
 
 	jsr SetupGame
 
