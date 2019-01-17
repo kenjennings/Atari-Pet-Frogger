@@ -108,10 +108,10 @@ TestTransTitle2
 	cmp #2
 	bne TestTransTitle3
 
-	lda [COLPF1_TABLE+3]
+	lda COLPF1_TABLE+3
 	cmp #$0E               ; It is maximum brightness?
 	beq FinishedNowSetupStage3
-	inc [COLPF1_TABLE+3]   +1.
+	inc COLPF1_TABLE+3
 	bne EndTransitionToTitle
 
 FinishedNowSetupStage3
@@ -202,11 +202,11 @@ EventTransitionToGame
 	; Fade out text lines  from bottom to top. 
 	; Decrease COLPF1 brightness from bottom   to top.
 	; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK. 
-	ldy EventCounter2
-	dec COLPF1_TABLE,y
-	lda COLPF1_TABLE,y 
+	ldx EventCounter2
+	dec COLPF1_TABLE,x
+	lda COLPF1_TABLE,x 
 	bne EndTransitionToGame  
-	sta COLPF2_TABLE,Y
+	sta COLPF2_TABLE,x
 
 	dec EventCounter2
 	bpl EndTransitionToGame
@@ -248,15 +248,15 @@ TestTransGame3
 	cmp #3
 	bne EndTransitionToGame
 
-	ldy EventCounter2
-	lda GAME_BACK_COLORS,y ; (redundantly) copy the background color.
-	sta COLPF2_TABLE,y
+	ldx EventCounter2
+	lda GAME_BACK_COLORS,x ; (redundantly) copy the background color.
+	sta COLPF2_TABLE,x
 
-	lda COLPF1_TABLE,y
-	cmp GAME_TEXT_COLORS,y 
+	lda COLPF1_TABLE,x
+	cmp GAME_TEXT_COLORS,x 
 	beq TransGameNextLine
 
-	inc COLPF1_TABLE,y
+	inc COLPF1_TABLE,x
 	bne EndTransitionToGame
 
 TransGameNextLine

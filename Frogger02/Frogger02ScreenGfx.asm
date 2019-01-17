@@ -216,22 +216,6 @@
 ;    +----------------------------------------+
 
 
-
-; ==========================================================================
-; Animation speeds of various displayed items.   Number of frames to wait...
-; --------------------------------------------------------------------------
-BLINK_SPEED     = 36 ; blinking Press Any Key text
-CREDIT_SPEED    = 3  ; Animated Credits.
-DEAD_FILL_SPEED = 3  ; Fill the Screen for Dead Frog
-WIN_FILL_SPEED  = 4  ; Fill screen for Win
-FROG_WAKE_SPEED = 90 ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
-RES_IN_SPEED    = 2  ; Speed of Game over Res in animation
-TITLE_SPEED     = 6  ; Fill screen to present title
-
-
-
-
-
 ; ==========================================================================
 ; "Printing" things to the screen.
 ; --------------------------------------------------------------------------

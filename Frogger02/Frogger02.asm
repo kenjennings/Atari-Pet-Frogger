@@ -331,7 +331,7 @@ ScrollCounter   .byte 8
 ; Current low byte of the LMS value for scrolling the credit line.
 ScrollCredit    .byte <SCROLLING_CREDIT 
 ; Pointer to the current display LMS for the credits.
-CurrentCreditLMS .word SCROLL_LMS0
+CurrentCreditLMS .word SCROLL_CREDIT_LMS0
 
 ; Identify the current screen.  This is what drives which timer/event loop
 ; features are in effect.  Value is enumerated from SCREEN_LIST table.

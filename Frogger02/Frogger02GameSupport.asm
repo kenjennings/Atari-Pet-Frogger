@@ -330,6 +330,8 @@ AutoMoveFrog
 
 AutoFrogRight
 	inc FrogColumn            ; Move Frog right one character
+
+ExitAutoMoveFrog
 	rts                       ; Done, successful move.
 
 
