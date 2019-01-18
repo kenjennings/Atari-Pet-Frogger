@@ -37,7 +37,7 @@
 ;
 ; If toggle 0, then dark background, light text.
 ; If toggle 1, then light background and dark text.
-; 
+;
 ; Do not allow color black, since the credits are always black.
 ; --------------------------------------------------------------------------
 ToggleButtonPrompt
@@ -116,7 +116,7 @@ NextScoreDigit
 
 	lda #3              ; Reset number of
 	sta NumberOfLives   ; lives to 3.
-	
+
 	lda #0
 	sta FrogsCrossed    ; Zero the number of successful crossings.
 
@@ -267,10 +267,10 @@ FrogMoveUp
 ; ANTICIPATE FROG DEATH
 ; If the boat moves will the frog die?
 ;
-; Due to the change to scrolling by LMS the frog must be shown dead in its 
+; Due to the change to scrolling by LMS the frog must be shown dead in its
 ; current position BEFORE the boat woould move it off screen.
-; Therefore the game logic tilts a little from collision detection to 
-; collision avoidance.  
+; Therefore the game logic tilts a little from collision detection to
+; collision avoidance.
 ;
 ; Data to drive AutoMoveFrog routine.
 ; Byte value indicates direction of row movement.
@@ -296,7 +296,7 @@ CheckFrogGoRight
 	cpy #39                   ; 39 is limit or frog would leave screen
 	bne ExitFrogNowAlive      ; Not at limit means frog is still alive.
 
-FrogDemiseByWallSplat              
+FrogDemiseByWallSplat
 	inc FrogSafety            ; Schrodinger's frog is known to be dead.
 
 ExitFrogNowAlive
@@ -307,7 +307,7 @@ ExitFrogNowAlive
 ; ==========================================================================
 ; AUTO MOVE FROG
 ; Process automagical movement on the frog in the moving boat lines
-; 
+;
 ; The code calls AnticipateFrogDeath first, so it knows the auto
 ; movement will be safe.
 ;
@@ -319,7 +319,7 @@ ExitFrogNowAlive
 ; --------------------------------------------------------------------------
 AutoMoveFrog
 	ldy FrogColumn          ; Logical position (where visible on screen)
-	ldx FrogRow             ; Get the current row number 
+	ldx FrogRow             ; Get the current row number
 	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
 	beq ExitAutoMoveFrog    ; Is it 0?  Nothing to do.  Bail.
 	bpl AutoFrogRight       ; is it $1?  then automatic right move.

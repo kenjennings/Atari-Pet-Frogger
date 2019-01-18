@@ -179,7 +179,7 @@
 ; 18 |                                        |
 ; 19 |Use joystick control to jump forward,   | INSTXT_3
 ; 20 |left, and right.                        | INSTXT_3
-; 21 |                                        | 
+; 21 |                                        |
 ; 22 |                                        |
 ; 23 |                                        |
 ; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
@@ -257,7 +257,7 @@ ClearScreen
 
 
 ; ==========================================================================
-; Empty the lines of text immediately above and below the big 
+; Empty the lines of text immediately above and below the big
 ; text announcements (win, dead, game over)
 ;
 ; Used by code:
@@ -268,10 +268,10 @@ ClearForGfx
 
 ;	ldx #SIZEOF_LINE
 ;	lda #INTERNAL_SPACE
-	
+
 ;LoopClearForGfx
-;	sta SCREENMEM+360,x ; Line 10 
-;	sta SCREENMEM+520,x ; Line 14 
+;	sta SCREENMEM+360,x ; Line 10
+;	sta SCREENMEM+520,x ; Line 14
 
 ;	dex
 ;	bpl LoopClearForGfx
@@ -288,7 +288,7 @@ PrintDeadFrogGfx
 ;	ldx #SIZEOF_BIG_GFX
 ;LoopPrintDeadText
 ;	lda FROG_DEAD_GFX,x
-;	sta SCREENMEM+400,X 
+;	sta SCREENMEM+400,X
 ;	dex
 ;	bpl LoopPrintDeadText
 
@@ -300,7 +300,7 @@ PrintDeadFrogGfx
 ; --------------------------------------------------------------------------
 PrintWinFrogGfx
 ;	jsr ClearForGfx
-	
+
 ;	ldx #SIZEOF_BIG_GFX
 ;LoopPrintWinsText
 ;	lda FROG_SAVE_GFX,x
@@ -316,21 +316,21 @@ PrintWinFrogGfx
 ; --------------------------------------------------------------------------
 PrintGameOverGfx
 ;	jsr ClearForGfx
-	
+
 ;	ldx #SIZEOF_BIG_GFX
 ;LoopPrintGameOverText
 ;	lda GAME_OVER_GFX,x
 ;	sta SCREENMEM+400,x
 ;	dex
 ;	bpl LoopPrintGameOverText
-	
+
 	rts
 
 
 
 ; ==========================================================================
 ; Set the splattered frog on the screen.
-; 
+;
 ; Write the splat frog character into screen memeory.
 ; --------------------------------------------------------------------------
 SetSplatteredOnScreen
@@ -339,7 +339,7 @@ SetSplatteredOnScreen
 
 ; ==========================================================================
 ; Set the frog on the screen.
-; 
+;
 ; Write the Frog character into screen memeory.
 ; --------------------------------------------------------------------------
 SetFrogOnScreen
@@ -348,53 +348,53 @@ SetFrogOnScreen
 
 ; ==========================================================================
 ; Remove the frog from the screen.
-; 
+;
 ; Restore the character that is under the frog.
-; 
+;
 ; Note this falls right into UpdateFrogInMemory.
 ; --------------------------------------------------------------------------
 RemoveFrogOnScreen
-	lda lastCharacter
+	lda lastCharacter  ; Get the last character (under the frog)
 
 ; ==========================================================================
-; Update the frog image in screen memeory. 
-; 
-; Score/Lives, and the frog are the only place where screen memory 
-; is being changed.  The actual movements of boats does not move in 
-; screen memory.  Coarse scrolling is done by updating LMS in the 
+; Update the frog image in screen memeory.
+;
+; Score/Lives, and the frog are the only place where screen memory
+; is being changed.  The actual movements of boats does not move in
+; screen memory.  Coarse scrolling is done by updating LMS in the
 ; Display List.
 ;
-; The 80 characters of scrolling (twice the visible screen width) means 
-; there must be two frogs in the screen memory for the current row.  
-; One frog at the X location, one at the X location + 40. Whichever one 
-; is actually seen on screen depends on current scroll offset.  The scroll 
-; offset could be reset to the origin at any time, therefore the frog must 
+; The 80 characters of scrolling (twice the visible screen width) means
+; there must be two frogs in the screen memory for the current row.
+; One frog at the X location, one at the X location + 40. Whichever one
+; is actually seen on screen depends on current scroll offset.  The scroll
+; offset could be reset to the origin at any time, therefore the frog must
 ; be displayed in the adjusted place.
 ;
-; In the future the Frog will be a P/M graphics object, and then this 
+; In the future the Frog will be a P/M graphics object, and then this
 ; discussion is a complete non-issue as moving the frog will only require
-; changing the P/MG HPOS value. 
+; changing the P/MG HPOS value.
 ;
-; A  is the byte value to store.   
-; It could be the frog, splattered frog, or the character under the frog. 
+; A  is the byte value to store.
+; It could be the frog, splattered frog, or the character under the frog.
 ; --------------------------------------------------------------------------
 UpdateFrogInScreenMemory
-	ldy FrogRealColumn1 
-	sta (FrogLocation),y
-	ldy FrogRealColumn2
-	sta (FrogLocation),y
+	ldy FrogRealColumn1  ; Current X coordinate
+	sta (FrogLocation),y ; Erase the frog with the last character.
+	ldy FrogRealColumn2  ; Current X coordinate of alternate scroll location
+	sta (FrogLocation),y ; Erase the frog with the last character.
 
 	rts
 
 
 ; ==========================================================================
-; Get the character from screen memory where the frog will reside. 
+; Get the character from screen memory where the frog will reside.
 ;
-; A  is the byte value to store.   
-; It could be the frog, splattered frog, or the character under the frog. 
+; A  is the byte value to store.
+; It could be the frog, splattered frog, or the character under the frog.
 ; --------------------------------------------------------------------------
 GetScreenMemoryUnderFrog
-	ldy FrogRealColumn1 
+	ldy FrogRealColumn1
 	lda (FrogLocation),y
 	sta lastCharacter
 
@@ -433,7 +433,7 @@ DisplayTitleScreen
 ;	lda #1                   ; default condition of blinking prompt is inverse
 ;	sta ToggleState
 
-	lda #DISPLAY_TITLE   ; Tell VBI to change screens. 
+	lda #DISPLAY_TITLE   ; Tell VBI to change screens.
 	jsr ChangeScreen     ; Then copy the color tables.
 
 	rts
@@ -486,7 +486,7 @@ DisplayGameScreen
 
 	jsr SetBoatSpeed       ; Animation speed set by number of saved frogs
 
-	lda #DISPLAY_GAME      ; Tell VBI to change screens. 
+	lda #DISPLAY_GAME      ; Tell VBI to change screens.
 	jsr ChangeScreen       ; Then copy the color tables.
 
 	; Display the current score and number of frogs that crossed the river.
@@ -616,7 +616,7 @@ ExitPrintToScreen
 ; displayed and we end up with tearing animation.
 ; --------------------------------------------------------------------------
 AnimateBoats
-; First, need to check if the frog will become killed offscreen.  that means it is 
+; First, need to check if the frog will become killed offscreen.  that means it is
 ; dead now where it is and boat scrolling must not go any further.
 
 
@@ -632,7 +632,7 @@ AnimateBoats
 IncLeftOffset
 	inc CurrentLeftOffset  ; Add one to  position  to move screen contents left.
 	lda CurrentLeftOffset
-	cmp #40                ; 40th position is identical to 0th, 
+	cmp #40                ; 40th position is identical to 0th,
 	bne UpdatePlayfieldLMS
 	lda #0                 ; so, go back to origination point,
 	sta CurrentLeftOffset  ; reset to scroll start.
@@ -728,9 +728,9 @@ CopyScoreToScreen
 
 DoUpdateScreenScore
 	lda MyScore,x       ; Read from Score buffer
-	sta SCREEN_MYSCORE,x   
+	sta SCREEN_MYSCORE,x
 	lda HiScore,x       ; Read from Hi Score buffer
-	sta SCREEN_HISCORE,x  
+	sta SCREEN_HISCORE,x
 	dex                 ; Loop 8 bytes - 7 to 0.
 	bpl DoUpdateScreenScore
 
@@ -745,9 +745,9 @@ DoUpdateScreenScore
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; --------------------------------------------------------------------------
 ClearSavedFrogs
-	lda #INTERNAL_SPACE ; Blank space (zero) 
+	lda #INTERNAL_SPACE ; Blank space (zero)
 	ldx #17
-	
+
 RemoveFroggies
 	sta SCREEN_SAVED,x  ; Write to screen. (second line, 24th position)
 	dex                 ; Decrement number of frogs.
@@ -793,9 +793,9 @@ WriteLives
 ; Update Game screen LMS addresses and scrolling offset to specified
 ; values.
 ;
-; Note that only the low bytes needs to be reset as no line of data 
+; Note that only the low bytes needs to be reset as no line of data
 ; crosses over a page boundary.
-; 
+;
 ; A  is Right scroll position
 ; X  is Left scroll position.
 ; --------------------------------------------------------------------------
@@ -828,9 +828,9 @@ UpdateGamePlayfield
 ; ==========================================================================
 ; RESET GAME PLAYFIELD
 ; Reset Game screen LMS addresses and scrolling offset to starting values.
-; Note that only the low bytes needs to be reset as no line of data 
+; Note that only the low bytes needs to be reset as no line of data
 ; crosses over a page boundary.
-; 
+;
 ; Used A, X and Y
 ; --------------------------------------------------------------------------
 ResetGamePlayfield
@@ -868,8 +868,8 @@ ResetGamePlayfield
 ; --------------------------------------------------------------------------
 ; Force all the colors in the current table to black.
 ;
-; Needed because the ChangeScreen routine automatically populates the 
-; current color table and when I want to fade up the game screen 
+; Needed because the ChangeScreen routine automatically populates the
+; current color table and when I want to fade up the game screen
 ; it needs to start that loop from black colors.
 ;
 ; --------------------------------------------------------------------------
@@ -887,7 +887,7 @@ LoopZeroColors
 ; ==========================================================================
 ; HIDE BUTTON PROMPT                                                   A
 ; --------------------------------------------------------------------------
-; In case of sloppy programmer, force color black to 
+; In case of sloppy programmer, force color black to
 ; hide the Prompt for Button on setup.
 ;
 ; Uses A
@@ -904,17 +904,17 @@ HideButtonPrompt
 ; ==========================================================================
 ; CHANGE SCREEN                                                        A
 ; --------------------------------------------------------------------------
-; Set a new display. 
+; Set a new display.
 ;
-; Tell the VBI the screen ID.  
-; Wait for the VBI to change the current display and update the 
+; Tell the VBI the screen ID.
+; Wait for the VBI to change the current display and update the
 ; other pointers to the color tables.
 ; Copy the color tables to the current lookups.
 ;
 ; A  is the DISPLAY_* value (defined below) corresponding to the screen.
 ; --------------------------------------------------------------------------
 
-ChangeScreen 
+ChangeScreen
 	sta VBICurrentDL               ; Tell VBI to change to new mode.
 
 LoopChangeScreenWaitForVBI
@@ -935,4 +935,4 @@ LoopCopyColors
 
 	rts
 
-	
+

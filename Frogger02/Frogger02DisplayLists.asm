@@ -15,33 +15,33 @@
 
 ; ==========================================================================
 ; Display Lists.
-; 
-; The custom Display lists make the Atari impersonate the PET 4032's 
-; 40-column, 25 line display.  Each averages about 81 bytes, so 
+;
+; The custom Display lists make the Atari impersonate the PET 4032's
+; 40-column, 25 line display.  Each averages about 81 bytes, so
 ; three can fit in the same page.
 ;
 ; The Atari OS text printing is not being used, therefore the Atari screen
 ; editor's 24-line limitation is not an issue.
 ;
-; Where a display expects completely static, blank, black lines a  
-; display list would use real, blank line instructions.  However, the 
-; ANTIC mode 2 text uses color differently from other text modes.  
+; Where a display expects completely static, blank, black lines a
+; display list would use real, blank line instructions.  However, the
+; ANTIC mode 2 text uses color differently from other text modes.
 ; The "background" behind text uses COLPF2 and COLPF4 for the border.
-; Other modes use COLPF4 as true background through the border and 
-; empty background behind text.  Therefore where the program expects 
+; Other modes use COLPF4 as true background through the border and
+; empty background behind text.  Therefore where the program expects
 ; to use color in the background behind text, it uses a text instruction
 ; pointing to an empty line of blank spaces, so that COLPF2 can be used
 ; to show color within the same horizontal limits as the other text
-; in the screen. This makes it easy to "animate" with color changes to 
-; the text background.  
+; in the screen. This makes it easy to "animate" with color changes to
+; the text background.
 ;
-; We could start at ANTIC's 1K boundary for display lists.  But, 
-; we can make due with aligning to pages and just making sure none of 
-; the display lists cross a page boundary and by extension would not 
-; cross a 1K boundary. 
+; We could start at ANTIC's 1K boundary for display lists.  But,
+; we can make due with aligning to pages and just making sure none of
+; the display lists cross a page boundary and by extension would not
+; cross a 1K boundary.
 ; --------------------------------------------------------------------------
 
-	.align $0100 
+	.align $0100
 
 ; Revised V02 Title Screen and Instructions:
 ;    +----------------------------------------+
@@ -65,7 +65,7 @@
 ; 18 |                                        |
 ; 19 |Use joystick control to jump forward,   | INSTXT_3
 ; 20 |left, and right.                        | INSTXT_3
-; 21 |                                        | 
+; 21 |                                        |
 ; 22 |                                        |
 ; 23 |                                        |
 ; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
@@ -73,33 +73,33 @@
 ;    +----------------------------------------+
 
 ; Mode 2 text and Load Memory Scan for text/graphics
-; Using LMS on each line makes it easier to manipulate the 
+; Using LMS on each line makes it easier to manipulate the
 ; text for animating transitions.
 
 TITLE_DISPLAYLIST
 	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4|DL_DLI ; 20 blank scan lines.
 
-SCROLL_TITLE_LMS0 = [* + 1] 
+SCROLL_TITLE_LMS0 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1       ; Scroll In Title.
-SCROLL_TITLE_LMS1 = [* + 1] 
+SCROLL_TITLE_LMS1 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM2       ; Scroll In Title
-SCROLL_TITLE_LMS2 = [* + 1] 
+SCROLL_TITLE_LMS2 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM3       ; Scroll In Title.
 	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM4       ; Underlines
 	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
 
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1    ; Basic instructions...
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM2 
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM2
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM3
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM4 
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM4
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM5
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM6 
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM7 
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM8 
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM6
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM7
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM8
 	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
-	
+
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM1     ; Scoring
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM2 
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM2
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM3
 	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
 
@@ -110,10 +110,10 @@ SCROLL_TITLE_LMS2 = [* + 1]
 	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
 
 	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to start game.
-SCROLL_CREDIT_LMS0 = [* + 1] 
+SCROLL_CREDIT_LMS0 = [* + 1]
 	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
-	.byte DL_JUMP_VB                          ; End list, Vertical Blank 
+	.byte DL_JUMP_VB                          ; End list, Vertical Blank
 	.word TITLE_DISPLAYLIST                   ; Restart display at the same display list.
 
 
@@ -150,54 +150,54 @@ GAME_DISPLAYLIST
 	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4|DL_DLI ; 20 blank scan lines.
 
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1      ; Labels for crossings counter, scores, and lives
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM2    
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM2
 	mDL_LMS DL_TEXT_2,BLANK_MEM               ; An empty line of spaces.  (green grass)
 
 PF_LMS0 = [* + 1] ; Plus 1 is the address of the display list LMS
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM0  ; "Beach", and the two lines of Boats
-PF_LMS1 = [* + 1] 
+PF_LMS1 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM1  ; Right Boats.
-PF_LMS2 = [* + 1] 
+PF_LMS2 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM2  ; Left Boats.
-PF_LMS3 = [* + 1] 
+PF_LMS3 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM3  ; "Beach", and the two lines of Boats
-PF_LMS4 = [* + 1] 
+PF_LMS4 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM4
-PF_LMS5 = [* + 1] 
+PF_LMS5 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM5
-PF_LMS6 = [* + 1] 
+PF_LMS6 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM6  ; "Beach", and the two lines of Boats
-PF_LMS7 = [* + 1] 
+PF_LMS7 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM7
-PF_LMS8 = [* + 1] 
+PF_LMS8 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM8
-PF_LMS9 = [* + 1] 
+PF_LMS9 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM9  ; "Beach", and the two lines of Boats
-PF_LMS10 = [* + 1] 
+PF_LMS10 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM11
-PF_LMS11 = [* + 1] 
+PF_LMS11 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM10
-PF_LMS12 = [* + 1] 
+PF_LMS12 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM12 ; "Beach", and the two lines of Boats
-PF_LMS13 = [* + 1] 
+PF_LMS13 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM13
-PF_LMS14 = [* + 1] 
+PF_LMS14 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM14
-PF_LMS15 = [* + 1] 
+PF_LMS15 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM15 ; "Beach", and the two lines of Boats
-PF_LMS16 = [* + 1] 
+PF_LMS16 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM16
-PF_LMS17 = [* + 1] 
+PF_LMS17 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM17
-PF_LMS18 = [* + 1] 
+PF_LMS18 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM18 ; Frog starting beach.
 	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.  (green grass)
 
 	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
-SCROLL_CREDIT_LMS1 = [* + 1] 
+SCROLL_CREDIT_LMS1 = [* + 1]
 	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
-	.byte DL_JUMP_VB                         ; End list, Vertical Blank 
+	.byte DL_JUMP_VB                         ; End list, Vertical Blank
 	.word GAME_DISPLAYLIST                   ; Restart display at the same display list.
 
 
@@ -216,7 +216,7 @@ FROGSAVED_DISPLAYLIST
 	.endr
 
 	mDL_LMS DL_TEXT_2|DL_DLI,FROGSAVE_MEM           ; Frog Saved Line 1, 2, and 3.
-	mDL_LMS DL_TEXT_2|DL_DLI,FROGSAVE_MEM+40 
+	mDL_LMS DL_TEXT_2|DL_DLI,FROGSAVE_MEM+40
 	mDL_LMS DL_TEXT_2|DL_DLI,FROGSAVE_MEM+80
 
 	.rept 10
@@ -224,10 +224,10 @@ FROGSAVED_DISPLAYLIST
 	.endr
 
 	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM          ; Prompt to continue.
-SCROLL_CREDIT_LMS2 = [* + 1] 
+SCROLL_CREDIT_LMS2 = [* + 1]
 	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT              ; The perpetrators identified
 
-	.byte DL_JUMP_VB                                ; End list, Vertical Blank 
+	.byte DL_JUMP_VB                                ; End list, Vertical Blank
 	.word FROGSAVED_DISPLAYLIST                     ; Restart display at the same display list.
 
 
@@ -249,7 +249,7 @@ FROGDEAD_DISPLAYLIST
 	.endr
 
 	mDL_LMS DL_TEXT_2|DL_DLI,FROGDEAD_MEM           ; Dead Frog Line 1, 2, and 3.
-	mDL_LMS DL_TEXT_2|DL_DLI,FROGDEAD_MEM+40 
+	mDL_LMS DL_TEXT_2|DL_DLI,FROGDEAD_MEM+40
 	mDL_LMS DL_TEXT_2|DL_DLI,FROGDEAD_MEM+80
 
 	.rept 10
@@ -257,10 +257,10 @@ FROGDEAD_DISPLAYLIST
 	.endr
 
 	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to continue.
-SCROLL_CREDIT_LMS3 = [* + 1] 
+SCROLL_CREDIT_LMS3 = [* + 1]
 	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
-	.byte DL_JUMP_VB                                ; End list, Vertical Blank 
+	.byte DL_JUMP_VB                                ; End list, Vertical Blank
 	.word FROGDEAD_DISPLAYLIST                      ; Restart display at the same display list.
 
 
@@ -279,7 +279,7 @@ GAMEOVER_DISPLAYLIST
 	.endr
 
 	mDL_LMS DL_TEXT_2|DL_DLI,GAMEOVER_MEM           ; Game Over Line 1, 2, and 3.
-	mDL_LMS DL_TEXT_2|DL_DLI,GAMEOVER_MEM+40 
+	mDL_LMS DL_TEXT_2|DL_DLI,GAMEOVER_MEM+40
 	mDL_LMS DL_TEXT_2|DL_DLI,GAMEOVER_MEM+80
 
 	.rept 10
@@ -287,10 +287,10 @@ GAMEOVER_DISPLAYLIST
 	.endr
 
 	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to continue.
-SCROLL_CREDIT_LMS4 = [* + 1] 
+SCROLL_CREDIT_LMS4 = [* + 1]
 	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
-	.byte DL_JUMP_VB                                ; End list, Vertical Blank 
+	.byte DL_JUMP_VB                                ; End list, Vertical Blank
 	.word GAMEOVER_DISPLAYLIST                      ; Restart display at the same display list.
 
 

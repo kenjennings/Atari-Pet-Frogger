@@ -14,7 +14,7 @@
 ; --------------------------------------------------------------------------
 
 ; ==========================================================================
-; Frogger EVENTS 
+; Frogger EVENTS
 ;
 ; All the routines to run for each screen/state.
 ; --------------------------------------------------------------------------
@@ -22,21 +22,21 @@
 ; Note that there is no mention in this code for scrolling the credits
 ; text.  This is entirely handled by the Vertical blank routine.  Every
 ; display list is the same length and every Display List ends with an LMS
-; pointing to the Credit text.  The VBI routine updates the current 
-; Display List's LMS pointer to the current scroll value.  Since the VBI 
-; also controls what display is current it always means whatever is on 
-; Display is guaranteed to have the correct scroll value.  It should seem 
-; like the credit text is independent of the rest of the display as it will 
+; pointing to the Credit text.  The VBI routine updates the current
+; Display List's LMS pointer to the current scroll value.  Since the VBI
+; also controls what display is current it always means whatever is on
+; Display is guaranteed to have the correct scroll value.  It should seem
+; like the credit text is independent of the rest of the display as it will
 ; update continuously no matter what else is happening.
 
 ; Screen enumeration states for current processing condition.
-; Note that the order here does not imply the only order of 
-; movement between screens/event activity.  The enumeration 
+; Note that the order here does not imply the only order of
+; movement between screens/event activity.  The enumeration
 ; could be entirely random.
 SCREEN_START       = 0  ; Entry Point for New Game setup..
 SCREEN_TITLE       = 1  ; Credits and Instructions.
 SCREEN_TRANS_GAME  = 2  ; Transition animation from Title to Game.
-SCREEN_GAME        = 3  ; GamePlay 
+SCREEN_GAME        = 3  ; GamePlay
 SCREEN_TRANS_WIN   = 4  ; Transition animation from Game to Win.
 SCREEN_WIN         = 5  ; Crossed the river!
 SCREEN_TRANS_DEAD  = 6  ; Transition animation from Game to Dead.
@@ -73,25 +73,25 @@ EventTransitionToTitle
 	cmp #1
 	bne TestTransTitle2      ; Not the Title Scroll, try next stage
 
-	; === STAGE 1 === 
-	; Each line is 40 spaces followed by the graphics. 
-	; Scroll each one one at a time. 
+	; === STAGE 1 ===
+	; Each line is 40 spaces followed by the graphics.
+	; Scroll each one one at a time.
 	lda SCROLL_TITLE_LMS0
-	cmp #<[TITLE_MEM1+40] 
+	cmp #<[TITLE_MEM1+40]
 	beq NowScroll2
 	inc SCROLL_TITLE_LMS0
 	bne EndTransitionToTitle
 
 NowScroll2
 	lda SCROLL_TITLE_LMS1
-	cmp #<[TITLE_MEM2+40] 
+	cmp #<[TITLE_MEM2+40]
 	beq NowScroll3
 	inc SCROLL_TITLE_LMS1
 	bne EndTransitionToTitle
 
 NowScroll3
 	lda SCROLL_TITLE_LMS2
-	cmp #<[TITLE_MEM3+40] 
+	cmp #<[TITLE_MEM3+40]
 	beq FinishedNowSetupStage2
 	inc SCROLL_TITLE_LMS2
 	bne EndTransitionToTitle
@@ -101,8 +101,8 @@ FinishedNowSetupStage2
 	sta EventCounter
 	bne EndTransitionToTitle
 
-	; === STAGE 2 === 
-	; Ramp up luminance of line 4. 
+	; === STAGE 2 ===
+	; Ramp up luminance of line 4.
 
 TestTransTitle2
 	cmp #2
@@ -119,7 +119,7 @@ FinishedNowSetupStage3
 	sta EventCounter
 	bne EndTransitionToTitle
 
-	; === STAGE 3 === 
+	; === STAGE 3 ===
 	; Set Up Press Any Button  and get ready to runtitle.
 
 TestTransTitle3
@@ -142,9 +142,9 @@ EndTransitionToTitle
 ; Event process SCREEN START/NEW GAME
 ; Clear the Game Scores and get ready for the Press A Button prompt.
 ;
-; Sidebar: This is oddly inserted between Transition to Title and the 
-; Title to finish internal initialization per game, due to doofus-level 
-; lack of design planning, blah blah.   
+; Sidebar: This is oddly inserted between Transition to Title and the
+; Title to finish internal initialization per game, due to doofus-level
+; lack of design planning, blah blah.
 ; The title screen has already been presented by Transition To Title.
 ; --------------------------------------------------------------------------
 EventScreenStart            ; This is New Game and Transition to title.
@@ -159,7 +159,7 @@ EventScreenStart            ; This is New Game and Transition to title.
 
 ; ==========================================================================
 ; Event Process TITLE SCREEN
-; The activity on the title screen is 
+; The activity on the title screen is
 ; 1) Blink Prompt for ANY key.
 ; 2) Wait for input.
 ; 3) Setup for next transition.
@@ -180,13 +180,13 @@ EndTitleScreen
 ; ==========================================================================
 ; Event Process TRANSITION TO GAME SCREEN
 ; The Activity in the transition area, based on timer.
-; Stage 1) Fade out text lines  from bottom to top. 
+; Stage 1) Fade out text lines  from bottom to top.
 ;          Decrease COLPF1 brightness from bottom   to top.
-;          When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK. 
+;          When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
 ; Stage 2) Setup Game screen display.  Set all colors to black.
-; Stage 3) Fade in text lines from top to bottom. 
+; Stage 3) Fade in text lines from top to bottom.
 ;          Decrease COLPF1 brightness from top to bottom.
-;          When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK. 
+;          When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
 ; --------------------------------------------------------------------------
 EventTransitionToGame
 	lda AnimateFrames        ; Did animation counter reach 0 ?
@@ -198,14 +198,14 @@ EventTransitionToGame
 	cmp #1
 	bne TestTransGame2      ; Not the fade out, try next stage
 
-	; === STAGE 1 === 
-	; Fade out text lines  from bottom to top. 
+	; === STAGE 1 ===
+	; Fade out text lines  from bottom to top.
 	; Decrease COLPF1 brightness from bottom   to top.
-	; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK. 
+	; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
 	ldx EventCounter2
 	dec COLPF1_TABLE,x
-	lda COLPF1_TABLE,x 
-	bne EndTransitionToGame  
+	lda COLPF1_TABLE,x
+	bne EndTransitionToGame
 	sta COLPF2_TABLE,x
 
 	dec EventCounter2
@@ -217,8 +217,8 @@ EventTransitionToGame
 	inc EventCounter2 ; return to 0.
 	beq EndTransitionToGame
 
-	; === STAGE 2 === 
-	; Setup Game screen display.  
+	; === STAGE 2 ===
+	; Setup Game screen display.
 	; Set all colors to black.
 TestTransGame2
 	cmp #2
@@ -227,7 +227,7 @@ TestTransGame2
 	; Reset the game screen positions, Scrolling LMS offsets
 	jsr ResetGamePlayfield
 
-	lda #DISPLAY_GAME        ; Tell VBI to change screens. 
+	lda #DISPLAY_GAME        ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
 	jsr ZeroCurrentColors    ; Need the screen to start black.
@@ -235,15 +235,15 @@ TestTransGame2
 	; Finished stage 2, now setup Stage 3
 	lda #3
 	sta EventCounter
-	lda #0 
+	lda #0
 	sta EventCounter2 ; return to 0.
 	beq EndTransitionToGame
 
-	
-	; === STAGE 3 === 
-	; Fade in text lines from top to bottom. 
+
+	; === STAGE 3 ===
+	; Fade in text lines from top to bottom.
 	; Decrease COLPF1 brightness from top to bottom.
-	; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK. 
+	; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
 TestTransGame3
 	cmp #3
 	bne EndTransitionToGame
@@ -253,7 +253,7 @@ TestTransGame3
 	sta COLPF2_TABLE,x
 
 	lda COLPF1_TABLE,x
-	cmp GAME_TEXT_COLORS,x 
+	cmp GAME_TEXT_COLORS,x
 	beq TransGameNextLine
 
 	inc COLPF1_TABLE,x
@@ -265,7 +265,7 @@ TransGameNextLine
 	cmp #25
 	bne EndTransitionToGame
 
-	; Finished stage 3, now goto the main event.
+	; Finished stage 3, now go to the main event.
 	lda #SCREEN_START         ; Yes, change to event to start new game.
 	sta CurrentScreen
 
@@ -292,9 +292,9 @@ EndTransitionToGame
 ; 3) When the animation timer expires, shift the boat rows.
 ; 3.a) Determine if frog hits screen border to go to Dead screen.
 ; As a timer based pattern the controller input is first.
-; Joystick input updates the frog's logical and physical position 
+; Joystick input updates the frog's logical and physical position
 ; and updates screen memory.
-; The animation update forces an automatic logical movement of the 
+; The animation update forces an automatic logical movement of the
 ; frog as the frog moves with the boats and remains static relative
 ; to the boats.
 ; --------------------------------------------------------------------------
@@ -302,32 +302,44 @@ EventGameScreen
 ; ==========================================================================
 ; GAME SCREEN - Keyboard Input Section
 ; --------------------------------------------------------------------------
-	jsr CheckKey             ; Get a key if timer permits.
-	cmp #$FF                 ; Key is pressed?
+	jsr CheckInput           ; Get cooked stick or trigger if timer permits.
 	beq CheckForAnim         ; Nothing pressed, Skip the input section.
 
-	sta LastKeyPressed       ; Save key.
+	sta LastInput            ; Save Stick/trigger.  Well, InputStick has it too, so... why?
 
-	ldy FrogColumn           ; Current X coordinate
-	lda LastCharacter        ; Get the last character (under the frog)
-	sta (FrogLocation),y     ; Erase the frog with the last character.
+	jsr RemoveFrogOnScreen   ; Remove the frog from the screen (duh)
 
-ProcessKey ; Process keypress
-	lda LastKeyPressed       ; Restore the key press to A
+ProcessJoystickInput
+	lda LastInput            ; Restore the cooked joystick state... Bits...  "NA NA NA Trigger Right Left NA Up"
 
-	cmp #KEY_4               ; Testing for Left "4" key, #24
-	bne RightKeyTest         ; No.  Go test for Right.
+UpStickTest
+	ror                      ; Push out low bit. UP
+	bcc LeftStickTest        ; Nope.  Try Left
+
+	jsr FrogMoveUp           ; Yes, go do UP.
+	beq DoSetupForFrogWins   ; No more rows to cross. Update to frog Wins!
+	bne SaveNewFrogLocation  ; Row greater than 0.  Evaluate good/bad jump.
+
+LeftStickTest
+	ror ; empty bit for down
+	ror
+	bcc RightStickTest
 
 	dey                      ; Move Y to left.
 	sty FrogColumn
+
+
+
 	bpl SaveNewFrogLocation  ; Not $FF.  Go place frog on screen.
 	iny                      ; It is $FF.  Correct by adding 1 to Y.
 	sty FrogColumn
 	bpl SaveNewFrogLocation  ; Place frog on screen
 
-RightKeyTest 
-	cmp #KEY_6               ; Testing for Right "6", #27
-	bne UpKeyTest            ; Not "6" key, so go test for Up.
+
+
+RightStickTest
+	ror
+	bcc ReplaceFrogOnScreen  ; No input.  Replace Frog on screen.  Try boat animation.
 
 	iny                      ; Move Y to right.
 	cpy #$28                 ; Did it move off screen? Position $28/40 (dec)
@@ -337,18 +349,14 @@ RightKeyTest
 	sty FrogColumn
 	bne SaveNewFrogLocation  ; Corrected.  Go place frog on screen.
 
-UpKeyTest ; Test for Up "S" key
-	cmp #KEY_S               ; Atari "S", #62 ?
-	bne ReplaceFrogOnScreen  ; No.  Replace Frog on screen.  Try boat animation.
-	jsr FrogMoveUp           ; Yes, go do UP.
-	beq DoSetupForFrogWins   ; No more rows to cross. Update to frog Wins!
 
-; Row greater than 0.  Evaluate good/bad jump. 
+
+; Row greater than 0.  Evaluate good/bad jump.
 SaveNewFrogLocation
 	lda (FrogLocation),y     ; Get the character in the new position.
 	sta LastCharacter        ; Save for later when frog moves.
 	sty FrogColumn
-	
+
 ; Will the Pet Frog land on the Beach?
 	cmp #INTERNAL_INVSPACE   ; Atari uses inverse space for beach
 	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
@@ -356,7 +364,7 @@ SaveNewFrogLocation
 ; Will the Pet Frog land in the boat?
 CheckBoatLanding
 	cmp #INTERNAL_BALL       ; Atari uses ball graphics, ctrl-t
-	beq ReplaceFrogOnScreen  ; Yes.  Safe!  Draw the frog.  
+	beq ReplaceFrogOnScreen  ; Yes.  Safe!  Draw the frog.
 
 ; Safe locations have been accounted.
 ; Wherever the Frog will land now, it is Baaaaad.
@@ -389,7 +397,7 @@ CheckForAnim
 	bne DoSetupForYerDead    ; Nooooooo!
 
 EndGameScreen
-	lda CurrentScreen  
+	lda CurrentScreen
 
 	rts
 
@@ -412,7 +420,7 @@ EventTransitionToWin
 	cpx #13                  ; From 2 to 12, erase from top to middle
 	beq DoSwitchToWins       ; When at 13 then fill screen is done.
 
-	ldy #PRINT_BLANK_TXT_INV ; inverse blanks.  
+	ldy #PRINT_BLANK_TXT_INV ; inverse blanks.
 	jsr PrintToScreen
 
 	lda #26                  ; Subtract Row number for text from 26 (26-2 = 24)
@@ -426,11 +434,11 @@ EventTransitionToWin
 	bne EndTransitionToWin   ; Nothing else to do here.
 
 ; Clear screen is done.   Display the big prompt.
-DoSwitchToWins 
+DoSwitchToWins
 	jsr PrintWinFrogGfx      ; Copy the big text announcement to screen
 
 	jsr SetupWin             ; Setup for Wins screen (which only waits for input )
-	
+
 EndTransitionToWin
 	lda CurrentScreen
 
@@ -449,7 +457,7 @@ EventWinScreen
 	beq EndWinScreen       ; Nothing pressed, done with title screen.
 
 ProcessWinScreenInput      ; a key is pressed. Prepare for the screen transition.
-	jsr SetupTransitionToGame 
+	jsr SetupTransitionToGame
 
 EndWinScreen
 	lda CurrentScreen      ; Yeah, redundant to when a key is pressed.
@@ -462,7 +470,7 @@ EndWinScreen
 ; The Activity in the transition area, based on timer.
 ; 1) Wait (1.5 sec) to observe splattered frog. (timer set from prior event)
 ; 2) Wipe screen from sides to center.
-; 3) Print the big yer dead text.  
+; 3) Print the big yer dead text.
 ; 4) setup for get any key on the Dead screen.
 ; --------------------------------------------------------------------------
 EventTransitionToDead
@@ -474,7 +482,7 @@ EventTransitionToDead
 
 	ldy EventCounter            ; column number for text.
 	cpy #20                     ; From 0 to 19, erase from left to middle.
-	beq DoTransitionToDeadPart2 ; wipe done. continue to big dead text.        
+	beq DoTransitionToDeadPart2 ; wipe done. continue to big dead text.
 
 ; PART 1 -- Wipe the screen from sides to center.
 DoTransitionToDeadPart1         ; Have not reached the end, wipe more screen
@@ -500,7 +508,7 @@ LoopDeadTransition
 	inc EventCounter            ; Set for next run to the next column
 	bne EndTransitionToDead     ; And this turn is done.
 
-; PART 2 -- Clear screen is done.  
+; PART 2 -- Clear screen is done.
 DoTransitionToDeadPart2
 	jsr PrintDeadFrogGfx        ; Display the Big Dead Frog Text.
 
@@ -540,7 +548,7 @@ EndDeadScreen
 ; ==========================================================================
 ; Event Process TRANSITION TO OVER
 ; The Activity in the transition area, based on timer.
-; 1) Progressively reprint the credits on lines from the top of the screen 
+; 1) Progressively reprint the credits on lines from the top of the screen
 ; to the bottom.
 ; 2) follow with a blank line to erase the highest line of trailing text.
 ; --------------------------------------------------------------------------
@@ -567,15 +575,15 @@ GetRandomX
 	eor SCREENMEM+400,x        ; Exclusive Or with screen
 SkipGameOverEOR
 	sta SCREENMEM+400,x        ; Write to screen
-	dey                 
+	dey
 	bne GetRandomX             ; Do another random character in this turn.
 	beq EndTransitionGameOver
 
-	; Finish up. 
+	; Finish up.
 DoTransitionToGameOverPart2
 	jsr PrintGameOverGfx       ;  Draw Big Game Over
 
-	jsr SetupGameOver 
+	jsr SetupGameOver
 
 EndTransitionGameOver
 	lda CurrentScreen

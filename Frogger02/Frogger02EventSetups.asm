@@ -26,7 +26,7 @@
 ; Prep values to begin the Transition Event for the Title Screen. That is:
 ; Initialize scrolling line in title text.
 ; Tell VBI to switch to title screen.
-; 
+;
 ; Transition events:
 ; Stage 1: Scroll in the Title. (three lines, one at a time.)
 ; Stage 2: Brighten line 4 luminance.
@@ -43,12 +43,12 @@ SetupTransitionToTitle
 
 	lda #<TITLE_MEM1         ; Initialize the
 	sta SCROLL_TITLE_LMS0    ; Display List
-	lda #<[TITLE_MEM2]       ; LMS 
+	lda #<[TITLE_MEM2]       ; LMS
 	sta SCROLL_TITLE_LMS1    ; Addresses
 	lda #<[TITLE_MEM3]       ; for scrolling
 	sta SCROLL_TITLE_LMS2    ; in the title.
 
-	lda #DISPLAY_TITLE       ; Tell VBI to change screens. 
+	lda #DISPLAY_TITLE       ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
 	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
@@ -69,13 +69,13 @@ SetupTransitionToGame
 	jsr ResetTimers
 
 	lda #24
-	sta EventCounter2       ; Prep the first transition loop. 
+	sta EventCounter2       ; Prep the first transition loop.
 
 	lda #1                  ; First transition stage: Loop from bottom to top
 	sta EventCounter
 
 	lda #0                  ; Make background black for the Prompt text.
-	sta COLPF2_TABLE+23    
+	sta COLPF2_TABLE+23
 	lda #$0C                ; Set prompt text luminance.
 	sta COLPF1_TABLE+23
 
@@ -89,6 +89,8 @@ SetupTransitionToGame
 ; SETUP GAME SCREEN
 ;
 ; Prep values to run the game screen.
+;
+; The actual game display was switched on by the Trans Game event.
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
@@ -104,7 +106,7 @@ SetupGame
 	lda #>PLAYFIELD_MEM18   ; Hi Byte, Frog position.
 	sta FrogLocation + 1
 
-	lda #18                 ; 18 (dec), number of screen rows of game field. 
+	lda #18                 ; 18 (dec), number of screen rows of game field.
 	sta FrogRow
 
 	ldy #19                 ; Frog horizontal coordinate, Y = 19 (dec)
@@ -119,7 +121,7 @@ SetupGame
 ;	tax                     ; and for the LMS in other direction.
 ;	jsr UpdateGamePlayfield ; Reset Game screen to initial position.
 
-;	lda #DISPLAY_GAME       ; Tell VBI to change screens. 
+;	lda #DISPLAY_GAME       ; Tell VBI to change screens.
 ;	jsr ChangeScreen        ; Then copy the color tables.
 
 	lda #SCREEN_GAME        ; Yes, change to game screen event.
@@ -139,7 +141,7 @@ SetupTransitionToWin
 	jsr Add500ToScore
 
 	jsr CopyScoreToScreen   ; Update the screen information
-	jsr PrintFrogsAndLives     
+	jsr PrintFrogsAndLives
 
 ;	lda #WIN_FILL_SPEED     ; Animation moving speed.
 ;	jsr ResetTimers
@@ -147,7 +149,7 @@ SetupTransitionToWin
 ;	lda #2                  ; start wiping screen at line 2 (0, 1, 2)
 ;	sta EventCounter
 
-	lda #DISPLAY_WIN        ; Tell VBI to change screens. 
+	lda #DISPLAY_WIN        ; Tell VBI to change screens.
 	jsr ChangeScreen        ; Then copy the color tables.
 
 ;	jsr ClearKey
@@ -195,7 +197,7 @@ SetupTransitionToDead
 
 	dec NumberOfLives       ; subtract a life.
 	jsr CopyScoreToScreen   ; Update the screen information
-	jsr PrintFrogsAndLives     
+	jsr PrintFrogsAndLives
 
 	inc FrogSafety          ; Schrodinger knows the frog is dead.
 	lda #FROG_WAKE_SPEED    ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
@@ -204,7 +206,7 @@ SetupTransitionToDead
 	lda #0                  ; Zero event controls.
 	sta EventCounter
 
-	lda #DISPLAY_DEAD       ; Tell VBI to change screens. 
+	lda #DISPLAY_DEAD       ; Tell VBI to change screens.
 	jsr ChangeScreen        ; Then copy the color tables.
 
 ;	jsr ClearKey
@@ -229,7 +231,7 @@ SetupDead
 	jsr ResetTimers
 
 ;	jsr ClearKey
-	
+
 	lda #SCREEN_DEAD     ; Change to dead screen.
 	sta CurrentScreen
 
@@ -250,12 +252,12 @@ SetupTransitionToGameOver
 	lda #60                ; Number of times to do the Game Over EOR effect
 	sta EventCounter
 
-	lda #DISPLAY_OVER      ; Tell VBI to change screens. 
+	lda #DISPLAY_OVER      ; Tell VBI to change screens.
 	jsr ChangeScreen       ; Then copy the color tables.
 
 ;	jsr ClearKey
 
-;	jsr CopyOverColorsToDLI 
+;	jsr CopyOverColorsToDLI
 
 	lda #SCREEN_TRANS_OVER ; Change to game over transition.
 	sta CurrentScreen
@@ -275,7 +277,7 @@ SetupGameOver
 	jsr ResetTimers
 
 ;	jsr ClearKey
-	
+
 	lda #SCREEN_OVER     ; Change to Game Over screen.
 	sta CurrentScreen
 

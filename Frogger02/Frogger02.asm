@@ -52,32 +52,32 @@
 ;
 ; --------------------------------------------------------------------------
 ; Version 02.  December 2018
-; The design principle continues to maintain the original presentation 
-; of a full screen of basic text.  (In Atari terms, this is ANTIC mode 2, 
+; The design principle continues to maintain the original presentation
+; of a full screen of basic text.  (In Atari terms, this is ANTIC mode 2,
 ; or OS mode 0).  Everything else in the game is subject to Atari-fication.
 ; * Color.  Every line of the text mode has a DLI to set background color
-;   and the foreground text luminance.  The color is also used as an 
-;   animation tool on the screens for dead frog, game over, and saving 
+;   and the foreground text luminance.  The color is also used as an
+;   animation tool on the screens for dead frog, game over, and saving
 ;   a frog.
 ; * Joystick controller input.  Game controller input is a standard for
-;   Atari games.  Say goodbye to the keyboard.  
-; * Sound.  Add at least simple sound effects for water/boats moving, 
+;   Atari games.  Say goodbye to the keyboard.
+; * Sound.  Add at least simple sound effects for water/boats moving,
 ;   frog jumping, frog dying, rescuing a frog, joystick input.
-; * Custom character set to make the frog look like a frog, and boats 
+; * Custom character set to make the frog look like a frog, and boats
 ;   look like plus other graphics enhancements.
-; * Formalize game timing by implementing deferred vertical blank 
+; * Formalize game timing by implementing deferred vertical blank
 ;   interrupt to maintain the game activity and timings.
-; * Screen memory is no longer declared at the same location as on the 
+; * Screen memory is no longer declared at the same location as on the
 ;   Pet computer, and due to display lists is no longer contiguous RAM.
-; * Display List LMS updates present the information on screen. 
-;   Displayed items can be presented by updating a few display list 
+; * Display List LMS updates present the information on screen.
+;   Displayed items can be presented by updating a few display list
 ;   LMS pointers rather than bulk movement of data through screen memory.
-;   This is also used to move the boats around the screen by coarse 
+;   This is also used to move the boats around the screen by coarse
 ;   scrolling through the LMS.  This permits the screen memory to be
 ;   non-contiguous, and data can then be aligned in memory pages allowing
-;   code to update either high byte or low byte of addresses.  Since the 
-;   frog is a character on screen it must move through screen memory 
-;   and so the game still requires six groups of beaches and boats 
+;   code to update either high byte or low byte of addresses.  Since the
+;   frog is a character on screen it must move through screen memory
+;   and so the game still requires six groups of beaches and boats
 ;   separately declared in memory.
 ;
 ; --------------------------------------------------------------------------
@@ -87,12 +87,12 @@
 ; Random blabbering across the versions of Pet Frogger concerning
 ; differences between Atari and Pet, and the code considerations:
 ;
-; Version 00 commentary. . . . . . . . . . . . . . . . . . . . . . . . 
+; Version 00 commentary. . . . . . . . . . . . . . . . . . . . . . . .
 ; It appears text printing on the Pet treats the screen like a typewriter.
-; "Right" cursor movement the Pet uses to move through the full line 
+; "Right" cursor movement the Pet uses to move through the full line
 ; width will cause the cursor to wrap around to the next line.  "Down" also
-; moves to the next line.  I don't know for certain, but for printing 
-; purposes the program code makes it seem like character printing on the 
+; moves to the next line.  I don't know for certain, but for printing
+; purposes the program code makes it seem like character printing on the
 ; Pet does not support direct positioning of the cursor other than "Home".
 
 ; Printing for the Atari version is implemented similarly by sending single
@@ -101,9 +101,9 @@
 ; of the screen returns the cursor to the left edge of the screen on the
 ; same line.  (Remember, full screen editor).  Therefore the Atari needs
 ; an extra "Down" cursor inserted where code expects the cursor on the
-; Pet to be on the following line.  It also appears that replacing the 
-; "Right" cursor movements with a blank space should accomplish the same 
-; thing on the Atari, but for the sake of minimal changes Version 00 of the 
+; Pet to be on the following line.  It also appears that replacing the
+; "Right" cursor movements with a blank space should accomplish the same
+; thing on the Atari, but for the sake of minimal changes Version 00 of the
 ; port retains the Pet's idea of cursor movement.
 
 ; Also, depending on how the text is printed the Atari editor can relate
@@ -111,7 +111,7 @@
 ; text lines longer than 40 characters, not so good when printing wraps the
 ; cursor from one line to the next.  Printing a character through the end of
 ; the screen line (aka the right margin) extends the current line as a
-; logical line into the next screen line which pushes the content in the 
+; logical line into the next screen line which pushes the content in the
 ; subsequent lines below further down the screen.
 
 ; Since some code does direct manipulation of the screen memory, I wonder
@@ -132,87 +132,87 @@
 ; screen with the block graphics upon the frog's demise.  This conveniently
 ; leaves the 25th line free for the "ported by" credit.  But the Atari only
 ; displays 24 lines of text!?!  Gasp!  Not true.  The Atari can do up to
-; 30 lines of text (240 scan lines).  Only the OS printing routines are 
-; limited to 24 lines of text.  The game's 25 line screen is accomplished 
-; on the Atari with a custom display list that also designates screen 
+; 30 lines of text (240 scan lines).  Only the OS printing routines are
+; limited to 24 lines of text.  The game's 25 line screen is accomplished
+; on the Atari with a custom display list that also designates screen
 ; memory starting at $8000 which is the same location used by the Pet.
 ;
 ; --------------------------------------------------------------------------
 ;
-; Version 01 commentary. . . . . . . . . . . . . . . . . . . . . . . . 
+; Version 01 commentary. . . . . . . . . . . . . . . . . . . . . . . .
 ; "Printing" via standard OS I/O has been completely replaced by direct
-; writes to screen memory.  This greatly speeds up the game screen 
+; writes to screen memory.  This greatly speeds up the game screen
 ; and title screen presentation.
 ;
-; Having entirely rewritten the game logic, the new modular nature 
-; made it easy to add new screens and to manage animated transitions 
-; between screens.  There are new screens with huge text built of 
-; graphic control characters for when a frog dies, a frog is saved, 
+; Having entirely rewritten the game logic, the new modular nature
+; made it easy to add new screens and to manage animated transitions
+; between screens.  There are new screens with huge text built of
+; graphic control characters for when a frog dies, a frog is saved,
 ; and when the game is over.
 ;
 ; The high score is maintained in real-time with the player's score.
-; 
+;
 ; The only thing that is really Atari-specific is monitoring the vertical
-; blank.  Not sure how/if this could be done on the Pet.  The rest of the 
+; blank.  Not sure how/if this could be done on the Pet.  The rest of the
 ; code is still pretty generic 6502 with screen memory at the Pet's
-; standard location, $8000.  It should be easily portable back to the 
+; standard location, $8000.  It should be easily portable back to the
 ; Pet by changing the character and key codes.
-; 
-; Monitoring the vertical blank allows for more varied control of timing. 
-; The boat speeds are easily managed with a loop that relates the number 
-; of frogs saved to a frame count for delays.  Note that the code does 
-; not re-implement the CPU loop by waiting on frame updates.  Instead, it 
-; maintains counters during each frame and when counters reach 0 then the 
-; event (aka moving boats or accepting new input) is permitted.  This 
+;
+; Monitoring the vertical blank allows for more varied control of timing.
+; The boat speeds are easily managed with a loop that relates the number
+; of frogs saved to a frame count for delays.  Note that the code does
+; not re-implement the CPU loop by waiting on frame updates.  Instead, it
+; maintains counters during each frame and when counters reach 0 then the
+; event (aka moving boats or accepting new input) is permitted.  This
 ; is effectively (cooperative) multitasking vaguely like an event loop.
 ;
 ; --------------------------------------------------------------------------
 ;
-; Version 02 commentary. . . . . . . . . . . . . . . . . . . . . . . . 
-; Adding color was essentially trivial.  A table-driven Display List 
-; Interrupt routine sets a new background color and text luminance value 
-; for each of the 25 text lines. A Vertical Blank interrupt enforces the 
-; DLI state to start at 0 for every frame.  A rough prototype showing 
+; Version 02 commentary. . . . . . . . . . . . . . . . . . . . . . . .
+; Adding color was essentially trivial.  A table-driven Display List
+; Interrupt routine sets a new background color and text luminance value
+; for each of the 25 text lines. A Vertical Blank interrupt enforces the
+; DLI state to start at 0 for every frame.  A rough prototype showing
 ; colorized displays was added to Version 01 code in just a few hours.
 ;
-; Now that there is a VBI running various other timing controls can be 
-; formally, put into the VBI rather than using looping code that detects 
+; Now that there is a VBI running various other timing controls can be
+; formally, put into the VBI rather than using looping code that detects
 ; the start of a TV frame.
 ;
 ; Further use of the color indirection will eliminate the need to maintain
-; and write normal text and inverse text in screen memory to make blinking 
-; text.  The game can simply update the colors for that line of text to 
+; and write normal text and inverse text in screen memory to make blinking
+; text.  The game can simply update the colors for that line of text to
 ; make it appear to blink.
 ;
-; Given the Atari's significant graphics indirection capabilities there is 
-; no need to draw a screen to present it.  The data to supply the graphics 
-; is already in memory.  Properly arranging the data will allow the Atari 
-; to display the data directly as screen data.  This eliminates the need 
-; to have separate data and screen memory, and also eliminates the need 
+; Given the Atari's significant graphics indirection capabilities there is
+; no need to draw a screen to present it.  The data to supply the graphics
+; is already in memory.  Properly arranging the data will allow the Atari
+; to display the data directly as screen data.  This eliminates the need
+; to have separate data and screen memory, and also eliminates the need
 ; for the supporting code to copy the data to the screen.
 ;
-; Aaaand, the Atari has more than one way to do this.  First, we could 
-; update the LMS addresses in the Display List to point to each line of 
-; data for screen memory.  Changing the screen (or just the screen 
-; contents) is reduced to writing a two-byte pointer for each line in the 
-; Display List instead of writing 40 bytes for each line to screen memory. 
-; And where there are blank lines or otherwise duplicate data the LMS can 
-; point to the same screen data for each line. 
+; Aaaand, the Atari has more than one way to do this.  First, we could
+; update the LMS addresses in the Display List to point to each line of
+; data for screen memory.  Changing the screen (or just the screen
+; contents) is reduced to writing a two-byte pointer for each line in the
+; Display List instead of writing 40 bytes for each line to screen memory.
+; And where there are blank lines or otherwise duplicate data the LMS can
+; point to the same screen data for each line.
 ;
-; The other way to do this is to have a separate Display List for each 
-; screen.  This reduces changing the screen to writing one address for 
-; the entire screen.  
+; The other way to do this is to have a separate Display List for each
+; screen.  This reduces changing the screen to writing one address for
+; the entire screen.
 ;
-; We're mixing these two methods.  Each screen will have its own Display 
-; List with color tables.  Change the display list pointer and the entire 
-; screen changes.  The game screen will also use updates to the the LMS 
-; for each moving boat line to coarse scroll the boat data without moving 
+; We're mixing these two methods.  Each screen will have its own Display
+; List with color tables.  Change the display list pointer and the entire
+; screen changes.  The game screen will also use updates to the the LMS
+; for each moving boat line to coarse scroll the boat data without moving
 ; the boats in screen memory.
 ;
-; Since the frog must move in screen memory, there still must be separate 
-; data for each line of boats and beaches.  In a future version when the 
-; frog is a Player/Missile object independent from screen data then it 
-; will be possible to reduce the boats to one line for left and one for 
+; Since the frog must move in screen memory, there still must be separate
+; data for each line of boats and beaches.  In a future version when the
+; frog is a Player/Missile object independent from screen data then it
+; will be possible to reduce the boats to one line for left and one for
 ; right and re-use the data for each set of lines.
 ;
 ; --------------------------------------------------------------------------
@@ -274,16 +274,16 @@
 
 COLPF2_TABLE ; Text background color. ; Default Green
 	.rept 25
-		.byte COLOR_GREEN 
+		.byte COLOR_GREEN
 	.endr
 
-		
+
 COLPF1_TABLE ; Text color (luminance) ; default all to $0A/10 (dec)
 	.rept 25
-		.byte $0A  
+		.byte $0A
 	.endr
 
-ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables. 
+ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
 
 MovesCars       .word $00   ; = Moves Cars
 
@@ -305,7 +305,7 @@ NumberOfChars   .byte 0     ; = Number Of Characters Across
 FlaggedHiScore  .byte 0     ; = Flag For Hi Score.  0 = no high score.  $FF = High score.
 NumberOfLives   .byte 0     ; = Is Number Of Lives
 
-LastKeyPressed  .byte 0     ; = Remember last key pressed
+LastInput       .byte 0     ; = Remember last joystick input
 ScreenPointer   .word $0000 ; = Pointer to location in screen memory.
 TextPointer     .word $0000 ; = Pointer to text message to write.
 TextLength      .word $0000 ; = Length of text message to write.
@@ -315,8 +315,8 @@ TextLength      .word $0000 ; = Length of text message to write.
 ; Once they decrement to  0 they enable the related activity.
 
 ; After processing input (from the joystick) this is the number of frames
-; to count before new input is accepted.  This prevents moving the frog at 
-; 60 fps and compensates for any jitter/uneven toggling of the joystick 
+; to count before new input is accepted.  This prevents moving the frog at
+; 60 fps and compensates for any jitter/uneven toggling of the joystick
 ; bits by flaky controllers.
 InputScanFrames   .byte $00 ; = INPUTSCAN_FRAMES
 InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits.
@@ -329,7 +329,7 @@ AnimateFrames   .byte $00 ; = ANIMATION_FRAMES,X.
 ; Animation counter for scrolling the credit line. when it reaches 0, then scroll.
 ScrollCounter   .byte 8
 ; Current low byte of the LMS value for scrolling the credit line.
-ScrollCredit    .byte <SCROLLING_CREDIT 
+ScrollCredit    .byte <SCROLLING_CREDIT
 ; Pointer to the current display LMS for the credits.
 CurrentCreditLMS .word SCROLL_CREDIT_LMS0
 
@@ -337,12 +337,12 @@ CurrentCreditLMS .word SCROLL_CREDIT_LMS0
 ; features are in effect.  Value is enumerated from SCREEN_LIST table.
 CurrentScreen   .byte $00 ; = identity of current screen.
 
-; A display number written here by main code directs the VBI to update the 
-; screen pointers and the pointers to the color tables. Updated by VBI to 
-; $FF when update is completed. 
-VBICurrentDL    .byte $FF ; = Direct VBI to change screens. 
+; A display number written here by main code directs the VBI to update the
+; screen pointers and the pointers to the color tables. Updated by VBI to
+; $FF when update is completed.
+VBICurrentDL    .byte $FF ; = Direct VBI to change screens.
 
-; The actual display in use. Updated by VBI from the input provided by 
+; The actual display in use. Updated by VBI from the input provided by
 ; VBICurrentDL to let main code  know the the current physical display.
 CurrentDL        .byte $FF
 CurrentDLPointer .word $0000 ; the address of the Display list.  a copy of the OS pointer.
@@ -355,8 +355,8 @@ COLPF1Pointer   .word $0000
 PlayfieldLMSPointer .word $0000
 
 ; Scrolling offsets for LMS in the playfield.
-; All scroll data occupies page data from  0 to 79. 
-; Left scroll moves from LMS offset 0 to 39 
+; All scroll data occupies page data from  0 to 79.
+; Left scroll moves from LMS offset 0 to 39
 ; Right scroll moves from LMS offset 39 to 0
 CurrentRightOffset .byte $00
 CurrentLeftOffset  .byte $00
@@ -372,11 +372,11 @@ EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
 
 ; Game Score and High Score.
 ; This stays here and is copied to screen memory, because the math could
-; temporarily generate a non-numeric character when there is carry, and I 
+; temporarily generate a non-numeric character when there is carry, and I
 ; don't want that (possibly) visible on the screen however short it may be.
 
-MyScore .sb "00000000" 
-HiScore .sb "00000000" 
+MyScore .sb "00000000"
+HiScore .sb "00000000"
 
 ; In the event X and/or Y can't be saved on stack, protect them here....
 SAVEX = $FE
@@ -407,13 +407,13 @@ SAVEY = $FF
 	icl "Frogger02EventSetups.asm"  ; Set Entry criteria for the event/screen
 	icl "Frogger02Events.asm"       ; Run the current event/screen
 
-	icl "Frogger02TimerAndIO.asm"   ; Timer, tick tock, countdowns, key I/O, VBI, DLI 
+	icl "Frogger02TimerAndIO.asm"   ; Timer, tick tock, countdowns, key I/O, VBI, DLI
 
 	icl "Frogger02ScreenGfx.asm"    ; Physically drawing on the screen
 
 ; ==========================================================================
-; Graphics assets.  
-; To make sure these won't accidentally cross an ANTIC hardware limit 
+; Graphics assets.
+; To make sure these won't accidentally cross an ANTIC hardware limit
 ; these need to be aligned per ANTIC specs.
 ; --------------------------------------------------------------------------
 

@@ -24,12 +24,12 @@ GAMESTART
 
 	; Changing the Display List is potentially tricky.  If the update is
 	; interrupted by the Vertical blank, then it could mess up the display
-	; list address and crash the Atari.  
-	; 
+	; list address and crash the Atari.
+	;
 	; So, this problem is solved by giving responsibility for Display List
-	; changes to a custom Vertical Blank Interrupt. The main code simply 
-	; writes a byte to a page 0 location monitored by the vertical blank 
-	; interrupt and this directs the interrupt to change the current 
+	; changes to a custom Vertical Blank Interrupt. The main code simply
+	; writes a byte to a page 0 location monitored by the vertical blank
+	; interrupt and this directs the interrupt to change the current
 	; display list.  Easy-peasy and never updated at the wrong time.
 
 	lda #<CHARACTER_SET ; Set custom character set.  Global to game, forever.
@@ -48,7 +48,7 @@ GAMESTART
 
 	ldy #<MyImmediateVBI  ; Add the VBI to the system
 	ldx #>MyImmediateVBI
-	lda #6               ; 6 = Immediate VBI 
+	lda #6               ; 6 = Immediate VBI
 	jsr SETVBV           ; Tell OS to set it
 
 	lda #0
@@ -76,7 +76,7 @@ GAMESTART
 GameLoop
 	jsr TimerLoop    ; Wait for end of frame to update the timers.
 
-; Due to the timer sync above, now here at this point the code 
+; Due to the timer sync above, now here at this point the code
 ; is running at/near the top of the screen refresh.
 
 	lda CurrentScreen
