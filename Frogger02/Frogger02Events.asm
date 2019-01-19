@@ -304,59 +304,49 @@ EventGameScreen
 ; --------------------------------------------------------------------------
 	jsr CheckInput           ; Get cooked stick or trigger if timer permits.
 	beq CheckForAnim         ; Nothing pressed, Skip the input section.
-
-	sta LastInput            ; Save Stick/trigger.  Well, InputStick has it too, so... why?
+;	sta LastInput            ; Save Stick/trigger.  Well, InputStick has it too, so... why?
 
 	jsr RemoveFrogOnScreen   ; Remove the frog from the screen (duh)
 
-ProcessJoystickInput
-	lda LastInput            ; Restore the cooked joystick state... Bits...  "NA NA NA Trigger Right Left NA Up"
+ProcessJoystickInput         ; Reminder: Input Bits: "0 0 0 Trigger Right Left 0 Up"
+	lda InputStick           ; Get the cooked joystick state... 
 
 UpStickTest
-	ror                      ; Push out low bit. UP
-	bcc LeftStickTest        ; Nope.  Try Left
+	ror A                    ; Roll out low bit. UP
+	bcc LeftStickTest        ; No bit. Try Left.
 
-	jsr FrogMoveUp           ; Yes, go do UP.
+	jsr FrogMoveUp           ; Yes, go do UP. Subtract from FrogRow.
 	beq DoSetupForFrogWins   ; No more rows to cross. Update to frog Wins!
-	bne SaveNewFrogLocation  ; Row greater than 0.  Evaluate good/bad jump.
+	bne SaveNewFrogLocation  ; Row greater than 0.  Evaluate good/bad position.
 
 LeftStickTest
-	ror ; empty bit for down
-	ror
-	bcc RightStickTest
+	ror A                    ; Roll out empty bit. DOWN (it is unused)
+	ror A                    ; Roll out low bit. LEFT
+	bcc RightStickTest       ; No bit. Try Right.
 
+	ldy FrogColumn           ; Get "logical" apparent screen position.
+	beq SaveNewFrogLocation  ; Already 0. Can't move left. Redraw frog.
 	dey                      ; Move Y to left.
-	sty FrogColumn
-
-
-
-	bpl SaveNewFrogLocation  ; Not $FF.  Go place frog on screen.
-	iny                      ; It is $FF.  Correct by adding 1 to Y.
 	sty FrogColumn
 	bpl SaveNewFrogLocation  ; Place frog on screen
 
-
-
 RightStickTest
-	ror
-	bcc ReplaceFrogOnScreen  ; No input.  Replace Frog on screen.  Try boat animation.
+	ror A                    ; Roll out low bit. RIGHT
+	bcc ReplaceFrogOnScreen  ; No bit.  Replace Frog on screen.  Try boat animation.
 
+	ldy FrogColumn           ; Get "logical" apparent screen position.
+	cmp #39                  ; Is it at limit?
+	beq SaveNewFrogLocation  ; At limit. Can't move right. Redraw frog.
 	iny                      ; Move Y to right.
-	cpy #$28                 ; Did it move off screen? Position $28/40 (dec)
 	sty FrogColumn
-	bne SaveNewFrogLocation  ; No.  Go place frog on screen.
-	dey                      ; Yes.  Correct by subtracting 1 from Y.
-	sty FrogColumn
-	bne SaveNewFrogLocation  ; Corrected.  Go place frog on screen.
-
-
 
 ; Row greater than 0.  Evaluate good/bad jump.
 SaveNewFrogLocation
-	lda (FrogLocation),y     ; Get the character in the new position.
-	sta LastCharacter        ; Save for later when frog moves.
-	sty FrogColumn
+	jsr WhereIsThePhysicalFrog ; Update Frog Real Positions and the LastCharacter found there.
 
+
+
+==================================================================================
 ; Will the Pet Frog land on the Beach?
 	cmp #INTERNAL_INVSPACE   ; Atari uses inverse space for beach
 	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.

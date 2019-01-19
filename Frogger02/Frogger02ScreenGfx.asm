@@ -328,6 +328,11 @@ PrintGameOverGfx
 
 
 
+
+
+
+
+
 ; ==========================================================================
 ; Set the splattered frog on the screen.
 ;
@@ -389,9 +394,7 @@ UpdateFrogInScreenMemory
 
 ; ==========================================================================
 ; Get the character from screen memory where the frog will reside.
-;
-; A  is the byte value to store.
-; It could be the frog, splattered frog, or the character under the frog.
+; Save it to lastCharacter to restore as needed.
 ; --------------------------------------------------------------------------
 GetScreenMemoryUnderFrog
 	ldy FrogRealColumn1

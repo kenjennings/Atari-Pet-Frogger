@@ -46,7 +46,7 @@ ToggleButtonPrompt
 ; Otherwise, therefore, Prompt Dark and Light
 PromptDarkAndLight
 	lda RANDOM             ; A random color
-	and #%11110000         ; Mask out the lumninance for Dark.
+	and #$F0               ; Mask out the lumninance for Dark.
 	beq PromptDarkAndLight ; Do again if black/color 0 turned up
 	sta COLPF2_TABLE+23    ; Set background
 	lda #$0C               ; Light text
@@ -55,7 +55,7 @@ PromptDarkAndLight
 
 PromptLightAndDark
 	lda RANDOM             ; A random color
-	and #%11110000         ; Mask out the lumninance for Dark.
+	and #$F0               ; Mask out the lumninance for Dark.
 	beq PromptLightAndDark ; Do again if black/color 0 turned up
 	ora #$0C               ; Light Background
 	sta COLPF2_TABLE+23    ; Set background
@@ -260,6 +260,101 @@ FrogMoveUp
 
 	ldx FrogRow ; Make sure CPU flags reflect X = 0 or !0
 
+	rts
+
+
+; ==========================================================================
+; Determine the new, real memory location of the frog.
+;
+; Given the row, logical X coordinate, and scrolling factor of the row
+; determine where the frog really is in screen memory.
+; Note that FrogMoveUp established the pointer to the frog's row.
+; Two positions need to be calculated separated by 40 bytes.  
+; If the first calculation produces a number less than 40, then the 
+; second position is +40.   Otherwise the second position is -40
+; --------------------------------------------------------------------------
+WhereIsThePhysicalFrog
+	clc
+	lda FrogColumn          ; Logical position (where visible on screen)
+	ldx FrogRow             ; Get the current row number.
+	ldy MOVING_ROW_STATES,x ; Get the movement flag for the row.
+	beq FrogOnTheBeach      ; Zero is no scrolling, so no math.
+	bpl FrogOnBoatRight     ; +1 is boats going right
+
+	; Determine frog on boats going left.
+	adc CurrentLeftOffset     ; Add scroll position to the logical column
+	bcc NormalizeFrogPostions ; Calculate second frog position
+
+FrogOnBoatRight
+	adc CurrentRightOffset
+
+NormalizeFrogPositions
+	sta FrogRealColumn1
+	cmp #40                   ; Where is the first calculated position
+	bcs PhysicalFrogMinus40   ; Greater than, equal to 40, so subtract 40 
+
+	; BCC == Less than 40, so add 40. 
+	adc #40
+	bpl SaveSecondPosition    ; We know the maximum value is 79
+
+	PhysicalFrogMinus40       ; Got here due to BCS, so no SEC needed.
+	sbc #40 
+	bpl SaveSecondPosition
+
+FrogOnTheBeach                ; No alternate position for beach rows.  Trick the
+	sta FrogRealColumn1       ; future use by keeping the same value for both...
+
+SaveSecondPosition
+	sta FrogRealColumn2       ; 
+
+ExitWhereIsThePhysicalFrog
+	jsr GetScreenMemoryUnderFrog ; Update the cached character where the frog resides.
+
+	rts
+
+	
+	
+	
+	
+
+; ==========================================================================
+; ANTICIPATE FROG DEATH
+; If the boat moves will the frog die?
+;
+; Due to the change to scrolling by LMS the frog must be shown dead in its
+; current position BEFORE the boat woould move it off screen.
+; Therefore the game logic tilts a little from collision detection to
+; collision avoidance.
+;
+; Data to drive AutoMoveFrog routine.
+; Byte value indicates direction of row movement.
+; 0   = Beach line, no movement.
+; 1   = first boat/river row, move right
+; 255 = second boat/river row, move left.
+;
+; FrogSafety (and Z flag) indicates frog is now dead.
+; --------------------------------------------------------------------------
+AnticipateFrogDeath
+	ldy FrogColumn          ; Logical position (where visible on screen)
+	ldx FrogRow             ; Get the current row number.
+	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
+	beq ExitFrogNowAlive    ; Is it 0?  Beach. Nothing to do.  Bail.
+	bpl CheckFrogGoRight    ; is it $1?  then check right move.
+
+; Check Frog Go Left
+	cpy #0
+	bne ExitFrogNowAlive      ; Not at limit means frog is still alive.
+	beq FrogDemiseByWallSplat ; At zero means frog will leave screen.
+
+CheckFrogGoRight
+	cpy #39                   ; 39 is limit or frog would leave screen
+	bne ExitFrogNowAlive      ; Not at limit means frog is still alive.
+
+FrogDemiseByWallSplat
+	inc FrogSafety            ; Schrodinger's frog is known to be dead.
+
+ExitFrogNowAlive
+	lda FrogSafety            ; branching here is no change, so we assume frog is alive.
 	rts
 
 
