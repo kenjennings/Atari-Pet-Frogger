@@ -239,7 +239,6 @@ TestTransGame2
 	sta EventCounter2 ; return to 0.
 	beq EndTransitionToGame
 
-
 	; === STAGE 3 ===
 	; Fade in text lines from top to bottom.
 	; Decrease COLPF1 brightness from top to bottom.
@@ -280,8 +279,6 @@ EndTransitionToGame
 	rts
 
 
-
-
 ; ==========================================================================
 ; Event Process GAME SCREEN
 ; Play the game.
@@ -312,7 +309,7 @@ ProcessJoystickInput         ; Reminder: Input Bits: "0 0 0 Trigger Right Left 0
 	lda InputStick           ; Get the cooked joystick state... 
 
 UpStickTest
-	ror A                    ; Roll out low bit. UP
+	ror                      ; Roll out low bit. UP
 	bcc LeftStickTest        ; No bit. Try Left.
 
 	jsr FrogMoveUp           ; Yes, go do UP. Subtract from FrogRow.
@@ -320,8 +317,8 @@ UpStickTest
 	bne SaveNewFrogLocation  ; Row greater than 0.  Evaluate good/bad position.
 
 LeftStickTest
-	ror A                    ; Roll out empty bit. DOWN (it is unused)
-	ror A                    ; Roll out low bit. LEFT
+	ror                      ; Roll out empty bit. DOWN (it is unused)
+	ror                      ; Roll out low bit. LEFT
 	bcc RightStickTest       ; No bit. Try Right.
 
 	ldy FrogColumn           ; Get "logical" apparent screen position.
@@ -331,7 +328,7 @@ LeftStickTest
 	bpl SaveNewFrogLocation  ; Place frog on screen
 
 RightStickTest
-	ror A                    ; Roll out low bit. RIGHT
+	ror                      ; Roll out low bit. RIGHT
 	bcc ReplaceFrogOnScreen  ; No bit.  Replace Frog on screen.  Try boat animation.
 
 	ldy FrogColumn           ; Get "logical" apparent screen position.
@@ -344,16 +341,27 @@ RightStickTest
 SaveNewFrogLocation
 	jsr WhereIsThePhysicalFrog ; Update Frog Real Positions and the LastCharacter found there.
 
+; These are all safe characters...
+; I_SEATS   = $0B ; +, boat seats
 
+; I_BEACH1  = $0D ; -, beach rocks
+; I_BEACH2  = $0F ; /, beach rocks
+; I_BEACH3  = $1B ; ;, beach rocks
+; I_SPACE   = $00 ; space, also safe beach spot.
 
-==================================================================================
 ; Will the Pet Frog land on the Beach?
-	cmp #INTERNAL_INVSPACE   ; Atari uses inverse space for beach
+	cmp #I_SPACE             ; = $00 ; space, also safe beach spot.
+	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
+	cmp #I_BEACH1            ; = $0D ; -, beach rocks
+	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
+	cmp #I_BEACH2            ; = $0F ; -, beach rocks
+	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
+	cmp #I_BEACH3            ; = $1B ; -, beach rocks
 	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
 
 ; Will the Pet Frog land in the boat?
 CheckBoatLanding
-	cmp #INTERNAL_BALL       ; Atari uses ball graphics, ctrl-t
+	cmp #INTERNAL_BALL       ; I_SEATS   = $0B ; +, boat seats
 	beq ReplaceFrogOnScreen  ; Yes.  Safe!  Draw the frog.
 
 ; Safe locations have been accounted.
@@ -369,8 +377,8 @@ DoSetupForFrogWins
 
 ; Replace frog on screen, continue with boat animation.
 ReplaceFrogOnScreen
-	lda #INTERNAL_O          ; Atari internal code for "O" is frog.
-	sta (FrogLocation),y     ; Save to screen memory to display it.
+	jsr UpdateFrogInScreenMemory ; redraw the frog where it belongs
+
 
 ; ==========================================================================
 ; GAME SCREEN - Screen Animation Section
@@ -381,10 +389,11 @@ CheckForAnim
 
 	jsr SetBoatSpeed         ; Reset timer for animation based on number of saved frogs.
 
+	jsr AnticipateFrogDeath  ; Will the frog die when the boat moves?
+	bne DoSetupForYerDead    ; Shrodinger says apparently so.  dead frog.
+
 	jsr AnimateBoats         ; Move the boats around.
-	jsr AutoMoveFrog         ; GOTO AUTOMVE
-	lda FrogSafety           ; Whay does Schrodinger have to say?
-	bne DoSetupForYerDead    ; Nooooooo!
+	jsr AutoMoveFrog         ; Move the frog relative to boats.
 
 EndGameScreen
 	lda CurrentScreen

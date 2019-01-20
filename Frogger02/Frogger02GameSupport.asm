@@ -96,7 +96,7 @@ CheckButton
 ; Clear the score digits to zeros.
 ; That is, internal screen code for "0"
 ; If a high score is flagged, then do not clear high score.
-; other one-time things at game start.
+; And some other things at game start.
 ; --------------------------------------------------------------------------
 ClearGameScores
 	ldx #$07            ; 8 digits. 7 to 0
@@ -297,7 +297,7 @@ NormalizeFrogPositions
 	adc #40
 	bpl SaveSecondPosition    ; We know the maximum value is 79
 
-	PhysicalFrogMinus40       ; Got here due to BCS, so no SEC needed.
+PhysicalFrogMinus40       ; Got here due to BCS, so no SEC needed.
 	sbc #40 
 	bpl SaveSecondPosition
 
@@ -310,51 +310,6 @@ SaveSecondPosition
 ExitWhereIsThePhysicalFrog
 	jsr GetScreenMemoryUnderFrog ; Update the cached character where the frog resides.
 
-	rts
-
-	
-	
-	
-	
-
-; ==========================================================================
-; ANTICIPATE FROG DEATH
-; If the boat moves will the frog die?
-;
-; Due to the change to scrolling by LMS the frog must be shown dead in its
-; current position BEFORE the boat woould move it off screen.
-; Therefore the game logic tilts a little from collision detection to
-; collision avoidance.
-;
-; Data to drive AutoMoveFrog routine.
-; Byte value indicates direction of row movement.
-; 0   = Beach line, no movement.
-; 1   = first boat/river row, move right
-; 255 = second boat/river row, move left.
-;
-; FrogSafety (and Z flag) indicates frog is now dead.
-; --------------------------------------------------------------------------
-AnticipateFrogDeath
-	ldy FrogColumn          ; Logical position (where visible on screen)
-	ldx FrogRow             ; Get the current row number.
-	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
-	beq ExitFrogNowAlive    ; Is it 0?  Beach. Nothing to do.  Bail.
-	bpl CheckFrogGoRight    ; is it $1?  then check right move.
-
-; Check Frog Go Left
-	cpy #0
-	bne ExitFrogNowAlive      ; Not at limit means frog is still alive.
-	beq FrogDemiseByWallSplat ; At zero means frog will leave screen.
-
-CheckFrogGoRight
-	cpy #39                   ; 39 is limit or frog would leave screen
-	bne ExitFrogNowAlive      ; Not at limit means frog is still alive.
-
-FrogDemiseByWallSplat
-	inc FrogSafety            ; Schrodinger's frog is known to be dead.
-
-ExitFrogNowAlive
-	lda FrogSafety            ; branching here is no change, so we assume frog is alive.
 	rts
 
 
@@ -403,7 +358,7 @@ ExitFrogNowAlive
 ; AUTO MOVE FROG
 ; Process automagical movement on the frog in the moving boat lines
 ;
-; The code calls AnticipateFrogDeath first, so it knows the auto
+; The code must call AnticipateFrogDeath first, so it knows the auto
 ; movement will be safe.
 ;
 ; Data to drive AutoMoveFrog routine.

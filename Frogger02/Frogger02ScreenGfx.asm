@@ -237,21 +237,6 @@
 ; --------------------------------------------------------------------------
 ClearScreen
 
-;	mRegSaveAX ; Save A and X, so the caller doesn't need to.
-
-;	lda #INTERNAL_SPACE  ; Blank Space byte. (known to be 0)
-;	ldx #200             ; Loop 200 to 1, end when 0
-
-;ClearScreenLoop
-;	sta SCREENMEM-1, x    ; 0   to 199
-;	sta SCREENMEM+200-1,x ; 200 to 399
-;	sta SCREENMEM+400-1,x ; 400 to 599
-;	sta SCREENMEM+600-1,x ; 600 to 799
-;	sta SCREENMEM+800-1,x ; 800 to 999
-;	dex
-;	bne ClearScreenLoop
-
-;	mRegRestoreAX ; Restore X and A
 
 	rts
 
@@ -266,15 +251,6 @@ ClearScreen
 ; --------------------------------------------------------------------------
 ClearForGfx
 
-;	ldx #SIZEOF_LINE
-;	lda #INTERNAL_SPACE
-
-;LoopClearForGfx
-;	sta SCREENMEM+360,x ; Line 10
-;	sta SCREENMEM+520,x ; Line 14
-
-;	dex
-;	bpl LoopClearForGfx
 
 	rts
 
@@ -283,14 +259,7 @@ ClearForGfx
 ; Print the big text announcement for dead frog.
 ; --------------------------------------------------------------------------
 PrintDeadFrogGfx
-;	jsr ClearForGfx
 
-;	ldx #SIZEOF_BIG_GFX
-;LoopPrintDeadText
-;	lda FROG_DEAD_GFX,x
-;	sta SCREENMEM+400,X
-;	dex
-;	bpl LoopPrintDeadText
 
 	rts
 
@@ -299,38 +268,18 @@ PrintDeadFrogGfx
 ; Print the big text announcement for Winning frog.
 ; --------------------------------------------------------------------------
 PrintWinFrogGfx
-;	jsr ClearForGfx
 
-;	ldx #SIZEOF_BIG_GFX
-;LoopPrintWinsText
-;	lda FROG_SAVE_GFX,x
-;	sta SCREENMEM+400,X
-;	dex
-;	bpl LoopPrintWinsText
 
-;rts
+	rts
 
 
 ; ==========================================================================
 ; Print the big text announcement for Game Over.
 ; --------------------------------------------------------------------------
 PrintGameOverGfx
-;	jsr ClearForGfx
 
-;	ldx #SIZEOF_BIG_GFX
-;LoopPrintGameOverText
-;	lda GAME_OVER_GFX,x
-;	sta SCREENMEM+400,x
-;	dex
-;	bpl LoopPrintGameOverText
 
 	rts
-
-
-
-
-
-
 
 
 ; ==========================================================================
@@ -409,44 +358,12 @@ GetScreenMemoryUnderFrog
 ; Set state of the text line that is blinking.
 ; --------------------------------------------------------------------------
 DisplayTitleScreen
-;	jsr ClearScreen
-
-;	ldx #0
-
-; An individual setup and call to PrintToScreen is 7 bytes which
-; makes explicit setup for six calls for screen writing 42 bytes long.
-; Since there are multiple, repeat patterns of the same thing,
-; wrap it in a loop and read the driving data from a table.
-; The ldx for setup, this code in the loop, plus the actual data
-; in the driving tables is 2+19+12 = 33 bytes long.
-
-;LoopDisplayTitleText
-;	ldy TITLE_PRINT_LIST,x
-;	txa
-;	pha
-;	lda TITLE_PRINT_ROWS,x
-;	tax
-;	jsr PrintToScreen
-;	pla
-;	tax
-;	inx
-;	cpx #6
-;	bne LoopDisplayTitleText
-
-;	lda #1                   ; default condition of blinking prompt is inverse
-;	sta ToggleState
 
 	lda #DISPLAY_TITLE   ; Tell VBI to change screens.
 	jsr ChangeScreen     ; Then copy the color tables.
 
 	rts
 
-;TITLE_PRINT_LIST
-;	.byte PRINT_TITLE_TXT,PRINT_CREDIT_TXT,PRINT_INST_TXT1
-;	.byte PRINT_INST_TXT2,PRINT_INST_TXT3,PRINT_INST_TXT4_INV
-
-;TITLE_PRINT_ROWS
-;	.byte 0,2,6,15,19,23
 
 
 ; ==========================================================================
@@ -458,32 +375,6 @@ DisplayTitleScreen
 ; --------------------------------------------------------------------------
 DisplayGameScreen
 	mRegSaveAYX             ; Save A and Y and X, so the caller doesn't need to.
-
-;	jsr ClearScreen
-
-;	ldy #PRINT_CREDIT_TXT   ; Identify the culprits responsible
-;	ldx #22
-;	jsr PrintToScreen
-
-;	ldy #PRINT_SCORE_TXT    ; Print the lives and score labels
-;	ldx #0
-;	jsr PrintToScreen
-
-;	ldy #PRINT_TEXT1        ; Print TEXT1 -  beaches and boats (6 times)
-;	ldx #2
-
-;LoopPrintBoats
-;	jsr PrintToScreen
-
-;	inx                     ; Skip forward three lines
-;	inx
-;	inx
-
-;	cpx #20                 ; Printed six times? (18 lines total)
-;	bne LoopPrintBoats      ; No, go back to print another set of lines.
-
-;	ldy #PRINT_TEXT2        ; Print TEXT2 - last Beach with the frog (X is 20 here)
-;	jsr PrintToScreen
 
 	jsr ResetGamePlayfield ; initialize all game playfield LMS values.
 
@@ -539,73 +430,6 @@ LoadPlayfieldPointerFromX
 	rts
 
 
-; ==========================================================================
-; Copy text blocks to screen memory.
-;
-; Parameters:
-; Y = index of the text item.  One of the PRINT_... values.
-; X = row number on screen 0 to 24.
-;
-; Used by code:
-; A = used to multiply  value of index, and move the values.
-; --------------------------------------------------------------------------
-PrintToScreen
-	; cpy #PRINT_END
-	; bcs ExitPrintToScreen      ; Greater than or equal to END marker, so exit.
-
-	; mRegSaveAYX                ; Save A and Y and X, so the caller doesn't need to.
-
-	; asl                        ; multiply row number by 2 for address lookup.
-	; tax                        ; use as index.
-	; jsr LoadScreenPointerFromX ; get row pointer based on X
-
-	; tya                        ; get the text identification.
-	; asl                        ; multiply by 2 for all the word lookups.
-	; tay                        ; use as index.
-
-	; lda TEXT_MESSAGES,y        ; Load up the values from the tables
-	; sta TextPointer
-	; lda TEXT_SIZES,y
-	; sta TextLength
-	; iny                        ; now the high bytes
-	; lda TEXT_MESSAGES,y        ; Load up the values from the tables.
-	; sta TextPointer+1
-	; lda TEXT_SIZES,y
-	; sta TextLength+1
-
-	; ldy #0
-; PrintToScreenLoop              ; sub-optimal copy through page 0 indirect index
-	; lda (TextPointer),y        ; Always assumes at least 1 byte to copy
-	; sta (ScreenPointer),y
-
-	; dec TextLength             ; Decrement length.  Stop when length is 0.
-	; bne DoEvaluateLengthHi     ; If low byte is not 0, then continue
-	; lda TextLength+1           ; Is the high byte also 0?
-	; beq EndPrintToScreen       ; Low byte and high byte are 0, so we're done.
-
-; DoEvaluateLengthHi             ; Check if hi byte of length must decrement
-	; lda TextLength             ; If this rolled from 0 to $FF
-	; cmp #$FF                   ; this means there is a high byte to decrement
-	; bne DoTextPointer          ; Nope.  So, continue.
-	; dec TextLength+1           ; Yes, low byte went 0 to FF, so decrement high byte.
-
-; DoTextPointer                  ; inc text pointer.
-	; inc TextPointer
-	; bne DoScreenPointer        ; Did not roll from 255 to 0, so skip hi byte
-	; inc TextPointer+1
-
-; DoScreenPointer                ; inc screen pointer.
-	; inc ScreenPointer
-	; bne PrintToScreenLoop      ; Did not roll from 255 to 0, so skip hi byte
-	; inc ScreenPointer+1
-	; bne PrintToScreenLoop      ; The inc above must reasonably be non-zero.
-
-; EndPrintToScreen
-	; mRegRestoreAYX             ; Restore X, Y and A
-
-ExitPrintToScreen
-	rts
-
 
 ; ==========================================================================
 ; ANIMATE BOATS
@@ -621,9 +445,6 @@ ExitPrintToScreen
 AnimateBoats
 ; First, need to check if the frog will become killed offscreen.  that means it is
 ; dead now where it is and boat scrolling must not go any further.
-
-
-;	ldx #6                ; Loop 3 to 18 step 3 -- 6 = 3 times 2 for size of word in SCREEN_ADDR
 
 	; Update with working positions of the scrolling lines.
 
@@ -651,69 +472,6 @@ UpdatePlayfieldLMS
 
 	jsr UpdateGamePlayfield ; Update all the LMS offsets.
 
-
-	; ; FIRST PART -- Set up for Right Shift...
-; RightShiftRow
-	; lda SCREEN_ADDR,x     ; Get address of this row in X from the screen memory lookup.
-	; sta MovesCars
-	; inx
-	; lda SCREEN_ADDR,x
-	; sta MovesCars+1
-	; inx
-
-	; ldy #$27              ; Character position, start at +39 (dec)
-	; lda (MovesCars),y     ; Read byte from screen (start +39)
-	; pha                   ; Save the character at the end to move to position 0.
-	; dey                   ; now at offset +38 (dec)
-
-; MoveToRight ; Shift text lines to the right.
-	; lda (MovesCars),y     ; Read byte from screen (start +38)
-	; iny
-	; sta (MovesCars),y     ; Store byte to screen at next position (start +39)
-
-	; dey                   ; Back up to the original read position.
-	; dey                   ; Backup to previous position.
-
-	; bpl MoveToRight       ; Backed up from 0 to FF? No. Do the shift again.
-
-	; ; Copy character at end of line to the start of the line.
-	; iny                   ; Go back from $FF to $00
-	; pla                   ; Get character that was at the end of the line.
-	; sta (MovesCars),y     ; Save it at start of line.
-
-	; ; SECOND PART -- Setup for Left Shift...
-	; lda SCREEN_ADDR,x
-	; sta MovesCars
-	; inx
-	; lda SCREEN_ADDR,x
-	; sta MovesCars+1
-	; inx
-
-	; lda (MovesCars),y     ; Read byte from screen (start +0)
-	; pha                   ; Save to move to position +39.
-	; iny                   ; now at offset +1 (dec)
-
-; MoveToLeft                ; Shift text lines to the left.
-	; lda (MovesCars),y     ; Get byte from screen (start +1)
-	; dey
-	; sta (MovesCars),y     ; Store byte at previous position (start +0)
-
-	; iny                   ; Forward to the original read position. (start +1)
-	; iny                   ; Forward to the next read position. (start +2)
-
-	; cpy #40               ; Reached position $27/39 (dec) (end of line)?
-	; bne MoveToLeft        ; No.  Do the shift again.
-
-	; ; Copy character at start of line to the end of the line.
-	; ldy #39               ; Offset $27/39 (dec)
-	; pla                   ; Get character that was at the end of the line.
-	; sta (MovesCars),y     ; Save it at end of line.
-
-	; inx                   ; skip the beach line
-	; inx
-
-	; cpx #40               ; 21st line (20 from base 0) times 2
-	; bcc RightShiftRow     ; Continue to loop, right, left, right, left
 
 	jsr CopyScoreToScreen ; Finish up by updating score display.
 
@@ -845,26 +603,6 @@ ResetGamePlayfield
 
 	rts
 
-
-;LoopResetLMS
-;	lda PLAYFIELD_LMS_RIGHT_LO_TABLE,y ; LMS for Right moving boats
-;	sta PlayfieldLMSPointer
-;	lda PLAYFIELD_LMS_RIGHT_HI_TABLE,y
-;	sta PlayfieldLMSPointer+1
-;	lda #$00                           ; Starting offset is 0
-;	sta (PlayfieldLMSPointer),y
-
-;	lda PLAYFIELD_LMS_LEFT_LO_TABLE,y  ; LMS for Left moving boats
-;	sta PlayfieldLMSPointer
-;	lda PLAYFIELD_LMS_LEFT_HI_TABLE,y
-;	sta PlayfieldLMSPointer+1
-;	lda #$80                           ; Starting offset is 128
-;	sta (PlayfieldLMSPointer),y
-
-;	dex
-;	bpl LoopResetLMS
-
-;	rts
 
 ; ==========================================================================
 ; ZERO CURRENT COLORS                                                 A  Y
