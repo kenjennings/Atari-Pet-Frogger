@@ -415,26 +415,26 @@ EventTransitionToWin
 	lda #WIN_FILL_SPEED      ; yes.  Reset it. (60 / 6 == 10 updates per second)
 	jsr ResetTimers
 
-	ldx EventCounter         ; Row number for text.
-	cpx #13                  ; From 2 to 12, erase from top to middle
-	beq DoSwitchToWins       ; When at 13 then fill screen is done.
+;	ldx EventCounter         ; Row number for text.
+;	cpx #13                  ; From 2 to 12, erase from top to middle
+;	beq DoSwitchToWins       ; When at 13 then fill screen is done.
 
-	ldy #PRINT_BLANK_TXT_INV ; inverse blanks.
-	jsr PrintToScreen
+;	ldy #PRINT_BLANK_TXT_INV ; inverse blanks.
+;	jsr PrintToScreen
 
-	lda #26                  ; Subtract Row number for text from 26 (26-2 = 24)
-	sec
-	sbc EventCounter
-	tax
+;	lda #26                  ; Subtract Row number for text from 26 (26-2 = 24)
+;	sec
+;	sbc EventCounter
+;	tax
 
-	jsr PrintToScreen        ; And print the inverse blanks again.
+;	jsr PrintToScreen        ; And print the inverse blanks again.
 
-	inc EventCounter
-	bne EndTransitionToWin   ; Nothing else to do here.
+;	inc EventCounter
+;	bne EndTransitionToWin   ; Nothing else to do here.
 
 ; Clear screen is done.   Display the big prompt.
 DoSwitchToWins
-	jsr PrintWinFrogGfx      ; Copy the big text announcement to screen
+;	jsr PrintWinFrogGfx      ; Copy the big text announcement to screen
 
 	jsr SetupWin             ; Setup for Wins screen (which only waits for input )
 
@@ -479,37 +479,37 @@ EventTransitionToDead
 	lda #DEAD_FILL_SPEED        ; yes.  Reset it. (drawing speed)
 	jsr ResetTimers
 
-	ldy EventCounter            ; column number for text.
-	cpy #20                     ; From 0 to 19, erase from left to middle.
-	beq DoTransitionToDeadPart2 ; wipe done. continue to big dead text.
+;	ldy EventCounter            ; column number for text.
+;	cpy #20                     ; From 0 to 19, erase from left to middle.
+;	beq DoTransitionToDeadPart2 ; wipe done. continue to big dead text.
 
 ; PART 1 -- Wipe the screen from sides to center.
 DoTransitionToDeadPart1         ; Have not reached the end, wipe more screen
-	ldx #4                      ; use as line index. 2 (*2) to 24 (*2)
+;	ldx #4                      ; use as line index. 2 (*2) to 24 (*2)
 
 LoopDeadTransition
-	jsr LoadScreenPointerFromX  ; Load ScreenPointer From X index.  duh.
-	stx SAVEX                   ; Keep for later.
+;	jsr LoadScreenPointerFromX  ; Load ScreenPointer From X index.  duh.
+;	stx SAVEX                   ; Keep for later.
 
-	lda #INTERNAL_INVSPACE      ; inverse space
-	sta (ScreenPointer),y       ; stuff into column Y from the left.
-	sty SAVEY                   ; Save the Y column.
-	lda #39                     ; Subtract ...
-	sec                         ; the column...
-	sbc SAVEY                   ; from 39...
-	tay                         ; for the right side.
-	lda #INTERNAL_INVSPACE
-	sta (ScreenPointer),y       ; And stuff into column Y from the right.
+;	lda #INTERNAL_INVSPACE      ; inverse space
+;	sta (ScreenPointer),y       ; stuff into column Y from the left.
+;	sty SAVEY                   ; Save the Y column.
+;	lda #39                     ; Subtract ...
+;	sec                         ; the column...
+;	sbc SAVEY                   ; from 39...
+;	tay                         ; for the right side.
+;	lda #INTERNAL_INVSPACE
+;	sta (ScreenPointer),y       ; And stuff into column Y from the right.
 
-	cpx #50 ; Lines 0 to 24 times 2.  Line 25 times 2 is the exit.
-	bne LoopDeadTransition
+;	cpx #50 ; Lines 0 to 24 times 2.  Line 25 times 2 is the exit.
+;	bne LoopDeadTransition
 
-	inc EventCounter            ; Set for next run to the next column
-	bne EndTransitionToDead     ; And this turn is done.
+;	inc EventCounter            ; Set for next run to the next column
+;	bne EndTransitionToDead     ; And this turn is done.
 
 ; PART 2 -- Clear screen is done.
 DoTransitionToDeadPart2
-	jsr PrintDeadFrogGfx        ; Display the Big Dead Frog Text.
+;	jsr PrintDeadFrogGfx        ; Display the Big Dead Frog Text.
 
 	jsr SetupDead               ; Setup for Dead screen (wait for input loop)
 
@@ -555,32 +555,32 @@ EventTransitionGameOver
 	lda AnimateFrames          ; Did animation counter reach 0 ?
 	bne EndTransitionGameOver  ; Nope.  Nothing to do.
 
-	dec EventCounter                ; Decrement pass counter.
-	beq DoTransitionToGameOverPart2 ; When this reaches 0 finish the screen
+;	dec EventCounter                ; Decrement pass counter.
+;	beq DoTransitionToGameOverPart2 ; When this reaches 0 finish the screen
 
 	lda #RES_IN_SPEED          ; Running animation loop. Reset timer.
 	jsr ResetTimers
 
 	; Randomize display of Game Over
-	ldy #16                    ; Do 16 random characters per pass.
+;	ldy #16                    ; Do 16 random characters per pass.
 GetRandomX
-	lda RANDOM                 ; Get a random value.
-	and #$7F                   ; Mask it down to 0 to 127 value
-	cmp #118                   ; Is it more than 118?
-	bcs GetRandomX             ; Yes, retry it.
-	tax                        ; The index into the image and screen buffers.
-	lda GAME_OVER_GFX,x        ; Get image byte
-	beq SkipGameOverEOR        ; if this is 0 just copy to screen
-	eor SCREENMEM+400,x        ; Exclusive Or with screen
+;	lda RANDOM                 ; Get a random value.
+;	and #$7F                   ; Mask it down to 0 to 127 value
+;	cmp #118                   ; Is it more than 118?
+;	bcs GetRandomX             ; Yes, retry it.
+;	tax                        ; The index into the image and screen buffers.
+;	lda GAME_OVER_GFX,x        ; Get image byte
+;	beq SkipGameOverEOR        ; if this is 0 just copy to screen
+;	eor SCREENMEM+400,x        ; Exclusive Or with screen
 SkipGameOverEOR
-	sta SCREENMEM+400,x        ; Write to screen
-	dey
-	bne GetRandomX             ; Do another random character in this turn.
-	beq EndTransitionGameOver
+;	sta SCREENMEM+400,x        ; Write to screen
+;	dey
+;	bne GetRandomX             ; Do another random character in this turn.
+;	beq EndTransitionGameOver
 
 	; Finish up.
 DoTransitionToGameOverPart2
-	jsr PrintGameOverGfx       ;  Draw Big Game Over
+;	jsr PrintGameOverGfx       ;  Draw Big Game Over
 
 	jsr SetupGameOver
 

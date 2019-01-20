@@ -282,8 +282,8 @@ WhereIsThePhysicalFrog
 	bpl FrogOnBoatRight     ; +1 is boats going right
 
 	; Determine frog on boats going left.
-	adc CurrentLeftOffset     ; Add scroll position to the logical column
-	bcc NormalizeFrogPostions ; Calculate second frog position
+	adc CurrentLeftOffset      ; Add scroll position to the logical column
+	bcc NormalizeFrogPositions ; Calculate second frog position
 
 FrogOnBoatRight
 	adc CurrentRightOffset
@@ -297,7 +297,7 @@ NormalizeFrogPositions
 	adc #40
 	bpl SaveSecondPosition    ; We know the maximum value is 79
 
-PhysicalFrogMinus40       ; Got here due to BCS, so no SEC needed.
+PhysicalFrogMinus40           ; Got here due to BCS, so no SEC needed.
 	sbc #40 
 	bpl SaveSecondPosition
 

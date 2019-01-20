@@ -250,6 +250,7 @@
 	icl "ANTIC.asm" ; Display List registers
 	icl "GTIA.asm"  ; Color Registers.
 	icl "POKEY.asm" ;
+	icl "PIA.asm"   ; Controllers
 	icl "OS.asm"    ;
 	icl "DOS.asm"   ; LOMEM, load file start, and run addresses.
 ; --------------------------------------------------------------------------

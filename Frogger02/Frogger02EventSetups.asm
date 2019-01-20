@@ -98,9 +98,6 @@ SetupGame
 	lda #0
 	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
 
-	lda #INTERNAL_SPACE     ; Default position.
-	sta LastCharacter       ; Preset the character under the frog.
-
 	lda #<PLAYFIELD_MEM18   ; Low Byte, Frog position.
 	sta FrogLocation
 	lda #>PLAYFIELD_MEM18   ; Hi Byte, Frog position.
@@ -117,12 +114,8 @@ SetupGame
 	lda #I_FROG             ; On Atari we're using $7F as the frog shape.
 	sta (FrogLocation),y    ; PLAYFIELD_MEM18 (beach) + $13/19 (dec)
 
-;	lda #0                  ; Scrolling LMS offset
-;	tax                     ; and for the LMS in other direction.
-;	jsr UpdateGamePlayfield ; Reset Game screen to initial position.
-
-;	lda #DISPLAY_GAME       ; Tell VBI to change screens.
-;	jsr ChangeScreen        ; Then copy the color tables.
+	lda #I_SPACE            ; Default position.
+	sta LastCharacter       ; Preset the character under the frog.
 
 	lda #SCREEN_GAME        ; Yes, change to game screen event.
 	sta CurrentScreen
@@ -152,10 +145,6 @@ SetupTransitionToWin
 	lda #DISPLAY_WIN        ; Tell VBI to change screens.
 	jsr ChangeScreen        ; Then copy the color tables.
 
-;	jsr ClearKey
-
-;	jsr CopyWinColorsToDLI
-
 	lda #SCREEN_TRANS_WIN   ; Next step is operating the transition animation.
 	sta CurrentScreen
 
@@ -173,8 +162,6 @@ SetupWin
 	lda #BLINK_SPEED    ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
-;	jsr ClearKey
-
 	lda #SCREEN_WIN     ; Change to wins screen.
 	sta CurrentScreen
 
@@ -191,9 +178,7 @@ SetupWin
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupTransitionToDead
-	; splat the frog:
-	lda #I_SPLAT            ; Atari ASCII $2A/42 (dec) Splattered Frog.
-	sta (FrogLocation),y    ; Road kill the frog.
+	jsr SetSplatteredOnScreen ; splat the frog:
 
 	dec NumberOfLives       ; subtract a life.
 	jsr CopyScoreToScreen   ; Update the screen information
@@ -208,10 +193,6 @@ SetupTransitionToDead
 
 	lda #DISPLAY_DEAD       ; Tell VBI to change screens.
 	jsr ChangeScreen        ; Then copy the color tables.
-
-;	jsr ClearKey
-
-;	jsr CopyDeadColorsToDLI
 
 	lda #SCREEN_TRANS_DEAD  ; Next step is operating the transition animation.
 	sta CurrentScreen
@@ -229,8 +210,6 @@ SetupTransitionToDead
 SetupDead
 	lda #BLINK_SPEED     ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
-
-;	jsr ClearKey
 
 	lda #SCREEN_DEAD     ; Change to dead screen.
 	sta CurrentScreen
@@ -255,10 +234,6 @@ SetupTransitionToGameOver
 	lda #DISPLAY_OVER      ; Tell VBI to change screens.
 	jsr ChangeScreen       ; Then copy the color tables.
 
-;	jsr ClearKey
-
-;	jsr CopyOverColorsToDLI
-
 	lda #SCREEN_TRANS_OVER ; Change to game over transition.
 	sta CurrentScreen
 
@@ -276,11 +251,8 @@ SetupGameOver
 	lda #BLINK_SPEED     ; Text Blinking speed for prompt on Title screen.
 	jsr ResetTimers
 
-;	jsr ClearKey
-
 	lda #SCREEN_OVER     ; Change to Game Over screen.
 	sta CurrentScreen
 
 	rts
-
 

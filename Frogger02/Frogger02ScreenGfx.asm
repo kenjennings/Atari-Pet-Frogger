@@ -402,12 +402,12 @@ DisplayGameScreen
 ; A = used to multiply  move the values.
 ; --------------------------------------------------------------------------
 LoadScreenPointerFromX
-	lda SCREEN_ADDR,x      ; Get screen row address low byte.
-	sta ScreenPointer
-	inx
-	lda SCREEN_ADDR,x      ; Get screen row address high byte.
-	sta ScreenPointer+1
-	inx                    ; doing this for consistency so the next call pulls correct row
+;	lda SCREEN_ADDR,x      ; Get screen row address low byte.
+;	sta ScreenPointer
+;	inx
+;	lda SCREEN_ADDR,x      ; Get screen row address high byte.
+;	sta ScreenPointer+1
+;	inx                    ; doing this for consistency so the next call pulls correct row
 
 	rts
 

@@ -32,29 +32,29 @@ GAMESTART
 	; interrupt and this directs the interrupt to change the current
 	; display list.  Easy-peasy and never updated at the wrong time.
 
-	lda #<CHARACTER_SET ; Set custom character set.  Global to game, forever.
+	lda #<CHARACTER_SET        ; Set custom character set.  Global to game, forever.
 	sta CHBAS
 
-	lda #NMI_VBI ; Turn Off DLI
+	lda #NMI_VBI               ; Turn Off DLI
 	sta NMIEN
 
-	lda #<MyDLI ; Set DLI vector.
+	lda #<MyDLI                ; Set DLI vector.
 	sta VDSLST
 	lda #>MyDLI
 	sta VDSLST+1
 
-	lda #[NMI_DLI|NMI_VBI] ; Turn On DLI
+	lda #[NMI_DLI|NMI_VBI]     ; Turn On DLI
 	sta NMIEN
 
-	ldy #<MyImmediateVBI  ; Add the VBI to the system
+	ldy #<MyImmediateVBI       ; Add the VBI to the system
 	ldx #>MyImmediateVBI
-	lda #6               ; 6 = Immediate VBI
-	jsr SETVBV           ; Tell OS to set it
+	lda #6                     ; 6 = Immediate VBI
+	jsr SETVBV                 ; Tell OS to set it
 
 	lda #0
-	sta COLOR4         ; Border color, 0 is black.
+	sta COLOR4                 ; Border color, 0 is black.
 	sta FlaggedHiScore
-	sta LastKeyPressed
+	sta InputStick             ; no input from joystick
 
 	jsr SetupTransitionToTitle ; will set CurrentScreen = SCREEN_TRANS_TITLE
 
