@@ -150,6 +150,10 @@ EndTransitionToTitle
 EventScreenStart            ; This is New Game and Transition to title.
 
 	jsr ClearGameScores     ; Zero the score.  And high score if not set.
+	jsr CopyScoreToScreen   ; And put into screen memory.
+
+	jsr ClearSavedFrogs     ; Erase the saved frogs from the screen. (Zero the count)
+	jsr PrintFrogsAndLives  ; Update the screen memory.
 
 	lda #SCREEN_TITLE       ; Next step is operating the title screen input.
 	sta CurrentScreen
@@ -161,18 +165,19 @@ EventScreenStart            ; This is New Game and Transition to title.
 ; Event Process TITLE SCREEN
 ; The activity on the title screen is
 ; 1) Blink Prompt for ANY key.
-; 2) Wait for input.
+; 2) Wait for joystich button.
 ; 3) Setup for next transition.
 ; --------------------------------------------------------------------------
 EventTitleScreen
 	jsr RunPromptForButton     ; Blink Prompt to press ANY key.  check key.
+	and #%00010000             ; Is only joystick button pressed?
 	beq EndTitleScreen         ; Nothing pressed, done with title screen.
 
-ProcessTitleScreenInput        ; a key is pressed. Prepare for the screen transition.
+ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transition.
 	jsr SetupTransitionToGame
 
 EndTitleScreen
-	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
+	lda CurrentScreen
 
 	rts
 
@@ -190,22 +195,29 @@ EndTitleScreen
 ; --------------------------------------------------------------------------
 EventTransitionToGame
 	lda AnimateFrames        ; Did animation counter reach 0 ?
-	bne EndTransitionToGame ; Nope.  Nothing to do.
-	lda #CREDIT_SPEED        ; yes.  Reset it.
+	bne EndTransitionToGame  ; Nope.  Nothing to do.
+	lda #TITLE_WIPE_SPEED    ; yes.  Reset it.
 	jsr ResetTimers
 
 	lda EventCounter         ; What stage are we in?
 	cmp #1
-	bne TestTransGame2      ; Not the fade out, try next stage
+	bne TestTransGame2       ; Not the fade out, try next stage
 
 	; === STAGE 1 ===
 	; Fade out text lines  from bottom to top.
-	; Decrease COLPF1 brightness from bottom   to top.
+	; Decrease COLPF1 brightness.
 	; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
+	; Decrement twice here, because once was not fast enough.
+	; The fade and wipe was becoming boring.
 	ldx EventCounter2
-	dec COLPF1_TABLE,x
 	lda COLPF1_TABLE,x
+	beq ZeroCOLPF2
+	dec COLPF1_TABLE,x
+	beq ZeroCOLPF2
+	dec COLPF1_TABLE,x
 	bne EndTransitionToGame
+ZeroCOLPF2
+	lda #0
 	sta COLPF2_TABLE,x
 
 	dec EventCounter2
@@ -241,8 +253,11 @@ TestTransGame2
 
 	; === STAGE 3 ===
 	; Fade in text lines from top to bottom.
-	; Decrease COLPF1 brightness from top to bottom.
-	; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
+	; change COLPF2 to target color.
+	; Increase COLPF1 brightness.
+	; When COLPF1 reaches target move to next line.
+	; Increment twice here, because once was not fast enough.
+	; The fade and wipe was becoming boring.
 TestTransGame3
 	cmp #3
 	bne EndTransitionToGame
@@ -250,6 +265,12 @@ TestTransGame3
 	ldx EventCounter2
 	lda GAME_BACK_COLORS,x ; (redundantly) copy the background color.
 	sta COLPF2_TABLE,x
+
+	lda COLPF1_TABLE,x
+	cmp GAME_TEXT_COLORS,x
+	beq TransGameNextLine
+
+	inc COLPF1_TABLE,x
 
 	lda COLPF1_TABLE,x
 	cmp GAME_TEXT_COLORS,x
@@ -301,7 +322,6 @@ EventGameScreen
 ; --------------------------------------------------------------------------
 	jsr CheckInput           ; Get cooked stick or trigger if timer permits.
 	beq CheckForAnim         ; Nothing pressed, Skip the input section.
-;	sta LastInput            ; Save Stick/trigger.  Well, InputStick has it too, so... why?
 
 	jsr RemoveFrogOnScreen   ; Remove the frog from the screen (duh)
 
@@ -332,7 +352,7 @@ RightStickTest
 	bcc ReplaceFrogOnScreen  ; No bit.  Replace Frog on screen.  Try boat animation.
 
 	ldy FrogColumn           ; Get "logical" apparent screen position.
-	cmp #39                  ; Is it at limit?
+	cpy #39                  ; Is it at limit?
 	beq SaveNewFrogLocation  ; At limit. Can't move right. Redraw frog.
 	iny                      ; Move Y to right.
 	sty FrogColumn
@@ -352,16 +372,16 @@ SaveNewFrogLocation
 ; Will the Pet Frog land on the Beach?
 	cmp #I_SPACE             ; = $00 ; space, also safe beach spot.
 	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
-	cmp #I_BEACH1            ; = $0D ; -, beach rocks
+	cmp #I_BEACH1            ; = $02 ;  beach rocks
 	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
-	cmp #I_BEACH2            ; = $0F ; -, beach rocks
+	cmp #I_BEACH2            ; = $0F ;  beach rocks
 	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
-	cmp #I_BEACH3            ; = $1B ; -, beach rocks
+	cmp #I_BEACH3            ; = $1B ;  beach rocks
 	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
 
 ; Will the Pet Frog land in the boat?
 CheckBoatLanding
-	cmp #INTERNAL_BALL       ; I_SEATS   = $0B ; +, boat seats
+	cmp #I_SEATS             ; I_SEATS   = $0B ; +, boat seats
 	beq ReplaceFrogOnScreen  ; Yes.  Safe!  Draw the frog.
 
 ; Safe locations have been accounted.
@@ -377,7 +397,7 @@ DoSetupForFrogWins
 
 ; Replace frog on screen, continue with boat animation.
 ReplaceFrogOnScreen
-	jsr UpdateFrogInScreenMemory ; redraw the frog where it belongs
+	jsr SetFrogOnScreen ; redraw the frog where it belongs
 
 
 ; ==========================================================================

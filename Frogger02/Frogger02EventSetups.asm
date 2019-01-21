@@ -38,21 +38,27 @@ SetupTransitionToTitle
 	lda #TITLE_SPEED         ; Animation moving speed.
 	jsr ResetTimers
 
+	lda #0
+	sta EnablePressAButton   ; Tell VBI to the prompt flashing is disabled.
+	
 	lda #1
 	sta EventCounter         ; Declare stage 1 behavior for scrolling.
 
 	lda #<TITLE_MEM1         ; Initialize the
 	sta SCROLL_TITLE_LMS0    ; Display List
-	lda #<[TITLE_MEM2]       ; LMS
+	lda #<TITLE_MEM2         ; LMS
 	sta SCROLL_TITLE_LMS1    ; Addresses
-	lda #<[TITLE_MEM3]       ; for scrolling
+	lda #<TITLE_MEM3         ; for scrolling
 	sta SCROLL_TITLE_LMS2    ; in the title.
 
 	lda #DISPLAY_TITLE       ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
+	
 	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
 	sta CurrentScreen
+
+
 
 	rts
 
@@ -65,8 +71,11 @@ SetupTransitionToTitle
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupTransitionToGame
-	lda #CREDIT_SPEED       ; Credit Draw Speed
+	lda #TITLE_WIPE_SPEED   ; Speed of fade/dissolve for tranision
 	jsr ResetTimers
+
+	lda #0
+	sta EnablePressAButton   ; Tell VBI the prompt flashing is disabled.
 
 	lda #24
 	sta EventCounter2       ; Prep the first transition loop.
@@ -98,6 +107,9 @@ SetupGame
 	lda #0
 	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
 
+	lda #0
+	sta EnablePressAButton  ; Tell VBI the prompt flashing is disabled.
+
 	lda #<PLAYFIELD_MEM18   ; Low Byte, Frog position.
 	sta FrogLocation
 	lda #>PLAYFIELD_MEM18   ; Hi Byte, Frog position.
@@ -108,13 +120,13 @@ SetupGame
 
 	ldy #19                 ; Frog horizontal coordinate, Y = 19 (dec)
 	sty FrogColumn          ; Logical X coordinate
-	sty FrogRealColumn1     ; On a Beach row the physical locations are the same
-	sty FrogRealColumn2     ; If a scroll row then they are different.
+	sty FrogRealColumn1     ; On a Beach row the physical locations are the same.
+	sty FrogRealColumn2     ; If on a scroll row then they are different.
 
-	lda #I_FROG             ; On Atari we're using $7F as the frog shape.
+	lda #I_FROG             ; We're using $7F as the frog shape.
 	sta (FrogLocation),y    ; PLAYFIELD_MEM18 (beach) + $13/19 (dec)
 
-	lda #I_SPACE            ; Default position.
+	lda #I_SPACE            ; the character at the default position.
 	sta LastCharacter       ; Preset the character under the frog.
 
 	lda #SCREEN_GAME        ; Yes, change to game screen event.

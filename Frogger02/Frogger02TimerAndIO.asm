@@ -29,13 +29,13 @@
 ; ==========================================================================
 ; Animation speeds of various displayed items.   Number of frames to wait...
 ; --------------------------------------------------------------------------
-BLINK_SPEED     = 36 ; blinking Press Any Key text
-CREDIT_SPEED    = 3  ; Animated Credits.
-DEAD_FILL_SPEED = 3  ; Fill the Screen for Dead Frog
-WIN_FILL_SPEED  = 4  ; Fill screen for Win
-FROG_WAKE_SPEED = 90 ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
-RES_IN_SPEED    = 2  ; Speed of Game over Res in animation
-TITLE_SPEED     = 6  ; Fill screen to present title
+BLINK_SPEED      = 36 ; blinking Press Any Key text
+TITLE_WIPE_SPEED = 0  ; Title wipe speed
+DEAD_FILL_SPEED  = 3  ; Fill the Screen for Dead Frog
+WIN_FILL_SPEED   = 4  ; Fill screen for Win
+FROG_WAKE_SPEED  = 90 ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
+RES_IN_SPEED     = 2  ; Speed of Game over Res in animation
+TITLE_SPEED      = 2  ; Fill screen to present title
 
 ; Timer values.  NTSC.
 ; About 7 Inputs per second.
@@ -133,7 +133,7 @@ ToggleFlipFlop
 ; 0 is button pressed., !0 is not pressed.
 ; If STRIG0 input then set bit $10 for trigger.
 ;
-; Return  A  with InputStick value where direction
+; Return  A  with InputStick value of cooked Input bits where the direction
 ; and trigger set are 1 bits.  Bit values:   00011101
 ; "NA NA NA Trigger Right Left NA Up"
 ;
@@ -198,7 +198,10 @@ DoneWithBitCookery            ; Some input was captured?
 	lda #INPUTSCAN_FRAMES     ; Because there was input collected, then
 	sta InputScanFrames       ; reset the input timer.
 
-ExitInputCollection
+ExitInputCollection ; Input occurred
+	lda #0                    ; Kill the attract mode flag
+	sta ATRACT                ; to prevent color cycling.
+
 	lda InputStick            ; Return the input value.
 	rts
 
@@ -417,15 +420,18 @@ MyImmediateVBI
 	tay                      ; I want Y = 0 too.
 	sta ThisDLI              ; Make the DLI index restarts at 0.
 
+; ======== Manage InputScanFrames ========
 	lda InputScanFrames      ; Is input delay already 0?
 	beq DoAnimateClock       ; Yes, do not decrement it again.
 	dec InputScanFrames      ; Minus 1.
 
+; ======== Manage AnimateFrames ========
 DoAnimateClock
 	lda AnimateFrames       ; Is animation countdown already 0?
 	beq DoDisplayListSwitch ; Yes, do not decrement now.
 	dec AnimateFrames       ; Minus 1
-
+	
+; ======== Manage Changing Display List ========
 DoDisplayListSwitch
 	lda VBICurrentDL            ; Main code signals to change screens?
 	bmi ScrollTheCreditLine     ; Negative value is no change.
@@ -454,31 +460,63 @@ DoDisplayListSwitch
 	lda PLAYFIELD_LMS_SCROLL_HI_TABLE,x
 	sta CurrentCreditLMS+1
 
-	lda ScrollCredit         ; Update current screen to have the current credit scroll value.
+	lda ScrollCredit              ; Update current screen to have the current credit scroll value.
 	sta (CurrentCreditLMS),y
 
-	stx CurrentDL          ; Tell main code the new screen is set.
+	stx CurrentDL                 ; Tell main code the new screen is set.
 
-	lda #$FF               ; Turn off the signal to change screens.
+	lda #$FF                      ; Turn off the signal to change screens.
 	sta VBICurrentDL
 
-ScrollTheCreditLine        ; scroll the text identifying the perpetrators
-	dec ScrollCounter      ; subtract from scroll delay counter
-	bne ExitMyImmediateVBI ; Not 0 yet, so no scrolling.
-	lda #8                 ; Reset counter to original value.
+; ======== Manage scrolling the current credit line ========
+ScrollTheCreditLine               ; scroll the text identifying the perpetrators
+	dec ScrollCounter             ; subtract from scroll delay counter
+	bne ManagePressAButtonPrompt  ; Not 0 yet, so no scrolling.
+	lda #6                        ; Reset counter to original value.
 	sta ScrollCounter
 
-	inc ScrollCredit       ; Move text left one position.
+	inc ScrollCredit              ; Move text left one position.
 	lda ScrollCredit
 	cmp #<EXTRA_BLANK_MEM         ; Did scroll position reach the end of the text?
 	bne UpdateCurrentScrollCredit ; No.  Just update with current value.
 
-	lda #<SCROLLING_CREDIT       ; Yes, restart scroll from the beginning position.
+	lda #<SCROLLING_CREDIT        ; Yes, restart scroll from the beginning position.
 	sta ScrollCredit
 
 UpdateCurrentScrollCredit    ; Note that only the low byte of the LMS needs to be updated, since all the
 	sta (CurrentCreditLMS),y ; text of the scrolling line fits inside one page of memory.
 
+; ======== Manage the prompt flashing for Press A Button ========
+ManagePressAButtonPrompt
+	lda EnablePressAButton
+	bne DoAnimateButtonTimer ; Not zero is enabled.
+	; Prompt is off.  Zero everything.
+	sta COLPF2_TABLE+23      ; Set background
+	sta COLPF1_TABLE+23      ; Set text.
+	sta PressAButtonFrames   ; This makes sure it will restart as soon as enabled.
+	beq ExitMyImmediateVBI
+
+; Note that the Enable/Disable behavior connected to the timer mechanism 
+; means that the action will occur when this timer executes with value 1 
+; or 0. At 1 it will be decremented to become 0. The value 0 is evaluated 
+; immediately.
+DoAnimateButtonTimer
+	lda PressAButtonFrames   
+	beq DoPromptColorchange  ; Timer is Zero.  Go switch colors.
+	dec PressAButtonFrames   ; Minus 1
+	bne ExitMyImmediateVBI   ; if it is still non-zero end this section.
+
+DoPromptColorchange
+	lda #BLINK_SPEED         ; Text Blinking speed for prompt
+	sta PressAButtonFrames   ; Reset the delay counter.
+
+	inc PressAButtonState    ; Add 1.  (says Capt Obvious)
+	lda PressAButtonState
+	and #1                   ; Squash to only lowest bit -- 0, 1, 0, 1, 0, 1...
+	sta PressAButtonState
+
+	jsr ToggleButtonPrompt   ; Switches colors for prompt randomly.
+
 ExitMyImmediateVBI
-	jmp XITVBV ; Return to OS.
+	jmp SYSVBV ; Return to OS.  XITVBV for Deferred interrupt.
 

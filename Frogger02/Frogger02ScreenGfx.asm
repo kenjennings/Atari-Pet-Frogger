@@ -308,7 +308,7 @@ SetFrogOnScreen
 ; Note this falls right into UpdateFrogInMemory.
 ; --------------------------------------------------------------------------
 RemoveFrogOnScreen
-	lda lastCharacter  ; Get the last character (under the frog)
+	lda LastCharacter  ; Get the last character (under the frog)
 
 ; ==========================================================================
 ; Update the frog image in screen memeory.
@@ -430,7 +430,6 @@ LoadPlayfieldPointerFromX
 	rts
 
 
-
 ; ==========================================================================
 ; ANIMATE BOATS
 ; Move the lines of boats around either left or right.
@@ -443,28 +442,25 @@ LoadPlayfieldPointerFromX
 ; displayed and we end up with tearing animation.
 ; --------------------------------------------------------------------------
 AnimateBoats
-; First, need to check if the frog will become killed offscreen.  that means it is
-; dead now where it is and boat scrolling must not go any further.
-
 	; Update with working positions of the scrolling lines.
 
-	dec CurrentRightOffset ; subtract one from position to move screen contents right.
-	bpl IncLeftOffset      ; Did not go negative, so does not need reset.
-	lda #39                ; Fell off the end. Jump forward a screen.
+	dec CurrentRightOffset ; subtract one to move screen contents right.
+	bpl IncLeftOffset      ; It did not go negative. Done. Go update screen.
+	lda #39                ; Fell off the end.  Restart.
 	sta CurrentRightOffset ; reset to scroll start.
 
 IncLeftOffset
-	inc CurrentLeftOffset  ; Add one to  position  to move screen contents left.
+	inc CurrentLeftOffset  ; subtract one to move screen contents left.
 	lda CurrentLeftOffset
 	cmp #40                ; 40th position is identical to 0th,
-	bne UpdatePlayfieldLMS
-	lda #0                 ; so, go back to origination point,
+	bne UpdatePlayfieldLMS ; Did not go off the deep end. Done. Go update screen.
+	lda #0                 ; Fell off the end.  Restart.
 	sta CurrentLeftOffset  ; reset to scroll start.
 
 UpdatePlayfieldLMS
 	; We could cleverly pull address for each LMS and update....
 	; Why?  The address are known and only low bytes need to be updated,
-	; So, so stuff them all directly.   This ends up being shorter than
+	; So, then stuff them all directly.   This ends up being shorter than
 	; cleverly looping through the LMS table.
 
 	; A already is Left offset. Make X the Right offset.
@@ -472,8 +468,62 @@ UpdatePlayfieldLMS
 
 	jsr UpdateGamePlayfield ; Update all the LMS offsets.
 
+	jsr CopyScoreToScreen   ; Finish up by updating score display.
 
-	jsr CopyScoreToScreen ; Finish up by updating score display.
+	rts
+
+
+; ==========================================================================
+; UPDATE GAME PLAYFIELD
+; Update Game screen LMS addresses and scrolling offset to specified
+; values.
+;
+; Note that only the low bytes needs to be reset as no line of data
+; crosses over a page boundary.
+;
+; A  is Left scroll position
+; X  is Right scroll position.
+; --------------------------------------------------------------------------
+UpdateGamePlayfield
+
+	stx PF_LMS1 ; Right
+	sta PF_LMS2 ; Left
+
+	stx PF_LMS4 ; and so on
+	sta PF_LMS5
+
+	stx PF_LMS7
+	sta PF_LMS8
+
+	stx PF_LMS10
+	sta PF_LMS11
+
+	stx PF_LMS13
+	sta PF_LMS14
+
+	stx PF_LMS16
+	sta PF_LMS17
+
+	stx CurrentRightOffset
+	sta CurrentLeftOffset
+
+	rts
+
+
+; ==========================================================================
+; RESET GAME PLAYFIELD
+; Reset Game screen LMS addresses and scrolling offset to starting values.
+; Note that only the low bytes needs to be reset as no line of data
+; crosses over a page boundary.
+;
+; Used A, X and Y
+; --------------------------------------------------------------------------
+ResetGamePlayfield
+
+	lda #$00               ; Reset the actual position trackers.
+	ldx #$00
+
+	jsr UpdateGamePlayfield
 
 	rts
 
@@ -550,61 +600,6 @@ WriteLives
 
 
 ; ==========================================================================
-; UPDATE GAME PLAYFIELD
-; Update Game screen LMS addresses and scrolling offset to specified
-; values.
-;
-; Note that only the low bytes needs to be reset as no line of data
-; crosses over a page boundary.
-;
-; A  is Right scroll position
-; X  is Left scroll position.
-; --------------------------------------------------------------------------
-UpdateGamePlayfield
-
-	stx PF_LMS1
-	sta PF_LMS2
-
-	stx PF_LMS4
-	sta PF_LMS5
-
-	stx PF_LMS7
-	sta PF_LMS8
-
-	stx PF_LMS10
-	sta PF_LMS11
-
-	stx PF_LMS13
-	sta PF_LMS14
-
-	stx PF_LMS16
-	sta PF_LMS17
-
-	stx CurrentLeftOffset
-	sta CurrentRightOffset
-
-	rts
-
-
-; ==========================================================================
-; RESET GAME PLAYFIELD
-; Reset Game screen LMS addresses and scrolling offset to starting values.
-; Note that only the low bytes needs to be reset as no line of data
-; crosses over a page boundary.
-;
-; Used A, X and Y
-; --------------------------------------------------------------------------
-ResetGamePlayfield
-
-	lda #$00               ; Reset the actual position trackers.
-	ldx #$39
-
-	jsr UpdateGamePlayfield
-
-	rts
-
-
-; ==========================================================================
 ; ZERO CURRENT COLORS                                                 A  Y
 ; --------------------------------------------------------------------------
 ; Force all the colors in the current table to black.
@@ -628,34 +623,38 @@ LoopZeroColors
 ; ==========================================================================
 ; HIDE BUTTON PROMPT                                                   A
 ; --------------------------------------------------------------------------
-; In case of sloppy programmer, force color black to
-; hide the Prompt for Button on setup.
+; In case of sloppy programmer, tell the VBI to shut off the prompt.
 ;
 ; Uses A
 ; --------------------------------------------------------------------------
 
 HideButtonPrompt
-	lda #COLOR_BLACK
-	sta COLPF2_TABLE+23
-	sta COLPF1_TABLE+23
+	lda #0 
+	sta EnablePressAButton  
 
 	rts
 
 
 ; ==========================================================================
-; CHANGE SCREEN                                                        A
+; CHANGE SCREEN                                                     A (Y)
 ; --------------------------------------------------------------------------
 ; Set a new display.
 ;
-; Tell the VBI the screen ID.
-; Wait for the VBI to change the current display and update the
-; other pointers to the color tables.
-; Copy the color tables to the current lookups.
+; 1. The Press Any Key Prompt is always disabled on the start of any screen.
+; 2. Tell the VBI the screen ID.
+; 3. Wait for the VBI to change the current display and update the
+; 4. other pointers to the color tables.
+; 5. Copy the color tables to the current lookups.
 ;
-; A  is the DISPLAY_* value (defined below) corresponding to the screen.
+; A  is the DISPLAY_* value (defined elsewhere) for the desired display.
+; Y  is used to turn off the Press A Button Prompt, and loop throrugh 
+;    the color tables.
 ; --------------------------------------------------------------------------
 
 ChangeScreen
+	ldy #0
+	sty EnablePressAButton         ; Tell the VBI to stop the prompt.
+
 	sta VBICurrentDL               ; Tell VBI to change to new mode.
 
 LoopChangeScreenWaitForVBI

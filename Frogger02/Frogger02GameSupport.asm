@@ -38,14 +38,16 @@
 ; If toggle 0, then dark background, light text.
 ; If toggle 1, then light background and dark text.
 ;
-; Do not allow color black, since the credits are always black.
+; On entry, the first flash will end up being black/white.  
+; NBut the code generally tries to exclude blck/white after that. 
 ; --------------------------------------------------------------------------
 ToggleButtonPrompt
 	bne PromptLightAndDark ; 1 = Light background and dark text?
 
 ; Otherwise, therefore, Prompt Dark and Light
 PromptDarkAndLight
-	lda RANDOM             ; A random color
+	lda RANDOM             ; A random color and then prevent same 
+	eor COLPF2_TABLE+23    ; value by chewing on it with the original color.
 	and #$F0               ; Mask out the lumninance for Dark.
 	beq PromptDarkAndLight ; Do again if black/color 0 turned up
 	sta COLPF2_TABLE+23    ; Set background
@@ -54,12 +56,10 @@ PromptDarkAndLight
 	rts
 
 PromptLightAndDark
-	lda RANDOM             ; A random color
-	and #$F0               ; Mask out the lumninance for Dark.
-	beq PromptLightAndDark ; Do again if black/color 0 turned up
-	ora #$0C               ; Light Background
-	sta COLPF2_TABLE+23    ; Set background
-	lda #$00               ; Dark text
+	lda COLPF2_TABLE+23    ; Use the previous color...
+	ora #$0C               ; ...but with a Light Background.
+	sta COLPF2_TABLE+23    ; Set background.
+	lda #$00               ; Dark text.
 	sta COLPF1_TABLE+23    ; Set text.
 	rts
 
@@ -76,18 +76,20 @@ PromptLightAndDark
 ; CPU flags are comparison of key value to $FF which means no key press.
 ; --------------------------------------------------------------------------
 RunPromptForButton
-	lda AnimateFrames        ; Did animation counter reach 0 ?
-	bne CheckButton          ; no, then is a key pressed?
+	lda #1
+	sta EnablePressAButton   ; Tell VBI to the prompt flashing is enabled.
+;	lda AnimateFrames        ; Did animation counter reach 0 ?
+;	bne CheckButton          ; no, then is a key pressed?
 
-	jsr ToggleFlipFlop       ; Yes! Let's toggle the flashing prompt
-	jsr ToggleButtonPrompt   ; Set prompt based on CPU flags from Toggle bit.
+;	jsr ToggleFlipFlop       ; Yes! Let's toggle the flashing prompt
+;	jsr ToggleButtonPrompt   ; Set prompt based on CPU flags from Toggle bit.
 
-ResetPromptBlinking
-	lda #BLINK_SPEED         ; Text Blinking speed for prompt on Title screen.
-	jsr ResetTimers
+;ResetPromptBlinking
+;	lda #BLINK_SPEED         ; Text Blinking speed for prompt on Title screen.
+;	jsr ResetTimers
 
 CheckButton
-	jsr CheckInput           ; Get an input if timer permits. Non Zero is input.
+	jsr CheckInput           ; Get input. Non Zero menas there is input.
 
 	rts
 

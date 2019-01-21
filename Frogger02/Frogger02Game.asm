@@ -32,7 +32,7 @@ GAMESTART
 	; interrupt and this directs the interrupt to change the current
 	; display list.  Easy-peasy and never updated at the wrong time.
 
-	lda #<CHARACTER_SET        ; Set custom character set.  Global to game, forever.
+	lda #>CHARACTER_SET        ; Set custom character set.  Global to game, forever.
 	sta CHBAS
 
 	lda #NMI_VBI               ; Turn Off DLI

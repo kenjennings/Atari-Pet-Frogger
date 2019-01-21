@@ -52,26 +52,26 @@
 ; --------------------------------------------------------------------------
 
 ATASCII_HEART  = $00 ; heart graphics
-ATASCII_HLINE  = $12 ; horizontal line, ctrl-r (title underline)
-ATASCII_BALL   = $14 ; ball graphics, ctrl-t
+;ATASCII_HLINE  = $12 ; horizontal line, ctrl-r (title underline)
+;ATASCII_BALL   = $14 ; ball graphics, ctrl-t
 
-ATASCII_ASTER  = $2A ; Character for '*' splattered frog.
-ATASCII_0      = $30 ; Character for '0'
+;ATASCII_ASTER  = $2A ; Character for '*' splattered frog.
+;ATASCII_0      = $30 ; Character for '0'
 
 ; ATASCII chars shorthanded due to frequency....
-A_B = ATASCII_BALL
-A_H = ATASCII_HLINE
+;A_B = ATASCII_BALL
+;A_H = ATASCII_HLINE
 
 ; Atari uses different, "internal" values when writing to
 ; Screen RAM.  These are the internal codes for writing
 ; bytes directly to the screen:
-INTERNAL_O        = $2F ; Letter 'O' is the frog.
+;INTERNAL_O        = $2F ; Letter 'O' is the frog.
 INTERNAL_0        = $10 ; Number '0' for scores.
-INTERNAL_BALL     = $54 ; Ball graphics, ctrl-t, boat part.
+;INTERNAL_BALL     = $54 ; Ball graphics, ctrl-t, boat part.
 INTERNAL_SPACE    = $00 ; Blank space character.
-INTERNAL_INVSPACE = $80 ; Inverse Blank space, for the beach.
-INTERNAL_ASTER    = $0A ; Character for '*' splattered frog.
-INTERNAL_HEART    = $40 ; heart graphics
+;INTERNAL_INVSPACE = $80 ; Inverse Blank space, for the beach.
+;INTERNAL_ASTER    = $0A ; Character for '*' splattered frog.
+;INTERNAL_HEART    = $40 ; heart graphics
 INTERNAL_HLINE    = $52 ; underline for title text.
 
 ; Graphics chars shorthanded due to frequency in the code....
@@ -96,6 +96,7 @@ I_IS = 0+$80   ; Internal Space Inverse
 I_T  = $54     ; Internal ctrl-t (ball)
 I_IT = $54+$80 ; Internal ctrl-t Inverse
 
+I_H = INTERNAL_HLINE
 
 SIZEOF_LINE    = 39  ; That is, 40 - 1
 SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
@@ -116,7 +117,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 10 |to prove your frog management skills by | INSTXT_1
 ; 11 |directing frogs to jump on boats in the | INSTXT_1
 ; 12 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
-; 13 |the seats in the boats ('Q').           | INSTXT_1
+; 13 |the seats in the boats.                 | INSTXT_1
 ; 14 |                                        |
 ; 15 |Scoring:                                | INSTXT_2
 ; 16 |    10 points for each jump forward.    | INSTXT_2
@@ -223,7 +224,7 @@ EXTRA_BLANK_MEM ; Trailing line for credit scrolling.
 ; Graphics chars, PET FROGGER
 ; |i |iU|iK|  |i |iU|iU|  |iU|i |iU|  |  |i |iU|iU|  |i |iU|iK|  |iL|iU|iK|  |iL|iU|iU|  |iL|iU|iU|  |i |iU|iU|  |i |iU|iK|
 ; |i |U |iI|  |i |iU|L |  |  |i |  |  |  |i |iU|L |  |i |U |iI|  |i |  |i |  |i |I |U |  |i |I |U |  |i |iU|L |  |i |U |iI|
-; |i |  |  |  |i |U |U |  |  |i |  |  |  |i |  |  |  |i |K |iK|  |iO|U |iO|  |iO|U |i |  |iO|U |i |  |i |U |U |  |i |K |iK|
+; |i |  |  |  |i |U |U |  |  |i |  |  |  |i |  |  |  |i |K |iK|  |iO|U |iI|  |iO|U |i |  |iO|U |i |  |i |U |U |  |i |K |iK|
 
 ; Graphics data, DEAD FROG!  (40).  To make this scroll will need some leading spaces.
 
@@ -232,10 +233,10 @@ TITLE_MEM1 ; Title text.
 	.by I_iS I_iU I_iK I_S I_iS I_iU I_iU I_S I_iU I_iS I_iU I_S I_S I_iS I_iU I_iU I_S I_iS I_iU I_iK I_S I_iL I_iU I_iK I_S I_iL I_iU I_iU I_S I_iL I_iU I_iU I_S I_iS I_iU I_iU I_S I_iS I_iU I_iK
 TITLE_MEM2
 	.sb "                                        "  ; Leading blanks  for  scrolling.
-	.by I_iS I_U  I_iI I_S I_iS I_iU I_L  I_S I_S  I_iS I_S  I_S I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI I_S I_iS I_S  I_iS I_S I_iS I_iS I_U  I_S I_iS I_iS I_U  I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI
+	.by I_iS I_U  I_iI I_S I_iS I_iU I_L  I_S I_S  I_iS I_S  I_S I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI I_S I_iS I_S  I_iS I_S I_iS I_I  I_U  I_S I_iS I_I  I_U  I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI
 TITLE_MEM3
 	.sb "                                        "  ; Leading blanks  for  scrolling.
-	.by I_iS I_S  I_S  I_S I_iS I_U  I_U  I_S I_S  I_iS I_S  I_S I_S I_iS I_S  I_S  I_S I_iS I_K  I_iK I_S I_iO I_U  I_iO I_S I_iO I_U  I_iS I_S I_iO I_U  I_iS I_S I_iS I_U  I_U  I_S I_iS I_K  I_iK
+	.by I_iS I_S  I_S  I_S I_iS I_U  I_U  I_S I_S  I_iS I_S  I_S I_S I_iS I_S  I_S  I_S I_iS I_K  I_iK I_S I_iO I_U  I_iI I_S I_iO I_U  I_iS I_S I_iO I_U  I_iS I_S I_iS I_U  I_U  I_S I_iS I_K  I_iK
 
 
 
@@ -253,24 +254,25 @@ TITLE_MEM3
 
 PLAYFIELD_MEM1
 ; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1 ; Boats Right
-	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "        "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "       "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "      "
-	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "        "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "       "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "      "
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
+	.sb "        "                                       ; 8
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "       "                                        ; 7
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "         "                                      ; 9
+	
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
+	.sb "        "                                       ; 8
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "       "                                        ; 7
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5  
+	.sb "         "                                      ; 9
 
 TITLE_MEM4
 ; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE
-	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H "  "
-	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " "
-	.sb A_H A_H A_H " " A_H A_H A_H " " A_H A_H A_H " "
+	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00 $00
+	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00
+	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H
 
 INSTRUCT_MEM1 ; Basic instructions...
 ; 6  |Help the frogs escape from Doc Hopper's | INSTXT_1
@@ -291,19 +293,21 @@ INSTRUCT_MEM3
 
 PLAYFIELD_MEM2
 ; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1 ; Boats Left
-	.sb "      "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "        "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "          "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "        "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
+	.sb "       "                                   ; 7
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "         "                                 ; 9
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "     "                                     ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "    "                                      ; 4
+
+	.sb "       "                                   ; 7
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "         "                                 ; 9
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "     "                                     ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "    "                                      ; 4
 
 INSTRUCT_MEM4
 ; 9  |to reach freedom. You have three chances| INSTXT_1
@@ -329,18 +333,19 @@ INSTRUCT_MEM7
 
 PLAYFIELD_MEM4
 ; 7  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2 ; Boats Right
-	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "        "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "       "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "      "
-	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "        "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "       "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "      "
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
+	.sb "        "                                       ; 8
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "       "                                        ; 7
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "         "                                      ; 9
+	
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
+	.sb "        "                                       ; 8
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "       "                                        ; 7
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5  
+	.sb "         "                                      ; 9
 
 INSTRUCT_MEM8
 ; 13 |the seats in the boats.                 | INSTXT_1
@@ -364,19 +369,21 @@ SCORING_MEM3
 
 PLAYFIELD_MEM5
 ; 8  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2 ; Boats Left
-	.sb "      "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "        "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "          "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "        "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
+	.sb "       "                                   ; 7
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "         "                                 ; 9
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "     "                                     ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "    "                                      ; 4
+
+	.sb "       "                                   ; 7
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "         "                                 ; 9
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "     "                                     ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "    "                                      ; 4
 
 CONTROLS_MEM1 ; Game Controls
 ; 19 |Use joystick control to jump forward,   | INSTXT_3
@@ -413,18 +420,19 @@ PLAYFIELD_MEM3 ; Default display of "Beach", for lack of any other description, 
 
 PLAYFIELD_MEM7
 ; 10  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3 ; Boats Right
-	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "        "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "       "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "      "
-	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "        "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "       "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "      "
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
+	.sb "        "                                       ; 8
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "       "                                        ; 7
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "         "                                      ; 9
+	
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
+	.sb "        "                                       ; 8
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "       "                                        ; 7
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5  
+	.sb "         "                                      ; 9
 
 PLAYFIELD_MEM6 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 9  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
@@ -472,19 +480,21 @@ PLAYFIELD_MEM15 ; Default display of "Beach", for lack of any other description,
 
 PLAYFIELD_MEM8
 ; 11  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3 ; Boats Left
-	.sb "      "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "        "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "          "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "        "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
+	.sb "       "                                   ; 7
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "         "                                 ; 9
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "     "                                     ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "    "                                      ; 4
+
+	.sb "       "                                   ; 7
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "         "                                 ; 9
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "     "                                     ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "    "                                      ; 4
 
 PLAYFIELD_MEM18 ; One last line of Beach
 ; 21  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT2
@@ -495,6 +505,10 @@ PLAYFIELD_MEM18 ; One last line of Beach
 	.sb "                 "
 	.by I_BEACH1
 	.sb "    " ; "Beach"
+
+ANYBUTTON_MEM ; Prompt to start game.
+; 24 |   Press joystick button to continue.   | INSTXT_4
+	.sb "   Press joystick button to continue.   "
 
 ; Two lines for Scores, lives, and frogs saved.
 
@@ -512,32 +526,28 @@ SCORE_MEM2
 	.by I_BF I_SR I_SO I_SG I_SS I_CO
 SCREEN_LIVES
 	.sb"0    "
-	.by I_BF I_SR I_SO I_SG I_SS $00 I_BS I_BS I_SV I_SE I_SD
+	.by I_BF I_SR I_SO I_SG I_SS $00 I_BS I_BA I_SV I_SE I_SD I_CO
 SCREEN_SAVED
 	.sb "                 "
-
-ANYBUTTON_MEM ; Prompt to start game.
-; 24 |   Press joystick button to continue.   | INSTXT_4
-	.sb "   Press joystick button to continue.   "
-
 
 
 	.align $0100
 
 PLAYFIELD_MEM10
 ; 13  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4 ; Boats Right
-	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "        "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "       "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "      "
-	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "        "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "       "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "      "
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
+	.sb "        "                                       ; 8
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "       "                                        ; 7
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "         "                                      ; 9
+	
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
+	.sb "        "                                       ; 8
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "       "                                        ; 7
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5  
+	.sb "         "                                      ; 9
 
 ; FROG SAVED screen., 25 lines:
 ; 10 blank lines.
@@ -571,19 +581,21 @@ FROGSAVE_MEM
 
 PLAYFIELD_MEM11
 ; 14  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4 ; Boats Left
-	.sb "      "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "        "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "          "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "        "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
+	.sb "       "                                   ; 7
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "         "                                 ; 9
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "     "                                     ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "    "                                      ; 4
+
+	.sb "       "                                   ; 7
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "         "                                 ; 9
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "     "                                     ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "    "                                      ; 4
 
 
 ; FROG DEAD screen., 25 lines:
@@ -618,18 +630,19 @@ FROGDEAD_MEM
 
 PLAYFIELD_MEM13
 ; 16  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5 ; Boats Right
-	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "        "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "       "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "      "
-	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "        "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "       "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "      "
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
+	.sb "        "                                       ; 8
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "       "                                        ; 7
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "         "                                      ; 9
+	
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
+	.sb "        "                                       ; 8
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "       "                                        ; 7
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5  
+	.sb "         "                                      ; 9
 
 ; GAME OVER screen., 25 lines:
 ; 10 blank lines.
@@ -663,56 +676,61 @@ GAMEOVER_MEM
 
 PLAYFIELD_MEM14
 ; 17  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5 ; Boats Left
-	.sb "      "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "        "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "          "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "        "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
+	.sb "       "                                   ; 7
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "         "                                 ; 9
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "     "                                     ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "    "                                      ; 4
+
+	.sb "       "                                   ; 7
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "         "                                 ; 9
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "     "                                     ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "    "                                      ; 4
 
 
 	.align $0100
 
 PLAYFIELD_MEM16
 ; 19  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6 ; Boats Right
-	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "        "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "       "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "      "
-	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "        "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "       "
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF
-	.sb "      "
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
+	.sb "        "                                       ; 8
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "       "                                        ; 7
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "         "                                      ; 9
+	
+	.by $00 I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
+	.sb "        "                                       ; 8
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5
+	.sb "       "                                        ; 7
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF      ; 5  
+	.sb "         "                                      ; 9
 
 
 	.align $0100
 
 PLAYFIELD_MEM17
 ; 20  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6 ; Boats Left
-	.sb "      "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "        "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "          "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "        "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "    "
+	.sb "       "                                   ; 7
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "         "                                 ; 9
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "     "                                     ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "    "                                      ; 4
+
+	.sb "       "                                   ; 7
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "         "                                 ; 9
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "     "                                     ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 5
+	.sb "    "                                      ; 4
 
 
 	.align $0100
@@ -720,6 +738,22 @@ PLAYFIELD_MEM17
 ; ==========================================================================
 ; Color Layouts for the screens.
 ; --------------------------------------------------------------------------
+; FYI from GTIA.asm:
+; COLOR_ORANGE1 =      $10
+; COLOR_ORANGE2 =      $20
+; COLOR_RED_ORANGE =   $30
+; COLOR_PINK =         $40
+; COLOR_PURPLE =       $50
+; COLOR_PURPLE_BLUE =  $60
+; COLOR_BLUE1 =        $70
+; COLOR_BLUE2 =        $80
+; COLOR_LITE_BLUE =    $90
+; COLOR_AQUA =         $A0
+; COLOR_BLUE_GREEN =   $B0
+; COLOR_GREEN =        $C0
+; COLOR_YELLOW_GREEN = $D0
+; COLOR_ORANGE_GREEN = $E0
+; COLOR_LITE_ORANGE =  $F0
 
 TITLE_BACK_COLORS
 	.by COLOR_GREEN COLOR_GREEN
@@ -745,18 +779,20 @@ TITLE_TEXT_COLORS ; Text luminance
 
 
 GAME_BACK_COLORS
-	.by COLOR_BLACK COLOR_BLACK               ; Scores
-	.by COLOR_GREEN                           ; Grassy gap
-	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
-	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
-	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
-	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
-	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
-	.by COLOR_ORANGE1 COLOR_BLUE1 COLOR_BLUE1 ; Beach, boats, boats.
-	.by COLOR_ORANGE1                         ; one last Beach.
-	.by COLOR_GREEN                           ; grassy gap
-	.by COLOR_BLACK                           ; Press Button (turned off)
-	.by COLOR_BLACK                           ; Credits
+	.by COLOR_BLACK COLOR_BLACK                        ; Scores
+	.by COLOR_GREEN                                    ; Grassy gap
+	.by COLOR_ORANGE2     COLOR_AQUA  COLOR_BLUE1     ; Beach, boats, boats.
+	.by COLOR_RED_ORANGE  COLOR_BLUE2 COLOR_LITE_BLUE ; Beach, boats, boats.
+	.by COLOR_LITE_ORANGE COLOR_AQUA  COLOR_BLUE1     ; Beach, boats, boats.
+	
+	.by COLOR_ORANGE2     COLOR_BLUE2 COLOR_LITE_BLUE  ; Beach, boats, boats.
+	.by COLOR_LITE_ORANGE COLOR_BLUE1 COLOR_AQUA       ; Beach, boats, boats.
+	.by COLOR_RED_ORANGE   COLOR_BLUE2 COLOR_LITE_BLUE; Beach, boats, boats.
+	.by COLOR_ORANGE2                                  ; one last Beach.
+
+	.by COLOR_GREEN                                    ; grassy gap
+	.by COLOR_BLACK                                    ; Press Button (turned off)
+	.by COLOR_BLACK                                    ; Credits
 
 GAME_TEXT_COLORS ; Text luminance
 	.rept 23

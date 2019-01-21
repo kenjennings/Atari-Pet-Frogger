@@ -323,20 +323,17 @@ InputScanFrames   .byte $00 ; = INPUTSCAN_FRAMES
 InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits.
 ; And then it is safe to use STRIG0 directly for the joystick button.
 
-; In the case of animation frames the value is set from the ANIMATION_FRAMES
-; table based on the number of frogs that crossed the river (difficulty level)
-AnimateFrames   .byte $00 ; = ANIMATION_FRAMES,X.
-
-; Animation counter for scrolling the credit line. when it reaches 0, then scroll.
-ScrollCounter   .byte 8
-; Current low byte of the LMS value for scrolling the credit line.
-ScrollCredit    .byte <SCROLLING_CREDIT
-; Pointer to the current display LMS for the credits.
-CurrentCreditLMS .word SCROLL_CREDIT_LMS0
-
 ; Identify the current screen.  This is what drives which timer/event loop
 ; features are in effect.  Value is enumerated from SCREEN_LIST table.
 CurrentScreen   .byte $00 ; = identity of current screen.
+
+; ======== V B I ========
+; Frame counte set by main code events for delay/speed of activity.
+; In the case of boat movements the value is set from the ANIMATION_FRAMES
+; table based on the number of frogs that crossed the river (difficulty level).
+; The VBI decrements this value until 0.
+; Main code acts on value 0.
+AnimateFrames   .byte $00 ; = ANIMATION_FRAMES,X.
 
 ; A display number written here by main code directs the VBI to update the
 ; screen pointers and the pointers to the color tables. Updated by VBI to
@@ -347,6 +344,27 @@ VBICurrentDL    .byte $FF ; = Direct VBI to change screens.
 ; VBICurrentDL to let main code  know the the current physical display.
 CurrentDL        .byte $FF
 CurrentDLPointer .word $0000 ; the address of the Display list.  a copy of the OS pointer.
+
+; VBI's Animation counter for scrolling the credit line. when it reaches 0, then scroll.
+ScrollCounter   .byte 8
+ 
+; Current low byte of the LMS value for scrolling the credit line.
+ScrollCredit    .byte <SCROLLING_CREDIT
+; Pointer to the current display LMS for the credits.
+CurrentCreditLMS .word SCROLL_CREDIT_LMS0
+
+; ON/Off status of the Get Any Key Prompt. 
+; Main code sets 0 to turn it off.
+; Main code sets 1 to turs it on. 
+; Visibility actions performed by VBI.
+EnablePressAButton .byte 0
+
+; 0/1 toggle for light/dark state of Press a button prompt.
+PressAButtonState  .byte 0
+
+; Timer value for prompt changing  state.
+PressAButtonFrames .byte BLINK_SPEED
+
 
 ; Pointer to the current color table sources in use.
 COLPF2Pointer   .word $0000
@@ -394,8 +412,8 @@ SAVEY = $FF
 	.by "semiconductor chemistry and physics which makes all this fun possible. ** "
 	.by "Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. ** "
 	.by "Atari port by Ken Jennings, January 2019. Version 02. "
-	.by "Added color with DLIs, joystick interface **"
-	.by "Event loop properly managed by VBI **"
+	.by "Added color with DLIs, joystick interface, "
+	.by "display managed by VBI **"
 
 
 ; ==========================================================================
