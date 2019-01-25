@@ -35,31 +35,35 @@
 ; On entry the CPU flags should indicate current toggle state:
 ;   Z or 0   v   !Z or !0
 ;
-; If toggle 0, then dark background, light text.
-; If toggle 1, then light background and dark text.
+; If  0, then light background, dark text.
+; If  1, then dark background and light text.
 ;
-; On entry, the first flash will end up being black/white.  
-; NBut the code generally tries to exclude blck/white after that. 
+; On entry, the first flash may end up being black/white.  
+; The code generally tries to exclude black/white, but on 
+; entry this may occur depending on prior state. (fadeouts, etc.)
+;
+; A  is used for background color
+; X  is used for text color.
 ; --------------------------------------------------------------------------
 ToggleButtonPrompt
-	bne PromptLightAndDark ; 1 = Light background and dark text?
+	beq PromptLightAndDark ; 0 = Light background and dark text?
 
-; Otherwise, therefore, Prompt Dark and Light
+; Otherwise, therefore, Prompt Dark background and Light text
 PromptDarkAndLight
 	lda RANDOM             ; A random color and then prevent same 
 	eor COLPF2_TABLE+23    ; value by chewing on it with the original color.
 	and #$F0               ; Mask out the lumninance for Dark.
 	beq PromptDarkAndLight ; Do again if black/color 0 turned up
-	sta COLPF2_TABLE+23    ; Set background
-	lda #$0C               ; Light text
-	sta COLPF1_TABLE+23    ; Set text.
-	rts
+	ldx #$0C               ; Light text
+	bne SetPromptColors
 
 PromptLightAndDark
 	lda COLPF2_TABLE+23    ; Use the previous color...
 	ora #$0C               ; ...but with a Light Background.
+	ldx #$00               ; Dark text.
+
+SetPromptColors
 	sta COLPF2_TABLE+23    ; Set background.
-	lda #$00               ; Dark text.
 	sta COLPF1_TABLE+23    ; Set text.
 	rts
 
@@ -78,18 +82,9 @@ PromptLightAndDark
 RunPromptForButton
 	lda #1
 	sta EnablePressAButton   ; Tell VBI to the prompt flashing is enabled.
-;	lda AnimateFrames        ; Did animation counter reach 0 ?
-;	bne CheckButton          ; no, then is a key pressed?
 
-;	jsr ToggleFlipFlop       ; Yes! Let's toggle the flashing prompt
-;	jsr ToggleButtonPrompt   ; Set prompt based on CPU flags from Toggle bit.
-
-;ResetPromptBlinking
-;	lda #BLINK_SPEED         ; Text Blinking speed for prompt on Title screen.
-;	jsr ResetTimers
-
-CheckButton
-	jsr CheckInput           ; Get input. Non Zero menas there is input.
+	jsr CheckInput           ; Get input. Non Zero means there is input.
+	and #%00010000           ; Strip it down to only the joystick button.
 
 	rts
 
@@ -320,7 +315,7 @@ ExitWhereIsThePhysicalFrog
 ; If the boat moves will the frog die?
 ;
 ; Due to the change to scrolling by LMS the frog must be shown dead in its
-; current position BEFORE the boat woould move it off screen.
+; current position BEFORE the boat would move it off screen.
 ; Therefore the game logic tilts a little from collision detection to
 ; collision avoidance.
 ;

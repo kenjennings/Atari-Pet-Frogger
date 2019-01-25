@@ -29,13 +29,20 @@
 ; ==========================================================================
 ; Animation speeds of various displayed items.   Number of frames to wait...
 ; --------------------------------------------------------------------------
-BLINK_SPEED      = 36 ; blinking Press Any Key text
-TITLE_WIPE_SPEED = 0  ; Title wipe speed
-DEAD_FILL_SPEED  = 3  ; Fill the Screen for Dead Frog
-WIN_FILL_SPEED   = 4  ; Fill screen for Win
-FROG_WAKE_SPEED  = 90 ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
+BLINK_SPEED      = 36 ; blinking Press A Button text
+
+TITLE_SPEED      = 2  ; Scrolling speed for title. 
+TITLE_WIPE_SPEED = 0  ; Title screen to game screen fade speed.
+
+FROG_WAKE_SPEED  = 95 ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
+DEAD_FADE_SPEED  = 4  ; Fade the game screen to black for Dead Frog
+DEAD_CYCLE_SPEED = 4  ; Speed of color animation on Dead screen
+
+WIN_FADE_SPEED   = 4  ; Fade the game screen to black to show Win
+WIN_CYCLE_SPEED  = 4  ; Speed of color animation on Win screen 
+
 RES_IN_SPEED     = 2  ; Speed of Game over Res in animation
-TITLE_SPEED      = 2  ; Fill screen to present title
+
 
 ; Timer values.  NTSC.
 ; About 7 Inputs per second.

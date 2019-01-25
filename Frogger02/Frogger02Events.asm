@@ -169,8 +169,7 @@ EventScreenStart            ; This is New Game and Transition to title.
 ; 3) Setup for next transition.
 ; --------------------------------------------------------------------------
 EventTitleScreen
-	jsr RunPromptForButton     ; Blink Prompt to press ANY key.  check key.
-	and #%00010000             ; Is only joystick button pressed?
+	jsr RunPromptForButton     ; Blink Prompt to press ANY key.  check button.
 	beq EndTitleScreen         ; Nothing pressed, done with title screen.
 
 ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transition.
@@ -369,7 +368,7 @@ SaveNewFrogLocation
 ; I_BEACH3  = $1B ; ;, beach rocks
 ; I_SPACE   = $00 ; space, also safe beach spot.
 
-; Will the Pet Frog land on the Beach?
+; Will the Pet Frog land on the Beach or a seat in the boat?
 	cmp #I_SPACE             ; = $00 ; space, also safe beach spot.
 	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
 	cmp #I_BEACH1            ; = $02 ;  beach rocks
@@ -378,9 +377,6 @@ SaveNewFrogLocation
 	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
 	cmp #I_BEACH3            ; = $1B ;  beach rocks
 	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
-
-; Will the Pet Frog land in the boat?
-CheckBoatLanding
 	cmp #I_SEATS             ; I_SEATS   = $0B ; +, boat seats
 	beq ReplaceFrogOnScreen  ; Yes.  Safe!  Draw the frog.
 
@@ -472,14 +468,14 @@ EndTransitionToWin
 ; Setup for next transition.
 ; --------------------------------------------------------------------------
 EventWinScreen
-	jsr RunPromptForButton ; Blink Prompt to press ANY key.  check key.
-	beq EndWinScreen       ; Nothing pressed, done with title screen.
+	jsr RunPromptForButton     ; Blink Prompt to press ANY key.  check button.
+	beq EndWinScreen           ; Nothing pressed, done with title screen.
 
-ProcessWinScreenInput      ; a key is pressed. Prepare for the screen transition.
+ProcessWinScreenInput          ; a key is pressed. Prepare for the screen transition.
 	jsr SetupTransitionToGame
 
 EndWinScreen
-	lda CurrentScreen      ; Yeah, redundant to when a key is pressed.
+	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
 
 	rts
 
@@ -487,51 +483,84 @@ EndWinScreen
 ; ==========================================================================
 ; Event Process TRANSITION TO DEAD
 ; The Activity in the transition area, based on timer.
-; 1) Wait (1.5 sec) to observe splattered frog. (timer set from prior event)
-; 2) Wipe screen from sides to center.
-; 3) Print the big yer dead text.
-; 4) setup for get any key on the Dead screen.
+; 0) On Entry, wait (1.5 sec) to observe splattered frog. (timer set in 
+;    the setup event)
+; 1) Black background for all playfield lines, turn frog's line red.
+; 2) Fade playfield text to black.
+; 2) Launch the Dead Frog Display.
 ; --------------------------------------------------------------------------
 EventTransitionToDead
-	lda AnimateFrames           ; Did animation counter reach 0 ?
-	bne EndTransitionToDead     ; Nope.  Nothing to do.
-
-	lda #DEAD_FILL_SPEED        ; yes.  Reset it. (drawing speed)
+	lda AnimateFrames        ; Did animation counter reach 0 ?
+	bne EndTransitionToDead  ; Nope.  Nothing to do.
+	lda #DEAD_FADE_SPEED     ; yes.  Reset it. (fade speed)
 	jsr ResetTimers
 
-;	ldy EventCounter            ; column number for text.
-;	cpy #20                     ; From 0 to 19, erase from left to middle.
-;	beq DoTransitionToDeadPart2 ; wipe done. continue to big dead text.
+	lda EventCounter         ; What stage are we in?
+	cmp #1
+	bne TestTransDead2       ; Not the Playfield blackout, try next stage
 
-; PART 1 -- Wipe the screen from sides to center.
-DoTransitionToDeadPart1         ; Have not reached the end, wipe more screen
-;	ldx #4                      ; use as line index. 2 (*2) to 24 (*2)
+; ======== Stage 1 ========
+; Black the playfield background.   Make frog line red.
+	ldx #18
 
-LoopDeadTransition
-;	jsr LoadScreenPointerFromX  ; Load ScreenPointer From X index.  duh.
-;	stx SAVEX                   ; Keep for later.
+LoopDeadToBlack
+	cpx FrogRow             ; Is X the same as Frog Row?
+	bne SkipRedFrog         ; No.  Skip setting row to red.
+	lda #COLOR_PINK         ; Really, it is like red.
+	bne SkipBlackFrog       ; Skip over choosing black.
+SkipRedFrog
+	lda #COLOR_BLACK        ; Choose black instead.
+SkipBlackFrog
+	sta COLPF2_TABLE+3,x    ; Set playfield row to black (or red)
+	dex                     ; Next row.
+	bpl LoopDeadToBlack     ; 18 to 0...
 
-;	lda #INTERNAL_INVSPACE      ; inverse space
-;	sta (ScreenPointer),y       ; stuff into column Y from the left.
-;	sty SAVEY                   ; Save the Y column.
-;	lda #39                     ; Subtract ...
-;	sec                         ; the column...
-;	sbc SAVEY                   ; from 39...
-;	tay                         ; for the right side.
-;	lda #INTERNAL_INVSPACE
-;	sta (ScreenPointer),y       ; And stuff into column Y from the right.
+	; Do the empty green grass rows, too.  Logically, the frog cannot die 
+	; on row 18 or row 0, so we must know that A still contains #BLACK.  
+	sta COLPF2_TABLE+2
+	sta COLPF2_TABLE+21
 
-;	cpx #50 ; Lines 0 to 24 times 2.  Line 25 times 2 is the exit.
-;	bne LoopDeadTransition
+	lda #2
+	sta EventCounter         ; Identify Stage 2
+	lda #$18
+	sta EventCounter2        ; Prep the instance count.
+	; Fade speed was set earlier. 
+	bne EndTransitionToDead  ; Nothing else to do.
 
-;	inc EventCounter            ; Set for next run to the next column
-;	bne EndTransitionToDead     ; And this turn is done.
+; ======== Stage 2 ========
+; Fade the text out on all playfield lines EXCEPT the frog line.
+TestTransDead2
+	ldx #18
 
-; PART 2 -- Clear screen is done.
-DoTransitionToDeadPart2
-;	jsr PrintDeadFrogGfx        ; Display the Big Dead Frog Text.
+LoopDeadFadeText
+	cpx FrogRow             ; Is X the same as Frog Row?
+	beq SkipDeadFade        ; Yes.  Skip fading this row.
+	ldy COLPF1_TABLE+3,x    ; Get text color. 
+	beq SkipDeadFade        ; If it is 0 now, then do not decrement.
+	dey
+	sty COLPF1_TABLE+3,x    ; Save text color. 
+SkipDeadFade
+	dex                     ; Next row.
+	bpl LoopDeadFadeText    ; 18 to 0...
 
-	jsr SetupDead               ; Setup for Dead screen (wait for input loop)
+	; Fade the empty green grass rows, too.
+	ldy COLPF1_TABLE+2
+	beq SkipFadeGrass1
+	dey 
+	sty COLPF1_TABLE+2
+SkipFadeGrass1
+	ldy COLPF1_TABLE+21
+	beq SkipFadeGrass2
+	dey 
+	sty COLPF1_TABLE+21
+SkipFadeGrass2
+
+; Control loop, exit from stage 2
+	dec EventCounter2        ; Decrement counter.
+	bpl EndTransitionToDead  ; It was not zero before.  So, just exit here. 
+
+TestTransDead3 ; Used up the fading iterations. Go to Dead screen now. 
+	jsr SetupDead            ; Setup for Dead screen (wait for input loop)
 
 EndTransitionToDead
 	lda CurrentScreen
@@ -545,10 +574,28 @@ EndTransitionToDead
 ;
 ; --------------------------------------------------------------------------
 EventDeadScreen
-	jsr RunPromptForButton     ; Blink Prompt to press ANY key.  check key.
-	beq EndDeadScreen          ; Nothing pressed, done with this pass on the screen.
+	jsr RunPromptForButton     ; Blink Prompt to press ANY key.  check button.
+	bne ProcessDeadScreenInput ; Button pressed.  Run the dead exit section..
 
-ProcessDeadScreenInput         ; a key is pressed. Prepare for the screen transition.
+	; While there is no input, then animate colors.
+	lda AnimateFrames        ; Did animation counter reach 0 ?
+	bne EndDeadScreen        ; Nope.  Nothing to do.
+	lda #DEAD_CYCLE_SPEED    ; yes.  Reset it.
+	jsr ResetTimers
+
+	ldx EventCounter
+	inx
+	cpx #20
+	bne SkipZeroDeadCycle
+	ldx #0
+SkipZeroDeadCycle
+	stx EventCounter
+
+	ldy #
+
+
+
+ProcessDeadScreenInput         ; a key is pressed. Prepare for the next screen.
 	lda NumberOfLives          ; Have we run out of frogs?
 	beq SwitchToGameOver       ; Yes.  Game Over.
 
@@ -564,6 +611,19 @@ EndDeadScreen
 	rts
 
 
+DEAD_COLOR_SINE 
+	.byte COLOR_RED_ORANGE+7, COLOR_RED_ORANGE+9, COLOR_RED_ORANGE+11,COLOR_RED_ORANGE+13
+	.byte COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+13
+	.byte COLOR_RED_ORANGE+11,COLOR_RED_ORANGE+9, COLOR_RED_ORANGE+7, COLOR_RED_ORANGE+5
+	.byte COLOR_RED_ORANGE+3, COLOR_RED_ORANGE+1, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0
+	.byte COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+1, COLOR_RED_ORANGE+3, COLOR_RED_ORANGE+5
+	.byte COLOR_RED_ORANGE+7, COLOR_RED_ORANGE+9, COLOR_RED_ORANGE+11,COLOR_RED_ORANGE+13
+	.byte COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+13
+	.byte COLOR_RED_ORANGE+11,COLOR_RED_ORANGE+9, COLOR_RED_ORANGE+7, COLOR_RED_ORANGE+5
+	.byte COLOR_RED_ORANGE+3, COLOR_RED_ORANGE+1, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0
+	.byte COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+1, COLOR_RED_ORANGE+3, COLOR_RED_ORANGE+5
+
+	
 ; ==========================================================================
 ; Event Process TRANSITION TO OVER
 ; The Activity in the transition area, based on timer.
@@ -616,7 +676,7 @@ EndTransitionGameOver
 ;
 ; --------------------------------------------------------------------------
 EventGameOverScreen
-	jsr RunPromptForButton     ; Blink Prompt to press ANY key.  check key.
+	jsr RunPromptForButton     ; Blink Prompt to press ANY key.  check button.
 	beq EndGameOverScreen      ; Nothing pressed, done with title screen.
 
 ProcessGameOverScreenInput     ; a key is pressed. Prepare for the screen transition.

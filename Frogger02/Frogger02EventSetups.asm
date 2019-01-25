@@ -58,8 +58,6 @@ SetupTransitionToTitle
 	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
 	sta CurrentScreen
 
-
-
 	rts
 
 
@@ -71,7 +69,7 @@ SetupTransitionToTitle
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupTransitionToGame
-	lda #TITLE_WIPE_SPEED   ; Speed of fade/dissolve for tranision
+	lda #TITLE_WIPE_SPEED   ; Speed of fade/dissolve for transition
 	jsr ResetTimers
 
 	lda #0
@@ -200,11 +198,13 @@ SetupTransitionToDead
 	lda #FROG_WAKE_SPEED    ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
 	jsr ResetTimers
 
-	lda #0                  ; Zero event controls.
+	lda #1                  ; Set Stage 1 in the fading control.
 	sta EventCounter
 
-	lda #DISPLAY_DEAD       ; Tell VBI to change screens.
-	jsr ChangeScreen        ; Then copy the color tables.
+	; In this case we do not want the Transition to change to the next 
+	; display immediately as the player must have time to view and 
+	; mourn the splattered frog remains laying in state.  There will be 
+	; a pause of about 1.5 seconds for player's tears. 
 
 	lda #SCREEN_TRANS_DEAD  ; Next step is operating the transition animation.
 	sta CurrentScreen
@@ -220,10 +220,18 @@ SetupTransitionToDead
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupDead
-	lda #BLINK_SPEED     ; Text Blinking speed for prompt on Title screen.
+	lda #DEAD_CYCLE_SPEED     ; Animation moving speed.
 	jsr ResetTimers
+	
+	lda #DISPLAY_DEAD        ; Tell VBI to change screens.
+	jsr ChangeScreen         ; Then copy the color tables.
 
-	lda #SCREEN_DEAD     ; Change to dead screen.
+	jsr RemoveFrogOnScreen   ; Remove the frog (corpse) from the screen
+
+	lda #0                   ; Color cycling index for dead.
+	sta EventCounter
+
+	lda #SCREEN_DEAD         ; Change to dead screen event.
 	sta CurrentScreen
 
 	rts
