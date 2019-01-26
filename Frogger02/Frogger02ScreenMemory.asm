@@ -52,32 +52,17 @@
 ; --------------------------------------------------------------------------
 
 ATASCII_HEART  = $00 ; heart graphics
-;ATASCII_HLINE  = $12 ; horizontal line, ctrl-r (title underline)
-;ATASCII_BALL   = $14 ; ball graphics, ctrl-t
-
-;ATASCII_ASTER  = $2A ; Character for '*' splattered frog.
-;ATASCII_0      = $30 ; Character for '0'
-
-; ATASCII chars shorthanded due to frequency....
-;A_B = ATASCII_BALL
-;A_H = ATASCII_HLINE
 
 ; Atari uses different, "internal" values when writing to
 ; Screen RAM.  These are the internal codes for writing
 ; bytes directly to the screen:
-;INTERNAL_O        = $2F ; Letter 'O' is the frog.
 INTERNAL_0        = $10 ; Number '0' for scores.
-;INTERNAL_BALL     = $54 ; Ball graphics, ctrl-t, boat part.
 INTERNAL_SPACE    = $00 ; Blank space character.
-;INTERNAL_INVSPACE = $80 ; Inverse Blank space, for the beach.
-;INTERNAL_ASTER    = $0A ; Character for '*' splattered frog.
-;INTERNAL_HEART    = $40 ; heart graphics
 INTERNAL_HLINE    = $52 ; underline for title text.
 
 ; Graphics chars shorthanded due to frequency in the code....
 ; These characters "draw" the huge text on the screens for
 ; the title, Dead Frog, Saved, and Game Over messages.
-
 I_I  = 73      ; Internal ctrl-I
 I_II = 73+$80  ; Internal ctrl-I Inverse
 I_K  = 75      ; Internal ctrl-K
@@ -1222,17 +1207,17 @@ PLAYFIELD_LMS_LEFT_HI_TABLE
 ; A list of the game LMS addresses for scrolling the credit line.
 ; --------------------------------------------------------------------------
 
-PLAYFIELD_LMS_SCROLL_LO_TABLE
-	.byte <SCROLL_CREDIT_LMS0
-	.byte <SCROLL_CREDIT_LMS1
-	.byte <SCROLL_CREDIT_LMS2
-	.byte <SCROLL_CREDIT_LMS3
-	.byte <SCROLL_CREDIT_LMS4
+;PLAYFIELD_LMS_SCROLL_LO_TABLE
+;	.byte <SCROLL_CREDIT_LMS0
+;	.byte <SCROLL_CREDIT_LMS1
+;	.byte <SCROLL_CREDIT_LMS2
+;	.byte <SCROLL_CREDIT_LMS3
+;	.byte <SCROLL_CREDIT_LMS4
 
 
-PLAYFIELD_LMS_SCROLL_HI_TABLE
-	.byte >SCROLL_CREDIT_LMS0
-	.byte >SCROLL_CREDIT_LMS1
-	.byte >SCROLL_CREDIT_LMS2
-	.byte >SCROLL_CREDIT_LMS3
-	.byte >SCROLL_CREDIT_LMS4
+;PLAYFIELD_LMS_SCROLL_HI_TABLE
+;	.byte >SCROLL_CREDIT_LMS0
+;	.byte >SCROLL_CREDIT_LMS1
+;	.byte >SCROLL_CREDIT_LMS2
+;	.byte >SCROLL_CREDIT_LMS3
+;	.byte >SCROLL_CREDIT_LMS4

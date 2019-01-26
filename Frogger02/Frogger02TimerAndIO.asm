@@ -414,12 +414,11 @@ MyDLI
 ;==============================================================================
 ;                                                           MyImmediateVBI
 ;==============================================================================
-; Vertical Blank Interrupt.
+; Immediate Vertical Blank Interrupt.
 ;
-; Manage timers and countdowns.
+; Frame-critical tasks. 
 ; Force steady state of DLI.
 ; Manage switching displays.
-; Scroll the line of credit text.
 ;==============================================================================
 
 MyImmediateVBI
@@ -427,21 +426,9 @@ MyImmediateVBI
 	tay                      ; I want Y = 0 too.
 	sta ThisDLI              ; Make the DLI index restarts at 0.
 
-; ======== Manage InputScanFrames ========
-	lda InputScanFrames      ; Is input delay already 0?
-	beq DoAnimateClock       ; Yes, do not decrement it again.
-	dec InputScanFrames      ; Minus 1.
-
-; ======== Manage AnimateFrames ========
-DoAnimateClock
-	lda AnimateFrames       ; Is animation countdown already 0?
-	beq DoDisplayListSwitch ; Yes, do not decrement now.
-	dec AnimateFrames       ; Minus 1
-	
 ; ======== Manage Changing Display List ========
-DoDisplayListSwitch
 	lda VBICurrentDL            ; Main code signals to change screens?
-	bmi ScrollTheCreditLine     ; Negative value is no change.
+	bmi ExitMyImmediateVBI      ; Negative value is no change. Exit.
 
 	tax                         ; Use this as index to tables.
 
@@ -462,18 +449,50 @@ DoDisplayListSwitch
 	lda COLOR_TEXT_HI_TABLE,x
 	sta COLPF1POINTER+1
 
-	lda PLAYFIELD_LMS_SCROLL_LO_TABLE,x ; Get the pointer to the LMS for the scrolling credit line.
-	sta CurrentCreditLMS
-	lda PLAYFIELD_LMS_SCROLL_HI_TABLE,x
-	sta CurrentCreditLMS+1
+;	lda PLAYFIELD_LMS_SCROLL_LO_TABLE,x ; Get the pointer to the LMS for the scrolling credit line.
+;	sta CurrentCreditLMS
+;	lda PLAYFIELD_LMS_SCROLL_HI_TABLE,x
+;	sta CurrentCreditLMS+1
 
-	lda ScrollCredit              ; Update current screen to have the current credit scroll value.
-	sta (CurrentCreditLMS),y
+;	lda ScrollCredit              ; Update current screen to have the current credit scroll value.
+;	sta (CurrentCreditLMS),y
 
 	stx CurrentDL                 ; Tell main code the new screen is set.
 
 	lda #$FF                      ; Turn off the signal to change screens.
 	sta VBICurrentDL
+
+ExitMyImmediateVBI
+	jmp SYSVBV ; Return to OS.  XITVBV for Deferred interrupt.
+
+
+
+;==============================================================================
+;                                                           MyDeferredVBI
+;==============================================================================
+; Deferred Vertical Blank Interrupt.
+;
+; Tasks that tolerate more laziness...
+; Manage timers and countdowns.
+; Scroll the line of credit text.
+; Blink the Press Button prompt if enabled.
+;==============================================================================
+
+MyImmediateVBI
+	lda #$00                 ; Initialize.
+	tay                      ; I want Y = 0 too.
+	sta ThisDLI              ; Make the DLI index restarts at 0.
+
+; ======== Manage InputScanFrames ========
+	lda InputScanFrames      ; Is input delay already 0?
+	beq DoAnimateClock       ; Yes, do not decrement it again.
+	dec InputScanFrames      ; Minus 1.
+
+; ======== Manage AnimateFrames ========
+DoAnimateClock
+	lda AnimateFrames       ; Is animation countdown already 0?
+	beq ScrollTheCreditLine ; Yes, do not decrement now.
+	dec AnimateFrames       ; Minus 1
 
 ; ======== Manage scrolling the current credit line ========
 ScrollTheCreditLine               ; scroll the text identifying the perpetrators
@@ -482,16 +501,13 @@ ScrollTheCreditLine               ; scroll the text identifying the perpetrators
 	lda #6                        ; Reset counter to original value.
 	sta ScrollCounter
 
-	inc ScrollCredit              ; Move text left one position.
-	lda ScrollCredit
+	inc SCROLL_CREDIT_LMS         ; Move text left one position.
+	lda SCROLL_CREDIT_LMS
 	cmp #<EXTRA_BLANK_MEM         ; Did scroll position reach the end of the text?
-	bne UpdateCurrentScrollCredit ; No.  Just update with current value.
+	bne ManagePressAButtonPrompt  ; No.  We are done. 
 
 	lda #<SCROLLING_CREDIT        ; Yes, restart scroll from the beginning position.
-	sta ScrollCredit
-
-UpdateCurrentScrollCredit    ; Note that only the low byte of the LMS needs to be updated, since all the
-	sta (CurrentCreditLMS),y ; text of the scrolling line fits inside one page of memory.
+	sta SCROLL_CREDIT_LMS
 
 ; ======== Manage the prompt flashing for Press A Button ========
 ManagePressAButtonPrompt
@@ -525,5 +541,5 @@ DoPromptColorchange
 	jsr ToggleButtonPrompt   ; Switches colors for prompt randomly.
 
 ExitMyImmediateVBI
-	jmp SYSVBV ; Return to OS.  XITVBV for Deferred interrupt.
+	jmp XITVBV  ; Return to OS.  SYSVBV for Immediate interrupt.
 

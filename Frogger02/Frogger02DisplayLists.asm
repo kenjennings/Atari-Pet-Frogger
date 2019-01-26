@@ -17,7 +17,7 @@
 ; Display Lists.
 ;
 ; The custom Display lists make the Atari impersonate the PET 4032's
-; 40-column, 25 line display.  Each averages about 81 bytes, so
+; 40-column, 25 line display.  Each averages about 75 bytes, so
 ; three can fit in the same page.
 ;
 ; The Atari OS text printing is not being used, therefore the Atari screen
@@ -109,12 +109,8 @@ SCROLL_TITLE_LMS2 = [* + 1]
 	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
 	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
 
-	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to start game.
-SCROLL_CREDIT_LMS0 = [* + 1]
-	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
+	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
 
-	.byte DL_JUMP_VB                          ; End list, Vertical Blank
-	.word TITLE_DISPLAYLIST                   ; Restart display at the same display list.
 
 
 ; Revised V02 Main Game Play Screen:
@@ -194,11 +190,8 @@ PF_LMS18 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.  (green grass)
 
 	.byte DL_BLANK_8|DL_DLI                   ; An empty line.  (No Press A Button Prompt for this screen)
-SCROLL_CREDIT_LMS1 = [* + 1]
-	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
-	.byte DL_JUMP_VB                         ; End list, Vertical Blank
-	.word GAME_DISPLAYLIST                   ; Restart display at the same display list.
+	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
 
 
 ; FROG SAVED screen, 25 lines:
@@ -223,12 +216,7 @@ FROGSAVED_DISPLAYLIST
 		mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM          ; An empty line. times 10
 	.endr
 
-	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM          ; Prompt to continue.
-SCROLL_CREDIT_LMS2 = [* + 1]
-	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT              ; The perpetrators identified
-
-	.byte DL_JUMP_VB                                ; End list, Vertical Blank
-	.word FROGSAVED_DISPLAYLIST                     ; Restart display at the same display list.
+	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
 
 
 
@@ -256,12 +244,7 @@ FROGDEAD_DISPLAYLIST
 		mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM          ; An empty line. times 10
 	.endr
 
-	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to continue.
-SCROLL_CREDIT_LMS3 = [* + 1]
-	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
-
-	.byte DL_JUMP_VB                                ; End list, Vertical Blank
-	.word FROGDEAD_DISPLAYLIST                      ; Restart display at the same display list.
+	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
 
 
 ; GAME OVER screen., 25 lines:
@@ -286,12 +269,5 @@ GAMEOVER_DISPLAYLIST
 		mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM          ; An empty line. times 10
 	.endr
 
-	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to continue.
-SCROLL_CREDIT_LMS4 = [* + 1]
-	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
-
-	.byte DL_JUMP_VB                                ; End list, Vertical Blank
-	.word GAMEOVER_DISPLAYLIST                      ; Restart display at the same display list.
-
-
+	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
 

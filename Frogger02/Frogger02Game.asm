@@ -46,9 +46,14 @@ GAMESTART
 	lda #[NMI_DLI|NMI_VBI]     ; Turn On DLI
 	sta NMIEN
 
-	ldy #<MyImmediateVBI       ; Add the VBI to the system
+	ldy #<MyImmediateVBI       ; Add the VBI to the system (Display List dictatorship)
 	ldx #>MyImmediateVBI
 	lda #6                     ; 6 = Immediate VBI
+	jsr SETVBV                 ; Tell OS to set it
+
+	ldy #<MyDeferredVBI       ; Add the VBI to the system (Lazy hippie timers and colors.)
+	ldx #>MyDeferredVBI
+	lda #7                     ; 7 = Deferred VBI
 	jsr SETVBV                 ; Tell OS to set it
 
 	lda #0

@@ -271,21 +271,7 @@
 ; --------------------------------------------------------------------------
 	ORG $82
 
-; Data read by the Display List Interrupts to change the colors for each line.
-
-COLPF2_TABLE ; Text background color. ; Default Green
-	.rept 25
-		.byte COLOR_GREEN
-	.endr
-
-
-COLPF1_TABLE ; Text color (luminance) ; default all to $0A/10 (dec)
-	.rept 25
-		.byte $0A
-	.endr
-
-ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
-
+; ======== M A I N ======== 
 MovesCars       .word $00   ; = Moves Cars
 
 FrogLocation    .word $0000 ; = Pointer to start of Frog's current row in screen memory.
@@ -312,7 +298,7 @@ TextPointer     .word $0000 ; = Pointer to text message to write.
 TextLength      .word $0000 ; = Length of text message to write.
 
 ; Timers and event control.
-; Frame counters are decremented each frame.
+; Frame counters are decremented each frame (by the VBI).
 ; Once they decrement to  0 they enable the related activity.
 
 ; After processing input (from the joystick) this is the number of frames
@@ -327,50 +313,11 @@ InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits.
 ; features are in effect.  Value is enumerated from SCREEN_LIST table.
 CurrentScreen   .byte $00 ; = identity of current screen.
 
-; ======== V B I ========
-; Frame counte set by main code events for delay/speed of activity.
-; In the case of boat movements the value is set from the ANIMATION_FRAMES
-; table based on the number of frogs that crossed the river (difficulty level).
-; The VBI decrements this value until 0.
-; Main code acts on value 0.
-AnimateFrames   .byte $00 ; = ANIMATION_FRAMES,X.
-
-; A display number written here by main code directs the VBI to update the
-; screen pointers and the pointers to the color tables. Updated by VBI to
-; $FF when update is completed.
-VBICurrentDL    .byte $FF ; = Direct VBI to change screens.
-
-; The actual display in use. Updated by VBI from the input provided by
-; VBICurrentDL to let main code  know the the current physical display.
-CurrentDL        .byte $FF
-CurrentDLPointer .word $0000 ; the address of the Display list.  a copy of the OS pointer.
-
-; VBI's Animation counter for scrolling the credit line. when it reaches 0, then scroll.
-ScrollCounter   .byte 8
- 
-; Current low byte of the LMS value for scrolling the credit line.
-ScrollCredit    .byte <SCROLLING_CREDIT
-; Pointer to the current display LMS for the credits.
-CurrentCreditLMS .word SCROLL_CREDIT_LMS0
-
-; ON/Off status of the Get Any Key Prompt. 
-; Main code sets 0 to turn it off.
-; Main code sets 1 to turs it on. 
-; Visibility actions performed by VBI.
-EnablePressAButton .byte 0
-
-; 0/1 toggle for light/dark state of Press a button prompt.
-PressAButtonState  .byte 0
-
-; Timer value for prompt changing  state.
-PressAButtonFrames .byte BLINK_SPEED
-
-
 ; Pointer to the current color table sources in use.
 COLPF2Pointer   .word $0000
 COLPF1Pointer   .word $0000
 
-; Pointer to an LMS instructions in the game screen.
+; Pointer to an LMS instruction in the game screen.
 PlayfieldLMSPointer .word $0000
 
 ; Scrolling offsets for LMS in the playfield.
@@ -388,7 +335,6 @@ ToggleState     .byte 0   ; = 0, 1, flipper to drive a blinking thing.
 EventCounter    .byte 0
 EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
 
-
 ; Game Score and High Score.
 ; This stays here and is copied to screen memory, because the math could
 ; temporarily generate a non-numeric character when there is carry, and I
@@ -396,6 +342,83 @@ EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
 
 MyScore .sb "00000000"
 HiScore .sb "00000000"
+
+
+; ======== V B I ======== TIMER FOR CODE
+; Frame counter set by main code events for delay/speed of activity.
+; In the case of boat movements the value is set from the ANIMATION_FRAMES
+; table based on the number of frogs that crossed the river (difficulty level).
+; The VBI decrements this value until 0.
+; Main code acts on value 0.
+AnimateFrames   .byte $00 ; = ANIMATION_FRAMES,X.
+
+; ======== V B I ======== MANAGE DISPLAY LISTS
+; A display number written here by main code directs the VBI to update the
+; screen pointers and the pointers to the color tables. Updated by VBI to
+; $FF when update is completed.
+VBICurrentDL    .byte $FF ; = Direct VBI to change screens.
+
+; The actual display in use. Updated by VBI from the input provided by
+; VBICurrentDL to let main code  know the the current physical display.
+CurrentDL        .byte $FF
+CurrentDLPointer .word $0000 ; the address of the Display list.  a copy of the OS pointer.
+
+; ======== V B I ======== SCROLLING CREDITS MANAGEMENT
+; VBI's Animation counter for scrolling the credit line. when it reaches 0, then scroll.
+ScrollCounter   .byte 8
+ 
+; We're doing something evil here. All the  display lists will 
+; JMP to here to finish the bottom of the screen.  Thus, there 
+; is only one place to maintain the scrolling credits text.
+   
+; When a prior version of this code gave each display list 
+; its own instructions to point to the credit text then there 
+; needed to be a table of addresses and another page 0 pointer,
+; so that the scrolling code could find and update the correct 
+; LMS instruction currently in use.
+
+BOTTOM_OF_DISPLAY
+	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to start game.
+SCROLL_CREDIT_LMS = [* + 1]
+	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
+
+; Note that as long as the system VBI is functioning the address 
+; provided here does not matter at all.  The VBI will update
+; ANTIC after this using the address in the shadow registers (SDLST)
+
+	.byte DL_JUMP_VB                          ; End list, Vertical Blank
+	.word TITLE_DISPLAYLIST                   ; Restart display at the same display list.
+
+; ======== V B I ======== PRESS A BUTTON MANAGEMENT
+; ON/Off status of the Press A Button Prompt. 
+; Main code sets 0 to turn it off.
+; Main code sets 1 to turs it on. 
+; Visibility actions performed by VBI.
+EnablePressAButton .byte 0
+
+; 0/1 toggle for light/dark state of Press a button prompt.
+PressAButtonState  .byte 0
+
+; Timer value for prompt changing  state.
+PressAButtonFrames .byte BLINK_SPEED
+
+
+; ======== D L I ======== COLOR TABLES
+; Data read by the Display List Interrupts to change the colors for each line.
+
+ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
+
+COLPF2_TABLE ; Text background color. ; Default Black
+	.rept 25
+		.byte COLOR_BLACK
+	.endr
+
+COLPF1_TABLE ; Text color (luminance) ; default all to $0A/10 (dec)
+	.rept 25
+		.byte $0A
+	.endr
+
+
 
 ; In the event X and/or Y can't be saved on stack, protect them here....
 SAVEX = $FE

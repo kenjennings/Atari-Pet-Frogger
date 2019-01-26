@@ -35,14 +35,19 @@
 ; could be entirely random.
 SCREEN_START       = 0  ; Entry Point for New Game setup..
 SCREEN_TITLE       = 1  ; Credits and Instructions.
+
 SCREEN_TRANS_GAME  = 2  ; Transition animation from Title to Game.
 SCREEN_GAME        = 3  ; GamePlay
+
 SCREEN_TRANS_WIN   = 4  ; Transition animation from Game to Win.
 SCREEN_WIN         = 5  ; Crossed the river!
+
 SCREEN_TRANS_DEAD  = 6  ; Transition animation from Game to Dead.
 SCREEN_DEAD        = 7  ; Yer Dead!
+
 SCREEN_TRANS_OVER  = 8  ; Transition animation from Dead to Game Over.
 SCREEN_OVER        = 9  ; Game Over.
+
 SCREEN_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
 
 ; Screen Order/Path
@@ -574,32 +579,49 @@ EndTransitionToDead
 ;
 ; --------------------------------------------------------------------------
 EventDeadScreen
-	jsr RunPromptForButton     ; Blink Prompt to press ANY key.  check button.
-	bne ProcessDeadScreenInput ; Button pressed.  Run the dead exit section..
+	jsr RunPromptForButton      ; Check button press.
+	bne ProcessDeadScreenInput  ; Button pressed.  Run the dead exit section..
 
 	; While there is no input, then animate colors.
-	lda AnimateFrames        ; Did animation counter reach 0 ?
-	bne EndDeadScreen        ; Nope.  Nothing to do.
-	lda #DEAD_CYCLE_SPEED    ; yes.  Reset it.
+	lda AnimateFrames           ; Did animation counter reach 0 ?
+	bne EndDeadScreen           ; Nope.  Nothing to do.
+	lda #DEAD_CYCLE_SPEED       ; yes.  Reset animation timer.
 	jsr ResetTimers
 
-	ldx EventCounter
-	inx
-	cpx #20
-	bne SkipZeroDeadCycle
-	ldx #0
+	ldx EventCounter            ; Get starting color index.
+	inx                         ; Next index. 
+	cpx #20                     ; Did index reach the repeat?
+	bne SkipZeroDeadCycle       ; Nope.
+	ldx #0                      ; Yes, restart at 0.
 SkipZeroDeadCycle
-	stx EventCounter
+	stx EventCounter            ; And save for next time.
 
-	ldy #
+	ldy #0 ; Top 9 lines of screen...
+LoopTopDeadSine
+	lda DEAD_COLOR_SINE_TABLE,x ; Get another color
+	sta COLPF2_TABLE,y          ; Set line on screen
+	inx                         ; Next color entry
+	iny                         ; Next line on screen.
+	cpy #9                      ; Reached the 9th line?
+	bne LoopTopDeadSine         ; No, continue looping.
 
+	ldy #14 ; Bottom 9 lines of screen (above prompt and credits.
+LoopBottomDeadSine
+	lda DEAD_COLOR_SINE_TABLE,x ; Get another color
+	sta COLPF2_TABLE,y          ; Set line on screen
+	inx                         ; Next color entry
+	iny                         ; Next line on screen.
+	cpy #23                     ; Reached the 23rd line?
+	bne LoopBottomDeadSine      ; No, continue looping.
+	beq EndDeadScreen           ; Yes.  Exit now. 
 
+; Button was pressed, so we're done with this event.
+; Evaluate to return to the game, or if game is over.
+ProcessDeadScreenInput          ; A key is pressed. Prepare for the next screen.
+	lda NumberOfLives           ; Have we run out of frogs?
+	beq SwitchToGameOver        ; Yes.  Game Over.
 
-ProcessDeadScreenInput         ; a key is pressed. Prepare for the next screen.
-	lda NumberOfLives          ; Have we run out of frogs?
-	beq SwitchToGameOver       ; Yes.  Game Over.
-
-	jsr SetupTransitionToGame  ; Go back to game screen.
+	jsr SetupTransitionToGame   ; Go back to game screen.
 	bne EndDeadScreen
 
 SwitchToGameOver
@@ -611,7 +633,7 @@ EndDeadScreen
 	rts
 
 
-DEAD_COLOR_SINE 
+DEAD_COLOR_SINE_TABLE
 	.byte COLOR_RED_ORANGE+7, COLOR_RED_ORANGE+9, COLOR_RED_ORANGE+11,COLOR_RED_ORANGE+13
 	.byte COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+13
 	.byte COLOR_RED_ORANGE+11,COLOR_RED_ORANGE+9, COLOR_RED_ORANGE+7, COLOR_RED_ORANGE+5
@@ -623,7 +645,7 @@ DEAD_COLOR_SINE
 	.byte COLOR_RED_ORANGE+3, COLOR_RED_ORANGE+1, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0
 	.byte COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+1, COLOR_RED_ORANGE+3, COLOR_RED_ORANGE+5
 
-	
+
 ; ==========================================================================
 ; Event Process TRANSITION TO OVER
 ; The Activity in the transition area, based on timer.

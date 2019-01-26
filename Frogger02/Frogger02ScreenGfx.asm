@@ -235,7 +235,7 @@
 ; A = 0 for blank space.
 ; X = index, 200 to 1
 ; --------------------------------------------------------------------------
-ClearScreen
+;ClearScreen
 
 
 	rts
@@ -249,7 +249,7 @@ ClearScreen
 ; A = 0 for blank space.
 ; X = index, 200 to 1
 ; --------------------------------------------------------------------------
-ClearForGfx
+;ClearForGfx
 
 
 	rts
@@ -258,7 +258,7 @@ ClearForGfx
 ; ==========================================================================
 ; Print the big text announcement for dead frog.
 ; --------------------------------------------------------------------------
-PrintDeadFrogGfx
+;PrintDeadFrogGfx
 
 
 	rts
@@ -267,7 +267,7 @@ PrintDeadFrogGfx
 ; ==========================================================================
 ; Print the big text announcement for Winning frog.
 ; --------------------------------------------------------------------------
-PrintWinFrogGfx
+;PrintWinFrogGfx
 
 
 	rts
@@ -276,7 +276,7 @@ PrintWinFrogGfx
 ; ==========================================================================
 ; Print the big text announcement for Game Over.
 ; --------------------------------------------------------------------------
-PrintGameOverGfx
+;PrintGameOverGfx
 
 
 	rts

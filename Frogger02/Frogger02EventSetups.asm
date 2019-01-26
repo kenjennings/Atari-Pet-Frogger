@@ -146,12 +146,6 @@ SetupTransitionToWin
 	jsr CopyScoreToScreen   ; Update the screen information
 	jsr PrintFrogsAndLives
 
-;	lda #WIN_FILL_SPEED     ; Animation moving speed.
-;	jsr ResetTimers
-
-;	lda #2                  ; start wiping screen at line 2 (0, 1, 2)
-;	sta EventCounter
-
 	lda #DISPLAY_WIN        ; Tell VBI to change screens.
 	jsr ChangeScreen        ; Then copy the color tables.
 
@@ -169,7 +163,7 @@ SetupTransitionToWin
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupWin
-	lda #BLINK_SPEED    ; Text Blinking speed for prompt on Title screen.
+	lda #FROG_WAKE_SPEED    ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
 	jsr ResetTimers
 
 	lda #SCREEN_WIN     ; Change to wins screen.
@@ -268,8 +262,6 @@ SetupTransitionToGameOver
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupGameOver
-	lda #BLINK_SPEED     ; Text Blinking speed for prompt on Title screen.
-	jsr ResetTimers
 
 	lda #SCREEN_OVER     ; Change to Game Over screen.
 	sta CurrentScreen
