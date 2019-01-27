@@ -64,7 +64,7 @@ PromptLightAndDark
 
 SetPromptColors
 	sta COLPF2_TABLE+23    ; Set background.
-	sta COLPF1_TABLE+23    ; Set text.
+	stx COLPF1_TABLE+23    ; Set text.
 	rts
 
 

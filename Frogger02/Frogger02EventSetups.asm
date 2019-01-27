@@ -54,7 +54,6 @@ SetupTransitionToTitle
 	lda #DISPLAY_TITLE       ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
-	
 	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
 	sta CurrentScreen
 
@@ -80,11 +79,6 @@ SetupTransitionToGame
 
 	lda #1                  ; First transition stage: Loop from bottom to top
 	sta EventCounter
-
-	lda #0                  ; Make background black for the Prompt text.
-	sta COLPF2_TABLE+23
-	lda #$0C                ; Set prompt text luminance.
-	sta COLPF1_TABLE+23
 
 	lda #SCREEN_TRANS_GAME  ; Next step is operating the transition animation.
 	sta CurrentScreen
@@ -163,8 +157,11 @@ SetupTransitionToWin
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupWin
-	lda #FROG_WAKE_SPEED    ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
+	lda #WIN_CYCLE_SPEED    ; 
 	jsr ResetTimers
+
+	lda #$10                ; Color scrolling 238 to 16
+	sta EventCounter
 
 	lda #SCREEN_WIN     ; Change to wins screen.
 	sta CurrentScreen
@@ -239,14 +236,6 @@ SetupDead
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupTransitionToGameOver
-	lda #RES_IN_SPEED      ; Animation moving speed.
-	jsr ResetTimers
-
-	lda #60                ; Number of times to do the Game Over EOR effect
-	sta EventCounter
-
-	lda #DISPLAY_OVER      ; Tell VBI to change screens.
-	jsr ChangeScreen       ; Then copy the color tables.
 
 	lda #SCREEN_TRANS_OVER ; Change to game over transition.
 	sta CurrentScreen
@@ -262,9 +251,17 @@ SetupTransitionToGameOver
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupGameOver
+	lda #GAME_OVER_SPEED   ; Animation moving speed.
+	jsr ResetTimers
+	
+	lda #DISPLAY_OVER      ; Tell VBI to change screens.
+	jsr ChangeScreen       ; Then copy the color tables.
 
-	lda #SCREEN_OVER     ; Change to Game Over screen.
+	lda #SCREEN_OVER       ; Change to Game Over screen.
 	sta CurrentScreen
+
+	lda #0                 ; base color for down color scroll
+	sta EventCounter
 
 	rts
 

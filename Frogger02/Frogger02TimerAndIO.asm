@@ -41,7 +41,7 @@ DEAD_CYCLE_SPEED = 4  ; Speed of color animation on Dead screen
 WIN_FADE_SPEED   = 4  ; Fade the game screen to black to show Win
 WIN_CYCLE_SPEED  = 4  ; Speed of color animation on Win screen 
 
-RES_IN_SPEED     = 2  ; Speed of Game over Res in animation
+GAME_OVER_SPEED  = 2  ; Speed of Game over Res in animation
 
 
 ; Timer values.  NTSC.
@@ -423,7 +423,6 @@ MyDLI
 
 MyImmediateVBI
 	lda #$00                 ; Initialize.
-	tay                      ; I want Y = 0 too.
 	sta ThisDLI              ; Make the DLI index restarts at 0.
 
 ; ======== Manage Changing Display List ========
@@ -449,14 +448,6 @@ MyImmediateVBI
 	lda COLOR_TEXT_HI_TABLE,x
 	sta COLPF1POINTER+1
 
-;	lda PLAYFIELD_LMS_SCROLL_LO_TABLE,x ; Get the pointer to the LMS for the scrolling credit line.
-;	sta CurrentCreditLMS
-;	lda PLAYFIELD_LMS_SCROLL_HI_TABLE,x
-;	sta CurrentCreditLMS+1
-
-;	lda ScrollCredit              ; Update current screen to have the current credit scroll value.
-;	sta (CurrentCreditLMS),y
-
 	stx CurrentDL                 ; Tell main code the new screen is set.
 
 	lda #$FF                      ; Turn off the signal to change screens.
@@ -478,11 +469,7 @@ ExitMyImmediateVBI
 ; Blink the Press Button prompt if enabled.
 ;==============================================================================
 
-MyImmediateVBI
-	lda #$00                 ; Initialize.
-	tay                      ; I want Y = 0 too.
-	sta ThisDLI              ; Make the DLI index restarts at 0.
-
+MyDeferredVBI
 ; ======== Manage InputScanFrames ========
 	lda InputScanFrames      ; Is input delay already 0?
 	beq DoAnimateClock       ; Yes, do not decrement it again.
@@ -517,7 +504,7 @@ ManagePressAButtonPrompt
 	sta COLPF2_TABLE+23      ; Set background
 	sta COLPF1_TABLE+23      ; Set text.
 	sta PressAButtonFrames   ; This makes sure it will restart as soon as enabled.
-	beq ExitMyImmediateVBI
+	beq ExitMyDeferredVBI    
 
 ; Note that the Enable/Disable behavior connected to the timer mechanism 
 ; means that the action will occur when this timer executes with value 1 
@@ -527,7 +514,7 @@ DoAnimateButtonTimer
 	lda PressAButtonFrames   
 	beq DoPromptColorchange  ; Timer is Zero.  Go switch colors.
 	dec PressAButtonFrames   ; Minus 1
-	bne ExitMyImmediateVBI   ; if it is still non-zero end this section.
+	bne ExitMyDeferredVBI    ; if it is still non-zero end this section.
 
 DoPromptColorchange
 	lda #BLINK_SPEED         ; Text Blinking speed for prompt
@@ -535,11 +522,11 @@ DoPromptColorchange
 
 	inc PressAButtonState    ; Add 1.  (says Capt Obvious)
 	lda PressAButtonState
-	and #1                   ; Squash to only lowest bit -- 0, 1, 0, 1, 0, 1...
+	and #1                   ; Keep only lowest bit -- 0, 1, 0, 1, 0, 1...
 	sta PressAButtonState
 
 	jsr ToggleButtonPrompt   ; Switches colors for prompt randomly.
 
-ExitMyImmediateVBI
+ExitMyDeferredVBI
 	jmp XITVBV  ; Return to OS.  SYSVBV for Immediate interrupt.
 

@@ -134,9 +134,6 @@ TestTransTitle3
 	lda #SCREEN_START         ; Yes, change to event to start new game.
 	sta CurrentScreen
 
-	lda #BLINK_SPEED          ; Text Blinking speed for prompt on Title screen.
-	jsr ResetTimers
-
 EndTransitionToTitle
 	lda CurrentScreen
 
@@ -430,34 +427,13 @@ EndGameScreen
 ; 3) Setup to do the Win screen event.
 ; --------------------------------------------------------------------------
 EventTransitionToWin
-	lda AnimateFrames        ; Did animation counter reach 0 ?
-	bne EndTransitionToWin   ; Nope.  Nothing to do.
+;	lda AnimateFrames        ; Did animation counter reach 0 ?
+;	bne EndTransitionToWin   ; Nope.  Nothing to do.
 
-	lda #WIN_FILL_SPEED      ; yes.  Reset it. (60 / 6 == 10 updates per second)
-	jsr ResetTimers
+;	lda #WIN_FILL_SPEED      ; yes.  Reset it. (60 / 6 == 10 updates per second)
+;	jsr ResetTimers
 
-;	ldx EventCounter         ; Row number for text.
-;	cpx #13                  ; From 2 to 12, erase from top to middle
-;	beq DoSwitchToWins       ; When at 13 then fill screen is done.
-
-;	ldy #PRINT_BLANK_TXT_INV ; inverse blanks.
-;	jsr PrintToScreen
-
-;	lda #26                  ; Subtract Row number for text from 26 (26-2 = 24)
-;	sec
-;	sbc EventCounter
-;	tax
-
-;	jsr PrintToScreen        ; And print the inverse blanks again.
-
-;	inc EventCounter
-;	bne EndTransitionToWin   ; Nothing else to do here.
-
-; Clear screen is done.   Display the big prompt.
-DoSwitchToWins
-;	jsr PrintWinFrogGfx      ; Copy the big text announcement to screen
-
-	jsr SetupWin             ; Setup for Wins screen (which only waits for input )
+	jsr SetupWin             ; Setup for Wins screen 
 
 EndTransitionToWin
 	lda CurrentScreen
@@ -467,20 +443,66 @@ EndTransitionToWin
 
 ; ==========================================================================
 ; Event Process WIN SCREEN
-; The Activity in the transition area, based on timer.
-; Blink Prompt for ANY key.
-; Wait for Key.
+; Scroll colors on screen while waiting for a button press.
 ; Setup for next transition.
 ; --------------------------------------------------------------------------
 EventWinScreen
-	jsr RunPromptForButton     ; Blink Prompt to press ANY key.  check button.
-	beq EndWinScreen           ; Nothing pressed, done with title screen.
+	jsr RunPromptForButton      ; Check button press.
+	bne ProcessWinScreenInput   ; Button pressed.  Run the Win exit section..
 
-ProcessWinScreenInput          ; a key is pressed. Prepare for the screen transition.
+	; While there is no input, then animate colors.
+	lda AnimateFrames           ; Did animation counter reach 0 ?
+	bne EndWinScreen            ; Nope.  Nothing to do.
+	lda #WIN_CYCLE_SPEED        ; yes.  Reset animation timer.
+	jsr ResetTimers
+
+; Color scrolling skips the blacl/grey/white.  
+; The scrolling uses values 238 to 16
+	dec EventCounter            ; decrement base color 
+	dec EventCounter            ; Twice.  (need to use even numbers.)
+	lda EventCounter            ; Get value 
+	cmp #14                     ; Reach the limit?
+	beq SkipColorReset          ; No.  Continue.
+	lda #238                    ; Yes.  Reset to start.
+SkipColorReset                  
+	sta EventCounter            ; Save it for next time.
+
+	ldy #0 ; Top 9 lines of screen...
+LoopTopWinScroll
+	sta COLPF2_TABLE,y          ; Set line on screen
+	tax                         ; X = A
+	dex                         ; X = X - 1
+	dex                         ; X = X - 1
+ 	cpx #14                     ; Reached limit? (16 -2)
+	bne SkipUpScrollReset       ; No.  continue.
+	ldx #238                    ; Yes.   Back to start.
+SkipUpScrollReset 
+	txa                         ; A = X
+	iny                         ; Next line on screen.
+	cpy #9                      ; Reached the 9th line?
+	bne LoopTopWinScroll        ; No, continue looping.
+
+	ldy #14 ; Bottom 9 lines of screen (above prompt and credits.
+LoopBottomWinScroll             ; Scroll opposite direction
+	tax                         ; X = A
+	inx                         ; X = X + 1
+	inx                         ; X = X + 1
+	cpx #240                    ; Reached limit? (238 + 2)
+	bne SkipDownScrollReset     ; No.  Continue.
+	ldx #16                     ; Yes.  Back to start.
+SkipDownScrollReset
+	txa                         ; A = X
+	sta COLPF2_TABLE,y          ; Set line on screen
+	iny                         ; Next line on screen.
+	cpy #23                     ; Reached the 23rd line?
+	bne LoopBottomWinScroll     ; No, continue looping.
+	beq EndWinScreen           ; Yes.  Exit now. 
+
+ProcessWinScreenInput           ; Button is pressed. Prepare for the screen transition.
 	jsr SetupTransitionToGame
 
 EndWinScreen
-	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
+	lda CurrentScreen           ; Yeah, redundant to when a key is pressed.
 
 	rts
 
@@ -598,19 +620,13 @@ SkipZeroDeadCycle
 
 	ldy #0 ; Top 9 lines of screen...
 LoopTopDeadSine
-	lda DEAD_COLOR_SINE_TABLE,x ; Get another color
-	sta COLPF2_TABLE,y          ; Set line on screen
-	inx                         ; Next color entry
-	iny                         ; Next line on screen.
+	jsr DeadFrogRedScroll       ; Increments and color stuffing.
 	cpy #9                      ; Reached the 9th line?
 	bne LoopTopDeadSine         ; No, continue looping.
 
 	ldy #14 ; Bottom 9 lines of screen (above prompt and credits.
 LoopBottomDeadSine
-	lda DEAD_COLOR_SINE_TABLE,x ; Get another color
-	sta COLPF2_TABLE,y          ; Set line on screen
-	inx                         ; Next color entry
-	iny                         ; Next line on screen.
+	jsr DeadFrogRedScroll       ; Increments and color stuffing.
 	cpy #23                     ; Reached the 23rd line?
 	bne LoopBottomDeadSine      ; No, continue looping.
 	beq EndDeadScreen           ; Yes.  Exit now. 
@@ -629,6 +645,19 @@ SwitchToGameOver
 
 EndDeadScreen
 	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
+
+	rts
+
+
+; ==========================================================================
+; Redundant code section used for two separate loops in the Dead Frog event.
+;
+; --------------------------------------------------------------------------
+DeadFrogRedScroll
+	lda DEAD_COLOR_SINE_TABLE,x ; Get another color
+	sta COLPF2_TABLE,y          ; Set line on screen
+	inx                         ; Next color entry
+	iny                         ; Next line on screen.
 
 	rts
 
@@ -654,35 +683,6 @@ DEAD_COLOR_SINE_TABLE
 ; 2) follow with a blank line to erase the highest line of trailing text.
 ; --------------------------------------------------------------------------
 EventTransitionGameOver
-	lda AnimateFrames          ; Did animation counter reach 0 ?
-	bne EndTransitionGameOver  ; Nope.  Nothing to do.
-
-;	dec EventCounter                ; Decrement pass counter.
-;	beq DoTransitionToGameOverPart2 ; When this reaches 0 finish the screen
-
-	lda #RES_IN_SPEED          ; Running animation loop. Reset timer.
-	jsr ResetTimers
-
-	; Randomize display of Game Over
-;	ldy #16                    ; Do 16 random characters per pass.
-GetRandomX
-;	lda RANDOM                 ; Get a random value.
-;	and #$7F                   ; Mask it down to 0 to 127 value
-;	cmp #118                   ; Is it more than 118?
-;	bcs GetRandomX             ; Yes, retry it.
-;	tax                        ; The index into the image and screen buffers.
-;	lda GAME_OVER_GFX,x        ; Get image byte
-;	beq SkipGameOverEOR        ; if this is 0 just copy to screen
-;	eor SCREENMEM+400,x        ; Exclusive Or with screen
-SkipGameOverEOR
-;	sta SCREENMEM+400,x        ; Write to screen
-;	dey
-;	bne GetRandomX             ; Do another random character in this turn.
-;	beq EndTransitionGameOver
-
-	; Finish up.
-DoTransitionToGameOverPart2
-;	jsr PrintGameOverGfx       ;  Draw Big Game Over
 
 	jsr SetupGameOver
 
@@ -698,15 +698,54 @@ EndTransitionGameOver
 ;
 ; --------------------------------------------------------------------------
 EventGameOverScreen
-	jsr RunPromptForButton     ; Blink Prompt to press ANY key.  check button.
-	beq EndGameOverScreen      ; Nothing pressed, done with title screen.
+	jsr RunPromptForButton          ; Check button press.
+	bne ProcessGameOverScreenInput  ; Button pressed.  Run the dead exit section..
 
-ProcessGameOverScreenInput     ; a key is pressed. Prepare for the screen transition.
+	; While there is no input, then animate scrolling.
+	lda AnimateFrames               ; Did animation counter reach 0 ?
+	beq EndGameOverScreen           ; No. Nothing to do.
+	lda #GAME_OVER_SPEED            ; yes.  Reset animation timer.
+	jsr ResetTimers
+
+	inc EventCounter                ; Increment base color 
+	inc EventCounter                ; Twice.  (need to use even numbers.)
+	lda EventCounter                ; Get value 
+	and #$0F                        ; Keep this truncated to grey (black) $0 to $F
+	sta EventCounter                ; Save it for next time.
+
+	ldy #0 ; Top 9 lines of screen...
+LoopTopOverGrey
+	jsr GameOverGreyScroll      ; Increments and color stuffing.
+	cpy #9                      ; Reached the 9th line?
+	bne LoopTopOverGrey         ; No, continue looping.
+
+	ldy #14 ; Bottom 9 lines of screen (above prompt and credits.
+LoopBottomOverGrey
+	jsr GameOverGreyScroll      ; Increments and color stuffing.
+	cpy #23                     ; Reached the 23rd line?
+	bne LoopBottomOverGrey      ; No, continue looping.
+	beq EndGameOverScreen
+
+ProcessGameOverScreenInput      ; a key is pressed. Prepare for the screen transition.
 	jsr SetupTransitionToTitle
 
 EndGameOverScreen
-	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
+	lda CurrentScreen           ; Yeah, redundant to when a key is pressed.
 
 	rts
 
+; ==========================================================================
+; Redundant code section used for two separate loops in the Game Over event.
+;
+; --------------------------------------------------------------------------
+GameOverGreyScroll
+	sta COLPF2_TABLE,y          ; Set line on screen
+	tax                         ; X = A
+	inx                         ; X = X + 1
+	inx                         ; X = X + 1
+	txa                         ; A = X
+	and #$0F                    ; Keep this truncated to grey (black) $0 to $F
+	iny                         ; Next line on screen.
 
+	rts
+	
