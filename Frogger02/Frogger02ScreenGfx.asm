@@ -215,73 +215,6 @@
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
 
-
-; ==========================================================================
-; "Printing" things to the screen.
-; --------------------------------------------------------------------------
-
-; ==========================================================================
-; Clear the screen.
-; 25 lines of text is divisible by 5 lines, and 5 lines of text is
-; 200 bytes, so the code will loop and clear in multiple, 5 line
-; sections at the same time.
-;
-; Indexing to 200 means bpl/bmi can't be used to identify continuing
-; or ending condition of the loop.  Therefore, the loop counts 200 to
-; 1 and uses value 0 for end of loop.  This means the base address for
-; the indexing must be one less (-1) from the intended target base.
-;
-; Used by code:
-; A = 0 for blank space.
-; X = index, 200 to 1
-; --------------------------------------------------------------------------
-;ClearScreen
-
-
-	rts
-
-
-; ==========================================================================
-; Empty the lines of text immediately above and below the big
-; text announcements (win, dead, game over)
-;
-; Used by code:
-; A = 0 for blank space.
-; X = index, 200 to 1
-; --------------------------------------------------------------------------
-;ClearForGfx
-
-
-	rts
-
-
-; ==========================================================================
-; Print the big text announcement for dead frog.
-; --------------------------------------------------------------------------
-;PrintDeadFrogGfx
-
-
-	rts
-
-
-; ==========================================================================
-; Print the big text announcement for Winning frog.
-; --------------------------------------------------------------------------
-;PrintWinFrogGfx
-
-
-	rts
-
-
-; ==========================================================================
-; Print the big text announcement for Game Over.
-; --------------------------------------------------------------------------
-;PrintGameOverGfx
-
-
-	rts
-
-
 ; ==========================================================================
 ; Set the splattered frog on the screen.
 ;
@@ -388,26 +321,6 @@ DisplayGameScreen
 	jsr PrintFrogsAndLives
 
 	mRegRestoreAYX          ; Restore X, Y and A
-
-	rts
-
-
-; ==========================================================================
-; Load ScreenPointer From X
-;
-; Parameters:
-; X = row number on screen 0 to 24. (times 2 for index)
-;
-; Used by code:
-; A = used to multiply  move the values.
-; --------------------------------------------------------------------------
-LoadScreenPointerFromX
-;	lda SCREEN_ADDR,x      ; Get screen row address low byte.
-;	sta ScreenPointer
-;	inx
-;	lda SCREEN_ADDR,x      ; Get screen row address high byte.
-;	sta ScreenPointer+1
-;	inx                    ; doing this for consistency so the next call pulls correct row
 
 	rts
 

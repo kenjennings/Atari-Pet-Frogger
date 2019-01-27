@@ -367,7 +367,7 @@ CurrentDLPointer .word $0000 ; the address of the Display list.  a copy of the O
 ; VBI's Animation counter for scrolling the credit line. when it reaches 0, then scroll.
 ScrollCounter   .byte 8
  
-; We're doing something evil here. All the  display lists will 
+; We're doing something evil here. Most of the display lists will 
 ; JMP to here to finish the bottom of the screen.  Thus, there 
 ; is only one place to maintain the scrolling credits text.
    
@@ -386,8 +386,7 @@ SCROLL_CREDIT_LMS = [* + 1]
 ; provided here does not matter at all.  The VBI will update
 ; ANTIC after this using the address in the shadow registers (SDLST)
 
-	.byte DL_JUMP_VB                          ; End list, Vertical Blank
-	.word TITLE_DISPLAYLIST                   ; Restart display at the same display list.
+	mDL_JVB TITLE_DISPLAYLIST   ; Restart display at the same display list.
 
 ; ======== V B I ======== PRESS A BUTTON MANAGEMENT
 ; ON/Off status of the Press A Button Prompt. 

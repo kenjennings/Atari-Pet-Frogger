@@ -36,12 +36,12 @@ TITLE_WIPE_SPEED = 0  ; Title screen to game screen fade speed.
 
 FROG_WAKE_SPEED  = 95 ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
 DEAD_FADE_SPEED  = 4  ; Fade the game screen to black for Dead Frog
-DEAD_CYCLE_SPEED = 4  ; Speed of color animation on Dead screen
+DEAD_CYCLE_SPEED = 6  ; Speed of color animation on Dead screen
 
 WIN_FADE_SPEED   = 4  ; Fade the game screen to black to show Win
-WIN_CYCLE_SPEED  = 4  ; Speed of color animation on Win screen 
+WIN_CYCLE_SPEED  = 6  ; Speed of color animation on Win screen 
 
-GAME_OVER_SPEED  = 2  ; Speed of Game over Res in animation
+GAME_OVER_SPEED  = 12  ; Speed of Game over Res in animation
 
 
 ; Timer values.  NTSC.

@@ -189,8 +189,6 @@ PF_LMS18 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM18 ; Frog starting beach.
 	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.  (green grass)
 
-	.byte DL_BLANK_8|DL_DLI                   ; An empty line.  (No Press A Button Prompt for this screen)
-
 	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
 
 

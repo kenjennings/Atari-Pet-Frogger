@@ -267,23 +267,26 @@ TestTransGame3
 	lda GAME_BACK_COLORS,x ; (redundantly) copy the background color.
 	sta COLPF2_TABLE,x
 
+	cmp #23 ; must skip prompt line to keep it visibly off
+	beq SkipThePromptLine
 	lda COLPF1_TABLE,x
 	cmp GAME_TEXT_COLORS,x
+SkipThePromptLine
 	beq TransGameNextLine
 
-	inc COLPF1_TABLE,x
+	inc COLPF1_TABLE,x       ; Increase text brightness.
 
-	lda COLPF1_TABLE,x
-	cmp GAME_TEXT_COLORS,x
+	lda COLPF1_TABLE,x 
+	cmp GAME_TEXT_COLORS,x   ; Is it at target brighness?
 	beq TransGameNextLine
 
-	inc COLPF1_TABLE,x
-	bne EndTransitionToGame
+	inc COLPF1_TABLE,x       ; Twice to speed this up.
+	bne EndTransitionToGame  ; (thus targets must all be even numbers)
 
 TransGameNextLine
-	inc EventCounter2
+	inc EventCounter2        ; next screen line.
 	lda EventCounter2
-	cmp #25
+	cmp #25                  ; Reached the limit.  all 24 lines are done.
 	bne EndTransitionToGame
 
 	; Finished stage 3, now go to the main event.
@@ -462,7 +465,7 @@ EventWinScreen
 	dec EventCounter            ; Twice.  (need to use even numbers.)
 	lda EventCounter            ; Get value 
 	cmp #14                     ; Reach the limit?
-	beq SkipColorReset          ; No.  Continue.
+	bne SkipColorReset          ; No.  Continue.
 	lda #238                    ; Yes.  Reset to start.
 SkipColorReset                  
 	sta EventCounter            ; Save it for next time.
@@ -703,7 +706,7 @@ EventGameOverScreen
 
 	; While there is no input, then animate scrolling.
 	lda AnimateFrames               ; Did animation counter reach 0 ?
-	beq EndGameOverScreen           ; No. Nothing to do.
+	bne EndGameOverScreen           ; No. Nothing to do.
 	lda #GAME_OVER_SPEED            ; yes.  Reset animation timer.
 	jsr ResetTimers
 
