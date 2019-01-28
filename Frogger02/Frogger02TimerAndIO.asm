@@ -39,7 +39,7 @@ DEAD_FADE_SPEED  = 4  ; Fade the game screen to black for Dead Frog
 DEAD_CYCLE_SPEED = 6  ; Speed of color animation on Dead screen
 
 WIN_FADE_SPEED   = 4  ; Fade the game screen to black to show Win
-WIN_CYCLE_SPEED  = 6  ; Speed of color animation on Win screen 
+WIN_CYCLE_SPEED  = 5  ; Speed of color animation on Win screen 
 
 GAME_OVER_SPEED  = 12  ; Speed of Game over Res in animation
 

@@ -459,47 +459,44 @@ EventWinScreen
 	lda #WIN_CYCLE_SPEED        ; yes.  Reset animation timer.
 	jsr ResetTimers
 
-; Color scrolling skips the blacl/grey/white.  
-; The scrolling uses values 238 to 16
-	dec EventCounter            ; decrement base color 
-	dec EventCounter            ; Twice.  (need to use even numbers.)
-	lda EventCounter            ; Get value 
-	cmp #14                     ; Reach the limit?
-	bne SkipColorReset          ; No.  Continue.
-	lda #238                    ; Yes.  Reset to start.
-SkipColorReset                  
+; Color scrolling skips the black/grey/white.  
+; The scrolling uses values 238 to 18 step -4
+	lda EventCounter            ; Get starting value from last frame
+	jsr WinColorScroll          ; Subtract 4 and reset to start if needed.
 	sta EventCounter            ; Save it for next time.
 
-	ldy #0 ; Top 9 lines of screen...
+	ldy #0 ; Color the Top 9 lines of screen...
 LoopTopWinScroll
-	sta COLPF2_TABLE,y          ; Set line on screen
-	tax                         ; X = A
-	dex                         ; X = X - 1
-	dex                         ; X = X - 1
- 	cpx #14                     ; Reached limit? (16 -2)
-	bne SkipUpScrollReset       ; No.  continue.
-	ldx #238                    ; Yes.   Back to start.
-SkipUpScrollReset 
-	txa                         ; A = X
+	sta COLPF2_TABLE,y          ; Set color for line on screen
+	jsr WinColorScroll          ; Subtract 4 and reset to start if needed.
+
 	iny                         ; Next line on screen.
 	cpy #9                      ; Reached the 9th line?
 	bne LoopTopWinScroll        ; No, continue looping.
 
-	ldy #14 ; Bottom 9 lines of screen (above prompt and credits.
-LoopBottomWinScroll             ; Scroll opposite direction
-	tax                         ; X = A
-	inx                         ; X = X + 1
-	inx                         ; X = X + 1
-	cpx #240                    ; Reached limit? (238 + 2)
-	bne SkipDownScrollReset     ; No.  Continue.
-	ldx #16                     ; Yes.  Back to start.
+	pha                         ; Save to use as start value later.
+
+	eor #$F0                    ; Invert color bits for the middle SAVED text.
+	and #$F0                    ; Truncate luminace bits.
+	sta COLPF2_TABLE+10         ; Use as background color for 
+	sta COLPF2_TABLE+11         ; the three lines of text.
+	sta COLPF2_TABLE+12
+
+	pla                         ; Get the color back for scolling the bottom. 
+
+	ldy #14                     ; Bottom 9 lines of screen (above prompt and credits.)
+LoopBottomWinScroll             ; Scroll colors in opposite direction
+	clc
+	adc #4                      ; Add 4 to the color.
+	cmp #242                    ; Reached limit? (238 + 4)
+	bne SkipDownScrollReset     ; No. Continue.
+	lda #18                     ; Yes. Reset back to start.
 SkipDownScrollReset
-	txa                         ; A = X
-	sta COLPF2_TABLE,y          ; Set line on screen
+	sta COLPF2_TABLE,y          ; Set color for line on screen
 	iny                         ; Next line on screen.
 	cpy #23                     ; Reached the 23rd line?
 	bne LoopBottomWinScroll     ; No, continue looping.
-	beq EndWinScreen           ; Yes.  Exit now. 
+	beq EndWinScreen            ; Yes.  Nothing left to do. Exit now. 
 
 ProcessWinScreenInput           ; Button is pressed. Prepare for the screen transition.
 	jsr SetupTransitionToGame
@@ -507,6 +504,24 @@ ProcessWinScreenInput           ; Button is pressed. Prepare for the screen tran
 EndWinScreen
 	lda CurrentScreen           ; Yeah, redundant to when a key is pressed.
 
+	rts
+
+
+; ==========================================================================
+; Redundant code section used for two separate places in the Win event.
+; Subtract 4 from the current color.
+; Reset to 238 if the limit 14 is reached.
+;
+; A  is the current color.   
+; --------------------------------------------------------------------------
+WinColorScroll
+	sec
+	sbc #4                      ; Subtract 4
+ 	cmp #14                     ; Did it pass the limit (minimum 18, minus 4 == 14)
+	bne ExitWinColorScroll      ; No. We're done here.
+	lda #238                    ; Yes.  Reset back to start.
+
+ExitWinColorScroll
 	rts
 
 

@@ -160,7 +160,7 @@ SetupWin
 	lda #WIN_CYCLE_SPEED    ; 
 	jsr ResetTimers
 
-	lda #$10                ; Color scrolling 238 to 16
+	lda #238               ; Color scrolling 238 to 16
 	sta EventCounter
 
 	lda #SCREEN_WIN     ; Change to wins screen.
