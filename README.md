@@ -42,6 +42,10 @@ PROTOTYPE COLORIZATION (same game as V01, but with colors from DLI.  Actually ea
 
 [![V02 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger02/V02_ProtoComposite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02/README_V02.md)
 
+UPDATE 27 JAN 2019.....   New Title Screen teaser below.  Still Work in progress.  Most of the game workings are redone.  A few minor refinements and sound are still in progress.
+
+[![V02 New Title](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger02/V02_NewProtoTitle.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02/README_V02.md)
+
 The plan for Version 02 is to continue to maintain the game in the same text mode (ANTIC mode 2, OS Text Mode 0), but to Atari-cize everything about the screen and game operation.  Ideas under contemplation....
 
 - Add at least simple sound effects.
