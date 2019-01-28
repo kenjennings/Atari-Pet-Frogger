@@ -272,7 +272,7 @@
 	ORG $82
 
 ; ======== M A I N ======== 
-MovesCars       .word $00   ; = Moves Cars
+;MovesCars       .word $00   ; = Moves Cars
 
 FrogLocation    .word $0000 ; = Pointer to start of Frog's current row in screen memory.
 FrogColumn      .byte $00   ; = Frog X coord (logical to screen)
@@ -283,7 +283,6 @@ FrogRow         .byte $00   ; = Frog Y row position (in the beach/boat playfield
 LastCharacter   .byte 0     ; = Last Character Under Frog
 
 FrogSafety      .byte 0     ; = 0 When Frog OK.  !0 == Yer Dead.
-DelayNumber     .byte 0     ; = Delay No. (Hi = Slow, Low = Fast)
 
 FrogsCrossed    .byte 0     ; = Number Of Frogs crossed
 ScoreToAdd      .byte 0     ; = Number To Be Added to Score
@@ -293,9 +292,6 @@ FlaggedHiScore  .byte 0     ; = Flag For Hi Score.  0 = no high score.  $FF = Hi
 NumberOfLives   .byte 0     ; = Is Number Of Lives
 
 LastInput       .byte 0     ; = Remember last joystick input
-ScreenPointer   .word $0000 ; = Pointer to location in screen memory.
-TextPointer     .word $0000 ; = Pointer to text message to write.
-TextLength      .word $0000 ; = Length of text message to write.
 
 ; Timers and event control.
 ; Frame counters are decremented each frame (by the VBI).
@@ -317,9 +313,6 @@ CurrentScreen   .byte $00 ; = identity of current screen.
 COLPF2Pointer   .word $0000
 COLPF1Pointer   .word $0000
 
-; Pointer to an LMS instruction in the game screen.
-PlayfieldLMSPointer .word $0000
-
 ; Scrolling offsets for LMS in the playfield.
 ; All scroll data occupies page data from  0 to 79.
 ; Left scroll moves from LMS offset 0 to 39
@@ -339,7 +332,6 @@ EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
 ; This stays here and is copied to screen memory, because the math could
 ; temporarily generate a non-numeric character when there is carry, and I
 ; don't want that (possibly) visible on the screen however short it may be.
-
 MyScore .sb "00000000"
 HiScore .sb "00000000"
 
@@ -350,13 +342,13 @@ HiScore .sb "00000000"
 ; table based on the number of frogs that crossed the river (difficulty level).
 ; The VBI decrements this value until 0.
 ; Main code acts on value 0.
-AnimateFrames   .byte $00 ; = ANIMATION_FRAMES,X.
+AnimateFrames    .byte $00 ; = ANIMATION_FRAMES,X.
 
 ; ======== V B I ======== MANAGE DISPLAY LISTS
 ; A display number written here by main code directs the VBI to update the
 ; screen pointers and the pointers to the color tables. Updated by VBI to
 ; $FF when update is completed.
-VBICurrentDL    .byte $FF ; = Direct VBI to change screens.
+VBICurrentDL     .byte $FF ; = Direct VBI to change screens.
 
 ; The actual display in use. Updated by VBI from the input provided by
 ; VBICurrentDL to let main code  know the the current physical display.

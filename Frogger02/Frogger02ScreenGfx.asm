@@ -326,24 +326,6 @@ DisplayGameScreen
 
 
 ; ==========================================================================
-; Load Playfield Pointer From X
-;
-; Parameters:
-; X = row number on screen 0 to 18.
-;
-; Used by code:
-; A = used to load/store
-; --------------------------------------------------------------------------
-LoadPlayfieldPointerFromX
-	lda PLAYFIELD_MEM_LO_TABLE,x      ; Get screen row address low byte.
-	sta ScreenPointer
-	lda PLAYFIELD_MEM_HI_TABLE,x      ; Get screen row address high byte.
-	sta ScreenPointer+1
-
-	rts
-
-
-; ==========================================================================
 ; ANIMATE BOATS
 ; Move the lines of boats around either left or right.
 ; Changed logic for moving lines.  The original code moved all the

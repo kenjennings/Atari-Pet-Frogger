@@ -175,15 +175,15 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 6  |                                        |
 
 ; Now:
-SCROLLING_CREDIT   ; 40+47+61+56+40 == 244;
+SCROLLING_CREDIT   ; 40+48+62+56+40 == 246;
 BLANK_MEM ; Blank text also used a blank in many other places.
 	.sb "                                        " ; 40
 
 CREDIT_MEM1 ; The perpetrators identified...
-	.sb "PET FROGGER   (c) November 1983 by Dales" ATASCII_HEART "ft.   " ; 47
+	.sb "PET FROGGER    (c) November 1983 by Dales" ATASCII_HEART "ft.   " ; 48
 
 CREDIT_MEM2
-	.sb "Original program for CBM PET 4032 written by John C. Dale.   " ; 61
+	.sb "Original program for CBM PET 4032 written by John C. Dale.    " ; 62
 
 CREDIT_MEM3
 	.sb "Atari 8-bit computer port by Ken Jennings, V02, Jan 2019" ; 56
@@ -191,9 +191,6 @@ CREDIT_MEM3
 END_OF_CREDITS
 EXTRA_BLANK_MEM ; Trailing line for credit scrolling.
 	.sb "                                        " ; 40
-
-; Six lines times 40 characters is 240 bytes of data.
-
 
 
 	.align $0100  ; Realign to next page.
@@ -921,13 +918,13 @@ GAME_BACK_COLORS
 	.by COLOR_BLACK COLOR_BLACK                            ; Scores, lives, saved frogs.
 	.by COLOR_GREEN                                        ; Grassy gap
 
-	.by COLOR_ORANGE2    COLOR_AQUA      COLOR_AQUA+2      ; Beach, boats, boats.
-	.by COLOR_RED_ORANGE COLOR_BLUE1     COLOR_BLUE1+2     ; Beach, boats, boats.
-	.by COLOR_ORANGE2    COLOR_BLUE2     COLOR_BLUE2+2     ; Beach, boats, boats.
-	.by COLOR_RED_ORANGE COLOR_LITE_BLUE COLOR_LITE_BLUE+2 ; Beach, boats, boats.
-	.by COLOR_ORANGE2    COLOR_AQUA      COLOR_AQUA+2      ; Beach, boats, boats.
-	.by COLOR_RED_ORANGE COLOR_BLUE1     COLOR_BLUE1+2     ; Beach, boats, boats.
-	.by COLOR_ORANGE2                                      ; one last Beach.
+	.by COLOR_ORANGE2+2    COLOR_AQUA      COLOR_AQUA+4      ; Beach, boats, boats.
+	.by COLOR_RED_ORANGE+2 COLOR_BLUE1     COLOR_BLUE1+4     ; Beach, boats, boats.
+	.by COLOR_ORANGE2+2    COLOR_BLUE2     COLOR_BLUE2+4     ; Beach, boats, boats.
+	.by COLOR_RED_ORANGE+2 COLOR_LITE_BLUE COLOR_LITE_BLUE+4 ; Beach, boats, boats.
+	.by COLOR_ORANGE2+2    COLOR_AQUA      COLOR_AQUA+4      ; Beach, boats, boats.
+	.by COLOR_RED_ORANGE+2 COLOR_BLUE1     COLOR_BLUE1+4     ; Beach, boats, boats.
+	.by COLOR_ORANGE2+2                                      ; one last Beach.
 
 	.by COLOR_GREEN                                        ; grassy gap
 	.by COLOR_BLACK                                        ; Press Button (turned off)
