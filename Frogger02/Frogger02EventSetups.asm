@@ -228,15 +228,6 @@ SetupDead
 	rts
 
 
-	
-	
-	
-	NEED A TRANSITION HERE TO TAKE UP SOME TIME.
-	THE CODE SWITCHES SO FAST THAT PRESSING THE BUTTON FOR DEAD FROG
-	WILL PROBABLY STILL BE PRESSED FOR GAME OVER!!!!!!!!!!!!!!!!!!!!
-	
-	
-	
 ; ==========================================================================
 ; SETUP TRANSITION TO GAME OVER SCREEN
 ;
@@ -284,10 +275,9 @@ SetupGameOver
 	lda #SCREEN_OVER       ; Change to Game Over screen.
 	sta CurrentScreen
 
-	lda #16                ; base color for down color scroll
+	lda #0                ; base color for down color scroll
 	sta EventCounter
                
 	inc EnablePressAButton ; Turn on the Prompt to press the Button
 
 	rts
-
