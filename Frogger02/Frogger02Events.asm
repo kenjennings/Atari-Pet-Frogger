@@ -108,7 +108,6 @@ FinishedNowSetupStage2
 
 	; === STAGE 2 ===
 	; Ramp up luminance of line 4.
-
 TestTransTitle2
 	cmp #2
 	bne TestTransTitle3
@@ -126,7 +125,6 @@ FinishedNowSetupStage3
 
 	; === STAGE 3 ===
 	; Set Up Press Any Button  and get ready to runtitle.
-
 TestTransTitle3
 	cmp #3
 	bne EndTransitionToTitle  ; Really shouldn't get to that point
@@ -167,7 +165,7 @@ EventScreenStart            ; This is New Game and Transition to title.
 ; Event Process TITLE SCREEN
 ; The activity on the title screen is
 ; 1) Blink Prompt for ANY key.
-; 2) Wait for joystich button.
+; 2) Wait for joystick button.
 ; 3) Setup for next transition.
 ; --------------------------------------------------------------------------
 EventTitleScreen
@@ -365,14 +363,6 @@ RightStickTest
 SaveNewFrogLocation
 	jsr WhereIsThePhysicalFrog ; Update Frog Real Positions and the LastCharacter found there.
 
-; These are all safe characters...
-; I_SEATS   = $0B ; +, boat seats
-
-; I_BEACH1  = $0D ; -, beach rocks
-; I_BEACH2  = $0F ; /, beach rocks
-; I_BEACH3  = $1B ; ;, beach rocks
-; I_SPACE   = $00 ; space, also safe beach spot.
-
 ; Will the Pet Frog land on the Beach or a seat in the boat?
 	cmp #I_SPACE             ; = $00 ; space, also safe beach spot.
 	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
@@ -429,12 +419,6 @@ EndGameScreen
 ; 3) Setup to do the Win screen event.
 ; --------------------------------------------------------------------------
 EventTransitionToWin
-;	lda AnimateFrames        ; Did animation counter reach 0 ?
-;	bne EndTransitionToWin   ; Nope.  Nothing to do.
-
-;	lda #WIN_FILL_SPEED      ; yes.  Reset it. (60 / 6 == 10 updates per second)
-;	jsr ResetTimers
-
 	jsr SetupWin             ; Setup for Wins screen 
 
 EndTransitionToWin
@@ -614,8 +598,8 @@ EndTransitionToDead
 
 ; ==========================================================================
 ; Event Process DEAD SCREEN
-; The Activity in the transition area, based on timer.
-;
+; The Activity is in the transition event, based on timer.
+; Run an animated scroll driven by the data in the sine table.
 ; --------------------------------------------------------------------------
 EventDeadScreen
 	jsr RunPromptForButton      ; Check button press.
@@ -703,6 +687,11 @@ DEAD_COLOR_SINE_TABLE
 ; Screen may not be able to release the button fast enough and end 
 ; up immediately dismissing the game over screen.  
 ;
+; 1) Fade display to black.
+; 2) Switch to Game Over display.
+; 3) Fade in the Game Over text. 
+; $) Switch to the Game Over event.
+;
 ; Not feeling enterprising, so just use the Fade value from the Dead event.
 ; --------------------------------------------------------------------------
 EventTransitionGameOver
@@ -715,10 +704,10 @@ EventTransitionGameOver
 	cmp #1
 	bne TestTransOver2
 ; ======== Stage 1 ========
-; Fade to black the playfield background.
-
+; Fade to black the playfield background...
+; Where text is greater than 0, then fade that too.
+; When text is 0, then background color can be 0.
 	ldx #24
-
 LoopDeadToBlack
 	lda COLPF1_TABLE,x      ; Get the text brighness.
 	and #$0F                ; Look at only luminance.
@@ -764,17 +753,19 @@ DoOverNextLine
 	lda EventCounter2
 	cmp #12
 	bne EndTransitionGameOver
-	
+
 	; End of Stage 1.  Now setup to fade in Game Over.
 	lda #DISPLAY_OVER          ; Tell VBI to change screens.
 	jsr ChangeScreen           ; Then copy the color tables.
 
-; Set the base background color without luminance for all the lines.
+; Force the base background color without luminance for all the lines.
 	ldx #24
 DoCopyBaseColors
 	lda OVER_BACK_COLORS,x
 	and #$F0
 	sta COLPF2_TABLE,x
+	lda #0
+	sta COLPF1_TABLE,x
 	dex
 	bpl DoCopyBaseColors
 
@@ -785,34 +776,26 @@ DoCopyBaseColors
 
 	beq EndTransitionGameOver  ; Nothing else to do.
 
-
 ; ======== Stage 2 ========
-; Fade in Game Over.
-
+; Fade in Game Over text.
 TestTransOver2
 	cmp #2
 	bne TestTransOver3
 
 	ldx #24
-DoCopyBaseColors
-	lda OVER_BACK_COLORS,x
-	and #$F0
-	sta COLPF2_TABLE,x
+DoFadeUpOverText
+	lda COLPF1_TABLE,x
+	cmp OVER_TEXT_COLORS,x
+	beq DoNextLineFadeUp
+	inc OVER_TEXT_COLORS,x
+DoNextLineFadeUp
 	dex
-	bpl DoCopyBaseColors
+	bpl DoFadeUpOverText
 
-
-; ======== Stage 3 ========
-; Fade in Game Over.
-TestTransOver3
-	cmp #3
+	inc EventCounter2
+	lda EventCounter2
+	cmp #16  ; That's enough of that.
 	bne EndTransitionGameOver
-
-
-
-
-
-
 
 DoneWithTranOver
 	jsr SetupGameOver
@@ -829,63 +812,17 @@ EndTransitionGameOver
 ;
 ; --------------------------------------------------------------------------
 EventGameOverScreen
-	lda AnimateFrames        ; Did animation counter reach 0 ?
-	bne EndTransitionToTitle ; Nope.  Nothing to do.
-	lda #DEAD_FADE_SPEED     ; yes.  Reset it.
-	jsr ResetTimers
-
-	lda EventCounter         ; What stage are we in?
-	cmp #1
-	bne TestTransOver2      ; Fade the Screen
-
-	; === STAGE 1 ===
-	; Fade all the lines.
-	; Scroll each one one at a time.
-	lda SCROLL_TITLE_LMS0
-	cmp #<[TITLE_MEM1+40]
-	beq NowScroll2
-	inc SCROLL_TITLE_LMS0
-	bne EndTransitionToTitle
-
-NowScroll2
-	lda SCROLL_TITLE_LMS1
-	cmp #<[TITLE_MEM2+40]
-	beq NowScroll3
-	inc SCROLL_TITLE_LMS1
-	bne EndTransitionToTitle
-
-NowScroll3
-	lda SCROLL_TITLE_LMS2
-	cmp #<[TITLE_MEM3+40]
-	beq FinishedNowSetupStage2
-	inc SCROLL_TITLE_LMS2
-	bne EndTransitionToTitle
-
-FinishedNowSetupStage2
-	lda #2
-	sta EventCounter
-	bne EndTransitionToTitle
-
-	; === STAGE 2 ===
-	; Ramp up luminance of line 4.
-
-TestTransOver2
-	cmp #2
-	bne EndGameOverScreen
-
-
-
 	jsr RunPromptForButton          ; Check button press.
-	bne ProcessGameOverScreenInput  ; Button pressed.  Run the dead exit section..
+	bne ProcessGameOverScreenInput  ; Button pressed.  Run the dead exit section.
 
-	; While there is no input, then animate scrolling.
+	; Animate the scrolling.
 	lda AnimateFrames               ; Did animation counter reach 0 ?
 	bne EndGameOverScreen           ; No. Nothing to do.
 	lda #GAME_OVER_SPEED            ; yes.  Reset animation timer.
 	jsr ResetTimers
 
-	inc EventCounter                ; Increment base color 
-	inc EventCounter                ; Twice.  (need to use even numbers.)
+	dec EventCounter                ; Decrement base color 
+	dec EventCounter                ; Twice.  (need to use even numbers.)
 	lda EventCounter                ; Get value 
 	and #$0F                        ; Keep this truncated to grey (black) $0 to $F
 	sta EventCounter                ; Save it for next time.
@@ -925,4 +862,3 @@ GameOverGreyScroll
 	iny                         ; Next line on screen.
 
 	rts
-	
