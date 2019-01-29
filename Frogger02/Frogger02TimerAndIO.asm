@@ -21,8 +21,8 @@
 ; Key Values
 ; Tick Tock value,
 ; Count downs,
-; Check for Key I/O,
-; Wait for start of frame.
+; DLI and VBI routines.
+; Prompt for Button press.
 ;
 ; --------------------------------------------------------------------------
 
@@ -63,13 +63,6 @@ MAX_FROG_SPEED=14
 ; KEYSCAN_FRAMES = $07
 ; based on number of frogs, how many frames between boat movements...
 ;ANIMATION_FRAMES .byte 25,21,17,14,12,11,10,9,8,7,6,5
-
-
-; Keyboard codes for keyboard game controls.
-;KEY_S = 62
-;KEY_Y = 43
-;KEY_6 = 27
-;KEY_4 = 24
 
 
 ; ==========================================================================
@@ -356,7 +349,7 @@ bLoopWaitFrame
 ; Display List Interrupt
 ;
 ; Get background color from table.
-; Get text luminace from table.
+; Get text luminance from table.
 ; sync display.
 ; Store background color.
 ; store text color (luminance.)
@@ -530,3 +523,63 @@ DoPromptColorchange
 ExitMyDeferredVBI
 	jmp XITVBV  ; Return to OS.  SYSVBV for Immediate interrupt.
 
+
+; ==========================================================================
+; TOGGLE BUTTON PROMPT
+; Set blinking prompt.
+;
+; On entry the CPU flags should indicate current toggle state:
+;   Z or 0   v   !Z or !0
+;
+; If  0, then light background, dark text.
+; If  1, then dark background and light text.
+;
+; On entry, the first flash may end up being black/white.  
+; The code generally tries to exclude black/white, but on 
+; entry this may occur depending on prior state. (fadeouts, etc.)
+;
+; A  is used for background color
+; X  is used for text color.
+; --------------------------------------------------------------------------
+ToggleButtonPrompt
+	beq PromptLightAndDark ; 0 = Light background and dark text?
+
+; Otherwise, therefore, Prompt Dark background and Light text
+PromptDarkAndLight
+	lda RANDOM             ; A random color and then prevent same 
+	eor COLPF2_TABLE+23    ; value by chewing on it with the original color.
+	and #$F0               ; Mask out the lumninance for Dark.
+	beq PromptDarkAndLight ; Do again if black/color 0 turned up
+	ldx #$0C               ; Light text
+	bne SetPromptColors
+
+PromptLightAndDark
+	lda COLPF2_TABLE+23    ; Use the previous color...
+	ora #$0C               ; ...but with a Light Background.
+	ldx #$00               ; Dark text.
+
+SetPromptColors
+	sta COLPF2_TABLE+23    ; Set background.
+	stx COLPF1_TABLE+23    ; Set text.
+	rts
+
+
+; ==========================================================================
+; RUN PROMPT FOR BUTTON
+; Maintain blinking timer.
+; Update/blink text on line 23.
+; Return 0/BEQ when the any key is not pressed.
+; Return !0/BNE when the any key is pressed.
+;
+; On Exit:
+; A  contains key press.
+; CPU flags are comparison of key value to $FF which means no key press.
+; --------------------------------------------------------------------------
+RunPromptForButton
+	lda #1
+	sta EnablePressAButton   ; Tell VBI to the prompt flashing is enabled.
+
+	jsr CheckInput           ; Get input. Non Zero means there is input.
+	and #%00010000           ; Strip it down to only the joystick button.
+
+	rts
