@@ -100,8 +100,13 @@ ContinueTransitionToTitle
 	jsr EventTransitionToTitle
 
 ; ==========================================================================
-; SCREEN START/NEW GAME
-; Setup for New Game.  (Internal value updates)
+; Event process SCREEN START/NEW GAME
+; Clear the Game Scores and get ready for the Press A Button prompt.
+;
+; Sidebar: This is oddly inserted between Transition to Title and the
+; Title to finish internal initialization per game, due to doofus-level
+; lack of design planning, blah blah.
+; The title screen has already been presented by Transition To Title.
 ; --------------------------------------------------------------------------
 ContinueStartNewGame
 	cmp #SCREEN_START
@@ -110,10 +115,11 @@ ContinueStartNewGame
 	jsr EventScreenStart
 
 ; ==========================================================================
-; TITLE SCREEN
+; Event Process TITLE SCREEN
 ; The activity on the title screen is
-; 1) blinking the text and
-; 2) waiting for a key press.
+; 1) Blink Prompt for ANY key.
+; 2) Wait for joystick button.
+; 3) Setup for next transition.
 ; --------------------------------------------------------------------------
 ContinueTitleScreen
 	cmp #SCREEN_TITLE
@@ -122,11 +128,15 @@ ContinueTitleScreen
 	jsr EventTitleScreen
 
 ; ==========================================================================
-; TRANSITION TO GAME SCREEN
+; Event Process TRANSITION TO GAME SCREEN
 ; The Activity in the transition area, based on timer.
-; 1) Progressively reprint the credits on lines from the top of the screen
-; to the bottom.
-; 2) follow with a blank line to erase the highest line of trailing text.
+; Stage 1) Fade out text lines  from bottom to top.
+;          Decrease COLPF1 brightness from bottom   to top.
+;          When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
+; Stage 2) Setup Game screen display.  Set all colors to black.
+; Stage 3) Fade in text lines from top to bottom.
+;          Decrease COLPF1 brightness from top to bottom.
+;          When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
 ; --------------------------------------------------------------------------
 ContinueTransitionToGame
 	cmp #SCREEN_TRANS_GAME
@@ -135,20 +145,20 @@ ContinueTransitionToGame
 	jsr EventTransitionToGame
 
 ; ==========================================================================
-; GAME SCREEN
+; Event Process GAME SCREEN
 ; Play the game.
-; 1) When the input timer allows, get a key.
+; 1) When the input timer allows, get controller input.
 ; 2) Evaluate frog Movement
 ; 2.a) Determine exit to Win screen
 ; 2.b) Determine exit to Dead screen.
 ; 3) When the animation timer expires, shift the boat rows.
 ; 3.a) Determine if frog hits screen border to go to Dead screen.
-; As a timer based pattern the key input is first.
-; Keyboard input updates the frog's logical and physical position
+; As a timer based pattern the controller input is first.
+; Joystick input updates the frog's logical and physical position
 ; and updates screen memory.
-; The animation update forces an automatic movement of the frog
-; logically, as the frog moves with the boats and remains static
-; relative to the boats.
+; The animation update forces an automatic logical movement of the
+; frog as the frog moves with the boats and remains static relative
+; to the boats.
 ; --------------------------------------------------------------------------
 ContinueGameScreen
 	cmp #SCREEN_GAME
@@ -157,10 +167,11 @@ ContinueGameScreen
 	jsr EventGameScreen
 
 ; ==========================================================================
-; TRANSITION TO WIN SCREEN
+; Event Process TRANSITION TO WIN
 ; The Activity in the transition area, based on timer.
-; 1) Animate something.
-; 2) End With display of WIN Screen.
+; 1) wipe screen from top to middle, and bottom to middle
+; 2) Display the Frogs SAVED!
+; 3) Setup to do the Win screen event.
 ; --------------------------------------------------------------------------
 ContinueTransitionToWin
 	cmp #SCREEN_TRANS_WIN
@@ -169,10 +180,9 @@ ContinueTransitionToWin
 	jsr EventTransitionToWin
 
 ; ==========================================================================
-; WIN SCREEN
-; The activity in the WIN screen.
-; 1) blinking the text and
-; 2) waiting for a key press.
+; Event Process WIN SCREEN
+; Scroll colors on screen while waiting for a button press.
+; Setup for next transition.
 ; --------------------------------------------------------------------------
 ContinueWinScreen
 	cmp #SCREEN_WIN
@@ -181,10 +191,13 @@ ContinueWinScreen
 	jsr EventWinScreen
 
 ; ==========================================================================
-; TRANSITION TO DEAD SCREEN
+; Event Process TRANSITION TO DEAD
 ; The Activity in the transition area, based on timer.
-; 1) Animate something.
-; 2) End With display of DEAD Screen.
+; 0) On Entry, wait (1.5 sec) to observe splattered frog. (timer set in 
+;    the setup event)
+; 1) Black background for all playfield lines, turn frog's line red.
+; 2) Fade playfield text to black.
+; 2) Launch the Dead Frog Display.
 ; --------------------------------------------------------------------------
 ContinueTransitionToDead
 	cmp #SCREEN_TRANS_DEAD
@@ -193,12 +206,9 @@ ContinueTransitionToDead
 	jsr EventTransitionToDead
 
 ; ==========================================================================
-; DEAD SCREEN
-; The activity in the DEAD screen.
-; 1) blinking the text and
-; 2) waiting for a key press.
-; 3.a) Evaluate to continue to game screen
-; 3.b.) Evaluate to continue to Game Over
+; Event Process DEAD SCREEN
+; The Activity is in the transition event, based on timer.
+; Run an animated scroll driven by the data in the sine table.
 ; --------------------------------------------------------------------------
 ContinueDeadScreen
 	cmp #SCREEN_DEAD
@@ -207,10 +217,22 @@ ContinueDeadScreen
 	jsr EventDeadScreen
 
 ; ==========================================================================
-; TRANSITION TO GAME OVER SCREEN
-; The Activity in the transition area, based on timer.
-; 1) Animate something.
-; 2) End With display of GAME OVER Screen.
+; Event Process TRANSITION TO OVER
+;
+; Fade out all lines of the Dead Screen.  
+; Fade in the lines of the Game Over Screen.
+;
+; This seems gratuitous, but it is necessary, because the screen can 
+; be switched so fast that the user pressing the button on the Dead 
+; Screen may not be able to release the button fast enough and end 
+; up immediately dismissing the game over screen.  
+;
+; 1) Fade display to black.
+; 2) Switch to Game Over display.
+; 3) Fade in the Game Over text. 
+; $) Switch to the Game Over event.
+;
+; Not feeling enterprising, so just use the Fade value from the Dead event.
 ; --------------------------------------------------------------------------
 ContinueTransitionToOver
 	cmp #SCREEN_TRANS_OVER
@@ -218,11 +240,10 @@ ContinueTransitionToOver
 
 	jsr EventTransitionGameOver
 
+
 ; ==========================================================================
-; GAME OVER SCREEN
-; The activity in the DEAD screen.
-; 1) blinking the text and
-; 2) waiting for a key press.
+; Event Process GAME OVER SCREEN
+; The Activity in the transition area, based on timer.
 ; --------------------------------------------------------------------------
 ContinueOverScreen
 	cmp #SCREEN_OVER
@@ -238,4 +259,3 @@ EndGameLoop
 	jmp GameLoop     ; rinse, repeat, forever.
 
 	rts
-
