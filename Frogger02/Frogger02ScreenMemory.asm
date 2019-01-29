@@ -939,73 +939,65 @@ GAME_TEXT_COLORS ; Text luminance
 
 
 DEAD_BACK_COLORS ; Text luminance
-	.by COLOR_BLACK
-	.by COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE
-	.by COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE
+	.by COLOR_RED_ORANGE+7  COLOR_RED_ORANGE+9  COLOR_RED_ORANGE+11 COLOR_RED_ORANGE+13
+	.by COLOR_RED_ORANGE+14 COLOR_RED_ORANGE+14 COLOR_RED_ORANGE+14 COLOR_RED_ORANGE+13
+	.by COLOR_RED_ORANGE+11
 
 	.by COLOR_BLACK COLOR_PINK COLOR_PINK COLOR_PINK COLOR_BLACK
 
-	.by COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE
-	.by COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE
+	.by COLOR_RED_ORANGE+9 COLOR_RED_ORANGE+7 COLOR_RED_ORANGE+5
+	.by COLOR_RED_ORANGE+3 COLOR_RED_ORANGE+1 COLOR_RED_ORANGE+0 COLOR_RED_ORANGE+0
+	.by COLOR_RED_ORANGE+0 COLOR_RED_ORANGE+1
 
-	.by COLOR_BLACK
 	.by COLOR_BLACK                                 ; Press Button (turned off)
 	.by COLOR_BLACK                                 ; Credits
 
 DEAD_TEXT_COLORS ; Text luminance
-	.by $00
-	.by $0E $0C $0A $08 $06 $04 $02 $00
-	.by $00 $0A $08 $06 $00
-	.by $00 $02 $04 $06 $08 $0A $0C $0E
-	.by $00
-	.by $00                                         ; Press Button (turned off)
+	.rept 10
+		.by $00                                     ; Top SCroll.
+	.endr
+
+	.by $0A $08 $06
+
+	.rept 11
+		.by $00                                     ; Bottom Scroll, and Prompt.
+	.endr
 	.by $0A                                         ; Credits
 
 
-WIN_BACK_COLORS
-	.by COLOR_BLACK  ; Scores
-	.by COLOR_ORANGE1 COLOR_ORANGE2 COLOR_RED_ORANGE COLOR_PINK
-	.by COLOR_PURPLE COLOR_PURPLE_BLUE COLOR_BLUE1 COLOR_BLUE2
-
-	.by COLOR_BLACK COLOR_GREEN COLOR_GREEN COLOR_GREEN COLOR_BLACK
-
-	.by COLOR_LITE_BLUE COLOR_AQUA COLOR_BLUE_GREEN COLOR_GREEN
-	.by COLOR_YELLOW_GREEN COLOR_ORANGE_GREEN COLOR_LITE_ORANGE COLOR_ORANGE2
-
-	.by COLOR_BLACK
-	.by COLOR_BLACK                                 ; Press Button (turned off)
-	.by COLOR_BLACK                                 ; Credits
+WIN_BACK_COLORS                  ; The Win Screen will populate scrolling colors.
+	.rept 25
+		.by $00                                     ; The whole screen is black.
+	.endr
 
 WIN_TEXT_COLORS
-	.by $00; Text luminance
-	.by $0A $0A $0A $0A $0A $0A $0A $0A
-	.by $00 $0C $08 $04 $00
-	.by $0A $0A $0A $0A $0A $0A $0A $0A
-	.by $00
-	.by $00                                         ; Press Button (turned off)
+	.rept 24
+		.by $00                                     ; The whole screen is black.
+	.endr
 	.by $0A                                         ; Credits
 
+
 OVER_BACK_COLORS
-	.by COLOR_BLACK
-	.by COLOR_PINK COLOR_PINK COLOR_PINK COLOR_PINK
-	.by COLOR_PINK COLOR_PINK COLOR_PINK COLOR_PINK
+	.rept 10
+		.by $00                                     ; Top scroll
+	.endr
 
-	.by COLOR_BLACK COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_BLACK
+	.by  COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE 
 
-	.by COLOR_PINK COLOR_PINK COLOR_PINK COLOR_PINK
-	.by COLOR_PINK COLOR_PINK COLOR_PINK COLOR_PINK
-
-	.by COLOR_BLACK
-	.by COLOR_BLACK                                 ; Press Button (turned off)
-	.by COLOR_BLACK                                 ; Credits
+	.rept 12
+		.by $00                                     ; Bottom scroll, Prompt, and Credits.
+	.endr
 
 OVER_TEXT_COLORS
-	.by $00; Text luminance
-	.by $00 $02 $04 $06 $08 $0A $0C $0E
-	.by $00 $0A $08 $06 $00
-	.by $0E $0C $0A $08 $06 $04 $02 $00
-	.by $00
-	.by $00                                         ; Press Button (turned off)
+	.rept 10
+		.by $00                                     ; Top SCroll.
+	.endr
+
+	.by $0A $08 $06
+
+	.rept 11
+		.by $00                                     ; Bottom Scroll, and Prompt.
+	.endr
 	.by $0A                                         ; Credits
 
 

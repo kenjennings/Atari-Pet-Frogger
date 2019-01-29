@@ -228,6 +228,15 @@ SetupDead
 	rts
 
 
+	
+	
+	
+	NEED A TRANSITION HERE TO TAKE UP SOME TIME.
+	THE CODE SWITCHES SO FAST THAT PRESSING THE BUTTON FOR DEAD FROG
+	WILL PROBABLY STILL BE PRESSED FOR GAME OVER!!!!!!!!!!!!!!!!!!!!
+	
+	
+	
 ; ==========================================================================
 ; SETUP TRANSITION TO GAME OVER SCREEN
 ;

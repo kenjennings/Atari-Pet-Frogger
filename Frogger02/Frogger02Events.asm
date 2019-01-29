@@ -400,7 +400,6 @@ DoSetupForFrogWins
 ReplaceFrogOnScreen
 	jsr SetFrogOnScreen ; redraw the frog where it belongs
 
-
 ; ==========================================================================
 ; GAME SCREEN - Screen Animation Section
 ; --------------------------------------------------------------------------

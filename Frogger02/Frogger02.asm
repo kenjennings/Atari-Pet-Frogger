@@ -287,9 +287,9 @@ FrogSafety      .byte 0     ; = 0 When Frog OK.  !0 == Yer Dead.
 FrogsCrossed    .byte 0     ; = Number Of Frogs crossed
 ScoreToAdd      .byte 0     ; = Number To Be Added to Score
 
-NumberOfChars   .byte 0     ; = Number Of Characters Across
+NumberOfChars   .byte 0     ; = Number Of Characters across for score
 FlaggedHiScore  .byte 0     ; = Flag For Hi Score.  0 = no high score.  $FF = High score.
-NumberOfLives   .byte 0     ; = Is Number Of Lives
+NumberOfLives   .byte 0     ; = Is the Number Of Lives
 
 LastInput       .byte 0     ; = Remember last joystick input
 
@@ -299,8 +299,8 @@ LastInput       .byte 0     ; = Remember last joystick input
 
 ; After processing input (from the joystick) this is the number of frames
 ; to count before new input is accepted.  This prevents moving the frog at
-; 60 fps and compensates for any jitter/uneven toggling of the joystick
-; bits by flaky controllers.
+; 60 fps and sort of compensates for any jitter/uneven toggling of the 
+; joystick bits by flaky controllers.
 InputScanFrames   .byte $00 ; = INPUTSCAN_FRAMES
 InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits.
 ; And then it is safe to use STRIG0 directly for the joystick button.
@@ -375,7 +375,7 @@ SCROLL_CREDIT_LMS = [* + 1]
 	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
 ; Note that as long as the system VBI is functioning the address 
-; provided here does not matter at all.  The VBI will update
+; provided here does not matter at all.  The system VBI will update
 ; ANTIC after this using the address in the shadow registers (SDLST)
 
 	mDL_JVB TITLE_DISPLAYLIST   ; Restart display at the same display list.
@@ -435,14 +435,14 @@ SAVEY = $FF
 ; --------------------------------------------------------------------------
 
 	icl "Frogger02Game.asm"         ; GAMESTART and Game event loop in this file
-	icl "Frogger02GameSupport.asm"  ; Score and Frog management, Press Any Key
+	icl "Frogger02GameSupport.asm"  ; Score and Frog management
 
 	icl "Frogger02EventSetups.asm"  ; Set Entry criteria for the event/screen
 	icl "Frogger02Events.asm"       ; Run the current event/screen
 
-	icl "Frogger02TimerAndIO.asm"   ; Timer, tick tock, countdowns, key I/O, VBI, DLI
+	icl "Frogger02TimerAndIO.asm"   ; Timer, countdowns, VBI, DLI
 
-	icl "Frogger02ScreenGfx.asm"    ; Physically drawing on the screen
+	icl "Frogger02ScreenGfx.asm"    ; Support drawing frog in screen memory.
 
 ; ==========================================================================
 ; Graphics assets.
