@@ -569,5 +569,3 @@ LoopCopyColors
 	bpl LoopCopyColors
 
 	rts
-
-
