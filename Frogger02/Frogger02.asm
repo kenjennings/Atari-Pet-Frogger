@@ -272,8 +272,6 @@
 	ORG $82
 
 ; ======== M A I N ======== 
-;MovesCars       .word $00   ; = Moves Cars
-
 FrogLocation    .word $0000 ; = Pointer to start of Frog's current row in screen memory.
 FrogColumn      .byte $00   ; = Frog X coord (logical to screen)
 FrogRealColumn1 .byte $00   ; = Frog physical offset into current row
@@ -396,7 +394,6 @@ PressAButtonFrames .byte BLINK_SPEED
 
 ; ======== D L I ======== COLOR TABLES
 ; Data read by the Display List Interrupts to change the colors for each line.
-
 ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
 
 COLPF2_TABLE ; Text background color. ; Default Black
@@ -467,4 +464,3 @@ SAVEY = $FF
 
 
 	END
-
