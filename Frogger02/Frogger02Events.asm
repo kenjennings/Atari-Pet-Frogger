@@ -694,13 +694,127 @@ DEAD_COLOR_SINE_TABLE
 
 ; ==========================================================================
 ; Event Process TRANSITION TO OVER
-; The Activity in the transition area, based on timer.
-; 1) Progressively reprint the credits on lines from the top of the screen
-; to the bottom.
-; 2) follow with a blank line to erase the highest line of trailing text.
+;
+; Fade out all lines of the Dead Screen.  
+; Fade in the lines of the Game Over Screen.
+;
+; This seems gratuitous, but it is necessary, because the screen can 
+; be switched so fast that the user pressing the button on the Dead 
+; Screen may not be able to release the button fast enough and end 
+; up immediately dismissing the game over screen.  
+;
+; Not feeling enterprising, so just use the Fade value from the Dead event.
 ; --------------------------------------------------------------------------
 EventTransitionGameOver
+	lda AnimateFrames        ; Did animation counter reach 0 ?
+	bne EndTransitionToTitle ; Nope.  Nothing to do.
+	lda #DEAD_FADE_SPEED     ; yes.  Reset it.
+	jsr ResetTimers
 
+	lda EventCounter
+	cmp #1
+	bne TestTransOver2
+; ======== Stage 1 ========
+; Fade to black the playfield background.
+
+	ldx #24
+
+LoopDeadToBlack
+	lda COLPF1_TABLE,x      ; Get the text brighness.
+	and #$0F                ; Look at only luminance.
+	beq DoFadeCOLPF2        ; Already 0.  Just do background.
+	tay 
+	dey                     ; Decrement Text luminance
+	bmi BlackOutCOLPF1      ; If it went negative, then we're done.
+	dey                     ; Decrement Text luminance
+	bmi BlackOutCOLPF1      ; If it went negative, then we're done.
+	sty COLPF1_TABLE,x      ; Save the updated value in the color table.
+; Yes, this is a little inconsistent.  The pass when the text 
+; luminance reaches 0 will end up skipping the fade on the background. 
+; Meh.  I don't think anyone will notice.
+DoFadeCOLPF2
+	lda COLPF2_TABLE,x      ; Get the color.
+	pha                     ; Save for later.
+	and #$0F                ; Look at only the luminance
+	bne DoFadeLine          ; If luminance is >0 then decrement.
+	pla                     ; luminance is 0.  Fix the stack.
+BlackOutCOLPF2             
+	lda #COLOR_BLACK        ; Black out background (and the text below)
+	sta COLPF2_TABLE,x
+BlackOutCOLPF1 
+	lda #COLOR_BLACK        ; Black out the text.  Redundantly. 
+	sta COLPF1_TABLE,x
+	beq DoOverNextLine      ; Done with this line.
+DoFadeLine
+	tay                     ; Fade out the background brighness.
+	dey                     ; Decrement background luminance
+	bmi BlackOutCOLPF2      ; If it went negative, then we're done.
+	dey                     ; Decrement background luminance
+	bmi BlackOutCOLPF2      ; If it went negative, then we're done.
+	sty SAVEY               ; Save the new luminance.
+	pla                     ; get the original color back.
+	and #$F0                ; Get the color of the background.
+	ora SAVEY               ; combine the new lumninance.
+	sta COLPF2_TABLE,x      ; update the background color.
+DoOverNextLine
+	dex                     ; Next row.
+	bpl LoopDeadToBlack     ; 24 to 0...
+
+	inc EventCounter2
+	lda EventCounter2
+	cmp #12
+	bne EndTransitionGameOver
+	
+	; End of Stage 1.  Now setup to fade in Game Over.
+	lda #DISPLAY_OVER          ; Tell VBI to change screens.
+	jsr ChangeScreen           ; Then copy the color tables.
+
+; Set the base background color without luminance for all the lines.
+	ldx #24
+DoCopyBaseColors
+	lda OVER_BACK_COLORS,x
+	and #$F0
+	sta COLPF2_TABLE,x
+	dex
+	bpl DoCopyBaseColors
+
+	lda #2
+	sta EventCounter           ; Identify Stage 2
+	lda #0
+	sta EventCounter2          ; Prep the instance count.
+
+	beq EndTransitionGameOver  ; Nothing else to do.
+
+
+; ======== Stage 2 ========
+; Fade in Game Over.
+
+TestTransOver2
+	cmp #2
+	bne TestTransOver3
+
+	ldx #24
+DoCopyBaseColors
+	lda OVER_BACK_COLORS,x
+	and #$F0
+	sta COLPF2_TABLE,x
+	dex
+	bpl DoCopyBaseColors
+
+
+; ======== Stage 3 ========
+; Fade in Game Over.
+TestTransOver3
+	cmp #3
+	bne EndTransitionGameOver
+
+
+
+
+
+
+
+DoneWithTranOver
 	jsr SetupGameOver
 
 EndTransitionGameOver
@@ -715,6 +829,52 @@ EndTransitionGameOver
 ;
 ; --------------------------------------------------------------------------
 EventGameOverScreen
+	lda AnimateFrames        ; Did animation counter reach 0 ?
+	bne EndTransitionToTitle ; Nope.  Nothing to do.
+	lda #DEAD_FADE_SPEED     ; yes.  Reset it.
+	jsr ResetTimers
+
+	lda EventCounter         ; What stage are we in?
+	cmp #1
+	bne TestTransOver2      ; Fade the Screen
+
+	; === STAGE 1 ===
+	; Fade all the lines.
+	; Scroll each one one at a time.
+	lda SCROLL_TITLE_LMS0
+	cmp #<[TITLE_MEM1+40]
+	beq NowScroll2
+	inc SCROLL_TITLE_LMS0
+	bne EndTransitionToTitle
+
+NowScroll2
+	lda SCROLL_TITLE_LMS1
+	cmp #<[TITLE_MEM2+40]
+	beq NowScroll3
+	inc SCROLL_TITLE_LMS1
+	bne EndTransitionToTitle
+
+NowScroll3
+	lda SCROLL_TITLE_LMS2
+	cmp #<[TITLE_MEM3+40]
+	beq FinishedNowSetupStage2
+	inc SCROLL_TITLE_LMS2
+	bne EndTransitionToTitle
+
+FinishedNowSetupStage2
+	lda #2
+	sta EventCounter
+	bne EndTransitionToTitle
+
+	; === STAGE 2 ===
+	; Ramp up luminance of line 4.
+
+TestTransOver2
+	cmp #2
+	bne EndGameOverScreen
+
+
+
 	jsr RunPromptForButton          ; Check button press.
 	bne ProcessGameOverScreenInput  ; Button pressed.  Run the dead exit section..
 

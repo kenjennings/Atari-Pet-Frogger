@@ -242,12 +242,30 @@ SetupDead
 ;
 ; Prep values to run the Transition Event for the Game Over.
 ;
+; Fade out all lines of the Dead Screen.  
+; Fade in the lines of the Game Over Screen.
+;
+; This seems gratuitous, but it is necessary, because the screen can 
+; be switched so fast that the user pressing the button on the Dead 
+; Screen may not be able to release the button fast enough and end 
+; up immediately dismissing the game over screen.  Not feeling enterprising,
+; so just use the Dead value for fading.
+;
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupTransitionToGameOver
 
-	lda #SCREEN_TRANS_OVER ; Change to game over transition.
-	sta CurrentScreen
+	lda #DEAD_FADE_SPEED   ; Animation moving speed.
+	jsr ResetTimers 
+
+	lda #1                 ; set Stage to fade out.
+	sta EventCounter
+
+	lda #12                ; Set number of times to loop the fade.
+	sta EventCounter2
+
+	lda #0                 ; Turn off the Prompt to press the Button
+	sta EnablePressAButton
 
 	rts
 
@@ -262,15 +280,14 @@ SetupTransitionToGameOver
 SetupGameOver
 	lda #GAME_OVER_SPEED   ; Animation moving speed.
 	jsr ResetTimers
-	
-	lda #DISPLAY_OVER      ; Tell VBI to change screens.
-	jsr ChangeScreen       ; Then copy the color tables.
 
 	lda #SCREEN_OVER       ; Change to Game Over screen.
 	sta CurrentScreen
 
-	lda #0                 ; base color for down color scroll
+	lda #16                ; base color for down color scroll
 	sta EventCounter
+               
+	inc EnablePressAButton ; Turn on the Prompt to press the Button
 
 	rts
 

@@ -982,7 +982,7 @@ OVER_BACK_COLORS
 		.by $00                                     ; Top scroll
 	.endr
 
-	.by  COLOR_RED_ORANGE COLOR_RED_ORANGE COLOR_RED_ORANGE 
+	.by  COLOR_PINK COLOR_PINK COLOR_PINK 
 
 	.rept 12
 		.by $00                                     ; Bottom scroll, Prompt, and Credits.
@@ -990,7 +990,7 @@ OVER_BACK_COLORS
 
 OVER_TEXT_COLORS
 	.rept 10
-		.by $00                                     ; Top SCroll.
+		.by $00                                     ; Top Scroll.
 	.endr
 
 	.by $0A $08 $06
