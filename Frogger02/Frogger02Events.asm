@@ -695,9 +695,9 @@ DEAD_COLOR_SINE_TABLE
 ; Not feeling enterprising, so just use the Fade value from the Dead event.
 ; --------------------------------------------------------------------------
 EventTransitionGameOver
-	lda AnimateFrames        ; Did animation counter reach 0 ?
-	bne EndTransitionToTitle ; Nope.  Nothing to do.
-	lda #DEAD_FADE_SPEED     ; yes.  Reset it.
+	lda AnimateFrames         ; Did animation counter reach 0 ?
+	bne EndTransitionGameOver ; Nope.  Nothing to do.
+	lda #DEAD_FADE_SPEED      ; yes.  Reset it.
 	jsr ResetTimers
 
 	lda EventCounter
@@ -707,8 +707,76 @@ EventTransitionGameOver
 ; Fade to black the playfield background...
 ; Where text is greater than 0, then fade that too.
 ; When text is 0, then background color can be 0.
+	jsr TransGameOverStage1Scroll
+
+	inc EventCounter2
+	lda EventCounter2
+	cmp #12
+	bne EndTransitionGameOver
+
+	; End of Stage 1.  Now setup to fade in Game Over.
+	lda #DISPLAY_OVER          ; Tell VBI to change screens.
+	jsr ChangeScreen           ; Then copy the color tables.
+
+; Force the base background color without luminance for all the lines.
 	ldx #24
-LoopDeadToBlack
+DoCopyBaseColors
+	lda OVER_BACK_COLORS,x
+	and #$F0
+	sta COLPF2_TABLE,x
+	lda #0
+	sta COLPF1_TABLE,x
+	dex
+	bpl DoCopyBaseColors
+
+	lda #2
+	sta EventCounter           ; Identify Stage 2
+	lda #0
+	sta EventCounter2          ; Prep the instance count.
+
+	beq EndTransitionGameOver  ; Nothing else to do.
+
+; ======== Stage 2 ========
+; Fade in Game Over text.
+TestTransOver2
+	cmp #2
+	bne EndTransitionGameOver
+
+	ldx #24
+DoFadeUpOverText
+	lda COLPF1_TABLE,x
+	cmp OVER_TEXT_COLORS,x
+	beq DoNextLineFadeUp
+	inc OVER_TEXT_COLORS,x
+DoNextLineFadeUp
+	dex
+	bpl DoFadeUpOverText
+
+	inc EventCounter2
+	lda EventCounter2
+	cmp #16  ; That's enough of that.
+	bne EndTransitionGameOver
+
+DoneWithTranOver
+	jsr SetupGameOver
+
+EndTransitionGameOver
+	lda CurrentScreen
+
+	rts
+
+
+; ==========================================================================
+; Transition Game Over Stage 1  Scroll
+; The code in EventTransitionGameOver is too long to make a branch to the
+; end of the routine.  So, the code for the Stage 1 fading is cut out 
+; into this routine.
+;
+; --------------------------------------------------------------------------
+TransGameOverStage1Scroll
+
+	ldx #24
+LoopOverToBlack
 	lda COLPF1_TABLE,x      ; Get the text brighness.
 	and #$0F                ; Look at only luminance.
 	beq DoFadeCOLPF2        ; Already 0.  Just do background.
@@ -747,63 +815,9 @@ DoFadeLine
 	sta COLPF2_TABLE,x      ; update the background color.
 DoOverNextLine
 	dex                     ; Next row.
-	bpl LoopDeadToBlack     ; 24 to 0...
+	bpl LoopOverToBlack     ; 24 to 0...
 
-	inc EventCounter2
-	lda EventCounter2
-	cmp #12
-	bne EndTransitionGameOver
-
-	; End of Stage 1.  Now setup to fade in Game Over.
-	lda #DISPLAY_OVER          ; Tell VBI to change screens.
-	jsr ChangeScreen           ; Then copy the color tables.
-
-; Force the base background color without luminance for all the lines.
-	ldx #24
-DoCopyBaseColors
-	lda OVER_BACK_COLORS,x
-	and #$F0
-	sta COLPF2_TABLE,x
-	lda #0
-	sta COLPF1_TABLE,x
-	dex
-	bpl DoCopyBaseColors
-
-	lda #2
-	sta EventCounter           ; Identify Stage 2
-	lda #0
-	sta EventCounter2          ; Prep the instance count.
-
-	beq EndTransitionGameOver  ; Nothing else to do.
-
-; ======== Stage 2 ========
-; Fade in Game Over text.
-TestTransOver2
-	cmp #2
-	bne TestTransOver3
-
-	ldx #24
-DoFadeUpOverText
-	lda COLPF1_TABLE,x
-	cmp OVER_TEXT_COLORS,x
-	beq DoNextLineFadeUp
-	inc OVER_TEXT_COLORS,x
-DoNextLineFadeUp
-	dex
-	bpl DoFadeUpOverText
-
-	inc EventCounter2
-	lda EventCounter2
-	cmp #16  ; That's enough of that.
-	bne EndTransitionGameOver
-
-DoneWithTranOver
-	jsr SetupGameOver
-
-EndTransitionGameOver
-	lda CurrentScreen
-
-	rts
+rts
 
 
 ; ==========================================================================
