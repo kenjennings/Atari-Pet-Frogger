@@ -74,7 +74,7 @@ SetupTransitionToGame
 	lda #0
 	sta EnablePressAButton   ; Tell VBI the prompt flashing is disabled.
 
-	lda #24
+	lda #23
 	sta EventCounter2       ; Prep the first transition loop.
 
 	lda #1                  ; First transition stage: Loop from bottom to top
@@ -249,10 +249,10 @@ SetupTransitionToGameOver
 	lda #DEAD_FADE_SPEED   ; Animation moving speed.
 	jsr ResetTimers 
 
-	lda #1                 ; set Stage 1 to fade out.
+	lda #1                 ; set Stage 1 for fade out.
 	sta EventCounter
 
-	lda #12                ; Set number of times to loop the fade.
+	lda #16                ; Set number of times to loop the fade.
 	sta EventCounter2
 
 	lda #0                 ; Turn off the Prompt to press the Button
@@ -280,7 +280,5 @@ SetupGameOver
 
 	lda #0                ; base color for down color scroll
 	sta EventCounter
-               
-	inc EnablePressAButton ; Turn on the Prompt to press the Button
 
 	rts

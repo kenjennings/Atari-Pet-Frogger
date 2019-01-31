@@ -225,7 +225,8 @@ ZeroCOLPF2
 	; Finished stage 1, now setup Stage 2
 	lda #2
 	sta EventCounter
-	inc EventCounter2 ; return to 0.
+	lda #0
+	sta EventCounter2 ; return to 0.
 	beq EndTransitionToGame
 
 	; === STAGE 2 ===
@@ -241,7 +242,7 @@ TestTransGame2
 	lda #DISPLAY_GAME        ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
-	jsr ZeroCurrentColors    ; Need the screen to start black.
+	jsr ZeroCurrentColors    ; Insure the screen to start black.
 
 	; Finished stage 2, now setup Stage 3
 	lda #3
@@ -262,29 +263,23 @@ TestTransGame3
 	bne EndTransitionToGame
 
 	ldx EventCounter2
-	lda GAME_BACK_COLORS,x ; (redundantly) copy the background color.
+	lda GAME_BACK_COLORS,x   ; copy the background color.
 	sta COLPF2_TABLE,x
 
-	cmp #23 ; must skip prompt line to keep it visibly off
-	beq SkipThePromptLine
-	lda COLPF1_TABLE,x
-	cmp GAME_TEXT_COLORS,x
-SkipThePromptLine
-	beq TransGameNextLine
-
 	inc COLPF1_TABLE,x       ; Increase text brightness.
-
 	lda COLPF1_TABLE,x 
 	cmp GAME_TEXT_COLORS,x   ; Is it at target brighness?
-	beq TransGameNextLine
-
+	beq TransGameNextLine    ; Yes.  Go do next line.
 	inc COLPF1_TABLE,x       ; Twice to speed this up.
-	bne EndTransitionToGame  ; (thus targets must all be even numbers)
+	lda COLPF1_TABLE,x 
+	cmp GAME_TEXT_COLORS,x   ; Is it at target brighness?
+	beq TransGameNextLine    ; Yes.  Go do next line.
+	bne EndTransitionToGame  ; No.  End  this pass.  be back later.
 
 TransGameNextLine
 	inc EventCounter2        ; next screen line.
 	lda EventCounter2
-	cmp #25                  ; Reached the limit.  all 24 lines are done.
+	cmp #23                  ; Reached the limit.  all  lines are done.
 	bne EndTransitionToGame
 
 	; Finished stage 3, now go to the main event.
@@ -710,9 +705,9 @@ EventTransitionGameOver
 	jsr TransGameOverStage1Scroll
 
 	dec EventCounter2
-	bne EndTransitionGameOver
+	bne EndTransitionGameOver  ; Still not 0, so end for now.
 
-	; End of Stage 1.  Now setup to fade in Game Over.
+	; End of Stage 1.  Now setup to do Stage 2 to fade in Game Over.
 	lda #DISPLAY_OVER          ; Tell VBI to change screens.
 	jsr ChangeScreen           ; Then copy the color tables.
 
@@ -728,11 +723,11 @@ DoCopyBaseColors
 	bpl DoCopyBaseColors
 
 	lda #2
-	sta EventCounter           ; Identify Stage 2
-	lda #0
+	sta EventCounter           ; Identify doing Stage 2
+	lda #16
 	sta EventCounter2          ; Prep the instance count.
 
-	beq EndTransitionGameOver  ; Nothing else to do.
+	bne EndTransitionGameOver  ; Done here. Nothing else to do.
 
 ; ======== Stage 2 ========
 ; Fade in Game Over text.
@@ -745,17 +740,15 @@ DoFadeUpOverText
 	lda COLPF1_TABLE,x
 	cmp OVER_TEXT_COLORS,x
 	beq DoNextLineFadeUp
-	inc OVER_TEXT_COLORS,x
+	inc COLPF1_TABLE,x
 DoNextLineFadeUp
 	dex
 	bpl DoFadeUpOverText
 
-	inc EventCounter2
-	lda EventCounter2
-	cmp #16  ; That's enough of that.
-	bne EndTransitionGameOver
+	dec EventCounter2
+	bne EndTransitionGameOver  ; Not 0, so skip to end
 
-DoneWithTranOver
+DoneWithTranOver               ; call counter is 0.  go to game over.
 	jsr SetupGameOver
 
 EndTransitionGameOver
@@ -790,39 +783,35 @@ LoopOverToBlack
 ; Meh.  I don't think anyone will notice.
 DoFadeCOLPF2
 	lda COLPF2_TABLE,x      ; Get the color.
-	pha                     ; Save for later.
+	and #$F0                ; Keep the color
+	sta SAVEA               ; Save for later.
+	lda COLPF2_TABLE,x      ; Get the color. again
 	and #$0F                ; Look at only the luminance
-	beq ZeroTableColors     ; Zero luminance, so zero table entries.          
+	beq BlackOutCOLPF2     ; Zero luminance now, so zero table entries.          
 
-	; Luminance is >0, thetrefore decrement.
+	; Luminance is >0, therefore decrement.
 	tay                     ; Fade out the background brighness.
 	dey                     ; Decrement background luminance
 	bmi BlackOutCOLPF2      ; If it went negative, then we're done.
 	dey                     ; Decrement background luminance
 	bmi BlackOutCOLPF2      ; If it went negative, then we're done.
-	sty SAVEY               ; Save the new luminance.
-	pla                     ; get the original color back.
-	and #$F0                ; Get the color of the background.
-	ora SAVEY               ; combine the new lumninance.
+	tya                     ; the new luminance.
+	ora SAVEA               ; merge with the original color back.
 	sta COLPF2_TABLE,x      ; update the background color.
+	jmp DoOverNextLine
 
-ZeroTableColors
-	pla                     ; luminance is 0.  Fix the stack.
 BlackOutCOLPF2             
 	lda #COLOR_BLACK        ; Black out background (and the text below)
 	sta COLPF2_TABLE,x
 BlackOutCOLPF1 
 	lda #COLOR_BLACK        ; Black out the text.  Redundantly. 
 	sta COLPF1_TABLE,x
-	beq DoOverNextLine      ; Done with this line.
-
-
 
 DoOverNextLine
 	dex                     ; Next row.
 	bpl LoopOverToBlack     ; 24 to 0...
 
-rts
+	rts
 
 
 ; ==========================================================================
@@ -840,8 +829,8 @@ EventGameOverScreen
 	lda #GAME_OVER_SPEED            ; yes.  Reset animation timer.
 	jsr ResetTimers
 
-	dec EventCounter                ; Decrement base color 
-	dec EventCounter                ; Twice.  (need to use even numbers.)
+	inc EventCounter                ; Increment base color 
+	inc EventCounter                ; Twice.  (need to use even numbers.)
 	lda EventCounter                ; Get value 
 	and #$0F                        ; Keep this truncated to grey (black) $0 to $F
 	sta EventCounter                ; Save it for next time.
@@ -874,8 +863,8 @@ EndGameOverScreen
 GameOverGreyScroll
 	sta COLPF2_TABLE,y          ; Set line on screen
 	tax                         ; X = A
-	inx                         ; X = X + 1
-	inx                         ; X = X + 1
+	dex                         ; X = X + 1
+	dex                         ; X = X + 1
 	txa                         ; A = X
 	and #$0F                    ; Keep this truncated to grey (black) $0 to $F
 	iny                         ; Next line on screen.

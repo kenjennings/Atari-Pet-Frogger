@@ -548,7 +548,7 @@ HideButtonPrompt
 
 ChangeScreen
 	ldy #0
-	sty EnablePressAButton         ; Tell the VBI to stop the prompt.
+	sty EnablePressAButton         ; Always tell the VBI to stop the prompt.
 
 	sta VBICurrentDL               ; Tell VBI to change to new mode.
 
@@ -559,7 +559,11 @@ LoopChangeScreenWaitForVBI
 	; The VBI has changed the display and loaded page zero pointers.
 	; Now update the color tables.
 
-	ldy #24
+	lda #0               ; Always force prompt line to 0 color
+	sta COLPF2_TABLE+23
+	sta COLPF1_TABLE+23
+
+	ldy #23
 LoopCopyColors
 	lda (COLPF2Pointer),y
 	sta COLPF2_TABLE,y

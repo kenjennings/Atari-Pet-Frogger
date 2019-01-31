@@ -409,6 +409,7 @@ COLPF1_TABLE ; Text color (luminance) ; default all to $0A/10 (dec)
 ; Support for the world's most inept sound system
 SOUND_INDEX	.byte $00
 
+SAVEA = $FD
 ; In the event X and/or Y can't be saved on stack, protect them here....
 SAVEX = $FE
 SAVEY = $FF

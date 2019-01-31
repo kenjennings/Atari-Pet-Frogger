@@ -954,7 +954,7 @@ DEAD_BACK_COLORS ; Text luminance
 
 DEAD_TEXT_COLORS ; Text luminance
 	.rept 10
-		.by $00                                     ; Top SCroll.
+		.by $00                                     ; Top Scroll.
 	.endr
 
 	.by $0A $08 $06
@@ -965,14 +965,20 @@ DEAD_TEXT_COLORS ; Text luminance
 	.by $0A                                         ; Credits
 
 
-WIN_BACK_COLORS                  ; The Win Screen will populate scrolling colors.
+WIN_BACK_COLORS                                     ; The Win Screen will populate scrolling colors.
 	.rept 25
 		.by $00                                     ; The whole screen is black.
 	.endr
 
 WIN_TEXT_COLORS
-	.rept 24
-		.by $00                                     ; The whole screen is black.
+	.rept 10
+		.by $00                                     ; Top Scroll.
+	.endr
+
+	.by $0A $08 $06
+
+	.rept 11
+		.by $00                                     ; Bottom Scroll, and Prompt.
 	.endr
 	.by $0A                                         ; Credits
 
