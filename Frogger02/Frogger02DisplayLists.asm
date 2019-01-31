@@ -72,6 +72,17 @@
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
 
+; ==========================================================================
+; Give a display number below the VBI routine can set the Display List,
+; and populate zero page pointers for other routines.
+; --------------------------------------------------------------------------
+
+DISPLAY_TITLE = 0
+DISPLAY_GAME  = 1
+DISPLAY_WIN   = 2
+DISPLAY_DEAD  = 3
+DISPLAY_OVER  = 4
+
 ; Mode 2 text and Load Memory Scan for text/graphics
 ; Using LMS on each line makes it easier to manipulate the
 ; text for animating transitions.

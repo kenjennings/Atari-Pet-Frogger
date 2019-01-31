@@ -1007,17 +1007,6 @@ OVER_TEXT_COLORS
 ; Tables listing pointers to all the assets.
 ; --------------------------------------------------------------------------
 
-; ==========================================================================
-; Give a display number below the VBI routine can set the Display List,
-; and populate zero page pointers for other routines.
-; --------------------------------------------------------------------------
-
-DISPLAY_TITLE = 0
-DISPLAY_GAME  = 1
-DISPLAY_WIN   = 2
-DISPLAY_DEAD  = 3
-DISPLAY_OVER  = 4
-
 DISPLAYLIST_LO_TABLE
 	.byte <TITLE_DISPLAYLIST
 	.byte <GAME_DISPLAYLIST

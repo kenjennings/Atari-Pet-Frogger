@@ -406,7 +406,8 @@ COLPF1_TABLE ; Text color (luminance) ; default all to $0A/10 (dec)
 		.byte $0A
 	.endr
 
-
+; Support for the world's most inept sound system
+SOUND_INDEX	.byte $00
 
 ; In the event X and/or Y can't be saved on stack, protect them here....
 SAVEX = $FE
@@ -438,6 +439,7 @@ SAVEY = $FF
 	icl "Frogger02Events.asm"       ; Run the current event/screen
 
 	icl "Frogger02TimerAndIO.asm"   ; Timer, countdowns, VBI, DLI
+	icl "Frogger02Audio.asm"        ; Pathetic audio sequencer.
 
 	icl "Frogger02ScreenGfx.asm"    ; Support drawing frog in screen memory.
 

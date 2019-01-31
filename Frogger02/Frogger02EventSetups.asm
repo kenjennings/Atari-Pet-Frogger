@@ -249,7 +249,7 @@ SetupTransitionToGameOver
 	lda #DEAD_FADE_SPEED   ; Animation moving speed.
 	jsr ResetTimers 
 
-	lda #1                 ; set Stage to fade out.
+	lda #1                 ; set Stage 1 to fade out.
 	sta EventCounter
 
 	lda #12                ; Set number of times to loop the fade.
@@ -257,6 +257,9 @@ SetupTransitionToGameOver
 
 	lda #0                 ; Turn off the Prompt to press the Button
 	sta EnablePressAButton
+
+	lda #SCREEN_TRANS_OVER ; Change to transition to Game Over.
+	sta CurrentScreen
 
 	rts
 

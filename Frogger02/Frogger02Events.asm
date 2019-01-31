@@ -709,9 +709,7 @@ EventTransitionGameOver
 ; When text is 0, then background color can be 0.
 	jsr TransGameOverStage1Scroll
 
-	inc EventCounter2
-	lda EventCounter2
-	cmp #12
+	dec EventCounter2
 	bne EndTransitionGameOver
 
 	; End of Stage 1.  Now setup to fade in Game Over.
@@ -777,15 +775,16 @@ TransGameOverStage1Scroll
 
 	ldx #24
 LoopOverToBlack
-	lda COLPF1_TABLE,x      ; Get the text brighness.
+	lda COLPF1_TABLE,x      ; Get the text brightness.
 	and #$0F                ; Look at only luminance.
 	beq DoFadeCOLPF2        ; Already 0.  Just do background.
-	tay 
+	tay                     ; Y = A
 	dey                     ; Decrement Text luminance
 	bmi BlackOutCOLPF1      ; If it went negative, then we're done.
 	dey                     ; Decrement Text luminance
 	bmi BlackOutCOLPF1      ; If it went negative, then we're done.
 	sty COLPF1_TABLE,x      ; Save the updated value in the color table.
+	
 ; Yes, this is a little inconsistent.  The pass when the text 
 ; luminance reaches 0 will end up skipping the fade on the background. 
 ; Meh.  I don't think anyone will notice.
@@ -793,16 +792,9 @@ DoFadeCOLPF2
 	lda COLPF2_TABLE,x      ; Get the color.
 	pha                     ; Save for later.
 	and #$0F                ; Look at only the luminance
-	bne DoFadeLine          ; If luminance is >0 then decrement.
-	pla                     ; luminance is 0.  Fix the stack.
-BlackOutCOLPF2             
-	lda #COLOR_BLACK        ; Black out background (and the text below)
-	sta COLPF2_TABLE,x
-BlackOutCOLPF1 
-	lda #COLOR_BLACK        ; Black out the text.  Redundantly. 
-	sta COLPF1_TABLE,x
-	beq DoOverNextLine      ; Done with this line.
-DoFadeLine
+	beq ZeroTableColors     ; Zero luminance, so zero table entries.          
+
+	; Luminance is >0, thetrefore decrement.
 	tay                     ; Fade out the background brighness.
 	dey                     ; Decrement background luminance
 	bmi BlackOutCOLPF2      ; If it went negative, then we're done.
@@ -813,6 +805,19 @@ DoFadeLine
 	and #$F0                ; Get the color of the background.
 	ora SAVEY               ; combine the new lumninance.
 	sta COLPF2_TABLE,x      ; update the background color.
+
+ZeroTableColors
+	pla                     ; luminance is 0.  Fix the stack.
+BlackOutCOLPF2             
+	lda #COLOR_BLACK        ; Black out background (and the text below)
+	sta COLPF2_TABLE,x
+BlackOutCOLPF1 
+	lda #COLOR_BLACK        ; Black out the text.  Redundantly. 
+	sta COLPF1_TABLE,x
+	beq DoOverNextLine      ; Done with this line.
+
+
+
 DoOverNextLine
 	dex                     ; Next row.
 	bpl LoopOverToBlack     ; 24 to 0...
