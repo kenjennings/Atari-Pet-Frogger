@@ -38,9 +38,8 @@ SetupTransitionToTitle
 	lda #TITLE_SPEED         ; Animation moving speed.
 	jsr ResetTimers
 
-	lda #0
-	sta EnablePressAButton   ; Tell VBI to the prompt flashing is disabled.
-	
+	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
+
 	lda #1
 	sta EventCounter         ; Declare stage 1 behavior for scrolling.
 
@@ -71,10 +70,9 @@ SetupTransitionToGame
 	lda #TITLE_WIPE_SPEED   ; Speed of fade/dissolve for transition
 	jsr ResetTimers
 
-	lda #0
-	sta EnablePressAButton   ; Tell VBI the prompt flashing is disabled.
+	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
 
-	lda #23
+	lda #22
 	sta EventCounter2       ; Prep the first transition loop.
 
 	lda #1                  ; First transition stage: Loop from bottom to top
@@ -99,8 +97,7 @@ SetupGame
 	lda #0
 	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
 
-	lda #0
-	sta EnablePressAButton  ; Tell VBI the prompt flashing is disabled.
+	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
 
 	lda #<PLAYFIELD_MEM18   ; Low Byte, Frog position.
 	sta FrogLocation
@@ -255,8 +252,7 @@ SetupTransitionToGameOver
 	lda #16                ; Set number of times to loop the fade.
 	sta EventCounter2
 
-	lda #0                 ; Turn off the Prompt to press the Button
-	sta EnablePressAButton
+	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
 
 	lda #SCREEN_TRANS_OVER ; Change to transition to Game Over.
 	sta CurrentScreen

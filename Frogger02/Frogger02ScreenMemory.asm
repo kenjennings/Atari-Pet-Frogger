@@ -873,6 +873,10 @@ PLAYFIELD_MEM17
 
 ; ==========================================================================
 ; Color Layouts for the screens.
+; 23 lines of data each, not 25.
+; Line 24 for the Press A Button Prompt and line 25 for the 
+; scrolling credits are managed directly, so do not need 
+; entries in the tables.
 ; --------------------------------------------------------------------------
 ; FYI from GTIA.asm:
 ; COLOR_ORANGE1 =      $10
@@ -902,16 +906,16 @@ TITLE_BACK_COLORS
 	.by COLOR_BLACK                                 ; Space
 	.by COLOR_PINK COLOR_PINK COLOR_PINK            ; Controls
 	.by COLOR_BLACK COLOR_BLACK                     ; Space
-	.by COLOR_BLACK                                 ; Press Button (turned off)
-	.by COLOR_BLACK                                 ; Credits
+;	.by COLOR_BLACK                                 ; Press Button (turned off)
+;	.by COLOR_BLACK                                 ; Credits;
 
 TITLE_TEXT_COLORS ; Text luminance
 	.by $0C $08 $04 $00                             ; Scrolling title
 	.rept 19
 		.by $0C                                     ; The rest of the text on screen
 	.endr
-	.by $00                                         ; Press Button (turned off)
-	.by $0A                                         ; Credits
+;	.by $00                                         ; Press Button (turned off)
+;	.by $0A                                         ; Credits
 
 
 GAME_BACK_COLORS
@@ -927,15 +931,11 @@ GAME_BACK_COLORS
 	.by COLOR_ORANGE2+2                                      ; one last Beach.
 
 	.by COLOR_GREEN                                        ; grassy gap
-	.by COLOR_BLACK                                        ; Press Button (turned off)
-	.by COLOR_BLACK                                        ; Credits
 
 GAME_TEXT_COLORS ; Text luminance
 	.rept 23
 		.by $0C                                     ; The rest of the text on screen
 	.endr
-	.by $00                                         ; Press Button (turned off)
-	.by $0A                                         ; Credits
 
 
 DEAD_BACK_COLORS ; Text luminance
@@ -949,9 +949,6 @@ DEAD_BACK_COLORS ; Text luminance
 	.by COLOR_RED_ORANGE+3 COLOR_RED_ORANGE+1 COLOR_RED_ORANGE+0 COLOR_RED_ORANGE+0
 	.by COLOR_RED_ORANGE+0 COLOR_RED_ORANGE+1
 
-	.by COLOR_BLACK                                 ; Press Button (turned off)
-	.by COLOR_BLACK                                 ; Credits
-
 DEAD_TEXT_COLORS ; Text luminance
 	.rept 10
 		.by $00                                     ; Top Scroll.
@@ -959,14 +956,14 @@ DEAD_TEXT_COLORS ; Text luminance
 
 	.by $0A $08 $06
 
-	.rept 11
+	.rept 10
 		.by $00                                     ; Bottom Scroll, and Prompt.
 	.endr
-	.by $0A                                         ; Credits
+
 
 
 WIN_BACK_COLORS                                     ; The Win Screen will populate scrolling colors.
-	.rept 25
+	.rept 23
 		.by $00                                     ; The whole screen is black.
 	.endr
 
@@ -975,12 +972,12 @@ WIN_TEXT_COLORS
 		.by $00                                     ; Top Scroll.
 	.endr
 
-	.by $0A $08 $06
+	.by $0A $08 $06                                 ; SAVED!
 
-	.rept 11
-		.by $00                                     ; Bottom Scroll, and Prompt.
+	.rept 10
+		.by $00                                     ; Bottom Scroll
 	.endr
-	.by $0A                                         ; Credits
+
 
 
 OVER_BACK_COLORS
@@ -990,8 +987,8 @@ OVER_BACK_COLORS
 
 	.by  COLOR_PINK COLOR_PINK COLOR_PINK 
 
-	.rept 12
-		.by $00                                     ; Bottom scroll, Prompt, and Credits.
+	.rept 10
+		.by $00                                     ; Bottom scroll
 	.endr
 
 OVER_TEXT_COLORS
@@ -1001,10 +998,10 @@ OVER_TEXT_COLORS
 
 	.by $0A $08 $06
 
-	.rept 11
-		.by $00                                     ; Bottom Scroll, and Prompt.
+	.rept 10
+		.by $00                                     ; Bottom Scroll
 	.endr
-	.by $0A                                         ; Credits
+
 
 
 	.align $0100

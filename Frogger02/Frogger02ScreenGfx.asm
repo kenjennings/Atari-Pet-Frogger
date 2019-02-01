@@ -499,19 +499,17 @@ WriteLives
 ; --------------------------------------------------------------------------
 ; Force all the colors in the current table to black.
 ;
-; Needed because the ChangeScreen routine automatically populates the
-; current color table and when I want to fade up the game screen
-; it needs to start that loop from black colors.
-;
 ; --------------------------------------------------------------------------
 ZeroCurrentColors
-	ldy #24
+	ldy #23
 	lda #0
 LoopZeroColors
 	sta COLPF2_TABLE,y
 	sta COLPF1_TABLE,y
 	dey
 	bpl LoopZeroColors
+
+	jsr HideButtonPrompt
 	rts
 
 
@@ -559,11 +557,14 @@ LoopChangeScreenWaitForVBI
 	; The VBI has changed the display and loaded page zero pointers.
 	; Now update the color tables.
 
-	lda #0               ; Always force prompt line to 0 color
+	lda #0               ; Always force prompt line to off, 0 color
 	sta COLPF2_TABLE+23
 	sta COLPF1_TABLE+23
+	sta COLPF2_TABLE+24
+	lda #$0C               ; And the credits on.
+	sta COLPF1_TABLE+24
 
-	ldy #23
+	ldy #22
 LoopCopyColors
 	lda (COLPF2Pointer),y
 	sta COLPF2_TABLE,y
