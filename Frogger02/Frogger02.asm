@@ -386,9 +386,11 @@ SCROLL_CREDIT_LMS = [* + 1]
 EnablePressAButton .byte 0
 
 ; 0/1 toggle for light/dark state of Press a button prompt.
-PressAButtonState  .byte 0
+; 0 = Background fade up, text fades down/
 
-; Timer value for prompt changing  state.
+PressAButtonState  .byte 0   ; 0 means fading background down.   1 means fading up.
+
+; Timer value for Press A Button Prompt updating.
 PressAButtonFrames .byte BLINK_SPEED
 
 

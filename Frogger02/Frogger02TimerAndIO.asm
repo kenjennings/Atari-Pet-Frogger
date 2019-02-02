@@ -29,7 +29,7 @@
 ; ==========================================================================
 ; Animation speeds of various displayed items.   Number of frames to wait...
 ; --------------------------------------------------------------------------
-BLINK_SPEED      = 36 ; blinking Press A Button text
+BLINK_SPEED      = 3  ; Speed of updated to Press A Button prompt.
 
 TITLE_SPEED      = 2  ; Scrolling speed for title. 
 TITLE_WIPE_SPEED = 0  ; Title screen to game screen fade speed.
@@ -510,31 +510,34 @@ DoAnimateButtonTimer
 	bne ExitMyDeferredVBI    ; if it is still non-zero end this section.
 
 DoPromptColorchange
-	lda #BLINK_SPEED         ; Text Blinking speed for prompt
-	sta PressAButtonFrames   ; Reset the delay counter.
-
-	inc PressAButtonState    ; Add 1.  (says Capt Obvious)
-	lda PressAButtonState
-	and #1                   ; Keep only lowest bit -- 0, 1, 0, 1, 0, 1...
-	sta PressAButtonState
-
-	jsr ToggleButtonPrompt   ; Switches colors for prompt randomly.
+	jsr ToggleButtonPrompt   ; Manipulates colors for prompt.
 
 ExitMyDeferredVBI
 	jmp XITVBV  ; Return to OS.  SYSVBV for Immediate interrupt.
 
 
 ; ==========================================================================
+; TOGGLE PressAButtonState 
+; --------------------------------------------------------------------------
+TogglePressAButtonState
+	inc PressAButtonState    ; Add 1.  (says Capt Obvious)
+	lda PressAButtonState
+	and #1                   ; Keep only lowest bit -- 0, 1, 0, 1, 0, 1...
+	sta PressAButtonState
+
+	rts
+
+
+; ==========================================================================
 ; TOGGLE BUTTON PROMPT
-; Set blinking prompt.
+; Fade the prompt up and down. 
 ;
-; On entry the CPU flags should indicate current toggle state:
-;   Z or 0   v   !Z or !0
+; PressAButtonState...
+; If  0, then fading background down to dark.  (and text light)  
+; If  1, then fading background up to light  (and text dark) 
+; When background reaches 0 luminance change the color.
 ;
-; If  0, then light background, dark text.
-; If  1, then dark background and light text.
-;
-; On entry, the first flash may end up being black/white.  
+; On entry, the first choice may end up being black/white.  
 ; The code generally tries to exclude black/white, but on 
 ; entry this may occur depending on prior state. (fadeouts, etc.)
 ;
@@ -542,25 +545,47 @@ ExitMyDeferredVBI
 ; X  is used for text color.
 ; --------------------------------------------------------------------------
 ToggleButtonPrompt
-	beq PromptLightAndDark ; 0 = Light background and dark text?
+	lda #BLINK_SPEED            ; Text Fading speed for prompt
+	sta PressAButtonFrames      ; Reset the frame counter.
 
-; Otherwise, therefore, Prompt Dark background and Light text
-PromptDarkAndLight
-	lda RANDOM             ; A random color and then prevent same 
-	eor COLPF2_TABLE+23    ; value by chewing on it with the original color.
-	and #$F0               ; Mask out the lumninance for Dark.
-	beq PromptDarkAndLight ; Do again if black/color 0 turned up
-	ldx #$0C               ; Light text
-	bne SetPromptColors
+	lda PressAButtonState       ; Up or down?
+	bne PromptFadeUp            ; 1 == up.
 
-PromptLightAndDark
-	lda COLPF2_TABLE+23    ; Use the previous color...
-	ora #$0C               ; ...but with a Light Background.
-	ldx #$00               ; Dark text.
+	; Prompt Fading the background down.
+	lda COLPF2_TABLE+23         ; Get the current background color.
+	AND #$0F                    ; Look at only the luminance.
+	bne RegularPromptFadeDown   ; Not 0 yet, do a normal job on it.
 
-SetPromptColors
-	sta COLPF2_TABLE+23    ; Set background.
-	stx COLPF1_TABLE+23    ; Set text.
+SetNewPromptColor
+	lda RANDOM                  ; A random color and then prevent same 
+	eor COLPF2_TABLE+23         ; value by chewing on it with the original color.
+	and #$F0                    ; Mask out the luminance for Dark.
+	beq SetNewPromptColor       ; Do again if black/color 0 turned up
+	sta COLPF2_TABLE+23         ; Set background.
+	jsr TogglePressAButtonState ; Change fading mode to up (1)
+	bne SetTextAsInverse        ; Text Brightness inverse from the background
+
+RegularPromptFadeDown
+	dec COLPF2_TABLE+23         ; Subtract 1 from the color (which is the luminance)
+	jmp SetTextAsInverse        ; And reset the text to accordingly.
+
+PromptFadeUp
+	lda COLPF2_TABLE+23
+	AND #$0F                    ; Look at only the luminance.
+	cmp #$0F                    ; Is it is at max luminance now?
+	bne RegularPromptFadeUp     ; No, do the usual fade.
+
+	jsr TogglePressAButtonState ; Change fading mode to down.
+	rts
+
+RegularPromptFadeUp
+	inc COLPF2_TABLE+23         ; Add 1 to the color (which is the luminance)
+	; and fall into setting the text luminance setup....
+
+SetTextAsInverse  ; Make the text luminance the opposite of the background.
+	lda COLPF2_TABLE+23         ; Background color...
+	eor #$0F                    ; Not (!) the background color's luminance.
+	sta COLPF1_TABLE+23         ; Use as the text's luminance.
 	rts
 
 
