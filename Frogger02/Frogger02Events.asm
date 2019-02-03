@@ -524,7 +524,7 @@ EventTransitionToDead
 
 ; ======== Stage 1 ========
 ; Black the playfield background.   Make frog line red.
-	ldx #18
+	ldx #19
 
 LoopDeadToBlack
 	cpx FrogRow             ; Is X the same as Frog Row?
@@ -712,7 +712,7 @@ EventTransitionGameOver
 	jsr ChangeScreen           ; Then copy the color tables.
 
 ; Force the base background color without luminance for all the lines.
-	ldx #24
+	ldx #22
 DoCopyBaseColors
 	lda OVER_BACK_COLORS,x
 	and #$F0
@@ -735,7 +735,7 @@ TestTransOver2
 	cmp #2
 	bne EndTransitionGameOver
 
-	ldx #24
+	ldx #22
 DoFadeUpOverText
 	lda COLPF1_TABLE,x
 	cmp OVER_TEXT_COLORS,x
@@ -766,7 +766,7 @@ EndTransitionGameOver
 ; --------------------------------------------------------------------------
 TransGameOverStage1Scroll
 
-	ldx #24
+	ldx #22
 LoopOverToBlack
 	lda COLPF1_TABLE,x      ; Get the text brightness.
 	and #$0F                ; Look at only luminance.
@@ -809,7 +809,7 @@ BlackOutCOLPF1
 
 DoOverNextLine
 	dex                     ; Next row.
-	bpl LoopOverToBlack     ; 24 to 0...
+	bpl LoopOverToBlack     ; 22 to 0...
 
 	rts
 
