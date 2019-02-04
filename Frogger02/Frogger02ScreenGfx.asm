@@ -423,6 +423,13 @@ ResetGamePlayfield
 	rts
 
 
+; Game Score and High Score.
+; This stays here and is copied to screen memory, because the math could
+; temporarily generate a non-numeric character when there is carry, and I
+; don't want that (possibly) visible on the screen however short it may be.
+MyScore .sb "00000000"
+HiScore .sb "00000000"
+
 ; ==========================================================================
 ; Copy the score from memory to screen positions.
 ;

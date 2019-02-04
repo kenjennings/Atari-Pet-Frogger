@@ -99,13 +99,13 @@ EndResetTimers
 ;
 ; Uses A, CPU flag status Z indicates 0 or 1
 ; --------------------------------------------------------------------------
-ToggleFlipFlop
-	inc ToggleState ; Add 1.  (says Capt Obvious)
-	lda ToggleState
-	and #1          ; Squash to only lowest bit -- 0, 1, 0, 1, 0, 1...
-	sta ToggleState
+;ToggleFlipFlop
+;	inc ToggleState ; Add 1.  (says Capt Obvious)
+;	lda ToggleState
+;	and #1          ; Squash to only lowest bit -- 0, 1, 0, 1, 0, 1...
+;	sta ToggleState
 
-	rts
+;	rts
 
 
 ; ==========================================================================

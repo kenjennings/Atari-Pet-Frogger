@@ -320,18 +320,18 @@ CurrentLeftOffset  .byte $00
 
 ; This is a 0, 1, toggle to remember the last state of
 ; something. For example, a blinking thing on screen.
-ToggleState     .byte 0   ; = 0, 1, flipper to drive a blinking thing.
+;ToggleState     .byte 0   ; = 0, 1, flipper to drive a blinking thing.
 
 ; Another event value.  Use for counting things for each pass of a screen/event.
 EventCounter    .byte 0
 EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
 
-; Game Score and High Score.
-; This stays here and is copied to screen memory, because the math could
-; temporarily generate a non-numeric character when there is carry, and I
-; don't want that (possibly) visible on the screen however short it may be.
-MyScore .sb "00000000"
-HiScore .sb "00000000"
+;; Game Score and High Score.
+;; This stays here and is copied to screen memory, because the math could
+;; temporarily generate a non-numeric character when there is carry, and I
+;; don't want that (possibly) visible on the screen however short it may be.
+;MyScore .sb "00000000"
+;HiScore .sb "00000000"
 
 
 ; ======== V B I ======== TIMER FOR CODE
@@ -427,11 +427,6 @@ SOUND_FX_HI1 .word 0
 SOUND_FX_HI2 .word 0
 SOUND_FX_HI3 .word 0 
 
-SOUND_INDEX
-SOUND_INDEX0 .byte 0
-SOUND_INDEX1 .byte 0
-SOUND_INDEX2 .byte 0
-SOUND_INDEX3 .byte 0 
 
 ; Sound control between main process and VBI to turn on/off/play sounds.
 ; 0   = Set by Main to direct stop managing sound pending an update from MAIN. 
