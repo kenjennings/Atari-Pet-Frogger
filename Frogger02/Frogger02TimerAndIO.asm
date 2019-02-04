@@ -497,7 +497,7 @@ ManagePressAButtonPrompt
 	sta COLPF2_TABLE+23      ; Set background
 	sta COLPF1_TABLE+23      ; Set text.
 	sta PressAButtonFrames   ; This makes sure it will restart as soon as enabled.
-	beq ExitMyDeferredVBI    
+	beq DoCheesySoundService  
 
 ; Note that the Enable/Disable behavior connected to the timer mechanism 
 ; means that the action will occur when this timer executes with value 1 
@@ -507,10 +507,13 @@ DoAnimateButtonTimer
 	lda PressAButtonFrames   
 	beq DoPromptColorchange  ; Timer is Zero.  Go switch colors.
 	dec PressAButtonFrames   ; Minus 1
-	bne ExitMyDeferredVBI    ; if it is still non-zero end this section.
+	bne DoCheesySoundService ; if it is still non-zero end this section.
 
 DoPromptColorchange
 	jsr ToggleButtonPrompt   ; Manipulates colors for prompt.
+
+DoCheesySoundService         ; World's most inept sound sequencer.
+;	jsr SoundService
 
 ExitMyDeferredVBI
 	jmp XITVBV  ; Return to OS.  SYSVBV for Immediate interrupt.

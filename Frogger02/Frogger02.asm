@@ -408,11 +408,60 @@ COLPF1_TABLE ; Text color (luminance) ; default all to $0A/10 (dec)
 		.byte $0A
 	.endr
 
-; Support for the world's most inept sound system
-SOUND_INDEX	.byte $00
 
+; ======== Support for the world's most inept sound system. ========
+
+; Index used by the VBI for the current sound.
+
+SOUND_POINTER .word $0000
+
+SOUND_FX_LO
+SOUND_FX_LO0 .word 0
+SOUND_FX_LO1 .word 0
+SOUND_FX_LO2 .word 0
+SOUND_FX_LO3 .word 0 
+
+SOUND_FX_HI
+SOUND_FX_HI0 .word 0
+SOUND_FX_HI1 .word 0
+SOUND_FX_HI2 .word 0
+SOUND_FX_HI3 .word 0 
+
+SOUND_INDEX
+SOUND_INDEX0 .byte 0
+SOUND_INDEX1 .byte 0
+SOUND_INDEX2 .byte 0
+SOUND_INDEX3 .byte 0 
+
+; Sound control between main process and VBI to turn on/off/play sounds.
+; 0   = Set by Main to direct stop managing sound pending an update from MAIN. 
+;       This does not stop the sound. 
+;       It is set by the VBI to indicate the channel is idle. 
+; 1   = Main sets to direct VBI to start playing a sound FX.
+; 2   = VBI sets when it is playing to inform Main that it has taken direction.
+; 255 = Direct VBI to silence the channel.
+; So, the procedure for playing sound.
+; 1) MAIN sets SOUND_CONTROL to 0.
+; 2) MAIN sets SOUND_FX pointer to the sound effects sequence to play.
+; 3) MAIN sets SOUND_CONTROL to 1 to tell VBI to start.
+; 4) VBI when playing sets SOUNT_CONTROL value to 2  
+
+SOUND_CONTROL
+SOUND_CONTROL0 .byte $00
+SOUND_CONTROL1 .byte $00
+SOUND_CONTROL2 .byte $00
+SOUND_CONTROL3 .byte $00
+
+; When these are non-zero, the current settings continue for the next frame.
+SOUND_DURATION
+SOUND_DURATION0 .byte $00
+SOUND_DURATION1 .byte $00
+SOUND_DURATION2 .byte $00
+SOUND_DURATION3 .byte $00
+
+
+; In the event things can't be saved on the stack, protect them here....
 SAVEA = $FD
-; In the event X and/or Y can't be saved on stack, protect them here....
 SAVEX = $FE
 SAVEY = $FF
 
