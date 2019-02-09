@@ -56,6 +56,10 @@ SetupTransitionToTitle
 	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
 	sta CurrentScreen
 
+	ldx #0                   ; Set Pokey channel 0 to slide sound.
+	ldy #SOUND_SLIDE
+	jsr SetSound 
+
 	rts
 
 

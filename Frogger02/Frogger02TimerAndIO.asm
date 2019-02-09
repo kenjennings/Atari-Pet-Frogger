@@ -609,5 +609,11 @@ RunPromptForButton
 
 	jsr CheckInput           ; Get input. Non Zero means there is input.
 	and #%00010000           ; Strip it down to only the joystick button.
+	beq ExitRunPrompt        ; If 0, then do not play sound.
 
+	ldx #3                   ; Button pressed. Set Pokey channel 0 to tink sound.
+	ldy #SOUND_TINK
+	jsr SetSound 
+
+ExitRunPrompt
 	rts
