@@ -615,5 +615,7 @@ RunPromptForButton
 	ldy #SOUND_TINK
 	jsr SetSound 
 
+	lda #%00010000       ; Set the button is pressed.
+
 ExitRunPrompt
 	rts
