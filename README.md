@@ -48,7 +48,7 @@ UPDATE 27 JAN 2019.....   New Title Screen and Game Screen teasers below.  Still
 
 [![V02 New Game](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger02/V02_NewProtoGame.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02/README_V02.md)
 
-The plan for Version 02 is to continue to maintain the game in the same text mode (ANTIC mode 2, OS Text Mode 0), but to Atari-cize everything about the screen and game operation.  Ideas under contemplation....
+The plan for Version 02 is to continue to maintain the game in the same text mode (ANTIC mode 2, OS Text Mode 0) and basic state of operating the boat and frog movements (that is character movement, not fancy fince scrolling.)  Everything else about the screen and game operation will be Atari--ified.  Ideas under contemplation....
 
 - Add at least simple sound effects.
 
@@ -56,9 +56,9 @@ The plan for Version 02 is to continue to maintain the game in the same text mod
 
 - Formalize timer updates, and other important frame-oriented decisions and updates into a Vertical Blank Interrrupt.
 
-- Custom character set to make the Frog look like a frog, and the boats look like boats, possible other graphics.
+- Custom character set to make the Frog look something like a frog, and the boats look like boats, possible other graphics.
 
-- Use Display List LMS updates to move the boats rather than reloading screen memory.  (Debating whether to go full bore and fine scroll the boats too.)
+- Use Display List LMS updates to move the boats rather than reloading screen memory. 
 
 - Add color.  Use a DLI for each text line to set a different base color for every line.  The colors would be syncronized to the screen content.
 
