@@ -9,7 +9,7 @@
 ;
 ; Version 00, November 2018
 ; Version 01, December 2018
-; Version 02, January 2019
+; Version 02, February 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -513,7 +513,7 @@ DoPromptColorchange
 	jsr ToggleButtonPrompt   ; Manipulates colors for prompt.
 
 DoCheesySoundService         ; World's most inept sound sequencer.
-;	jsr SoundService
+	jsr SoundService
 
 ExitMyDeferredVBI
 	jmp XITVBV  ; Return to OS.  SYSVBV for Immediate interrupt.

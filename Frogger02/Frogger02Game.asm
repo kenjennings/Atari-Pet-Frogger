@@ -9,7 +9,7 @@
 ;
 ; Version 00, November 2018
 ; Version 01, December 2018
-; Version 02, January 2019
+; Version 02, February 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -31,9 +31,9 @@ GAMESTART
 	; writes a byte to a page 0 location monitored by the vertical blank
 	; interrupt and this directs the interrupt to change the current
 	; display list.  Easy-peasy and never updated at the wrong time.
-
-	lda #AUDCTL_CLOCK_15KHZ ;; Set only this one bit for clock.
-	sta AUDCTL ;; Audio Control
+	
+	lda #AUDCTL_CLOCK_15KHZ    ; Set only this one bit for clock.
+	sta AUDCTL                 ; POKEY Audio Control
 	jsr StopAllSound
 
 	lda #>CHARACTER_SET        ; Set custom character set.  Global to game, forever.

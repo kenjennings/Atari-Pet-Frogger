@@ -9,7 +9,7 @@
 ;
 ; Version 00, November 2018
 ; Version 01, December 2018
-; Version 02, January 2019
+; Version 02, February 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -119,7 +119,7 @@ SOUND_ENTRY_HUMMER_B ; one-half of Atari light saber
 
 ; Pointers to starting sound entry in a sequence.
 SOUND_FX_LO_TABLE
-	.byte <SOUND__ENTRY_OFF
+	.byte <SOUND_ENTRY_OFF
 	.byte <SOUND_ENTRY_TINK
 	.byte <SOUND_ENTRY_SLIDE
 	.byte <SOUND_ENTRY_HUMMER_A
@@ -156,21 +156,30 @@ LoopStopSound
 ; Set Sound
 ; -------------------------------------------------------------------------- 
 ; Main routine to set sound playing for a channel.
-; 
+;
+; Sound control between main process and VBI to turn on/off/play sounds.
+; 0   = Set by Main to direct stop managing sound pending an update from 
+;       MAIN. This does not stop the POKEY's currently playing sound. 
+;       It is set by the VBI to indicate the channel is idle. (unmanaged) 
+; 1   = Main sets to direct VBI to start playing a sound FX.
+; 2   = VBI sets when it is playing to inform Main that it has taken 
+;       direction and is now busy.
+; 255 = Direct VBI to silence the channel.
+;
 ; X = sound number to use.
 ; Y = sound channel to assign.
 ; --------------------------------------------------------------------------
 SetSound
 	lda #0
-	sta SOUND_CONTROL,X ; Tell VBI to stop working POKEY channel X
+	sta SOUND_CONTROL,X     ; Tell VBI to stop working POKEY channel X
 
 	lda SOUND_FX_LO_TABLE,Y ; Assign pointer of sound effect
 	sta SOUND_FX_LO,X       ; to the channel controller.
 	lda SOUND_FX_HI_TABLE,Y
 	sta SOUND_FX_HI,X
 
-	lda #0
-	sta SOUND_CONTROL,X ; Tell VBI it can start running POKEY channel X
+	lda #1
+	sta SOUND_CONTROL,X     ; Tell VBI it can start running POKEY channel X
 
 	rts
 
@@ -211,11 +220,11 @@ SoundService
 	ldx #3
 LoopSoundServiceControl
 	lda SOUND_CONTROL,x
-	beq DoNextSoundChannel   ; SOUND_CONTROL == 0 means MAIN says do nothing
+	beq DoNextSoundChannel       ; SOUND_CONTROL == 0 means MAIN says do nothing
 
-	cmp #255
-	bne CheckMainSoundDirections
-	jsr EndFXAndStopSound    ; SOUND_CONTROL == 255 Direction from main to stop sound.
+	cmp #255                     ; Is it 255 (-1)?
+	bne CheckMainSoundDirections ; No, then go follow channel FX directions.
+	jsr EndFXAndStopSound        ; SOUND_CONTROL == 255 Direction from main to stop sound.
 	jmp DoNextSoundChannel
 
 CheckMainSoundDirections
@@ -226,10 +235,7 @@ CheckMainSoundDirections
 	lda #2
 	sta SOUND_CONTROL,x      ; Tell Main we're on the clock
 
-	lda SOUND_FX_LO,X       ;  Get Pointer to specified sound effect.
-	sta SOUND_POINTER
-	lda SOUND_FX_HI,X
-	sta SOUND_POINTER+1
+	jsr LoadSoundPointerFromX ; Get the pointer to the current entry.
 
 	; This is the first time in this Entry.  
 	jsr EvaluateEntryControlToStop  ; test if this is the end now.
@@ -239,6 +245,7 @@ CheckMainSoundDirections
 	jmp DoNextSoundChannel          ; and then we're done without evaluation duration.
 
 DoNormalSoundService                ; SOUND_CONTROL == 2.  VBI is running normally.
+	jsr LoadSoundPointerFromX       ; Get the pointer to the current entry.
 	jsr EvaluateEntryControlToStop 
 	; If the Entry Control set CONTROL to stop the sound, then do no more work.
 	beq DoNextSoundChannel          ; SOUND_CONTROL == 0 means do nothing
@@ -268,10 +275,20 @@ ExitSoundService
 	rts
 
 
+; Given X, load the current Entry pointer into SOUND_POINTER
+LoadSoundPointerFromX
+	lda SOUND_FX_LO,X       ;  Get Pointer to specified sound effect.
+	sta SOUND_POINTER
+	lda SOUND_FX_HI,X
+	sta SOUND_POINTER+1
+
+	rts
+
+
 ; Given X and SOUND_POINTER pointing to the entry, then set
 ; audio controls.
 LoadTheCurrentSoundEntry
-	jsr SaveXTimes2
+	jsr SaveXTimes2        ;  X = X * 2  (but save original value)
 
 	ldy #0                 ; Pull AUDC
 	lda (SOUND_POINTER),y
@@ -299,19 +316,19 @@ EvaluateEntryControlToStop
 	rts
 
 EndFXAndStopSound
-	jsr SaveXTimes2
+	jsr SaveXTimes2          ;  X = X * 2  (but save original value)
 
-	lda #0
-	sta AUDC1,X
+	lda #0                   
+	sta AUDC1,X              ; Stop Pokey playing.
 	sta AUDF1,X
 
 EndFX
 	lda #0
-	ldx SAVEX             ; Get original X * 1 value.
-	sta SOUND_DURATION,X  ; Make sure duration is 0.
-	sta SOUND_CONTROL,X   ; And inform MAIN that this channel is unused.
+	ldx SAVEX               ; Get original X * 1 value.
+	sta SOUND_DURATION,X    ; Make sure duration is 0.
+	sta SOUND_CONTROL,X     ; And inform MAIN that this channel is unused.
 
-	beq DoNextSoundChannel
+;	beq DoNextSoundChannel
 
 	rts
 
