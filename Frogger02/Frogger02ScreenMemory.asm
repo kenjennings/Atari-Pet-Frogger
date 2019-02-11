@@ -171,7 +171,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; Formerly:
 ; 3  |     (c) November 1983 by DalesOft      | CREDIT
 ; 4  |        Written by John C Dale          | CREDIT
-; 5  |Atari V02 port by Ken Jennings, Jan 2019| CREDIT
+; 5  |Atari V02 port by Ken Jennings, Feb 2019| CREDIT
 ; 6  |                                        |
 
 ; Now:
@@ -186,7 +186,7 @@ CREDIT_MEM2
 	.sb "Original program for CBM PET 4032 written by John C. Dale.    " ; 62
 
 CREDIT_MEM3
-	.sb "Atari 8-bit computer port by Ken Jennings, V02, Jan 2019" ; 56
+	.sb "Atari 8-bit computer port by Ken Jennings, V02, Feb 2019" ; 56
 
 END_OF_CREDITS
 EXTRA_BLANK_MEM ; Trailing line for credit scrolling.
