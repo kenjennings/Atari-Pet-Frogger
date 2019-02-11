@@ -1,6 +1,6 @@
 # Atari PET FROGGER Version 02
 
-WORK IN PROGRESS...  (the rest of the text below is copied from Version 02.   Come back soon for updates).
+WORK IN PROGRESS...  (the rest of the text below is copied from Version 01.   Come back soon for updates).
 
 PET FROGGER game for Commodore PET 4032 ported to the Atari 8-bit computers
 
