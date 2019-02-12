@@ -48,7 +48,7 @@ UPDATE 27 JAN 2019.....   New Title Screen and Game Screen teasers below.  Still
 
 [![V02 New Game](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger02/V02_NewProtoGame.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02/README_V02.md)
 
-The plan for Version 02 is to continue to maintain the game in the same text mode (ANTIC mode 2, OS Text Mode 0) and basic state of operating the boat and frog movements (that is character movement, not fancy fince scrolling.)  Everything else about the screen and game operation will be Atari--ified.  Ideas under contemplation....
+The plan for Version 02 is to continue to maintain the game in the same text mode (ANTIC mode 2, OS Text Mode 0) and basic state of operating the boat and frog movements (that is character movement, not fancy fine scrolling.)  Everything else about the screen and game operation will be Atari--ified.  Ideas under contemplation....
 
 - Add at least simple sound effects.
 
