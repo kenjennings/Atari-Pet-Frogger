@@ -32,7 +32,7 @@ GAMESTART
 	; interrupt and this directs the interrupt to change the current
 	; display list.  Easy-peasy and never updated at the wrong time.
 	
-	lda #AUDCTL_CLOCK_15KHZ    ; Set only this one bit for clock.
+	lda #AUDCTL_CLOCK_64KHZ    ; Set only this one bit for clock.
 	sta AUDCTL                 ; Global POKEY Audio Control.
 	lda #3                     ; Set SKCTL to 3 to stop possible cassette noise. 
 	sta SKCTL                  ; So say Mapping The Atari and De Re Atari.

@@ -78,7 +78,7 @@ ToPlayFXScrollOrNot
 	bne ExitToPlayFXScroll   ; Yes.  Do nothing.
 	inc Playing_FX_Scroll1,X ; Nope.  Flag this as playing.
 
-	ldx #0                   ; Setup channel 0 to play slide sound.
+	ldx #0                  ; Setup channel 0 to play slide sound.
 	ldy #SOUND_SLIDE
 	jsr SetSound 
 
@@ -155,7 +155,7 @@ TestTransTitle2
 	ldx #0                     ; Setup channel 0 to play saber A sound.
 	ldy #SOUND_HUM_A
 	jsr SetSound 
-	ldx #1                     ; Setup channel 1 to play saber B sound.
+	ldx 3                     ; Setup channel 1 to play saber B sound.
 	lda #SOUND_HUM_B
 	jsr SetSound
 

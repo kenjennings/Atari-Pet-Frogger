@@ -67,12 +67,12 @@ SOUND_ENTRY_OFF
 	.byte 0,0,0,0
 
 SOUND_ENTRY_TINK ; Press A Button.
-	.byte $AD,$20,3,1
-	.byte $Ac,$20,3,1
-	.byte $Ab,$20,3,1
+	.byte $AD,$20,2,1
+	.byte $Ac,$20,2,1
+	.byte $Ab,$20,2,1
 	.byte $Aa,$20,2,1
-	.byte $A8,$20,3,1
-	.byte $A6,$20,2,1
+	.byte $A8,$20,2,1
+	.byte $A6,$20,1,1
 	.byte $A5,$20,1,1
 	.byte $A3,$20,1,1
 	.byte $A2,$20,1,1
@@ -103,20 +103,32 @@ SOUND_ENTRY_SLIDE ; Title logo lines slide right to left
 	.byte $0c,30,1,1
 	.byte $0d,29,1,1
 	.byte $0d,28,1,1
-	.byte $0e,27,1,1
-	.byte $0e,26,1,1
-	.byte $0e,25,1,1
+	.byte $0d,27,1,1
+	.byte $0d,26,1,1
+	.byte $0d,25,1,1
 	.byte $0e,24,1,1
 	.byte $0e,23,1,1
-	.byte $0d,22,1,1
-	.byte $0c,21,1,1
+	.byte $0e,22,1,1
+	.byte $0e,21,1,1
+	.byte $0e,20,1,1
+	.byte $0e,19,1,1
+	.byte $0e,18,1,1
+	.byte $0e,17,1,1
+	.byte $0e,16,1,1
+	.byte $0e,15,1,1
+	.byte $0e,14,1,1
+	.byte $0e,13,1,1
+	.byte $0e,12,1,1
+	.byte $0e,11,1,1
 	.byte $00,$00,0,0
 
 SOUND_ENTRY_HUMMER_A ; one-half of Atari light saber
-	.byte $A8,$FF,0,255
+	.byte $A8,$FF,1,1
+	.byte $A8,$FF,1,255
 
 SOUND_ENTRY_HUMMER_B ; one-half of Atari light saber
-	.byte $A8,$FE,0,255
+	.byte $A8,$FE,1,1
+	.byte $A8,$FE,1,255
 
 ; Pointers to starting sound entry in a sequence.
 SOUND_FX_LO_TABLE
