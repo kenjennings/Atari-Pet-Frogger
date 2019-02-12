@@ -33,7 +33,7 @@ SOUND_MAX = 4
 ;
 ; The world's cheapest sequencer. Play one sound value from a table at each 
 ; call. Assuming this is done synchronized to the frame it performs a sound 
-; change every 16.6ms (approximately)
+; change every 16.6ms (approximately)  (at 60fps)
 ; 
 ; Sound control between main process and VBI to turn on/off/play sounds.
 ; 0   = Set by Main to direct stop managing sound pending an update from 
@@ -43,6 +43,7 @@ SOUND_MAX = 4
 ; 2   = VBI sets when it is playing to inform Main that it has taken 
 ;       direction and is now busy.
 ; 255 = Direct VBI to silence the channel.
+;
 ; So, the procedure for playing sound.
 ; 1) MAIN sets SOUND_CONTROL to 0.
 ; 2) MAIN sets SOUND_FX_LO/HI pointer to the sound effects 
@@ -79,36 +80,36 @@ SOUND_ENTRY_TINK ; Press A Button.
 	.byte $A0,$00,0,0
 
 SOUND_ENTRY_SLIDE ; Title logo lines slide right to left
-	.byte $22,50,1,1
-	.byte $23,49,1,1
-	.byte $23,48,1,1
-	.byte $24,47,1,1
-	.byte $24,46,1,1
-	.byte $25,45,1,1
-	.byte $25,44,1,1
-	.byte $26,43,1,1
-	.byte $26,42,1,1
-	.byte $27,41,1,1
-	.byte $27,40,1,1
-	.byte $28,39,1,1
-	.byte $28,38,1,1
-	.byte $29,37,1,1
-	.byte $29,36,1,1
-	.byte $2a,35,1,1
-	.byte $2a,34,1,1
-	.byte $2b,33,1,1
-	.byte $2b,32,1,1
-	.byte $2c,31,1,1
-	.byte $2c,30,1,1
-	.byte $2d,29,1,1
-	.byte $2d,28,1,1
-	.byte $2e,27,1,1
-	.byte $2e,26,1,1
-	.byte $2e,25,1,1
-	.byte $2e,24,1,1
-	.byte $2e,23,1,1
-	.byte $2d,22,1,1
-	.byte $2c,21,1,1
+	.byte $02,50,1,1
+	.byte $03,49,1,1
+	.byte $03,48,1,1
+	.byte $04,47,1,1
+	.byte $04,46,1,1
+	.byte $05,45,1,1
+	.byte $05,44,1,1
+	.byte $06,43,1,1
+	.byte $06,42,1,1
+	.byte $07,41,1,1
+	.byte $07,40,1,1
+	.byte $08,39,1,1
+	.byte $08,38,1,1
+	.byte $09,37,1,1
+	.byte $09,36,1,1
+	.byte $0a,35,1,1
+	.byte $0a,34,1,1
+	.byte $0b,33,1,1
+	.byte $0b,32,1,1
+	.byte $0c,31,1,1
+	.byte $0c,30,1,1
+	.byte $0d,29,1,1
+	.byte $0d,28,1,1
+	.byte $0e,27,1,1
+	.byte $0e,26,1,1
+	.byte $0e,25,1,1
+	.byte $0e,24,1,1
+	.byte $0e,23,1,1
+	.byte $0d,22,1,1
+	.byte $0c,21,1,1
 	.byte $00,$00,0,0
 
 SOUND_ENTRY_HUMMER_A ; one-half of Atari light saber

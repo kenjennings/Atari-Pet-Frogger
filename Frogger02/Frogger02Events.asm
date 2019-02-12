@@ -61,6 +61,30 @@ SCREEN_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
 ;       +--------------------------------------------------------+
 
 
+
+; Track if sounds for events have been started...
+Playing_FX_Scroll1 .byte 0
+Playing_FX_Scroll2 .byte 0
+Playing_FX_Scroll3 .byte 0
+
+Playing_FX_Saber   .byte 0
+
+
+; Routine to reduce a little code for playing the slide 
+; sound for each line of the title graphics.
+; Same thing done three different times.
+ToPlayFXScrollOrNot
+	lda Playing_FX_Scroll1,X ; Did we start playing this sound?
+	bne ExitToPlayFXScroll   ; Yes.  Do nothing.
+	inc Playing_FX_Scroll1,X ; Nope.  Flag this as playing.
+
+	ldx #0                   ; Setup channel 0 to play slide sound.
+	ldy #SOUND_SLIDE
+	jsr SetSound 
+
+ExitToPlayFXScroll
+	rts
+
 ; ==========================================================================
 ; Event Process TRANSITION TO TITLE
 ; The setup for Transition to Title will turned on the Title Display.
@@ -68,41 +92,54 @@ SCREEN_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
 ; Stage 2: Brighten line 4 luminance.
 ; Stage 3: Initialize setup for Press Button on Title screen.
 ; --------------------------------------------------------------------------
+
 EventTransitionToTitle
-	lda AnimateFrames        ; Did animation counter reach 0 ?
-	bne EndTransitionToTitle ; Nope.  Nothing to do.
-	lda #TITLE_SPEED         ; yes.  Reset it.
+	lda AnimateFrames          ; Did animation counter reach 0 ?
+	bne EndTransitionToTitle   ; Nope.  Nothing to do.
+	lda #TITLE_SPEED           ; yes.  Reset it.
 	jsr ResetTimers
 
-	lda EventCounter         ; What stage are we in?
+	lda EventCounter           ; What stage are we in?
 	cmp #1
-	bne TestTransTitle2      ; Not the Title Scroll, try next stage
+	bne TestTransTitle2        ; Not the Title Scroll, try next stage
 
 	; === STAGE 1 ===
 	; Each line is 40 spaces followed by the graphics.
 	; Scroll each one one at a time.
-	lda SCROLL_TITLE_LMS0
-	cmp #<[TITLE_MEM1+40]
-	beq NowScroll2
-	inc SCROLL_TITLE_LMS0
-	bne EndTransitionToTitle
+	lda SCROLL_TITLE_LMS0    
+	cmp #<[TITLE_MEM1+40]      ; Reached the slide maximum ?
+	beq NowScroll2             ; Yes.  Skip this line slide.
+
+	ldx #0
+	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
+
+	inc SCROLL_TITLE_LMS0      ; Top line slide in progress.
+	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
 
 NowScroll2
 	lda SCROLL_TITLE_LMS1
-	cmp #<[TITLE_MEM2+40]
-	beq NowScroll3
-	inc SCROLL_TITLE_LMS1
-	bne EndTransitionToTitle
+	cmp #<[TITLE_MEM2+40]      ; Reached the slide maximum ?
+	beq NowScroll3             ; Yes.  Skip this line slide.
+
+	ldx #1
+	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
+
+	inc SCROLL_TITLE_LMS1      ; Middle line slide in progress.
+	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
 
 NowScroll3
 	lda SCROLL_TITLE_LMS2
-	cmp #<[TITLE_MEM3+40]
-	beq FinishedNowSetupStage2
-	inc SCROLL_TITLE_LMS2
-	bne EndTransitionToTitle
+	cmp #<[TITLE_MEM3+40]      ; Reached the slide maximum ?
+	beq FinishedNowSetupStage2 ; Yes.  All 3 lines moved.  Now do the glowing line.
+
+	ldx #2
+	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
+
+	inc SCROLL_TITLE_LMS2      ; Bottom line slide in progress.
+	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
 
 FinishedNowSetupStage2
-	lda #2
+	lda #2                     ; Set stage 3 as next part of Title screen event...
 	sta EventCounter
 	bne EndTransitionToTitle
 
@@ -112,19 +149,34 @@ TestTransTitle2
 	cmp #2
 	bne TestTransTitle3
 
-	lda COLPF1_TABLE+3
-	cmp #$0E               ; It is maximum brightness?
-	beq FinishedNowSetupStage3
-	inc COLPF1_TABLE+3
-	bne EndTransitionToTitle
+	lda Playing_FX_Saber       ; Is the light saber running?
+	bne GlowingTitleUnderline  ; Yes.  Skip starting sound.
+	inc Playing_FX_Saber       ; No.  Mark sound playing in progress.
+	ldx #0                     ; Setup channel 0 to play saber A sound.
+	ldy #SOUND_HUM_A
+	jsr SetSound 
+	ldx #1                     ; Setup channel 1 to play saber B sound.
+	lda #SOUND_HUM_B
+	jsr SetSound
+
+GlowingTitleUnderline
+	lda COLPF1_TABLE+3         ; Get the text brightness of line 4.
+	cmp #$0E                   ; It is maximum brightness?
+	beq FinishedNowSetupStage3 ; Yes.  Time for the next stage.
+	inc COLPF1_TABLE+3         ; No. Increment brightness.
+	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
 
 FinishedNowSetupStage3
-	lda #3
+	lda #255                  ; Direct the lame Sound Service to silence channels.
+	sta SOUND_CONTROL0
+	sta SOUND_CONTROL1
+
+	lda #3                    ; Set stage 3 as next part of Title screen event...
 	sta EventCounter
 	bne EndTransitionToTitle
 
 	; === STAGE 3 ===
-	; Set Up Press Any Button  and get ready to runtitle.
+	; Set Up Press Any Button and get ready to run title screen/event.
 TestTransTitle3
 	cmp #3
 	bne EndTransitionToTitle  ; Really shouldn't get to that point
@@ -136,6 +188,7 @@ EndTransitionToTitle
 	lda CurrentScreen
 
 	rts
+
 
 
 ; ==========================================================================

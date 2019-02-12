@@ -33,8 +33,10 @@ GAMESTART
 	; display list.  Easy-peasy and never updated at the wrong time.
 	
 	lda #AUDCTL_CLOCK_15KHZ    ; Set only this one bit for clock.
-	sta AUDCTL                 ; POKEY Audio Control
-	jsr StopAllSound
+	sta AUDCTL                 ; Global POKEY Audio Control.
+	lda #3                     ; Set SKCTL to 3 to stop possible cassette noise. 
+	sta SKCTL                  ; So say Mapping The Atari and De Re Atari.
+	jsr StopAllSound           ; Zero all AUDC and AUDF
 
 	lda #>CHARACTER_SET        ; Set custom character set.  Global to game, forever.
 	sta CHBAS
@@ -55,7 +57,7 @@ GAMESTART
 	lda #6                     ; 6 = Immediate VBI
 	jsr SETVBV                 ; Tell OS to set it
 
-	ldy #<MyDeferredVBI       ; Add the VBI to the system (Lazy hippie timers and colors.)
+	ldy #<MyDeferredVBI       ; Add the VBI to the system (Lazy hippie timers, colors, sound.)
 	ldx #>MyDeferredVBI
 	lda #7                     ; 7 = Deferred VBI
 	jsr SETVBV                 ; Tell OS to set it
