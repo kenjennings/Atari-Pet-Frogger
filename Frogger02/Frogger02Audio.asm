@@ -145,22 +145,31 @@ SOUND_FX_HI_TABLE
 	.byte >SOUND_ENTRY_HUMMER_A
 	.byte >SOUND_ENTRY_HUMMER_B
 
+	
 ; ==========================================================================
-; Stop All Sound
+; Stop All Sound                                                   A  X  Y
 ; -------------------------------------------------------------------------- 
 ; Main routine to stop all playing for all channels.
+;
+; Assign the no sound sequence to all channels.
+; Redundantly set the control to 255 to stop everything now.
 ; 
-; X = sound number to use.
-; Y = sound channel to assign.
+; Uses A, X, Y
+; X = sound channel to assign.
+; Y = sound number to use.
 ; --------------------------------------------------------------------------
 StopAllSound
-	ldy #SOUND_OFF
+	ldy #SOUND_OFF ; Default, 0 sequence for no sound.
 
-	ldx #3
+	ldx #3               ; Channel 3, 2, 1, 0
 LoopStopSound
 	jsr SetSound
+
+	lda #255             ; Also tell VBI to silence
+	sta SOUND_CONTROL,x
+
 	dex
-	bpl LoopStopSound
+	bpl LoopStopSound   ; Channel 3, 2, 1, 0
 
 	rts
 
@@ -179,8 +188,16 @@ LoopStopSound
 ;       direction and is now busy.
 ; 255 = Direct VBI to silence the channel.
 ;
-; X = sound number to use.
-; Y = sound channel to assign.
+; So, the procedure for playing sound.
+; 1) MAIN sets SOUND_CONTROL to 0.
+; 2) MAIN sets SOUND_FX_LO/HI pointer to the sound effects 
+;    sequence to play.
+; 3) MAIN sets SOUND_CONTROL to 1 to tell VBI to start.
+; 4) VBI when playing sets SOUND_CONTROL value to 2, then 0 when done.
+;
+; Uses A, X, Y
+; X = sound channel to assign.
+; Y = sound number to use.
 ; --------------------------------------------------------------------------
 SetSound
 	lda #0
@@ -198,7 +215,7 @@ SetSound
 
 
 ; ==========================================================================
-; Sound Service
+; Sound Service                                                    A  X  Y
 ; --------------------------------------------------------------------------
 ; The world's cheapest sequencer. Play one sound value from a table at each 
 ; call. Assuming this is done synchronized to the frame it performs a sound 
@@ -212,12 +229,13 @@ SetSound
 ; 2   = VBI sets when it is playing to inform Main that it has taken 
 ;       direction and is now busy.
 ; 255 = Direct VBI to silence the channel.
+;
 ; So, the procedure for playing sound.
 ; 1) MAIN sets SOUND_CONTROL to 0.
 ; 2) MAIN sets SOUND_FX_LO/HI pointer to the sound effects 
 ;    sequence to play.
 ; 3) MAIN sets SOUND_CONTROL to 1 to tell VBI to start.
-; 4) VBI when playing sets SOUND_CONTROL value to 2.
+; 4) VBI when playing sets SOUND_CONTROL value to 2, then 0 when done.
 ;
 ; A sound Entry is 4 bytes...
 ; byte 0, AUDC
@@ -334,14 +352,12 @@ EndFXAndStopSound
 	lda #0                   
 	sta AUDC1,X              ; Stop Pokey playing.
 	sta AUDF1,X
+	ldx SAVEX               ; Get original X * 1 value.
 
 EndFX
 	lda #0
-	ldx SAVEX               ; Get original X * 1 value.
-	sta SOUND_DURATION,X    ; Make sure duration is 0.
+	sta SOUND_DURATION,X    ; Make duration 0.
 	sta SOUND_CONTROL,X     ; And inform MAIN that this channel is unused.
-
-;	beq DoNextSoundChannel
 
 	rts
 
