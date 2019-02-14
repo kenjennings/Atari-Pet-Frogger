@@ -26,8 +26,10 @@ SOUND_TINK  = 1
 SOUND_SLIDE = 2
 SOUND_HUM_A = 3
 SOUND_HUM_B = 4
+SOUND_DIRGE = 5
+SOUND_THUMP = 6
 
-SOUND_MAX = 4
+SOUND_MAX = 6
 
 ; ======== The world's most inept sound system. ========
 ;
@@ -67,17 +69,13 @@ SOUND_ENTRY_OFF
 	.byte 0,0,0,0
 
 SOUND_ENTRY_TINK ; Press A Button.
-	.byte $AD,$20,2,1
-	.byte $Ac,$20,2,1
-	.byte $Ab,$20,2,1
-	.byte $Aa,$20,2,1
-	.byte $A8,$20,2,1
-	.byte $A6,$20,1,1
-	.byte $A5,$20,1,1
-	.byte $A3,$20,1,1
-	.byte $A2,$20,1,1
-	.byte $A1,$20,0,1
-	.byte $A0,$00,0,0
+	.byte $A6,200,1,1
+	.byte $A5,200,1,1
+	.byte $A4,200,1,1
+	.byte $A3,200,1,1
+	.byte $A2,200,1,1
+	.byte $A1,200,1,1
+	.byte $A0,200,0,0
 
 SOUND_ENTRY_SLIDE ; Title logo lines slide right to left
 	.byte $02,50,1,1
@@ -123,12 +121,116 @@ SOUND_ENTRY_SLIDE ; Title logo lines slide right to left
 	.byte $00,$00,0,0
 
 SOUND_ENTRY_HUMMER_A ; one-half of Atari light saber
-	.byte $A8,$FF,1,1
-	.byte $A8,$FF,1,255
+	.byte $A9,$FF,30,1
+	.byte $A8,$FF,5,1
+	.byte $A7,$FF,5,1
+	.byte $A6,$FF,5,1
+	.byte $A5,$FF,5,1
+	.byte $A3,$FF,5,1
+	.byte $A1,$FF,5,1
+	.byte $A0,0,0,0
 
 SOUND_ENTRY_HUMMER_B ; one-half of Atari light saber
-	.byte $A8,$FE,1,1
-	.byte $A8,$FE,1,255
+	.byte $A8,$FE,30,1
+	.byte $A8,$FE,5,1
+	.byte $A7,$FE,5,1
+	.byte $A6,$FE,5,1
+	.byte $A5,$FE,5,1
+	.byte $A3,$FE,5,1
+	.byte $A1,$FE,5,1
+	.byte $A0,0,0,0
+
+
+SOUND_ENTRY_DIRGE ; Chopin's Funeral for a frog (or gunslinger in Outlaw) 
+	.byte $A8,182,0,1 ; F, 1/4, 16 steps
+	.byte $A6,182,13,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+	.byte $A8,182,0,1 ; F, 1/8 ., 12 steps
+	.byte $A6,182,9,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+	.byte $A8,182,0,1 ; F, 1/16,  4 steps
+	.byte $A6,182,0,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+	.byte $A8,182,0,1 ; F, 1/2, 32 steps
+	.byte $A6,182,29,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+
+	.byte $A8,182,0,1 ; F, 1/4, 16 steps
+	.byte $A6,182,13,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+	.byte $A8,182,0,1 ; F, 1/8 ., 12 steps
+	.byte $A6,182,9,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+	.byte $A8,182,0,1 ; F, 1/16,  4 steps
+	.byte $A6,182,0,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+	.byte $A8,182,0,1 ; F, 1/2, 32 steps
+	.byte $A6,182,29,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+
+	.byte $A8,182,0,1 ; F, 1/4, 16 steps
+	.byte $A6,182,13,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+	.byte $A8,182,0,1 ; F, 1/8 ., 12 steps
+	.byte $A6,182,9,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+	.byte $A8,182,0,1 ; F, 1/16,  4 steps
+	.byte $A6,182,0,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+	.byte $A8,182,0,1 ; F, 1/4, 16 steps
+	.byte $A6,182,13,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+	.byte $A8,144,0,1 ; A, 1/8 ., 12 steps
+	.byte $A6,144,9,1 
+	.byte $A4,144,0,1 
+	.byte $A2,144,0,1 
+	.byte $A8,162,0,1 ; G, 1/16,  4 steps
+	.byte $A6,162,0,1 
+	.byte $A4,162,0,1 
+	.byte $A2,162,0,1 
+
+	.byte $A8,162,0,1 ; G, 1/8 ., 12 steps
+	.byte $A6,162,9,1 
+	.byte $A4,162,0,1 
+	.byte $A2,162,0,1 
+	.byte $A8,182,0,1 ; F, 1/16,  4 steps
+	.byte $A6,182,0,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+	.byte $A8,182,0,1 ; F, 1/8 ., 12 steps
+	.byte $A6,182,9,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+	.byte $A8,182,0,1 ; F, 1/16,  4 steps
+	.byte $A6,182,0,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+	.byte $A8,182,0,1 ; F, 1/2,  32 steps
+	.byte $A6,182,29,1 
+	.byte $A4,182,0,1 
+	.byte $A2,182,0,1 
+
+	.byte $A0,$00,0,0
+
+SOUND_ENTRY_THUMP ; When a frog moves
+	.byte $A2,240,0,1 
+	.byte $A5,240,0,1 
+	.byte $A8,240,2,1 
+	.byte $A4,240,0,1 
+	.byte $A1,240,0,1 
+	.byte $A0,$00,0,0
 
 ; Pointers to starting sound entry in a sequence.
 SOUND_FX_LO_TABLE
@@ -137,6 +239,8 @@ SOUND_FX_LO_TABLE
 	.byte <SOUND_ENTRY_SLIDE
 	.byte <SOUND_ENTRY_HUMMER_A
 	.byte <SOUND_ENTRY_HUMMER_B
+	.byte <SOUND_ENTRY_DIRGE
+	.byte <SOUND_ENTRY_THUMP
 
 SOUND_FX_HI_TABLE
 	.byte >SOUND_ENTRY_OFF
@@ -144,7 +248,21 @@ SOUND_FX_HI_TABLE
 	.byte >SOUND_ENTRY_SLIDE
 	.byte >SOUND_ENTRY_HUMMER_A
 	.byte >SOUND_ENTRY_HUMMER_B
+	.byte >SOUND_ENTRY_DIRGE
+	.byte >SOUND_ENTRY_THUMP
+	
 
+PlayThump
+	mRegSave
+	
+	ldx #2                     ; Setup channel 2 to play frog bump.
+	ldy #SOUND_THUMP
+	jsr SetSound 
+
+	mRegRestore
+
+	rts
+	
 	
 ; ==========================================================================
 ; Stop All Sound                                                   A  X  Y
@@ -342,7 +460,9 @@ EvaluateEntryControlToStop
 	beq EndFXAndStopSound    ; 0 means the end.
 	bmi EndFX                ; 255 means end, without stopping sound.
 
-	lda SOUND_CONTROL,X      ; Get value so caller can evaluate.
+	lda (SOUND_POINTER),y    ; What does entry control say?
+
+;	lda SOUND_CONTROL,X      ; Get value so caller can evaluate.
 
 	rts
 

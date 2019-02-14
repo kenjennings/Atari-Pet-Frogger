@@ -62,11 +62,6 @@ SetupTransitionToTitle
 	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
 	sta CurrentScreen
 
-
-	
-
-
-
 	rts
 
 
@@ -199,6 +194,10 @@ SetupTransitionToDead
 
 	lda #1                  ; Set Stage 1 in the fading control.
 	sta EventCounter
+
+	ldx #3                  ; Setup channel 3 to play funeral dirge for the dead frog.
+	ldy #SOUND_DIRGE
+	jsr SetSound 
 
 	; In this case we do not want the Transition to change to the next 
 	; display immediately as the player must have time to view and 

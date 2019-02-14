@@ -186,7 +186,7 @@ CREDIT_MEM2
 	.sb "Original program for CBM PET 4032 written by John C. Dale.    " ; 62
 
 CREDIT_MEM3
-	.sb "Atari 8-bit computer port by Ken Jennings, V02, Feb 2019" ; 56
+	.sb "Atari 8-bit computer port by Ken Jennings, V02, February 2019" ; 56
 
 END_OF_CREDITS
 EXTRA_BLANK_MEM ; Trailing line for credit scrolling.

@@ -78,7 +78,7 @@ ToPlayFXScrollOrNot
 	bne ExitToPlayFXScroll   ; Yes.  Do nothing.
 	inc Playing_FX_Scroll1,X ; Nope.  Flag this as playing.
 
-	ldx #0                  ; Setup channel 0 to play slide sound.
+	ldx #3                  ; Setup channel 0 to play slide sound.
 	ldy #SOUND_SLIDE
 	jsr SetSound 
 
@@ -155,8 +155,8 @@ TestTransTitle2
 	ldx #0                     ; Setup channel 0 to play saber A sound.
 	ldy #SOUND_HUM_A
 	jsr SetSound 
-	ldx 3                     ; Setup channel 1 to play saber B sound.
-	lda #SOUND_HUM_B
+	ldx #1                     ; Setup channel 1 to play saber B sound.
+	ldy #SOUND_HUM_B
 	jsr SetSound
 
 GlowingTitleUnderline
@@ -167,10 +167,6 @@ GlowingTitleUnderline
 	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
 
 FinishedNowSetupStage3
-	lda #255                  ; Direct the lame Sound Service to silence channels.
-	sta SOUND_CONTROL0
-	sta SOUND_CONTROL1
-
 	lda #3                    ; Set stage 3 as next part of Title screen event...
 	sta EventCounter
 	bne EndTransitionToTitle
@@ -384,6 +380,7 @@ UpStickTest
 
 	jsr FrogMoveUp           ; Yes, go do UP. Subtract from FrogRow.
 	beq DoSetupForFrogWins   ; No more rows to cross. Update to frog Wins!
+	jsr PlayThump            ; Sound for when frog moves.
 	bne SaveNewFrogLocation  ; Row greater than 0.  Evaluate good/bad position.
 
 LeftStickTest
@@ -395,6 +392,7 @@ LeftStickTest
 	beq SaveNewFrogLocation  ; Already 0. Can't move left. Redraw frog.
 	dey                      ; Move Y to left.
 	sty FrogColumn
+	jsr PlayThump            ; Sound for when frog moves.
 	bpl SaveNewFrogLocation  ; Place frog on screen
 
 RightStickTest
@@ -406,7 +404,8 @@ RightStickTest
 	beq SaveNewFrogLocation  ; At limit. Can't move right. Redraw frog.
 	iny                      ; Move Y to right.
 	sty FrogColumn
-
+	jsr PlayThump            ; Sound for when frog moves.
+	
 ; Row greater than 0.  Evaluate good/bad jump.
 SaveNewFrogLocation
 	jsr WhereIsThePhysicalFrog ; Update Frog Real Positions and the LastCharacter found there.
