@@ -14,6 +14,10 @@ This repository is for the Pet Frogger game ported to the Atari 8-bit computers.
 
 The assembly code for the Atari depends on my MADS include library here: https://github.com/kenjennings/Atari-Mads-Includes.  
 
+The MADS 6502 assembler is here: http://http://mads.atari8.info
+
+I generally build in eclipse from the WUDSN ide.  WUDSN can be found here: https://www.wudsn.com/index.php
+
 ---
 
 [Version 00 PET FROGGER](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger00/README_V00.md "Version 00 Atari PET FROGGER") 
