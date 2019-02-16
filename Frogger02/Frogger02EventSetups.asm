@@ -53,12 +53,6 @@ SetupTransitionToTitle
 	lda #DISPLAY_TITLE       ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
-	lda #0                   ; Flag event sound effects as NOT playing now.
-	sta Playing_FX_Scroll1 
-	sta Playing_FX_Scroll2 
-	sta Playing_FX_Scroll3 
-	sta Playing_FX_Saber 
-
 	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
 	sta CurrentScreen
 
@@ -124,6 +118,8 @@ SetupGame
 	lda #I_SPACE            ; the character at the default position.
 	sta LastCharacter       ; Preset the character under the frog.
 
+	jsr PlayWaterFX         ; Start water noises.  Now.
+
 	lda #SCREEN_GAME        ; Yes, change to game screen event.
 	sta CurrentScreen
 
@@ -145,6 +141,10 @@ SetupTransitionToWin
 
 	lda #DISPLAY_WIN        ; Tell VBI to change screens.
 	jsr ChangeScreen        ; Then copy the color tables.
+
+	ldx #3                  ; Setup channel 3 to play Ode To Joy for saving the frog.
+	ldy #SOUND_JOY
+	jsr SetSound 
 
 	lda #SCREEN_TRANS_WIN   ; Next step is operating the transition animation.
 	sta CurrentScreen

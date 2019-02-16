@@ -62,29 +62,6 @@ SCREEN_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
 
 
 
-; Track if sounds for events have been started...
-Playing_FX_Scroll1 .byte 0
-Playing_FX_Scroll2 .byte 0
-Playing_FX_Scroll3 .byte 0
-
-Playing_FX_Saber   .byte 0
-
-
-; Routine to reduce a little code for playing the slide 
-; sound for each line of the title graphics.
-; Same thing done three different times.
-ToPlayFXScrollOrNot
-	lda Playing_FX_Scroll1,X ; Did we start playing this sound?
-	bne ExitToPlayFXScroll   ; Yes.  Do nothing.
-	inc Playing_FX_Scroll1,X ; Nope.  Flag this as playing.
-
-	ldx #3                  ; Setup channel 0 to play slide sound.
-	ldy #SOUND_SLIDE
-	jsr SetSound 
-
-ExitToPlayFXScroll
-	rts
-
 ; ==========================================================================
 ; Event Process TRANSITION TO TITLE
 ; The setup for Transition to Title will turned on the Title Display.
@@ -110,7 +87,6 @@ EventTransitionToTitle
 	cmp #<[TITLE_MEM1+40]      ; Reached the slide maximum ?
 	beq NowScroll2             ; Yes.  Skip this line slide.
 
-	ldx #0
 	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
 
 	inc SCROLL_TITLE_LMS0      ; Top line slide in progress.
@@ -121,7 +97,6 @@ NowScroll2
 	cmp #<[TITLE_MEM2+40]      ; Reached the slide maximum ?
 	beq NowScroll3             ; Yes.  Skip this line slide.
 
-	ldx #1
 	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
 
 	inc SCROLL_TITLE_LMS1      ; Middle line slide in progress.
@@ -132,14 +107,20 @@ NowScroll3
 	cmp #<[TITLE_MEM3+40]      ; Reached the slide maximum ?
 	beq FinishedNowSetupStage2 ; Yes.  All 3 lines moved.  Now do the glowing line.
 
-	ldx #2
 	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
 
 	inc SCROLL_TITLE_LMS2      ; Bottom line slide in progress.
 	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
 
 FinishedNowSetupStage2
-	lda #2                     ; Set stage 3 as next part of Title screen event...
+	ldx #0                     ; Setup channel 0 to play saber A sound.
+	ldy #SOUND_HUM_A
+	jsr SetSound 
+	ldx #1                     ; Setup channel 1 to play saber B sound.
+	ldy #SOUND_HUM_B
+	jsr SetSound
+
+	lda #2                     ; Set stage 2 as next part of Title screen event...
 	sta EventCounter
 	bne EndTransitionToTitle
 
@@ -148,16 +129,6 @@ FinishedNowSetupStage2
 TestTransTitle2
 	cmp #2
 	bne TestTransTitle3
-
-	lda Playing_FX_Saber       ; Is the light saber running?
-	bne GlowingTitleUnderline  ; Yes.  Skip starting sound.
-	inc Playing_FX_Saber       ; No.  Mark sound playing in progress.
-	ldx #0                     ; Setup channel 0 to play saber A sound.
-	ldy #SOUND_HUM_A
-	jsr SetSound 
-	ldx #1                     ; Setup channel 1 to play saber B sound.
-	ldy #SOUND_HUM_B
-	jsr SetSound
 
 GlowingTitleUnderline
 	lda COLPF1_TABLE+3         ; Get the text brightness of line 4.
@@ -451,6 +422,8 @@ CheckForAnim
 
 	jsr AnimateBoats         ; Move the boats around.
 	jsr AutoMoveFrog         ; Move the frog relative to boats.
+
+	jsr ToReplayFXWaterOrNot ; Time to replay the water noises?
 
 EndGameScreen
 	lda CurrentScreen

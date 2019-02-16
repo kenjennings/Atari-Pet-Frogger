@@ -19,6 +19,12 @@
 ;
 ; All the routines to run for sound support.
 ; It is truly sad.
+;
+; Sound allocation:
+; Channel 0
+; Channel 1
+; Channel 2 - Frog movement bump.
+; Channel 3 - Ambient water noise, music.
 ; --------------------------------------------------------------------------
 
 SOUND_OFF   = 0
@@ -28,8 +34,10 @@ SOUND_HUM_A = 3
 SOUND_HUM_B = 4
 SOUND_DIRGE = 5
 SOUND_THUMP = 6
+SOUND_JOY   = 7
+SOUND_WATER = 8
 
-SOUND_MAX = 6
+SOUND_MAX   = 8
 
 ; ======== The world's most inept sound system. ========
 ;
@@ -68,17 +76,20 @@ SOUND_MAX = 6
 SOUND_ENTRY_OFF
 	.byte 0,0,0,0
 
+
 SOUND_ENTRY_TINK ; Press A Button.
-	.byte $A6,200,1,1
+	.byte $A6,200,2,1
 	.byte $A5,200,1,1
 	.byte $A4,200,1,1
-	.byte $A3,200,1,1
-	.byte $A2,200,1,1
-	.byte $A1,200,1,1
+	.byte $A3,200,0,1
+	.byte $A2,200,0,1
+	.byte $A1,200,0,1
+	
 	.byte $A0,200,0,0
 
+	
 SOUND_ENTRY_SLIDE ; Title logo lines slide right to left
-	.byte $02,50,1,1
+	.byte $02,50,1,1 ; 1 == 2 frames per wait.
 	.byte $03,49,1,1
 	.byte $03,48,1,1
 	.byte $04,47,1,1
@@ -116,28 +127,28 @@ SOUND_ENTRY_SLIDE ; Title logo lines slide right to left
 	.byte $0e,15,1,1
 	.byte $0e,14,1,1
 	.byte $0e,13,1,1
-	.byte $0e,12,1,1
-	.byte $0e,11,1,1
+
 	.byte $00,$00,0,0
 
+	
 SOUND_ENTRY_HUMMER_A ; one-half of Atari light saber
 	.byte $A9,$FF,30,1
-	.byte $A8,$FF,5,1
-	.byte $A7,$FF,5,1
-	.byte $A6,$FF,5,1
-	.byte $A5,$FF,5,1
-	.byte $A3,$FF,5,1
-	.byte $A1,$FF,5,1
+	.byte $A8,$FF,7,1
+	.byte $A7,$FF,7,1
+	.byte $A6,$FF,7,1
+	.byte $A5,$FF,7,1
+	.byte $A3,$FF,7,1
+	.byte $A1,$FF,7,1
 	.byte $A0,0,0,0
 
 SOUND_ENTRY_HUMMER_B ; one-half of Atari light saber
 	.byte $A8,$FE,30,1
-	.byte $A8,$FE,5,1
-	.byte $A7,$FE,5,1
-	.byte $A6,$FE,5,1
-	.byte $A5,$FE,5,1
-	.byte $A3,$FE,5,1
-	.byte $A1,$FE,5,1
+	.byte $A8,$FE,7,1
+	.byte $A7,$FE,7,1
+	.byte $A6,$FE,7,1
+	.byte $A5,$FE,7,1
+	.byte $A3,$FE,7,1
+	.byte $A1,$FE,7,1
 	.byte $A0,0,0,0
 
 
@@ -224,6 +235,7 @@ SOUND_ENTRY_DIRGE ; Chopin's Funeral for a frog (or gunslinger in Outlaw)
 
 	.byte $A0,$00,0,0
 
+
 SOUND_ENTRY_THUMP ; When a frog moves
 	.byte $A2,240,0,1 
 	.byte $A5,240,0,1 
@@ -231,6 +243,99 @@ SOUND_ENTRY_THUMP ; When a frog moves
 	.byte $A4,240,0,1 
 	.byte $A1,240,0,1 
 	.byte $A0,$00,0,0
+
+
+SOUND_ENTRY_ODE2JOY ; Beethoven's Ode To Joy when a frog is saved
+	.byte $A1,121,0,1 ; C, 1/4, 20 steps
+	.byte $A3,121,0,1 
+	.byte $A5,121,0,1 
+	.byte $A7,121,0,1 
+	.byte $A8,121,16,1 
+	.byte $A1,121,0,1 ; C, 1/4, 20 steps
+	.byte $A3,121,0,1 
+	.byte $A5,121,0,1 
+	.byte $A7,121,0,1 
+	.byte $A8,121,16,1 
+	.byte $A1,108,0,1 ; D, 1/4, 20 steps
+	.byte $A3,108,0,1 
+	.byte $A5,108,0,1 
+	.byte $A7,108,0,1 
+	.byte $A8,108,16,1 
+	.byte $A1,96,0,1 ; E, 1/4, 20 steps
+	.byte $A3,96,0,1 
+	.byte $A5,96,0,1 
+	.byte $A7,96,0,1 
+	.byte $A8,96,16,1 
+
+	.byte $A1,96,0,1 ; E, 1/4, 20 steps
+	.byte $A3,96,0,1 
+	.byte $A5,96,0,1 
+	.byte $A7,96,0,1 
+	.byte $A8,96,16,1 
+	.byte $A1,108,0,1 ; D, 1/4, 20 steps
+	.byte $A3,108,0,1 
+	.byte $A5,108,0,1 
+	.byte $A7,108,0,1 
+	.byte $A8,108,16,1 
+	.byte $A1,121,0,1 ; C, 1/4, 20 steps
+	.byte $A3,121,0,1 
+	.byte $A5,121,0,1 
+	.byte $A7,121,0,1 
+	.byte $A8,121,16,1 
+	.byte $A1,128,0,1 ; B, 1/4, 20 steps
+	.byte $A3,128,0,1 
+	.byte $A5,128,0,1 
+	.byte $A7,128,0,1 
+	.byte $A8,128,16,1 
+
+	.byte $A1,144,0,1 ; A, 1/4, 20 steps
+	.byte $A3,144,0,1 
+	.byte $A5,144,0,1 
+	.byte $A7,144,0,1 
+	.byte $A8,144,16,1 
+	.byte $A1,144,0,1 ; A, 1/4, 20 steps
+	.byte $A3,144,0,1 
+	.byte $A5,144,0,1 
+	.byte $A7,144,0,1 
+	.byte $A8,144,16,1 
+	.byte $A1,128,0,1 ; B, 1/4, 20 steps
+	.byte $A3,128,0,1 
+	.byte $A5,128,0,1 
+	.byte $A7,128,0,1 
+	.byte $A8,128,16,1 
+	.byte $A1,121,0,1 ; C, 1/4, 20 steps
+	.byte $A3,121,0,1 
+	.byte $A5,121,0,1 
+	.byte $A7,121,0,1 
+	.byte $A8,121,16,1 
+
+	.byte $A1,121,0,1 ; C, 1/4 ., 30 steps
+	.byte $A3,121,0,1 
+	.byte $A5,121,0,1 
+	.byte $A7,121,0,1 
+	.byte $A8,121,26,1 
+	.byte $A1,128,0,1 ; B, 1/8, 10 steps
+	.byte $A3,128,0,1 
+	.byte $A5,128,0,1 
+	.byte $A7,128,0,1 
+	.byte $A8,128,6,1 
+	.byte $A1,128,0,1 ; B, 1/4, 40 steps
+	.byte $A3,128,0,1 
+	.byte $A5,128,0,1 
+	.byte $A7,128,0,1 
+	.byte $A8,128,40,1 
+	
+	.byte $A0,$00,0,0
+
+
+SOUND_ENTRY_WATER ; Water sloshing noises
+	.byte $82,1,60,1 ; several full seconds 
+	.byte $83,2,60,1 ; of different sounds 
+	.byte $81,3,60,1 ; at different volumes.
+	.byte $84,4,60,1
+	.byte $82,5,60,1
+	.byte $81,2,60,255 ; End.  Do not stop sound.
+
 
 ; Pointers to starting sound entry in a sequence.
 SOUND_FX_LO_TABLE
@@ -241,6 +346,8 @@ SOUND_FX_LO_TABLE
 	.byte <SOUND_ENTRY_HUMMER_B
 	.byte <SOUND_ENTRY_DIRGE
 	.byte <SOUND_ENTRY_THUMP
+	.byte <SOUND_ENTRY_ODE2JOY
+	.byte <SOUND_ENTRY_WATER
 
 SOUND_FX_HI_TABLE
 	.byte >SOUND_ENTRY_OFF
@@ -250,72 +357,132 @@ SOUND_FX_HI_TABLE
 	.byte >SOUND_ENTRY_HUMMER_B
 	.byte >SOUND_ENTRY_DIRGE
 	.byte >SOUND_ENTRY_THUMP
-	
+	.byte >SOUND_ENTRY_ODE2JOY
+	.byte >SOUND_ENTRY_WATER
 
+
+
+; ==========================================================================
+; ToPlayFXScrollOrNot                                             A  X  Y
+; -------------------------------------------------------------------------- 
+; Decide to start playing the slide sound or not.
+; 
+; The duration of the slide on screen should be the same(ish) as the 
+; length of the sound playing.  Therefore the sound should run out at the
+; same time the slide finishes (more or less)    
+; 
+; Uses all the registers. 
+; X = sound channel to assign.
+; Y = sound number to use. (values declared at beginning of Audio.asm.) 
+; --------------------------------------------------------------------------
+ToPlayFXScrollOrNot
+	lda SOUND_CONTROL3      ; Is channel 3 busy?
+	bne ExitToPlayFXScroll  ; Yes.  Don't do anything.
+
+	ldx #3                  ; Setup channel 3 to play slide sound.
+	ldy #SOUND_SLIDE
+	jsr SetSound 
+
+ExitToPlayFXScroll
+	rts
+
+
+; ==========================================================================
+; ToReplayFXWaterOrNot                                             A  X  Y
+; -------------------------------------------------------------------------- 
+; To Replay water effects or not
+; 
+; Main routine to play the Water sounds during the game. 
+; This checks the channel 3 control to see if it is idle.  
+; If the channel is idle then the water effects sound sequence is restarted.
+;
+; Water is a series of long duration white noise/hissing sounds. 
+; 
+; Uses all the registers. 
+; X = sound channel to assign.
+; Y = sound number to use. (values declared at beginning of Audio.asm.) 
+; --------------------------------------------------------------------------
+ToReplayFXWaterOrNot
+	lda SOUND_CONTROL3      ; Is channel 3 busy?
+	bne ExitPlayWaterFX     ; Yes.  Don't do anything.
+
+PlayWaterFX
+	ldx #3                  ; Setup channel 3 to play water noises
+	ldy #SOUND_WATER
+	jsr SetSound
+
+ExitPlayWaterFX
+	rts
+
+
+; ==========================================================================
+; PlayThump                                                      *  *  *
+; -------------------------------------------------------------------------- 
+; Play Thump for jumping frog
+;
+; Main routine to play the frog movement sound. 
+; This needs to be introduced where the main code is dependent on 
+; the CPU flags for determining outcomes. Therefore, to prevent disrupting 
+; the logic flow due to flag changes this routine is wrapped in the macros 
+; to preserve/protect all registers to insure calling this routine has no 
+; discernible effect on the Main code.
+; 
+; Uses A, X, Y, but preserves all registers on entry/exit.
+; --------------------------------------------------------------------------
 PlayThump
-	mRegSave
-	
+	mRegSave                   ; Macro: save CPU flags, and A, X, Y
+
 	ldx #2                     ; Setup channel 2 to play frog bump.
 	ldy #SOUND_THUMP
 	jsr SetSound 
 
-	mRegRestore
+	mRegRestore                ; Macro: Restore Y, X, A, and CPU flags
 
 	rts
-	
-	
+
+
 ; ==========================================================================
-; Stop All Sound                                                   A  X  Y
+; StopAllSound                                                      A  X 
 ; -------------------------------------------------------------------------- 
+; Stop All Sound
+;
 ; Main routine to stop all playing for all channels.
 ;
-; Assign the no sound sequence to all channels.
-; Redundantly set the control to 255 to stop everything now.
+; Set the control for each channel to 255 to stop everything now.
 ; 
-; Uses A, X, Y
+; Uses A, X
 ; X = sound channel to assign.
-; Y = sound number to use.
 ; --------------------------------------------------------------------------
 StopAllSound
-	ldy #SOUND_OFF ; Default, 0 sequence for no sound.
-
 	ldx #3               ; Channel 3, 2, 1, 0
+	lda #255             ; Tell VBI to silence channel.
+
 LoopStopSound
-	jsr SetSound
-
-	lda #255             ; Also tell VBI to silence
-	sta SOUND_CONTROL,x
-
+	sta SOUND_CONTROL,x  ; Set channel control to silence.
 	dex
-	bpl LoopStopSound   ; Channel 3, 2, 1, 0
+	bpl LoopStopSound    ; Channel 3, 2, 1, 0
 
 	rts
 
 
 ; ==========================================================================
-; Set Sound
+; SetSound                                                        A  X  Y
 ; -------------------------------------------------------------------------- 
+; Set Sound
+;
 ; Main routine to set sound playing for a channel.
 ;
-; Sound control between main process and VBI to turn on/off/play sounds.
-; 0   = Set by Main to direct stop managing sound pending an update from 
-;       MAIN. This does not stop the POKEY's currently playing sound. 
-;       It is set by the VBI to indicate the channel is idle. (unmanaged) 
-; 1   = Main sets to direct VBI to start playing a sound FX.
-; 2   = VBI sets when it is playing to inform Main that it has taken 
-;       direction and is now busy.
-; 255 = Direct VBI to silence the channel.
-;
-; So, the procedure for playing sound.
-; 1) MAIN sets SOUND_CONTROL to 0.
-; 2) MAIN sets SOUND_FX_LO/HI pointer to the sound effects 
+; The procedure for playing sound.
+; 1) MAIN sets the channel's SOUND_CONTROL to 0.
+; 2) MAIN sets the channel's SOUND_FX_LO/HI pointer to the sound effects 
 ;    sequence to play.
-; 3) MAIN sets SOUND_CONTROL to 1 to tell VBI to start.
-; 4) VBI when playing sets SOUND_CONTROL value to 2, then 0 when done.
+; 3) MAIN sets the channel's SOUND_CONTROL to 1 to tell VBI to start.
+; 4) VBI when playing sets the channel's SOUND_CONTROL value to 2, then 
+;    to 0 when done.
 ;
 ; Uses A, X, Y
-; X = sound channel to assign.
-; Y = sound number to use.
+; X = sound channel to assign. (0 to 3, not 1 to 4)
+; Y = sound number to use. (values declared at beginning of Audio.asm.) 
 ; --------------------------------------------------------------------------
 SetSound
 	lda #0
@@ -333,8 +500,10 @@ SetSound
 
 
 ; ==========================================================================
-; Sound Service                                                    A  X  Y
+; SoundService                                                    A  X  Y
 ; --------------------------------------------------------------------------
+; Sound service called by Deferred Vertical Blank Interrupt.
+;
 ; The world's cheapest sequencer. Play one sound value from a table at each 
 ; call. Assuming this is done synchronized to the frame it performs a sound 
 ; change every 16.6ms (approximately)
@@ -342,26 +511,27 @@ SetSound
 ; Sound control between main process and VBI to turn on/off/play sounds.
 ; 0   = Set by Main to direct stop managing sound pending an update from 
 ;       MAIN. This does not stop the POKEY's currently playing sound. 
-;       It is set by the VBI to indicate the channel is idle. (unmanaged) 
-; 1   = Main sets to direct VBI to start playing a sound FX.
+;       It is set by the VBI to indicate the channel is idle/unmanaged. 
+; 1   = Main sets to direct VBI to start playing a new sound FX.
 ; 2   = VBI sets when it is playing to inform Main that it has taken 
 ;       direction and is now busy.
 ; 255 = Direct VBI to silence the channel.
 ;
 ; So, the procedure for playing sound.
-; 1) MAIN sets SOUND_CONTROL to 0.
-; 2) MAIN sets SOUND_FX_LO/HI pointer to the sound effects 
+; 1) MAIN sets the channel's SOUND_CONTROL to 0.
+; 2) MAIN sets the channel's SOUND_FX_LO/HI pointer to the sound effects 
 ;    sequence to play.
-; 3) MAIN sets SOUND_CONTROL to 1 to tell VBI to start.
-; 4) VBI when playing sets SOUND_CONTROL value to 2, then 0 when done.
+; 3) MAIN sets the channel's SOUND_CONTROL to 1 to tell VBI to start.
+; 4) VBI when playing sets the channel's SOUND_CONTROL value to 2, then 
+;    to 0 when done.
 ;
 ; A sound Entry is 4 bytes...
-; byte 0, AUDC
-; byte 1, AUDF
-; byte 2, Duration, number of frames to count.
-; byte 3, 0 == end+stop sound.  
-;         1 == continue normal playing
-;       255 == end (do not stop sound).
+; byte 0, AUDC (distortion/volume) value
+; byte 1, AUDF (frequency) value
+; byte 2, Duration, number of frames to count. 0 counts as 1 frame.
+; byte 3, 0 == End of sequence. Stop playing sound. (Set AUDF and AUDC to 0)
+;         1 == Continue normal playing.
+;       255 == End of sequence. Do not stop playing sound.
 ;       Eventually some other magic to be determined goes here.
 ; --------------------------------------------------------------------------
 
@@ -369,7 +539,7 @@ SoundService
 	ldx #3
 LoopSoundServiceControl
 	lda SOUND_CONTROL,x
-	beq DoNextSoundChannel       ; SOUND_CONTROL == 0 means MAIN says do nothing
+	beq DoNextSoundChannel       ; SOUND_CONTROL == 0 means do nothing
 
 	cmp #255                     ; Is it 255 (-1)?
 	bne CheckMainSoundDirections ; No, then go follow channel FX directions.
@@ -394,16 +564,16 @@ CheckMainSoundDirections
 	jmp DoNextSoundChannel          ; and then we're done without evaluation duration.
 
 DoNormalSoundService                ; SOUND_CONTROL == 2.  VBI is running normally.
+	lda SOUND_DURATION,x            ; If sound currently running has a duration, then decrement and loop.
+	beq ContinueNextSound           ; 0 means end of duration.  Load sound for the currently queued entry.
+	dec SOUND_DURATION,x            ; Otherwise, Decrement duration.
+	jmp DoNextSoundChannel          ; Maybe on the next frame there will be something to do.
+
+ContinueNextSound
 	jsr LoadSoundPointerFromX       ; Get the pointer to the current entry.
 	jsr EvaluateEntryControlToStop 
 	; If the Entry Control set CONTROL to stop the sound, then do no more work.
 	beq DoNextSoundChannel          ; SOUND_CONTROL == 0 means do nothing
-
-	; Regular continuation.
-	lda SOUND_DURATION,x            ; If sound currently running has a duration, then decrement and loop.
-	beq DoTheCurrentSound           ; 0 means end of duration.  Load sound for the current entry.
-	dec SOUND_DURATION,x            ; Decrement duration.
-	jmp DoNextSoundChannel          ; Maybe on the next frame there will be something to do.
 
 DoTheCurrentSound                   ; Duration is 0. Just do current parameters.
 	jsr LoadTheCurrentSoundEntry
@@ -426,7 +596,7 @@ ExitSoundService
 
 ; Given X, load the current Entry pointer into SOUND_POINTER
 LoadSoundPointerFromX
-	lda SOUND_FX_LO,X       ;  Get Pointer to specified sound effect.
+	lda SOUND_FX_LO,X       ; Get Pointer to specified sound effect.
 	sta SOUND_POINTER
 	lda SOUND_FX_HI,X
 	sta SOUND_POINTER+1
@@ -437,55 +607,57 @@ LoadSoundPointerFromX
 ; Given X and SOUND_POINTER pointing to the entry, then set
 ; audio controls.
 LoadTheCurrentSoundEntry
-	jsr SaveXTimes2        ;  X = X * 2  (but save original value)
+	jsr SaveXTimes2          ;  X = X * 2  (but save original value)
 
-	ldy #0                 ; Pull AUDC
+	ldy #0                   ; Pull AUDC
 	lda (SOUND_POINTER),y
 	sta AUDC1,X
 	iny
-	lda (SOUND_POINTER),y  ; Pull AUDF
+	lda (SOUND_POINTER),y    ; Pull AUDF
 	sta AUDF1,X
 	iny
-	lda (SOUND_POINTER),y   ; Pull Duration
-	ldx SAVEX               ; Get original X * 1 value.
+	lda (SOUND_POINTER),y    ; Pull Duration
+	ldx SAVEX                ; Get original X * 1 value.
 	sta SOUND_DURATION,X
 
 	rts
 
 
-; Do what the Entry control says if it says to stop sound.
+; Does the Entry control says to stop sound? 
 EvaluateEntryControlToStop
 	ldy #3
 	lda (SOUND_POINTER),y    ; What does entry control say?
 	beq EndFXAndStopSound    ; 0 means the end.
 	bmi EndFX                ; 255 means end, without stopping sound.
 
-	lda (SOUND_POINTER),y    ; What does entry control say?
-
-;	lda SOUND_CONTROL,X      ; Get value so caller can evaluate.
+	lda (SOUND_POINTER),y    ; What does entry control say? (return to caller)
 
 	rts
 
+
+; Entry control says the sound is over, and stop the sound...
 EndFXAndStopSound
 	jsr SaveXTimes2          ;  X = X * 2  (but save original value)
 
 	lda #0                   
-	sta AUDC1,X              ; Stop Pokey playing.
+	sta AUDC1,X              ; Stop POKEY playing.
 	sta AUDF1,X
-	ldx SAVEX               ; Get original X * 1 value.
+	ldx SAVEX                ; Get original X * 1 value.
 
+; Entry control says the sound is over. (but don't actually stop POKEY).
 EndFX
 	lda #0
-	sta SOUND_DURATION,X    ; Make duration 0.
-	sta SOUND_CONTROL,X     ; And inform MAIN that this channel is unused.
+	sta SOUND_DURATION,X     ; Make duration 0.
+	sta SOUND_CONTROL,X      ; And inform MAIN and VBI this channel is unused.
 
 	rts
 
-
+; In order to index the reference to AUDC and AUDF we need the channel 
+; number in X temporarily multiplied by 2.
 SaveXTimes2
-	stx SAVEX ; To reference AUDC and AUDF need X * 2.
-	txa
-	asl
-	tax
+	stx SAVEX                ; Save the current X
+	txa                      ; A = X
+	asl                      ; A = A << 1  ; (or A = A *2)
+	tax                      ; X = A  (0, 1, 2, 3 is now 0, 2, 4, 6).
 
 	rts
