@@ -85,9 +85,9 @@ GAMESTART
 ; --------------------------------------------------------------------------
 
 GameLoop
-	jsr TimerLoop    ; Wait for end of frame to update the timers.
+	jsr libScreenWaitFrame    ; Wait for end of frame, start of new frame.
 
-; Due to the timer sync above, now here at this point the code
+; Due to the frame sync above, at this point the code
 ; is running at/near the top of the screen refresh.
 
 	lda CurrentScreen

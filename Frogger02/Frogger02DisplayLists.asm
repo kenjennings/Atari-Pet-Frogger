@@ -45,28 +45,28 @@
 
 ; Revised V02 Title Screen and Instructions:
 ;    +----------------------------------------+
-; 1  |              PET FROGGER               | TITLE
-; 2  |              PET FROGGER               | TITLE
+; 1  |Score:00000000               00000000:Hi| SCORE_TXT
+; 2  |                                        |
 ; 3  |              PET FROGGER               | TITLE
-; 4  |              --- -------               | TITLE
-; 5  |                                        |
-; 6  |Help the frogs escape from Doc Hopper's | INSTXT_1
-; 7  |frog legs fast food franchise! But, the | INSTXT_1
-; 8  |frogs must cross piranha-infested rivers| INSTXT_1
-; 9  |to reach freedom. You have three chances| INSTXT_1
-; 10 |to prove your frog management skills by | INSTXT_1
-; 11 |directing frogs to jump on boats in the | INSTXT_1
-; 12 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
-; 13 |the seats in the boats ('Q').           | INSTXT_1
-; 14 |                                        |
-; 15 |Scoring:                                | INSTXT_2
-; 16 |    10 points for each jump forward.    | INSTXT_2
-; 17 |   500 points for each rescued frog.    | INSTXT_2
-; 18 |                                        |
-; 19 |Use joystick control to jump forward,   | INSTXT_3
-; 20 |left, and right.                        | INSTXT_3
-; 21 |                                        |
-; 22 |                                        |
+; 4  |              PET FROGGER               | TITLE
+; 5  |              PET FROGGER               | TITLE
+; 6  |              --- -------               | TITLE
+; 7  |                                        |
+; 8  |Help the frogs escape from Doc Hopper's | INSTXT_1
+; 9  |frog legs fast food franchise! But, the | INSTXT_1
+; 10 |frogs must cross piranha-infested rivers| INSTXT_1
+; 11 |to reach freedom. You have three chances| INSTXT_1
+; 12 |to prove your frog management skills by | INSTXT_1
+; 13 |directing frogs to jump on boats in the | INSTXT_1
+; 14 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
+; 15 |the seats in the boats ('Q').           | INSTXT_1
+; 16 |                                        |
+; 17 |Scoring:                                | INSTXT_2
+; 18 |    10 points for each jump forward.    | INSTXT_2
+; 19 |   500 points for each rescued frog.    | INSTXT_2
+; 20 |                                        |
+; 21 |Use joystick control to jump forward,   | INSTXT_3
+; 22 |left, and right.                        | INSTXT_3
 ; 23 |                                        |
 ; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
@@ -89,6 +89,9 @@ DISPLAY_OVER  = 4
 
 TITLE_DISPLAYLIST
 	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4|DL_DLI ; 20 blank scan lines.
+
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1       ; scores
+	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
 
 SCROLL_TITLE_LMS0 = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1       ; Scroll In Title.
@@ -116,8 +119,7 @@ SCROLL_TITLE_LMS2 = [* + 1]
 
 	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM1    ; Game Controls
 	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM2
-	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
-	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
+
 	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
 
 	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.

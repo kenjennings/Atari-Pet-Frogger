@@ -289,10 +289,8 @@ NumberOfChars   .byte 0     ; = Number Of Characters across for score
 FlaggedHiScore  .byte 0     ; = Flag For Hi Score.  0 = no high score.  $FF = High score.
 NumberOfLives   .byte 0     ; = Is the Number Of Lives
 
-LastInput       .byte 0     ; = Remember last joystick input
-
-; Timers and event control.
-; Frame counters are decremented each frame (by the VBI).
+; Input, event control, and timers.
+; FYI: Frame counters are decremented each frame (by the VBI).
 ; Once they decrement to  0 they enable the related activity.
 
 ; After processing input (from the joystick) this is the number of frames
@@ -300,8 +298,7 @@ LastInput       .byte 0     ; = Remember last joystick input
 ; 60 fps and sort of compensates for any jitter/uneven toggling of the 
 ; joystick bits by flaky controllers.
 InputScanFrames   .byte $00 ; = INPUTSCAN_FRAMES
-InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits.
-; And then it is safe to use STRIG0 directly for the joystick button.
+InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits + trigger
 
 ; Identify the current screen.  This is what drives which timer/event loop
 ; features are in effect.  Value is enumerated from SCREEN_LIST table.
@@ -326,14 +323,6 @@ CurrentLeftOffset  .byte $00
 EventCounter    .byte 0
 EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
 
-;; Game Score and High Score.
-;; This stays here and is copied to screen memory, because the math could
-;; temporarily generate a non-numeric character when there is carry, and I
-;; don't want that (possibly) visible on the screen however short it may be.
-;MyScore .sb "00000000"
-;HiScore .sb "00000000"
-
-
 ; ======== V B I ======== TIMER FOR CODE
 ; Frame counter set by main code events for delay/speed of activity.
 ; In the case of boat movements the value is set from the ANIMATION_FRAMES
@@ -348,10 +337,6 @@ AnimateFrames    .byte $00 ; = ANIMATION_FRAMES,X.
 ; $FF when update is completed.
 VBICurrentDL     .byte $FF ; = Direct VBI to change screens.
 
-; The actual display in use. Updated by VBI from the input provided by
-; VBICurrentDL to let main code  know the the current physical display.
-CurrentDL        .byte $FF
-CurrentDLPointer .word $0000 ; the address of the Display list.  a copy of the OS pointer.
 
 ; ======== V B I ======== SCROLLING CREDITS MANAGEMENT
 ; VBI's Animation counter for scrolling the credit line. when it reaches 0, then scroll.
@@ -373,7 +358,7 @@ SCROLL_CREDIT_LMS = [* + 1]
 	mDL_LMS DL_TEXT_2,SCROLLING_CREDIT        ; The perpetrators identified
 
 ; Note that as long as the system VBI is functioning the address 
-; provided here does not matter at all.  The system VBI will update
+; provided fo JVB does not matter at all.  The system VBI will update
 ; ANTIC after this using the address in the shadow registers (SDLST)
 
 	mDL_JVB TITLE_DISPLAYLIST   ; Restart display at the same display list.
@@ -463,10 +448,11 @@ SAVEX = $FE
 SAVEY = $FF
 
 
-; Programmer's unintelligently chosen higher address on Atari
-; to account for DOS, etc.
+; Now for the Game Code and Data...
+; Should be the first usable memory after DOS (and DUP?).
 
-	ORG $5000
+	ORG LOMEM_DOS
+;	ORG LOMEM_DOS_DUP ; Use this if following DOS won't work.  or just use $5000
 
 	; Label and Credit
 	.by "** Thanks to the Word (John 1:1), Creator of heaven, and earth, and "
@@ -474,7 +460,7 @@ SAVEY = $FF
 	.by "Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. ** "
 	.by "Atari port by Ken Jennings, February 2019. Version 02. "
 	.by "Added color with DLIs, joystick interface, "
-	.by "display managed by VBI **"
+	.by "display managed by VBI, and, finally, some sound **"
 
 
 ; ==========================================================================
@@ -506,12 +492,10 @@ SAVEY = $FF
 
 ; --------------------------------------------------------------------------
 
-
 ; ==========================================================================
 ; Inform DOS of the program's Auto-Run address...
 ; GAMESTART is in the "Game.asm' file.
 ; --------------------------------------------------------------------------
 	mDiskDPoke DOS_RUN_ADDR, GAMESTART
-
 
 	END

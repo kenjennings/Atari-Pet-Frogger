@@ -87,7 +87,6 @@ SIZEOF_LINE    = 39  ; That is, 40 - 1
 SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 
-
 ; Revised V02 Title Screen and Instructions:
 ;    +----------------------------------------+
 ; 1  |              PET FROGGER               | TITLE
@@ -146,7 +145,6 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 24 |                                        |
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
-
 
 
 ; ANTIC's has a 4K boundary for screen memory.
@@ -221,7 +219,6 @@ TITLE_MEM3
 	.by I_iS I_S  I_S  I_S I_iS I_U  I_U  I_S I_S  I_iS I_S  I_S I_S I_iS I_S  I_S  I_S I_iS I_K  I_iK I_S I_iO I_U  I_iI I_S I_iO I_U  I_iS I_S I_iO I_U  I_iS I_S I_iS I_U  I_U  I_S I_iS I_K  I_iK
 
 
-
 ; Playfield groups II
 ; Remember the part about screen memory not needing to be contiguous?
 ; Here we do another weird thing with screen memory.  Declaring each
@@ -285,8 +282,6 @@ INSTRUCT_MEM3
 	.sb "frogs must cross piranha-infested rivers"
 
 
-
-
 	.align $0100
 
 PLAYFIELD_MEM2
@@ -334,7 +329,6 @@ INSTRUCT_MEM7
 	.sb "  Land only on  "
 
 
-
 	.align $0100
 
 PLAYFIELD_MEM4
@@ -370,7 +364,6 @@ PLAYFIELD_MEM4
 	.by I_WAVES_L                                              ; 1
 
 
-
 INSTRUCT_MEM8
 ; 13 |the seats in the boats.                 | INSTXT_1
 	.sb "the seats in the boats.                 "
@@ -386,7 +379,6 @@ SCORING_MEM2
 SCORING_MEM3
 ; 17 |   500 points for each rescued frog.    | INSTXT_2
 	.sb "   500 points for each rescued frog.    "
-
 
 
 	.align $0100
@@ -447,7 +439,6 @@ PLAYFIELD_MEM3 ; Default display of "Beach", for lack of any other description, 
 	.sb "           " ; "Beach"
 
 
-
 	.align $0100
 
 PLAYFIELD_MEM7
@@ -481,7 +472,6 @@ PLAYFIELD_MEM7
 		.by I_WAVES_L I_WAVES_R                                ; 8
 	.endr
 	.by I_WAVES_L                                              ; 1
-
 
 
 PLAYFIELD_MEM6 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
@@ -523,7 +513,6 @@ PLAYFIELD_MEM15 ; Default display of "Beach", for lack of any other description,
 	.sb "          "
 	.by I_BEACH3
 	.sb "       " ; "Beach"
-
 
 
 	.align $0100
@@ -624,7 +613,6 @@ PLAYFIELD_MEM10
 	.by I_WAVES_L                                              ; 1
 
 
-
 ; FROG SAVED screen., 25 lines:
 ; 10 blank lines.
 ; 3 lines of big text.
@@ -650,7 +638,6 @@ FROGSAVE_MEM
 	.by $0 $0 $0 $0 $0 $0 $0 $0 $0 I_I I_II I_IU I_S I_S  I_IL I_IK I_S I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_L I_IY I_II I_IK I_S I_S I_IS $0 $0 $0 $0 $0 $0 $0 $0 $0
 	.by $0 $0 $0 $0 $0 $0 $0 $0 $0 I_S I_IU I_IO I_O I_IY I_Y  I_IY I_Y I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_S I_IY I_Y  I_IY I_Y I_S I_IS $0 $0 $0 $0 $0 $0 $0 $0 $0
 	.by $0 $0 $0 $0 $0 $0 $0 $0 $0 I_S I_U  I_IL I_L I_IY I_II I_IO I_Y I_S  I_IO I_II I_S I_IY I_IK I_U  I_O I_IY I_IK I_II I_S I_S I_U  $0 $0 $0 $0 $0 $0 $0 $0 $0
-
 
 
 	.align $0100
@@ -709,7 +696,6 @@ FROGDEAD_MEM
 	.by $0 $0 I_IY I_IK I_II I_S I_IY I_IK I_U  I_O I_IY I_II I_IO I_Y I_IY I_IK I_II I_S I_S I_S I_S I_IY I_Y  I_S  I_S I_IY I_Y  I_IO I_O I_K  I_IK I_IL I_L I_K  I_IK I_IL I_Y I_S I_U  $0
 
 
-
 	.align $0100
 
 PLAYFIELD_MEM13
@@ -745,7 +731,6 @@ PLAYFIELD_MEM13
 	.by I_WAVES_L                                              ; 1
 
 
-
 ; GAME OVER screen., 25 lines:
 ; 10 blank lines.
 ; 3 lines of big text.
@@ -771,7 +756,6 @@ GAMEOVER_MEM
 	.by $0 $0 $0 I_I  I_II I_IU I_L I_S  I_IL I_IK I_S I_IS I_O  I_IL I_Y I_IS I_IU I_IU I_S I_S I_S I_I  I_II I_IO I_O I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_L I_IY I_II I_IO I_O $0 $0 $0
 	.by $0 $0 $0 I_IY I_Y  I_U  I_O I_IY I_Y  I_IY I_Y I_IS I_IO I_IO I_Y I_IS I_IU I_L  I_S I_S I_S I_IY I_Y  I_IY I_Y I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_S I_IY I_IK I_IL I_L $0 $0 $0
 	.by $0 $0 $0 I_K  I_IK I_IL I_Y I_IY I_II I_IO I_Y I_IS I_S  I_IY I_Y I_IS I_U  I_U  I_S I_S I_S I_K  I_IK I_IL I_L I_S  I_IO I_II I_S I_IY I_IK I_U  I_O I_IY I_Y  I_IO I_O $0 $0 $0
-
 
 
 	.align $0100
@@ -838,8 +822,6 @@ PLAYFIELD_MEM16
 	.by I_WAVES_L                                              ; 1
 
 
-
-
 	.align $0100
 
 PLAYFIELD_MEM17
@@ -874,9 +856,9 @@ PLAYFIELD_MEM17
 ; ==========================================================================
 ; Color Layouts for the screens.
 ; 23 lines of data each, not 25.
-; Line 24 for the Press A Button Prompt and line 25 for the 
-; scrolling credits are managed directly, so do not need 
-; entries in the tables.
+; Line 24 for the Press A Button Prompt and 
+; line 25 for the scrolling credits are managed directly, 
+; so they do not need entries in the tables.
 ; --------------------------------------------------------------------------
 ; FYI from GTIA.asm:
 ; COLOR_ORANGE1 =      $10
@@ -896,7 +878,8 @@ PLAYFIELD_MEM17
 ; COLOR_LITE_ORANGE =  $F0
 
 TITLE_BACK_COLORS
-	.by COLOR_GREEN COLOR_GREEN
+	.by COLOR_BLACK COLOR_BLACK                     ; Scores, and blank line
+	.by COLOR_GREEN COLOR_GREEN                     ; Title line
 	.by COLOR_GREEN COLOR_GREEN                     ; Title line
 	.by COLOR_BLACK                                 ; Space
 	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
@@ -904,18 +887,16 @@ TITLE_BACK_COLORS
 	.by COLOR_BLACK                                 ; Space
 	.by COLOR_ORANGE2 COLOR_ORANGE2 COLOR_ORANGE2   ; Scoring
 	.by COLOR_BLACK                                 ; Space
-	.by COLOR_PINK COLOR_PINK COLOR_PINK            ; Controls
-	.by COLOR_BLACK COLOR_BLACK                     ; Space
-;	.by COLOR_BLACK                                 ; Press Button (turned off)
-;	.by COLOR_BLACK                                 ; Credits;
+	.by COLOR_PINK COLOR_PINK                       ; Controls
+	.by COLOR_BLACK                                 ; Space
+
 
 TITLE_TEXT_COLORS ; Text luminance
+	.by $0C $00                                     ; Scores, and blank line
 	.by $0C $08 $04 $00                             ; Scrolling title
-	.rept 19
+	.rept 17
 		.by $0C                                     ; The rest of the text on screen
 	.endr
-;	.by $00                                         ; Press Button (turned off)
-;	.by $0A                                         ; Credits
 
 
 GAME_BACK_COLORS
@@ -961,7 +942,6 @@ DEAD_TEXT_COLORS ; Text luminance
 	.endr
 
 
-
 WIN_BACK_COLORS                                     ; The Win Screen will populate scrolling colors.
 	.rept 23
 		.by $00                                     ; The whole screen is black.
@@ -977,7 +957,6 @@ WIN_TEXT_COLORS
 	.rept 10
 		.by $00                                     ; Bottom Scroll
 	.endr
-
 
 
 OVER_BACK_COLORS
@@ -1001,7 +980,6 @@ OVER_TEXT_COLORS
 	.rept 10
 		.by $00                                     ; Bottom Scroll
 	.endr
-
 
 
 	.align $0100
@@ -1099,107 +1077,5 @@ PLAYFIELD_MEM_HI_TABLE
 	.byte >PLAYFIELD_MEM17
 	.byte >PLAYFIELD_MEM18
 
-; ==========================================================================
-; A list of the game playfield's LMS address locations.
-; --------------------------------------------------------------------------
-
-PLAYFIELD_LMS_LO_TABLE
-	.byte <PF_LMS0
-	.byte <PF_LMS1
-	.byte <PF_LMS2
-	.byte <PF_LMS3
-	.byte <PF_LMS4
-	.byte <PF_LMS5
-	.byte <PF_LMS6
-	.byte <PF_LMS7
-	.byte <PF_LMS8
-	.byte <PF_LMS9
-	.byte <PF_LMS10
-	.byte <PF_LMS11
-	.byte <PF_LMS12
-	.byte <PF_LMS13
-	.byte <PF_LMS14
-	.byte <PF_LMS15
-	.byte <PF_LMS16
-	.byte <PF_LMS17
-	.byte <PF_LMS18
-
-PLAYFIELD_LMS_HI_TABLE
-	.byte >PF_LMS0
-	.byte >PF_LMS1
-	.byte >PF_LMS2
-	.byte >PF_LMS3
-	.byte >PF_LMS4
-	.byte >PF_LMS5
-	.byte >PF_LMS6
-	.byte >PF_LMS7
-	.byte >PF_LMS8
-	.byte >PF_LMS9
-	.byte >PF_LMS10
-	.byte >PF_LMS11
-	.byte >PF_LMS12
-	.byte >PF_LMS13
-	.byte >PF_LMS14
-	.byte >PF_LMS15
-	.byte >PF_LMS16
-	.byte >PF_LMS17
-	.byte >PF_LMS18
-
-; ==========================================================================
-; A list of the game playfield's LMS address locations for ONLY the
-; moving rows of boats based on direction.
-; --------------------------------------------------------------------------
-
-PLAYFIELD_LMS_RIGHT_LO_TABLE
-	.byte <PF_LMS1
-	.byte <PF_LMS4
-	.byte <PF_LMS7
-	.byte <PF_LMS10
-	.byte <PF_LMS13
-	.byte <PF_LMS16
-
-PLAYFIELD_LMS_RIGHT_HI_TABLE
-	.byte >PF_LMS1
-	.byte >PF_LMS4
-	.byte >PF_LMS7
-	.byte >PF_LMS10
-	.byte >PF_LMS13
-	.byte >PF_LMS16
 
 
-PLAYFIELD_LMS_LEFT_LO_TABLE
-	.byte <PF_LMS2
-	.byte <PF_LMS5
-	.byte <PF_LMS8
-	.byte <PF_LMS11
-	.byte <PF_LMS14
-	.byte <PF_LMS17
-
-PLAYFIELD_LMS_LEFT_HI_TABLE
-	.byte >PF_LMS2
-	.byte >PF_LMS5
-	.byte >PF_LMS8
-	.byte >PF_LMS11
-	.byte >PF_LMS14
-	.byte >PF_LMS17
-
-
-; =========================================================================
-; A list of the game LMS addresses for scrolling the credit line.
-; --------------------------------------------------------------------------
-
-;PLAYFIELD_LMS_SCROLL_LO_TABLE
-;	.byte <SCROLL_CREDIT_LMS0
-;	.byte <SCROLL_CREDIT_LMS1
-;	.byte <SCROLL_CREDIT_LMS2
-;	.byte <SCROLL_CREDIT_LMS3
-;	.byte <SCROLL_CREDIT_LMS4
-
-
-;PLAYFIELD_LMS_SCROLL_HI_TABLE
-;	.byte >SCROLL_CREDIT_LMS0
-;	.byte >SCROLL_CREDIT_LMS1
-;	.byte >SCROLL_CREDIT_LMS2
-;	.byte >SCROLL_CREDIT_LMS3
-
-;	.byte >SCROLL_CREDIT_LMS4

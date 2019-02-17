@@ -17,12 +17,12 @@
 ; ==========================================================================
 ; Frogger AUDIO
 ;
-; All the routines to run for sound support.
+; All the routines to run "The world's cheapest sequencer." 
 ; It is truly sad.
 ;
-; Sound allocation:
-; Channel 0
-; Channel 1
+; Game sound allocation:
+; Channel 0 - title slide, light saber
+; Channel 1 - light saber
 ; Channel 2 - Frog movement bump.
 ; Channel 3 - Ambient water noise, music.
 ; --------------------------------------------------------------------------
@@ -48,29 +48,30 @@ SOUND_MAX   = 8
 ; Sound control between main process and VBI to turn on/off/play sounds.
 ; 0   = Set by Main to direct stop managing sound pending an update from 
 ;       MAIN. This does not stop the POKEY's currently playing sound. 
-;       It is set by the VBI to indicate the channel is idle. (unmanaged) 
-; 1   = Main sets to direct VBI to start playing a sound FX.
+;       It is set by the VBI to indicate the channel is idle/unmanaged. 
+; 1   = Main sets to direct VBI to start playing a new sound FX.
 ; 2   = VBI sets when it is playing to inform Main that it has taken 
 ;       direction and is now busy.
 ; 255 = Direct VBI to silence the channel.
 ;
 ; So, the procedure for playing sound.
-; 1) MAIN sets SOUND_CONTROL to 0.
-; 2) MAIN sets SOUND_FX_LO/HI pointer to the sound effects 
+; 1) MAIN sets the channel's SOUND_CONTROL to 0.
+; 2) MAIN sets the channel's SOUND_FX_LO/HI pointer to the sound effects 
 ;    sequence to play.
-; 3) MAIN sets SOUND_CONTROL to 1 to tell VBI to start.
-; 4) VBI when playing sets SOUND_CONTROL value to 2. 
+; 3) MAIN sets the channel's SOUND_CONTROL to 1 to tell VBI to start.
+; 4) VBI when playing sets the channel's SOUND_CONTROL value to 2, then 
+;    to 0 when done.
 
 
 	.align 4
 
 ; A sound Entry is 4 bytes...
-; byte 0, AUDC
-; byte 1, AUDF
-; byte 2, Duration, number of frames to count.
-; byte 3, 0 == end+stop sound.  
-;         1 == continue normal playing
-;       255 == end (do not stop sound).
+; byte 0, AUDC (distortion/volume) value
+; byte 1, AUDF (frequency) value
+; byte 2, Duration, number of frames to count. 0 counts as 1 frame.
+; byte 3, 0 == End of sequence. Stop playing sound. (Set AUDF and AUDC to 0)
+;         1 == Continue normal playing.
+;       255 == End of sequence. Do not stop playing sound.
 ;       Eventually some other magic to be determined goes here.
 
 SOUND_ENTRY_OFF
@@ -78,16 +79,19 @@ SOUND_ENTRY_OFF
 
 
 SOUND_ENTRY_TINK ; Press A Button.
-	.byte $A6,200,2,1
-	.byte $A5,200,1,1
-	.byte $A4,200,1,1
-	.byte $A3,200,0,1
-	.byte $A2,200,0,1
-	.byte $A1,200,0,1
-	
-	.byte $A0,200,0,0
+	.byte $A6,120,2,1
+	.byte $A5,120,1,1
+	.byte $A4,120,1,1
+	.byte $A3,120,0,1
+	.byte $A2,120,0,1
+	.byte $A1,120,0,1
 
-	
+	.byte $A0,0,0,0
+
+	; Maybe if I thought about it for a while I could do a 
+	; ramp/counting feature in the sound entry control byte 
+	; in less than 100-ish bytes of code which is abpout how 
+	; much space this table occupies. 
 SOUND_ENTRY_SLIDE ; Title logo lines slide right to left
 	.byte $02,50,1,1 ; 1 == 2 frames per wait.
 	.byte $03,49,1,1
@@ -153,82 +157,82 @@ SOUND_ENTRY_HUMMER_B ; one-half of Atari light saber
 
 
 SOUND_ENTRY_DIRGE ; Chopin's Funeral for a frog (or gunslinger in Outlaw) 
-	.byte $A8,182,0,1 ; F, 1/4, 16 steps
+	.byte $A4,182,0,1 ; F, 1/4, 16 steps
 	.byte $A6,182,13,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
-	.byte $A8,182,0,1 ; F, 1/8 ., 12 steps
+	.byte $A4,182,0,1 ; F, 1/8 ., 12 steps
 	.byte $A6,182,9,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
-	.byte $A8,182,0,1 ; F, 1/16,  4 steps
+	.byte $A4,182,0,1 ; F, 1/16,  4 steps
 	.byte $A6,182,0,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
-	.byte $A8,182,0,1 ; F, 1/2, 32 steps
+	.byte $A4,182,0,1 ; F, 1/2, 32 steps
 	.byte $A6,182,29,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
 
-	.byte $A8,182,0,1 ; F, 1/4, 16 steps
+	.byte $A4,182,0,1 ; F, 1/4, 16 steps
 	.byte $A6,182,13,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
-	.byte $A8,182,0,1 ; F, 1/8 ., 12 steps
+	.byte $A4,182,0,1 ; F, 1/8 ., 12 steps
 	.byte $A6,182,9,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
-	.byte $A8,182,0,1 ; F, 1/16,  4 steps
+	.byte $A4,182,0,1 ; F, 1/16,  4 steps
 	.byte $A6,182,0,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
-	.byte $A8,182,0,1 ; F, 1/2, 32 steps
+	.byte $A4,182,0,1 ; F, 1/2, 32 steps
 	.byte $A6,182,29,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
 
-	.byte $A8,182,0,1 ; F, 1/4, 16 steps
+	.byte $A4,182,0,1 ; F, 1/4, 16 steps
 	.byte $A6,182,13,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
-	.byte $A8,182,0,1 ; F, 1/8 ., 12 steps
+	.byte $A4,182,0,1 ; F, 1/8 ., 12 steps
 	.byte $A6,182,9,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
-	.byte $A8,182,0,1 ; F, 1/16,  4 steps
+	.byte $A4,182,0,1 ; F, 1/16,  4 steps
 	.byte $A6,182,0,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
-	.byte $A8,182,0,1 ; F, 1/4, 16 steps
+	.byte $A4,182,0,1 ; F, 1/4, 16 steps
 	.byte $A6,182,13,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
-	.byte $A8,144,0,1 ; A, 1/8 ., 12 steps
+	.byte $A4,144,0,1 ; A, 1/8 ., 12 steps
 	.byte $A6,144,9,1 
 	.byte $A4,144,0,1 
 	.byte $A2,144,0,1 
-	.byte $A8,162,0,1 ; G, 1/16,  4 steps
+	.byte $A4,162,0,1 ; G, 1/16,  4 steps
 	.byte $A6,162,0,1 
 	.byte $A4,162,0,1 
 	.byte $A2,162,0,1 
 
-	.byte $A8,162,0,1 ; G, 1/8 ., 12 steps
+	.byte $A4,162,0,1 ; G, 1/8 ., 12 steps
 	.byte $A6,162,9,1 
 	.byte $A4,162,0,1 
 	.byte $A2,162,0,1 
-	.byte $A8,182,0,1 ; F, 1/16,  4 steps
+	.byte $A4,182,0,1 ; F, 1/16,  4 steps
 	.byte $A6,182,0,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
-	.byte $A8,182,0,1 ; F, 1/8 ., 12 steps
+	.byte $A4,182,0,1 ; F, 1/8 ., 12 steps
 	.byte $A6,182,9,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
-	.byte $A8,182,0,1 ; F, 1/16,  4 steps
+	.byte $A4,182,0,1 ; F, 1/16,  4 steps
 	.byte $A6,182,0,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
-	.byte $A8,182,0,1 ; F, 1/2,  32 steps
+	.byte $A4,182,0,1 ; F, 1/2,  32 steps
 	.byte $A6,182,29,1 
 	.byte $A4,182,0,1 
 	.byte $A2,182,0,1 
@@ -246,85 +250,85 @@ SOUND_ENTRY_THUMP ; When a frog moves
 
 
 SOUND_ENTRY_ODE2JOY ; Beethoven's Ode To Joy when a frog is saved
-	.byte $A1,121,0,1 ; C, 1/4, 20 steps
-	.byte $A3,121,0,1 
-	.byte $A5,121,0,1 
-	.byte $A7,121,0,1 
+	.byte $Aa,121,0,1 ; C, 1/4, 20 steps
 	.byte $A8,121,16,1 
-	.byte $A1,121,0,1 ; C, 1/4, 20 steps
-	.byte $A3,121,0,1 
 	.byte $A5,121,0,1 
-	.byte $A7,121,0,1 
+	.byte $A3,121,0,1 
+	.byte $A1,121,0,1 
+	.byte $Aa,121,0,1 ; C, 1/4, 20 steps
 	.byte $A8,121,16,1 
-	.byte $A1,108,0,1 ; D, 1/4, 20 steps
-	.byte $A3,108,0,1 
-	.byte $A5,108,0,1 
-	.byte $A7,108,0,1 
+	.byte $A5,121,0,1 
+	.byte $A3,121,0,1 
+	.byte $A1,121,0,1 
+	.byte $Aa,108,0,1 ; D, 1/4, 20 steps
 	.byte $A8,108,16,1 
-	.byte $A1,96,0,1 ; E, 1/4, 20 steps
-	.byte $A3,96,0,1 
-	.byte $A5,96,0,1 
-	.byte $A7,96,0,1 
-	.byte $A8,96,16,1 
-
-	.byte $A1,96,0,1 ; E, 1/4, 20 steps
-	.byte $A3,96,0,1 
-	.byte $A5,96,0,1 
-	.byte $A7,96,0,1 
-	.byte $A8,96,16,1 
-	.byte $A1,108,0,1 ; D, 1/4, 20 steps
-	.byte $A3,108,0,1 
 	.byte $A5,108,0,1 
-	.byte $A7,108,0,1 
+	.byte $A3,108,0,1 
+	.byte $A2,108,0,1 
+	.byte $Aa,96,0,1 ; E, 1/4, 20 steps
+	.byte $A8,96,16,1 
+	.byte $A5,96,0,1 
+	.byte $A3,96,0,1 
+	.byte $A1,96,0,1 
+
+	.byte $Aa,96,0,1 ; E, 1/4, 20 steps
+	.byte $A8,96,16,1 
+	.byte $A5,96,0,1 
+	.byte $A3,96,0,1 
+	.byte $A1,96,0,1 
+	.byte $Aa,108,0,1 ; D, 1/4, 20 steps
 	.byte $A8,108,16,1 
-	.byte $A1,121,0,1 ; C, 1/4, 20 steps
-	.byte $A3,121,0,1 
-	.byte $A5,121,0,1 
-	.byte $A7,121,0,1 
+	.byte $A5,108,0,1 
+	.byte $A3,108,0,1 
+	.byte $A1,108,0,1 
+	.byte $Aa,121,0,1 ; C, 1/4, 20 steps
 	.byte $A8,121,16,1 
-	.byte $A1,128,0,1 ; B, 1/4, 20 steps
-	.byte $A3,128,0,1 
-	.byte $A5,128,0,1 
-	.byte $A7,128,0,1 
-	.byte $A8,128,16,1 
-
-	.byte $A1,144,0,1 ; A, 1/4, 20 steps
-	.byte $A3,144,0,1 
-	.byte $A5,144,0,1 
-	.byte $A7,144,0,1 
-	.byte $A8,144,16,1 
-	.byte $A1,144,0,1 ; A, 1/4, 20 steps
-	.byte $A3,144,0,1 
-	.byte $A5,144,0,1 
-	.byte $A7,144,0,1 
-	.byte $A8,144,16,1 
-	.byte $A1,128,0,1 ; B, 1/4, 20 steps
-	.byte $A3,128,0,1 
-	.byte $A5,128,0,1 
-	.byte $A7,128,0,1 
-	.byte $A8,128,16,1 
-	.byte $A1,121,0,1 ; C, 1/4, 20 steps
-	.byte $A3,121,0,1 
 	.byte $A5,121,0,1 
-	.byte $A7,121,0,1 
+	.byte $A3,121,0,1 
+	.byte $A1,121,0,1 
+	.byte $Aa,128,0,1 ; B, 1/4, 20 steps
+	.byte $A8,128,16,1 
+	.byte $A5,128,0,1 
+	.byte $A3,128,0,1 
+	.byte $A1,128,0,1 
+
+	.byte $Aa,144,0,1 ; A, 1/4, 20 steps
+	.byte $A8,144,16,1 
+	.byte $A5,144,0,1 
+	.byte $A3,144,0,1 
+	.byte $A1,144,0,1 
+	.byte $Aa,144,0,1 ; A, 1/4, 20 steps
+	.byte $A8,144,16,1 
+	.byte $A5,144,0,1 
+	.byte $A3,144,0,1 
+	.byte $A1,144,0,1 
+	.byte $Aa,128,0,1 ; B, 1/4, 20 steps
+	.byte $A8,128,16,1 
+	.byte $A5,128,0,1 
+	.byte $A3,128,0,1 
+	.byte $A1,128,0,1 
+	.byte $Aa,121,0,1 ; C, 1/4, 20 steps
 	.byte $A8,121,16,1 
-
-	.byte $A1,121,0,1 ; C, 1/4 ., 30 steps
-	.byte $A3,121,0,1 
 	.byte $A5,121,0,1 
-	.byte $A7,121,0,1 
+	.byte $A3,121,0,1 
+	.byte $A1,121,0,1 
+
+	.byte $Aa,121,0,1 ; C, 1/4 ., 30 steps
 	.byte $A8,121,26,1 
-	.byte $A1,128,0,1 ; B, 1/8, 10 steps
-	.byte $A3,128,0,1 
-	.byte $A5,128,0,1 
-	.byte $A7,128,0,1 
+	.byte $A5,121,0,1 
+	.byte $A3,121,0,1 
+	.byte $A1,121,0,1 
+	.byte $Aa,128,0,1 ; B, 1/8, 10 steps
 	.byte $A8,128,6,1 
-	.byte $A1,128,0,1 ; B, 1/4, 40 steps
-	.byte $A3,128,0,1 
 	.byte $A5,128,0,1 
-	.byte $A7,128,0,1 
+	.byte $A3,128,0,1 
+	.byte $A1,128,0,1 
+	.byte $Aa,128,0,1 ; B, 1/4, 40 steps
 	.byte $A8,128,40,1 
-	
+	.byte $A5,128,0,1 
+	.byte $A3,128,0,1 
+	.byte $A1,128,0,1 
+
 	.byte $A0,$00,0,0
 
 

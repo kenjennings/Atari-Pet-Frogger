@@ -94,6 +94,7 @@ SetupTransitionToGame
 ; Uses A, X
 ; --------------------------------------------------------------------------
 SetupGame
+
 	lda #0
 	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
 

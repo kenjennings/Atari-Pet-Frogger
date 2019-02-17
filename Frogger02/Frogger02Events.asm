@@ -131,10 +131,10 @@ TestTransTitle2
 	bne TestTransTitle3
 
 GlowingTitleUnderline
-	lda COLPF1_TABLE+3         ; Get the text brightness of line 4.
+	lda COLPF1_TABLE+5         ; Get the text brightness of line 4.
 	cmp #$0E                   ; It is maximum brightness?
 	beq FinishedNowSetupStage3 ; Yes.  Time for the next stage.
-	inc COLPF1_TABLE+3         ; No. Increment brightness.
+	inc COLPF1_TABLE+5         ; No. Increment brightness.
 	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
 
 FinishedNowSetupStage3
@@ -169,9 +169,6 @@ EndTransitionToTitle
 ; --------------------------------------------------------------------------
 EventScreenStart            ; This is New Game and Transition to title.
 
-	jsr ClearGameScores     ; Zero the score.  And high score if not set.
-	jsr CopyScoreToScreen   ; And put into screen memory.
-
 	jsr ClearSavedFrogs     ; Erase the saved frogs from the screen. (Zero the count)
 	jsr PrintFrogsAndLives  ; Update the screen memory.
 
@@ -194,6 +191,12 @@ EventTitleScreen
 
 ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transition.
 	jsr SetupTransitionToGame
+
+	; This was part of the Start event, but after the change to keep the 
+	; scores displayed on the title screen it would end up erasing the 
+	; last game score as soon as the title transistion animation completed.
+	; Therefore resetting the score is deferred until leaving the Title.
+	jsr ClearGameScores     ; Zero the score.  And high score if not set.
 
 EndTitleScreen
 	lda CurrentScreen
@@ -230,7 +233,7 @@ EventTransitionToGame
 	; The fade and wipe was becoming boring.
 	ldx EventCounter2
 	lda COLPF1_TABLE,x
-	beq ZeroCOLPF2
+	beq ZeroCOLPF2          ; Safety check, because I am untrustworthy.
 	dec COLPF1_TABLE,x
 	beq ZeroCOLPF2
 	dec COLPF1_TABLE,x
@@ -243,6 +246,7 @@ ZeroCOLPF2
 	bpl EndTransitionToGame
 
 	; Finished stage 1, now setup Stage 2
+	jsr CopyScoreToScreen   ; Make sure the score is updated in screen memory.
 	lda #2
 	sta EventCounter
 	lda #0

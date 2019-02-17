@@ -88,27 +88,6 @@ EndResetTimers
 
 
 ; ==========================================================================
-; TOGGLE FLIP FLOP
-;
-; Flip toggle state 0, 1, 0, 1, 0, 1,....
-;
-; Ordinarily should be EOR with #1, but I don't trust myself that
-; Toggle state ends up being something greater than 1 due to some
-; moment of sloppiness, so the absolute, slower slogging about
-; with INC and AND is done here.
-;
-; Uses A, CPU flag status Z indicates 0 or 1
-; --------------------------------------------------------------------------
-;ToggleFlipFlop
-;	inc ToggleState ; Add 1.  (says Capt Obvious)
-;	lda ToggleState
-;	and #1          ; Squash to only lowest bit -- 0, 1, 0, 1, 0, 1...
-;	sta ToggleState
-
-;	rts
-
-
-; ==========================================================================
 ; Check for input from the controller....
 ;
 ; Eliminate Down direction.
@@ -137,25 +116,21 @@ EndResetTimers
 ; and trigger set are 1 bits.  Bit values:   00011101
 ; "NA NA NA Trigger Right Left NA Up"
 ;
-; Wow, but this became a sloppy mess.
+; Wow, but this became a sloppy mess of bit flogging.
+; But it does replace several functions of key reading shenanigans.
 ; --------------------------------------------------------------------------
 CheckInput
 	lda InputScanFrames       ; Is input timer delay  0?
 	bne SetNoInput            ; No. thus nothing to scan. (and exit)
 
-	jsr SetNoInput           ; Make sure the official stick starts with no input.
-
-ProcessJoystickBits
+	jsr SetNoInput            ; Make sure the official stick read starts with no input.
 	lda STICK0                ; The OS nicely separates PIA nybbles for us
-	and #%00001111            ; Make sure only low bits kept.  (Is this necessary?)
-	cmp #$0F                  ; Any direction is moved?
-	beq AddTriggerInput       ; No.  If the trigger button is pressed, then add that.
 
-ChefOfJoystickBits  ; Cook STICK0 into the safe stick directions.
-; Flip input bits.
+ChefOfJoystickBits  ; Cook STICK0 into the safe stick directions.  Flip input bits.
 	eor #%00001111            ; Reverse direction bits.
 	and #%00001101            ; Mask out the Down.
 	sta InputStick            ; Save it.
+	beq AddTriggerInput       ; No movement.  Add trigger button if pressed.
 
 ; Fix Up+Right Bits
 	and #%00001001            ; Looking at only Up and Right
@@ -193,7 +168,7 @@ AddTriggerInput
 
 DoneWithBitCookery            ; Some input was captured?
 	lda InputStick            ; Return the input value?
-	beq ExitInputCollection   ; No, nothing happened here.  Just exit.
+	beq ExitCheckInput        ; No, nothing happened here.  Just exit.
 
 	lda #INPUTSCAN_FRAMES     ; Because there was input collected, then
 	sta InputScanFrames       ; reset the input timer.
@@ -208,118 +183,7 @@ ExitInputCollection ; Input occurred
 SetNoInput
 	lda #0
 	sta InputStick
-	rts
-
-
-; ==========================================================================
-; Check for a keypress based on timer state.
-;
-; A  returns the key pressed.  or returns $FF for no key pressed.
-; If the timer allows reading, and a key is found, then the timer is
-; reset for the time of the next key input cycle.
-;
-; Return with flags set for CMP #$FF ; BEQ = No key
-; --------------------------------------------------------------------------
-CheckKey
-;	lda KeyscanFrames         ; Is keyboard timer delay  0?
-;	bne ExitCheckKeyNow       ; No. thus no key to scan.
-
-;	lda CH
-;	pha                       ; Save the key for later
-
-;	cmp #$FF                  ; No key pressed, so nothing to do.
-;	beq ExitCheckKey
-
-;	jsr ClearKey              ; Clear register/timer for next key read.
-
-;ExitCheckKey                  ; exit with some kind of key value in A.
-;	pla                       ; restore the pressed key in A.
-;	cmp #$FF                  ; set flags for not matching $FF no key value
-	rts
-
-;ExitCheckKeyNow               ; exit with no key value in A
-;	lda #$FF
-;	cmp #$FF                  ; set flags for matching $FF no key value
-	rts
-
-
-; ==========================================================================
-; Clear Input.
-;
-; Joystick and trigger input is real-time on-off without
-; a buffer, so there is substantially less purpose for this
-; routine than the same need for keyboard input.
-;
-; All it really does is reset the input scan timer.
-; --------------------------------------------------------------------------
-ClearInput
-	pha                 ; Save whatever is in A
-
-	lda #INPUTSCAN_FRAMES     ; Because there was input collected, then
-	sta InputScanFrames       ; reset the input timer.
-
-	pla                 ; restore  whatever was in A.
-
-	rts
-
-
-; ==========================================================================
-; Clear Current/Pending Key
-;
-; This should only be called
-; 1) when a successful read has just occurred to empty the key
-;    buffer and reset the key scan timer.
-; 2) when we do not want a keystroke entered in the recent past to be
-;    automatically read when we get to the next opportunity to read the
-;    keyboard.
-;    i.e.  When there was animation occurring which occupies human wait
-;    time and the code will soon enter an event area that will read a
-;    character.
-;    e.g. Press Any Key To Continue.
-;
-; Reset CH to no key read value.  Reset the timer too while we're here.
-; --------------------------------------------------------------------------
-ClearKey
-;	pha                 ; Save whatever is in A
-;	lda #$FF
-;	sta CH              ; Clear any pending key
-
-;	lda #KEYSCAN_FRAMES ; Reset keyboard timer for next key input.
-;	sta KeyscanFrames
-
-;	pla                 ; restore  whatever was in A.
-
-	rts
-
-
-;==============================================================================
-;                                                           TIMERLOOP  A
-;==============================================================================
-; Primitive timer loop.
-;
-; When the game design is more Atari-ficated (planned Version 02) this is part
-; of the program's deferred Vertical Blank Interrupt routine.  This routine
-; services any display-oriented updates and notifications for the mainline
-; code that runs during the bulk of the frame.
-;
-; Main code calls this at the end of its cycle, then afterwards it restarts
-; its cycle.
-; This routine waits for the current frame to finish display, then
-; manages the timers/countdown values.
-; It is the responsibility of the main line code to observe when timers
-; reach 0 and reset them or act accordingly.
-;
-; All registers are preserved.
-;==============================================================================
-
-TimerLoop
-	mRegSaveAYX
-
-	jsr libScreenWaitFrame ; Wait until end of frame
-
-ExitEventLoop
-	mRegRestoreAYX
-
+ExitCheckInput
 	rts
 
 
@@ -369,6 +233,13 @@ MyDLI
 	lda COLPF1_TABLE,x   ; Get text color (luminance)
 	sta COLPF1           ; write new text color.
 
+	inc ThisDLI          ; next DLI.
+
+	mRegRestoreAX
+
+	rti
+
+; Other thoughts....
 ; or if the writes are not fast enough...
 ;	ldx ThisDLI
 ;	lda COLPF1_TABLE,x   ; Get text color (luminance)
@@ -397,11 +268,7 @@ MyDLI
 ; each screen line, and then use immediate mode load (lda #00 ; sta foo).
 ; Then the code would need a lookup table of addresses to directly update the
 ; immediate mode values in the routines.
-	inc ThisDLI          ; next DLI.
 
-	mRegRestoreAX
-
-	rti
 
 
 ;==============================================================================
@@ -416,7 +283,7 @@ MyDLI
 
 MyImmediateVBI
 	lda #$00                 ; Initialize.
-	sta ThisDLI              ; Make the DLI index restarts at 0.
+	sta ThisDLI              ; Make the DLI index restart at 0.
 
 ; ======== Manage Changing Display List ========
 	lda VBICurrentDL            ; Main code signals to change screens?
@@ -424,12 +291,10 @@ MyImmediateVBI
 
 	tax                         ; Use this as index to tables.
 
-	lda DISPLAYLIST_LO_TABLE,x  ; Copy Display List Pointer.
-	sta SDLSTL                  ; One for the OS
-	sta CurrentDLPointer        ; One in page 0 for the code.
+	lda DISPLAYLIST_LO_TABLE,x  ; Copy Display List Pointer
+	sta SDLSTL                  ; for the OS
 	lda DISPLAYLIST_HI_TABLE,x
 	sta SDLSTH
-	sta CurrentDLPointer+1
 
 	lda COLOR_BACK_LO_TABLE,x   ; Get pointer to the source color table
 	sta COLPF2POINTER
@@ -440,8 +305,6 @@ MyImmediateVBI
 	sta COLPF1POINTER
 	lda COLOR_TEXT_HI_TABLE,x
 	sta COLPF1POINTER+1
-
-	stx CurrentDL                 ; Tell main code the new screen is set.
 
 	lda #$FF                      ; Turn off the signal to change screens.
 	sta VBICurrentDL
