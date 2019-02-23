@@ -66,6 +66,8 @@ PET FROGGER for Commodore PET 4032
 
 Version 02, February 2019 continues to maintain the same game play in the same format as prior versions.  The screen display is still based on the plain text mode (ANTIC mode 2, OS Text Mode 0).  The Frog is a character and moves in steps the size of a character.  Everything else about the game internals and operation has been Atari-fied.
 
+---
+
 **Version 02, February 2019 notable changes:**
 
 **Lame sound effects added... **
@@ -82,7 +84,7 @@ The custom character set provides a frog-like Frog. Another character is the spl
 
 The text characters A-Z, a-z and 0-9 are all redefined in a square style.  Most lowercase letters look like shorter versions of uppercase.  There are specific text labels for Lives, Score, Hi score, and Saved frogs which are in the same style as the alpha characters, but they rely on the ANTIC Mode 2 text's high-resolution pixel color artifacts to make them appear green instead of white. 
 
-** Atari-fied Playfield Graphics handling. **
+**Atari-fied Playfield Graphics handling.**
 
 The title screen now includes the last game score and the high score.
     - Custom Display Lists for all screens. 
@@ -94,13 +96,13 @@ The title screen now includes the last game score and the high score.
     - The updates and redraws to screen memory is vastly reduced to the frog moving on the game screen.  (Also the scores, lives, and saved frog updates).
     - All screens share the same Display List instructions for the bottom of the screen providing the prompt to Press a Button, and the continuously scrolling credits line.
 
-** Display List Interrupts for color.**
+**Display List Interrupts for color.**
 
     - Every line on every screen has its own base color and text luminance.
     - Dead Frog, Game Over, and Saved Frog screens include full screen animations which are simply updates to the color tables.
     - Animated transitions and fades between screens are also simple manipulation of the color tables.
 
-** Vertical Blank Interrupt **
+**Vertical Blank Interrupt**
 
     - Immediate VBI controls switching between different Display Lists.
     - Deferred VBI handles several tasks:
