@@ -1,11 +1,8 @@
 # Atari PET FROGGER Version 02
 
-WORK IN PROGRESS...  (the rest of the text below is copied from Version 01.   Come back soon for updates).
+ PET FROGGER game for Commodore PET 4032 ported to the Atari 8-bit computers
 
-PET FROGGER game for Commodore PET 4032 ported to the Atari 8-bit computers
-
-Video of the game play on YouTube: https://youtu.be/z5lkdjZt3bE    Yes, still no sound in the game.  
-(Note that the video shows a bug in the evaluation of current score to high score which has since been fixed in the source.)
+Video of the game play on YouTube: https://youtu.be/z5lkdjZt3bE
   
 Title Screen:
 
@@ -31,21 +28,29 @@ Game Over:
 
 **Porting/Enhancing PET FROGGER for Atari**
 
-[Frogger01.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01.asm "Frogger01.asm") Main assembly source.
+[Frogger02.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02.asm "Frogger02.asm") Main assembly source and Page Zero variables.
 
-[Frogger01Game.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01Game.asm "Frogger01Game.asm") Game start, and main event loop.
+[Frogger02Game.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02Game.asm "Frogger02Game.asm") Game start, and main event loop.
 
-[Frogger01GameSupport.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01GameSupport.asm "Frogger01GameSupport.asm") Common routines, score management.
+[Frogger02GameSupport.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02GameSupport.asm "Frogger02GameSupport.asm") Common routines, score management.
 
-[Frogger01EventSetups.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01EventSetups.asm "Frogger01EventSetups.asm") Setup entry requirements for each event. 
+[Frogger02EventSetups.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02EventSetups.asm "Frogger02EventSetups.asm") Setup entry requirements for each event. 
 
-[Frogger01Events.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01Events.asm "Frogger01Events.asm") A routine for each screen/event. 
+[Frogger02Events.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02Events.asm "Frogger02Events.asm") A routine for each screen/event. 
 
-[Frogger01ScreenGfx.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01ScreenGfx.asm "Frogger01ScreenGfx.asm") Routines for managing the various displays used by the game. 
+[Frogger02ScreenGfx.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02ScreenGfx.asm "Frogger02ScreenGfx.asm") Routines for managing the various displays used by the game. 
 
-[Frogger01TimerAndIO.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01TimerAndIO.asm "Frogger01TimerAndIO.asm") Managing Timers, flip-flop/tick-tock, count downs, keyboard I/O.
+[Frogger02ScreenMemory.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02ScreenMemory.asm "Frogger02ScreenMemory.asm") Data used for on screen graphics.
 
-[Frogger01.xex](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01.asm "Frogger01.xex") Atari executable program.
+[Frogger02CharSet.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02CharSet.asm "Frogger02CharSet.asm") Redefined custom character set.
+
+[Frogger02DisplayLists.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02DisplayLists.asm "Frogger02DisplayLists.asm") ANTIC Display Lists for the custom screens.
+
+[Frogger02Audio.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02Audio.asm "Frogger02Audio.asm") Sound effects and music.
+
+[Frogger02TimerAndIO.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02TimerAndIO.asm "Frogger02TimerAndIO.asm") Managing timers, Joystick controller input, vertical blank interrupts, display list interrupt
+
+[Frogger02.xex](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02.asm "Frogger02.xex") Atari executable program.
 
 The assembly code for the Atari depends on my MADS include library here: https://github.com/kenjennings/Atari-Mads-Includes.  
 
@@ -57,23 +62,52 @@ PET FROGGER for Commodore PET 4032
 
 [Version 00](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V00.md "Version 00") Ported (parodied) to Atari 8-bit computers November 2018 by Ken Jennings (if this were 1983, aka FTR Enterprises)
 
-Version 01, December 2018 notable changes:
+[Version 01](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V01.md "Version 01") Ported to Atari 8-bit computers December 2018 by Ken Jennings 
 
-- All text printing to the screen is removed.  Displayed items are written directly into screen memory.  This greatly speeds up creating the game display.
+Version 02, February 2019 continues to maintain the same game play in the same format as prior versions.  The screen display is still based on the plain text mode (ANTIC mode 2, OS Text Mode 0).  The Frog is a character and moves in steps the size of a character.  Everything else about the game internals and operation has been Atari-fied.
 
-- Reorganized and modularized the code for easier maintenance and enhancements.
- 
-- The game structure is remade into an event-like loop driven by monitoring video frame changes.
+**Version 02, February 2019 notable changes:**
 
-- The original game used a CPU loop for delays to scale the game speed down to realistic levels.  Driving the game events from the vertical blank timing eliminated the CPU loop, and makes everything move more smoothly and consistently. 
+**Lame sound effects added... **
 
-- The reorganization made it easy to add new, "graphics" displays for dead frog, saved frog, and game over as well as animated transitions between the screens.  
+Sound sequences and volume envelopes shaped by vertical blank interrupt, so longer running sounds (i.e. music) appears multi-tasking in parallel with everything else going on.   Sound effects are timed to the animation that occurs on the Title screen.  When the Frog moves in any direction there is a bump sound.  The game plays randomly changing water sloshing effects.  Upon a frog's inevitable demise Chopin's Funeral March plays.  Should the player manage to guide a frog to the safety of the opposite shore then Beethoven's Ode To joy plays. 
 
-- Boat movement is now handled for each row from the top to the bottom of the screen.  This should prevent updates occurring while the data is being displayed and eliminate visible tearing.
+**Input is changed to joystick control. ** 
 
-- Other than the timer control routine monitoring for vertical blank changes there is nothing very Atari-specific going on.  Therefore, this code could be ported back to the Pet 4032 provided character and keyboard code values are turned back into the values for the Pet.
+Buh-bye keyboard. The joystick values are cooked to make the code's analysis easier later on.  It reverses the bit values making 1 instead of 0 indicate the direction is pressed.  Diagonal movement is blocked and substituted with forward direction.  Down movement is discarded.  Since the joystick needs only 4 bits for directions, it unifies the controller input by adding the trigger bit to the joystick bits (the fifth bit).
 
-- Have I mentioned there still is no sound?
+**Custom character set to make things look like things.**
+
+The custom character set provides a frog-like Frog. Another character is the splattered Frog.   There are specific characters for the boat parts: fore, aft, and the seats, in left and right versions.  The water contains waves that are built in two parts, left and right.   The beaches are mostly blank spaces, but now there are several kinds of random rocks distributed which are also safe places to jump.
+
+The text characters A-Z, a-z and 0-9 are all redefined in a square style.  Most lowercase letters look like shorter versions of uppercase.  There are specific text labels for Lives, Score, Hi score, and Saved frogs which are in the same style as the alpha characters, but they rely on the ANTIC Mode 2 text's high-resolution pixel color artifacts to make them appear green instead of white. 
+
+** Atari-fied Playfield Graphics handling. **
+
+The title screen now includes the last game score and the high score.
+    - Custom Display Lists for all screens. 
+    - All screen memory is assembled in place for direct display, therefore there is no screen redrawing.
+    - Switching between display screens is nearly instantaneous, which is accomplished by merely updating the system's Display List pointer.  
+        - Screen switching is so fast that transitions are added to allow the user time to recover from pressing the trigger so that the same button press is not accepted as input on the following screen.  
+    - Boats move by coarse-scrolling done via by LMS updates in the Display List.
+    - Title screen animation is also done with LMS updates instead of redrawing.
+    - The updates and redraws to screen memory is vastly reduced to the frog moving on the game screen.  (Also the scores, lives, and saved frog updates).
+    - All screens share the same Display List instructions for the bottom of the screen providing the prompt to Press a Button, and the continuously scrolling credits line.
+
+** Display List Interrupts for color.**
+
+    - Every line on every screen has its own base color and text luminance.
+    - Dead Frog, Game Over, and Saved Frog screens include full screen animations which are simply updates to the color tables.
+    - Animated transitions and fades between screens are also simple manipulation of the color tables.
+
+** Vertical Blank Interrupt **
+
+    - Immediate VBI controls switching between different Display Lists.
+    - Deferred VBI handles several tasks:
+        - Animation timer updates.
+        - Managing the Press A Button prompt color cycling. 
+        - Continuously scrolling the bottom line of the display showing the credits. 
+        - Playing sequences of sound effect, and volume shaping the sounds.
 
 ---
 

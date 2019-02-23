@@ -233,35 +233,37 @@ TITLE_MEM3
 
 PLAYFIELD_MEM1
 ; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1 ; Boats Right
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
-	.endr
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
+	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
 	.rept 3
-		.by I_WAVES_L I_WAVES_R                                ; 6
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
+	.endr
+	.by I_WAVES_L                                                      ; 1
 
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
-	.endr
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
+	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
 	.rept 3
-		.by I_WAVES_L I_WAVES_R                                ; 6
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
+	.endr
+	.by I_WAVES_L                                                      ; 1
 
 TITLE_MEM4
 ; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE
@@ -286,29 +288,33 @@ INSTRUCT_MEM3
 
 PLAYFIELD_MEM2
 ; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1 ; Boats Left
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R           ; 4
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R           ; 4
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
 INSTRUCT_MEM4
 ; 9  |to reach freedom. You have three chances| INSTXT_1
@@ -333,35 +339,37 @@ INSTRUCT_MEM7
 
 PLAYFIELD_MEM4
 ; 7  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2 ; Boats Right
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
-	.endr
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
+	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
 	.rept 3
-		.by I_WAVES_L I_WAVES_R                                ; 6
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
+	.endr
+	.by I_WAVES_L                                                      ; 1
 
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
-	.endr
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
+	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
 	.rept 3
-		.by I_WAVES_L I_WAVES_R                                ; 6
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
+	.endr
+	.by I_WAVES_L                                                      ; 1
 
 
 INSTRUCT_MEM8
@@ -385,29 +393,33 @@ SCORING_MEM3
 
 PLAYFIELD_MEM5
 ; 8  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2 ; Boats Left
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R           ; 4
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R           ; 4
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
 CONTROLS_MEM1 ; Game Controls
 ; 19 |Use joystick control to jump forward,   | INSTXT_3
@@ -443,35 +455,37 @@ PLAYFIELD_MEM3 ; Default display of "Beach", for lack of any other description, 
 
 PLAYFIELD_MEM7
 ; 10  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3 ; Boats Right
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
-	.endr
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
+	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
 	.rept 3
-		.by I_WAVES_L I_WAVES_R                                ; 6
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
+	.endr
+	.by I_WAVES_L                                                      ; 1
 
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
-	.endr
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
+	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
 	.rept 3
-		.by I_WAVES_L I_WAVES_R                                ; 6
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
+	.endr
+	.by I_WAVES_L                                                      ; 1
 
 
 PLAYFIELD_MEM6 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
@@ -519,29 +533,33 @@ PLAYFIELD_MEM15 ; Default display of "Beach", for lack of any other description,
 
 PLAYFIELD_MEM8
 ; 11  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3 ; Boats Left
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R           ; 4
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R           ; 4
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
 PLAYFIELD_MEM18 ; One last line of Beach
 ; 21  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT2
@@ -582,35 +600,37 @@ SCREEN_SAVED
 
 PLAYFIELD_MEM10
 ; 13  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4 ; Boats Right
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
-	.endr
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
+	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
 	.rept 3
-		.by I_WAVES_L I_WAVES_R                                ; 6
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
+	.endr
+	.by I_WAVES_L                                                      ; 1
 
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
-	.endr
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
+	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
 	.rept 3
-		.by I_WAVES_L I_WAVES_R                                ; 6
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
+	.endr
+	.by I_WAVES_L                                                      ; 1
 
 
 ; FROG SAVED screen., 25 lines:
@@ -644,29 +664,33 @@ FROGSAVE_MEM
 
 PLAYFIELD_MEM11
 ; 14  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4 ; Boats Left
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R           ; 4
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R           ; 4
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
 
 ; FROG DEAD screen., 25 lines:
@@ -700,35 +724,37 @@ FROGDEAD_MEM
 
 PLAYFIELD_MEM13
 ; 16  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5 ; Boats Right
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
-	.endr
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
+	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
 	.rept 3
-		.by I_WAVES_L I_WAVES_R                                ; 6
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
+	.endr
+	.by I_WAVES_L                                                      ; 1
 
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
-	.endr
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
+	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
 	.rept 3
-		.by I_WAVES_L I_WAVES_R                                ; 6
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
+	.endr
+	.by I_WAVES_L                                                      ; 1
 
 
 ; GAME OVER screen., 25 lines:
@@ -762,93 +788,103 @@ GAMEOVER_MEM
 
 PLAYFIELD_MEM14
 ; 17  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5 ; Boats Left
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R           ; 4
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R           ; 4
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
 
 	.align $0100
 
 PLAYFIELD_MEM16
 ; 19  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6 ; Boats Right
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
-	.endr
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
+	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
 	.rept 3
-		.by I_WAVES_L I_WAVES_R                                ; 6
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
+	.endr
+	.by I_WAVES_L                                                      ; 1
 
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 6
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
-	.endr
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
+	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
 	.rept 3
-		.by I_WAVES_L I_WAVES_R                                ; 6
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                                ; 8
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
 	.endr
-	.by I_WAVES_L                                              ; 1
+	.by I_WAVES_L                                                      ; 1
+	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                                        ; 6
+	.endr
+	.by I_WAVES_L                                                      ; 1
 
 
 	.align $0100
 
 PLAYFIELD_MEM17
 ; 20  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6 ; Boats Left
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R           ; 4
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.rept 4
-		.by I_WAVES_L I_WAVES_R                           ; 8
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.rept 3
+		.by I_WAVES_L I_WAVES_R                             ; 6
 	.endr
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB       ; 5
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R           ; 4
+	.by I_WAVES_L                                           ; 1
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
+	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
 
 	.align $0100
@@ -1076,6 +1112,3 @@ PLAYFIELD_MEM_HI_TABLE
 	.byte >PLAYFIELD_MEM16
 	.byte >PLAYFIELD_MEM17
 	.byte >PLAYFIELD_MEM18
-
-
-
