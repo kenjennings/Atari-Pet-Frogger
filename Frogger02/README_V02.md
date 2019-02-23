@@ -70,11 +70,11 @@ Version 02, February 2019 continues to maintain the same game play in the same f
 
 **Version 02, February 2019 notable changes:**
 
-**Lame sound effects added... **
+**Lame sound effects added...**
 
 Sound sequences and volume envelopes shaped by vertical blank interrupt, so longer running sounds (i.e. music) appears multi-tasking in parallel with everything else going on.   Sound effects are timed to the animation that occurs on the Title screen.  When the Frog moves in any direction there is a bump sound.  The game plays randomly changing water sloshing effects.  Upon a frog's inevitable demise Chopin's Funeral March plays.  Should the player manage to guide a frog to the safety of the opposite shore then Beethoven's Ode To joy plays. 
 
-**Input is changed to joystick control. ** 
+**Input is changed to joystick control.** 
 
 Buh-bye keyboard. The joystick values are cooked to make the code's analysis easier later on.  It reverses the bit values making 1 instead of 0 indicate the direction is pressed.  Diagonal movement is blocked and substituted with forward direction.  Down movement is discarded.  Since the joystick needs only 4 bits for directions, it unifies the controller input by adding the trigger bit to the joystick bits (the fifth bit).
 
