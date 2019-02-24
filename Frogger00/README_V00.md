@@ -24,7 +24,13 @@ You're Dead!
 
 [Frogger00.xex](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger00/Frogger00.xex "Frogger00.xex") Atari executable program.
 
+---
+
 The assembly code for the Atari depends on my MADS include library here: https://github.com/kenjennings/Atari-Mads-Includes.  
+
+The MADS 6502 assembler is here: http://http://mads.atari8.info
+
+I generally build in eclipse from the WUDSN ide.  WUDSN can be found here: https://www.wudsn.com/index.php  
 
 ---
 
