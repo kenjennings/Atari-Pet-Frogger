@@ -54,15 +54,19 @@ Game Over:
 
 The assembly code for the Atari depends on my MADS include library here: https://github.com/kenjennings/Atari-Mads-Includes.  
 
+The MADS 6502 assembler is here: http://http://mads.atari8.info
+
+I generally build in eclipse from the WUDSN ide.  WUDSN can be found here: https://www.wudsn.com/index.php  
+
 ---
 
 **PET FROGGER for Commodore PET 4032**
 
 (c) November 1983 by John C. Dale, aka Dalesoft
 
-[Version 00](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V00.md "Version 00") Ported (parodied) to Atari 8-bit computers November 2018 by Ken Jennings (if this were 1983, aka FTR Enterprises)
+[Version 00](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V00.md "Version 00") Ported (or parodied) to Atari 8-bit computers November 2018 by Ken Jennings (if this were 1983, aka FTR Enterprises)
 
-[Version 01](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V01.md "Version 01") Ported to Atari 8-bit computers December 2018 by Ken Jennings 
+[Version 01](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V01.md "Version 01") Updated for Atari 8-bit computers December 2018 by Ken Jennings 
 
 Version 02, February 2019 continues to maintain the same game play in the same format as prior versions.  The screen display is still based on the plain text mode (ANTIC mode 2, OS Text Mode 0).  The Frog is a character and moves in steps the size of a character.  Everything else about the game internals and operation has been Atari-fied.
 
@@ -86,15 +90,11 @@ The text characters A-Z, a-z and 0-9 are all redefined in a square style.  Most 
 
 **Atari-fied Playfield Graphics handling.**
 
-The title screen now includes the last game score and the high score.
-    - Custom Display Lists for all screens. 
-    - All screen memory is assembled in place for direct display, therefore there is no screen redrawing.
-    - Switching between display screens is nearly instantaneous, which is accomplished by merely updating the system's Display List pointer.  
-        - Screen switching is so fast that transitions are added to allow the user time to recover from pressing the trigger so that the same button press is not accepted as input on the following screen.  
-    - Boats move by coarse-scrolling done via by LMS updates in the Display List.
-    - Title screen animation is also done with LMS updates instead of redrawing.
-    - The updates and redraws to screen memory is vastly reduced to the frog moving on the game screen.  (Also the scores, lives, and saved frog updates).
-    - All screens share the same Display List instructions for the bottom of the screen providing the prompt to Press a Button, and the continuously scrolling credits line.
+All screens are presented as custom Display Lists with the Display Lists and screen memory assembled directly where they will be used.  Therefore, there is no screen redrawing.  Switching between display screens is nearly instantaneous, which is accomplished by merely updating the system's Display List pointer.  In fact, screen switching is so fast that transitions are added to allow the user time to recover from pressing the trigger so that the same button press is not accepted as input on the following screen.
+
+Boats move by coarse-scrolling done via LMS updates in the Display List -- No redrawing of the boats occurs at all.  The Title screen animation is also done with LMS updates instead of redrawing.  The Title screen also now includes the last game score and the high score.  The LMS magic vastly reduces any manipulation at all in screen memeory.  The only thing left is moving the frog through the playfield screen memory, displaying the Scores, Lives, and Saved frogs statistics.
+
+All screens actually share the same Display List instructions for the bottom of the screen which provides the prompt to Press a Button, and the continuously scrolling credits line.  Therefore, there is only one set of code to manage these things for all the displays.
 
 **Display List Interrupts for color.**
 
