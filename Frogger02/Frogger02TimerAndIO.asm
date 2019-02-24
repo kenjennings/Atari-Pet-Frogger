@@ -346,7 +346,7 @@ ScrollTheCreditLine               ; scroll the text identifying the perpetrators
 
 	inc SCROLL_CREDIT_LMS         ; Move text left one position.
 	lda SCROLL_CREDIT_LMS
-	cmp #<EXTRA_BLANK_MEM         ; Did scroll position reach the end of the text?
+	cmp #<END_OF_CREDITS          ; Did scroll position reach the end of the text?
 	bne ManagePressAButtonPrompt  ; No.  We are done. 
 
 	lda #<SCROLLING_CREDIT        ; Yes, restart scroll from the beginning position.

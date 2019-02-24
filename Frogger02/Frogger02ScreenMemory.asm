@@ -146,10 +146,58 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
 
+; These things repeat six times.   Let's just type it once and macro it elsewhere.
+; Unfortunately, can't next .rept, so have to do the macro twice.
 
-; ANTIC's has a 4K boundary for screen memory.
-; But, we can simply align each set of lines into pages and that
-; will prevent any line of screen data from crossing over a
+; 4  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
+	.macro mLineOfRightBoats
+		.by I_WAVES_L I_WAVES_R                                 ;  2
+		.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF ; +6
+		.rept 3
+			.by I_WAVES_L I_WAVES_R                             ; +6
+		.endr
+		.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF ; +6
+		.rept 4
+			.by I_WAVES_L I_WAVES_R                             ; +8
+		.endr
+		.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF ; +6
+		.rept 3
+			.by I_WAVES_L I_WAVES_R                             ; +6 = 40
+		.endr
+	.endm
+
+	.macro mBoatsGoRight
+		mLineOfRightBoats ;   40
+		mLineOfRightBoats ; + 40 = 80
+	.endm
+
+
+; 5  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
+	.macro mLineOfLeftBoats
+		.rept 3
+			.by I_WAVES_L I_WAVES_R                             ;  6
+		.endr
+		.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; +6
+		.rept 3
+			.by I_WAVES_L I_WAVES_R                             ; +6
+		.endr
+		.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; +6
+		.rept 4
+			.by I_WAVES_L I_WAVES_R                             ; +8
+		.endr
+		.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; +6
+		.by I_WAVES_L I_WAVES_R                                 ; +2 = 40
+	.endm
+
+	.macro mBoatsGoLeft
+		mLineOfLeftBoats ;   40
+		mLineOfLeftBoats ; + 40 = 80
+	.endm
+
+
+; ANTIC has a 4K boundary for screen memory.
+; But, we can simply align screen data into pages and that
+; will prevent any line of displayed data from crossing over a
 ; 4K boundary.
 
 	.align $0100
@@ -173,21 +221,19 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 6  |                                        |
 
 ; Now:
-SCROLLING_CREDIT   ; 40+48+62+56+40 == 246;
-BLANK_MEM ; Blank text also used a blank in many other places.
+SCROLLING_CREDIT   ; 40+48+62+61+40 == 251 ; almost a page, how nice.
+BLANK_MEM ; Blank text also used for blanks in other places.
 	.sb "                                        " ; 40
 
-CREDIT_MEM1 ; The perpetrators identified...
+; The perpetrators identified...
 	.sb "PET FROGGER    (c) November 1983 by Dales" ATASCII_HEART "ft.   " ; 48
 
-CREDIT_MEM2
 	.sb "Original program for CBM PET 4032 written by John C. Dale.    " ; 62
 
-CREDIT_MEM3
-	.sb "Atari 8-bit computer port by Ken Jennings, V02, February 2019" ; 56
+	.sb "Atari 8-bit computer port by Ken Jennings, V02, February 2019" ; 61
 
 END_OF_CREDITS
-EXTRA_BLANK_MEM ; Trailing line for credit scrolling.
+EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
 	.sb "                                        " ; 40
 
 
@@ -206,7 +252,8 @@ EXTRA_BLANK_MEM ; Trailing line for credit scrolling.
 ; |i |U |iI|  |i |iU|L |  |  |i |  |  |  |i |iU|L |  |i |U |iI|  |i |  |i |  |i |I |U |  |i |I |U |  |i |iU|L |  |i |U |iI|
 ; |i |  |  |  |i |U |U |  |  |i |  |  |  |i |  |  |  |i |K |iK|  |iO|U |iI|  |iO|U |i |  |iO|U |i |  |i |U |U |  |i |K |iK|
 
-; Graphics data, DEAD FROG!  (40).  To make this scroll will need some leading spaces.
+; Graphics data, PET FROGGER title  (40).  Fortunately it just fits into 30 characters.
+; To make this scroll will need some leading spaces befoore each line
 
 TITLE_MEM1 ; Title text.
 	.sb "                                        " ; Leading blanks  for  scrolling.
@@ -219,12 +266,17 @@ TITLE_MEM3
 	.by I_iS I_S  I_S  I_S I_iS I_U  I_U  I_S I_S  I_iS I_S  I_S I_S I_iS I_S  I_S  I_S I_iS I_K  I_iK I_S I_iO I_U  I_iI I_S I_iO I_U  I_iS I_S I_iO I_U  I_iS I_S I_iS I_U  I_U  I_S I_iS I_K  I_iK
 
 
-; Playfield groups II
+; Mo Playfield Groups-o-Data
 ; Remember the part about screen memory not needing to be contiguous?
-; Here we do another weird thing with screen memory.  Declaring each
-; boat row at specific places relative to page alignments makes the
+; Here we do more deviant things to screen memory.   We declare each
+; boat row at specific places relative to page alignments which makes the
 ; low byte of each screen memory address location the same value for
-; each row.  This means the math for the LMS is the same for each row.
+; each row.  This means the math for the LMS is the same for all right 
+; rows, and then the same for all the left rows.
+; And, only the low byte of the LMS address needs to be updated which 
+; means less code for managing the coarse scrolling, and it makes the LMS 
+; update display-safe for ANTIC and can be done at any time without 
+; messing up ANTIC. Win, win, win.
 
 ; All the moving rows of boats start at low byte $00/0 (dec)
 ; Other lines of data start after to fill in the page.
@@ -232,38 +284,8 @@ TITLE_MEM3
 	.align $0100
 
 PLAYFIELD_MEM1
-; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1 ; Boats Right
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
+; 4  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
+	mBoatsGoRight
 
 TITLE_MEM4
 ; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE
@@ -287,34 +309,9 @@ INSTRUCT_MEM3
 	.align $0100
 
 PLAYFIELD_MEM2
-; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1 ; Boats Left
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
+; 5  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
+	mBoatsGoLeft
 
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
 INSTRUCT_MEM4
 ; 9  |to reach freedom. You have three chances| INSTXT_1
@@ -331,45 +328,15 @@ INSTRUCT_MEM6
 INSTRUCT_MEM7
 ; 12 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
 	.sb "rivers like this:  "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "  Land only on  "
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB
+	.sb "  Land only on "
 
 
 	.align $0100
 
 PLAYFIELD_MEM4
-; 7  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2 ; Boats Right
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
+; 7  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
+	mBoatsGoRight
 
 
 INSTRUCT_MEM8
@@ -392,34 +359,9 @@ SCORING_MEM3
 	.align $0100
 
 PLAYFIELD_MEM5
-; 8  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2 ; Boats Left
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
+; 8  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
+	mBoatsGoLeft
 
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
 CONTROLS_MEM1 ; Game Controls
 ; 19 |Use joystick control to jump forward,   | INSTXT_3
@@ -454,39 +396,8 @@ PLAYFIELD_MEM3 ; Default display of "Beach", for lack of any other description, 
 	.align $0100
 
 PLAYFIELD_MEM7
-; 10  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3 ; Boats Right
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-
+; 10  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
+	mBoatsGoRight
 
 PLAYFIELD_MEM6 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 9  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
@@ -532,34 +443,9 @@ PLAYFIELD_MEM15 ; Default display of "Beach", for lack of any other description,
 	.align $0100
 
 PLAYFIELD_MEM8
-; 11  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3 ; Boats Left
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
+; 11  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
+	mBoatsGoLeft 
 
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
 
 PLAYFIELD_MEM18 ; One last line of Beach
 ; 21  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT2
@@ -599,38 +485,8 @@ SCREEN_SAVED
 	.align $0100
 
 PLAYFIELD_MEM10
-; 13  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4 ; Boats Right
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
+; 13  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
+	mBoatsGoRight
 
 
 ; FROG SAVED screen., 25 lines:
@@ -663,34 +519,8 @@ FROGSAVE_MEM
 	.align $0100
 
 PLAYFIELD_MEM11
-; 14  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4 ; Boats Left
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
-
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
+; 14  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
+	mBoatsGoLeft 
 
 
 ; FROG DEAD screen., 25 lines:
@@ -723,39 +553,8 @@ FROGDEAD_MEM
 	.align $0100
 
 PLAYFIELD_MEM13
-; 16  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5 ; Boats Right
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-
+; 16  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
+	mBoatsGoRight
 
 ; GAME OVER screen., 25 lines:
 ; 10 blank lines.
@@ -787,104 +586,22 @@ GAMEOVER_MEM
 	.align $0100
 
 PLAYFIELD_MEM14
-; 17  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5 ; Boats Left
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
-
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
+; 17  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
+	mBoatsGoLeft 
 
 
 	.align $0100
 
 PLAYFIELD_MEM16
-; 19  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6 ; Boats Right
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-
-	.by I_WAVES_R I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF  ; 7
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
-	.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF            ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                                        ; 6
-	.endr
-	.by I_WAVES_L                                                      ; 1
+; 19  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
+	mBoatsGoRight
 
 
 	.align $0100
 
 PLAYFIELD_MEM17
-; 20  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6 ; Boats Left
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
-
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.rept 3
-		.by I_WAVES_L I_WAVES_R                             ; 6
-	.endr
-	.by I_WAVES_L                                           ; 1
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L   ; 5
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; 6
-	.by I_WAVES_R I_WAVES_L I_WAVES_R                       ; 3
+; 20  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
+	mBoatsGoLeft 
 
 
 	.align $0100
@@ -893,8 +610,8 @@ PLAYFIELD_MEM17
 ; Color Layouts for the screens.
 ; 23 lines of data each, not 25.
 ; Line 24 for the Press A Button Prompt and 
-; line 25 for the scrolling credits are managed directly, 
-; so they do not need entries in the tables.
+; line 25 for the scrolling credits are managed directly, by
+; the VBI, so they do not need entries in the tables.
 ; --------------------------------------------------------------------------
 ; FYI from GTIA.asm:
 ; COLOR_ORANGE1 =      $10
@@ -943,8 +660,8 @@ GAME_BACK_COLORS
 	.by COLOR_RED_ORANGE+2 COLOR_BLUE1     COLOR_BLUE1+4     ; Beach, boats, boats.
 	.by COLOR_ORANGE2+2    COLOR_BLUE2     COLOR_BLUE2+4     ; Beach, boats, boats.
 	.by COLOR_RED_ORANGE+2 COLOR_LITE_BLUE COLOR_LITE_BLUE+4 ; Beach, boats, boats.
-	.by COLOR_ORANGE2+2    COLOR_AQUA      COLOR_AQUA+4      ; Beach, boats, boats.
-	.by COLOR_RED_ORANGE+2 COLOR_BLUE1     COLOR_BLUE1+4     ; Beach, boats, boats.
+	.by COLOR_ORANGE2+2    COLOR_BLUE1     COLOR_BLUE1+4     ; Beach, boats, boats.
+	.by COLOR_RED_ORANGE+2 COLOR_AQUA      COLOR_AQUA+4      ; Beach, boats, boats.
 	.by COLOR_ORANGE2+2                                      ; one last Beach.
 
 	.by COLOR_GREEN                                        ; grassy gap

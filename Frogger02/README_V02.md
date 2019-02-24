@@ -1,6 +1,6 @@
 # Atari PET FROGGER Version 02
 
- PET FROGGER game for Commodore PET 4032 ported to the Atari 8-bit computers
+PET FROGGER game for Commodore PET 4032 ported to the Atari 8-bit computers
 
 Video of the game play on YouTube: https://youtu.be/z5lkdjZt3bE
   
@@ -56,7 +56,7 @@ The assembly code for the Atari depends on my MADS include library here: https:/
 
 ---
 
-PET FROGGER for Commodore PET 4032
+**PET FROGGER for Commodore PET 4032**
 
 (c) November 1983 by John C. Dale, aka Dalesoft
 
@@ -70,7 +70,7 @@ Version 02, February 2019 continues to maintain the same game play in the same f
 
 **Version 02, February 2019 notable changes:**
 
-**Lame sound effects added...**
+**Lame sound effects added.**
 
 Sound sequences and volume envelopes shaped by vertical blank interrupt, so longer running sounds (i.e. music) appears multi-tasking in parallel with everything else going on.   Sound effects are timed to the animation that occurs on the Title screen.  When the Frog moves in any direction there is a bump sound.  The game plays randomly changing water sloshing effects.  Upon a frog's inevitable demise Chopin's Funeral March plays.  Should the player manage to guide a frog to the safety of the opposite shore then Beethoven's Ode To joy plays. 
 
