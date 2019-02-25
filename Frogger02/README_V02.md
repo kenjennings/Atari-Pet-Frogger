@@ -78,7 +78,7 @@ Version 02, February 2019 continues to maintain the same game play in the same f
 
 **Lame sound effects added.**
 
-Sound sequences and volume envelopes shaped by vertical blank interrupt, so longer running sounds (i.e. music) appears multi-tasking in parallel with everything else going on.   Sound effects are timed to the animation that occurs on the Title screen.  When the Frog moves in any direction there is a bump sound.  The game plays randomly changing water sloshing effects.  Upon a frog's inevitable demise Chopin's Funeral March plays.  Should the player manage to guide a frog to the safety of the opposite shore then Beethoven's Ode To joy plays. 
+Sound sequences and volume envelopes are shaped by vertical blank interrupt, so longer running sounds (i.e. music) appears multi-tasking in parallel with everything else going on. Sound effects are timed to the animation that occurs on the Title screen.  When the Frog moves in any direction there is a bump sound.  The game plays randomly changing water sloshing effects. Upon a frog's inevitable demise Chopin's Funeral March plays. Should the player manage to guide a frog to the safety of the opposite shore then Beethoven's Ode To joy plays.
 
 **Input is changed to joystick control.** 
 
@@ -98,21 +98,22 @@ Boats move by coarse-scrolling done via LMS updates in the Display List -- No re
 
 All screens actually share the same Display List instructions for the bottom of the screen which provides the prompt to Press a Button, and the continuously scrolling credits line.  Therefore, there is only one set of code to manage these things for all the displays.
 
-**Display List Interrupts for color.**
+**Display List Interrupts for color**
 
-    - Every line on every screen has its own base color and text luminance.
-    - Dead Frog, Game Over, and Saved Frog screens include full screen animations which are simply updates to the color tables.
-    - Animated transitions and fades between screens are also simple manipulation of the color tables.
+A Display list Interrupt is used on every line of the scfeen to provide each line with its own base color and text luminance.  The top 23 lines belong to the game, and the bottom two lines belong to the Vertical Blank Interupt  for the Prompt to Press A Button, and the continuously scrolling credits text.  The Dead Frog, Game Over, and Saved Frog screens include full screen animations which are simply updates to the Display List Interupt color tables.
 
 **Vertical Blank Interrupt**
 
-    - Immediate VBI controls switching between different Display Lists.
-    - Deferred VBI handles several tasks:
-        - Animation timer updates.
-        - Managing the Press A Button prompt color cycling. 
-        - Continuously scrolling the bottom line of the display showing the credits. 
-        - Playing sequences of sound effect, and volume shaping the sounds.
+An Immediate VBI controls switching between different Display Lists.  The main code updates a value indicating which screen to switch to, then the VBI applies the associated update to the Operating System's Display List pointer (SDLST), and the screen is switched at the top of the frame.  Virtually instant.   In fact, the change is so fast that originally there were control problems between the Dead Frog screen and the Game Over screen.  The Game Over screen is able to accept input immediately, so the user did not have time to release the button press to leave the Dead Frog screen.  This would be inadvertently read by the input to leave the Game Over screen.  I should have put in some code to debounce the button, but instead added a bit of a pause, and fade and animation of the colors to give the user time to react.
+
+There is also a Deferred Vertical Blank Interrupt handling several tasks. It updates timers controlling the game speed.  It manages the display and animation of the Press A Button Prompt.  A couple bytes negotiated between the main code and the VBI exchange information about the state of the prompt and whether or not it should be visible.   
+
+The Deferred VBI also manages the continuously scrolling credits at the bottom of the screen.  This is only an update of an LMS instruction in the Display List.  And since all the text fits inside one page, the update is only incrementing the low byte of the LMS address, and resetting it as needed.  The text scrolls no matter what else is occuring in the game, so it pushes the illusion that the game is multitasking more than it really is.
+
+Finally, the Deferred VBI manages the sound system -- a very, idiotically-simple, sound sequence player.  Given a pointer to a sound event for each POKEY voice, the sequencer executes the directions of the event which could be to play a sound as a specific volume, or wait a number of frames using the current setting, or to stop playing sound.  This provides Attack/Decay/Sustain/Release control for sounds, changing the sound distortions on each frame, and playing (simple) music.  Since this is done by the VBI, it appears the sound is multi-tasking, and other screen transitions can occur while sound is playing (for instance, the Funeral March and Ode To Joy may still be playing while screen animations continue to transition back to the main game screen.
 
 ---
 
-[Back to Home](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README.md "Home") 
+[Back to Home](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README.md "Home")
+
+
