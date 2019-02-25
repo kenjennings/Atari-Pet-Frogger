@@ -2,7 +2,7 @@
 
 PET FROGGER game for Commodore PET 4032 ported to the Atari 8-bit computers
 
-Video of the game play on YouTube: https://youtu.be/z5lkdjZt3bE
+Video of the game play on YouTube: https://youtu.be/9MDZP2bl5KY
   
 Title Screen:
 
@@ -11,6 +11,10 @@ Title Screen:
 Game Screen:
 
 [![Game Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V02_Game.png "Game Screen")](#features2)
+
+Dying Frog!
+
+[![Dying Frog!](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V02_Dying.png "Dying Frog!")](#features3)
 
 You're Dead!
 
