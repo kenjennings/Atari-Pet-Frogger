@@ -42,7 +42,7 @@ Other than the timer control routine monitoring for vertical blank changes there
 
 [Version 02 PET FROGGER](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02/README_V02.md "Version 02 Atari PET FROGGER") 
 
-[![V02 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger02/V02_ProtoComposite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02/README_V02.md)
+[![V02 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger02/V02_Composite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02/README_V02.md)
 
 Version 02 continues to maintain the same game play in the same format as prior version.  The screen display is still the plain text mode (ANTIC mode 2, OS Text Mode 0) and frog movement is the size of a character.  Everything else about the game working and operation has been Atari-fied.
 
