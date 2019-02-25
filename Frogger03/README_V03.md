@@ -60,7 +60,7 @@ Finally, the standard text mode on the Atari provides limited color.   The per-l
 
 Bigger frogs means bigger boats.  Smoothly moving bigger boats and bigger Frogs in increments smaller than a character means escalating the moving object implementation into a higher level of warfare.  This could mean any or all of the following:  Multiple versions of the character objects at different offset positions, using fine scrolling, and Player/Missile graphics.  (In other words, using an Atari like it was meant to be.) 
 
-What kind of game is Pet Frogger?  (And should it be expanded?)  
+**What kind of game is Pet Frogger?  (And should it be expanded?)**
 
 The author describes it as Frogger-like.  (Frogger was a new game in arcades when he wrote the original game of Pet Frogger.) Frogger provides a myriad of enemies and environmental hazards.  Consequently, objects in Frogger are much slower moving and the Frog can be controlled in all four directions.
 
