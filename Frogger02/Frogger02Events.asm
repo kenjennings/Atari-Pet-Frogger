@@ -194,7 +194,7 @@ ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transiti
 
 	; This was part of the Start event, but after the change to keep the 
 	; scores displayed on the title screen it would end up erasing the 
-	; last game score as soon as the title transistion animation completed.
+	; last game score as soon as the title transition animation completed.
 	; Therefore resetting the score is deferred until leaving the Title.
 	jsr ClearGameScores     ; Zero the score.  And high score if not set.
 
@@ -247,6 +247,7 @@ ZeroCOLPF2
 
 	; Finished stage 1, now setup Stage 2
 	jsr CopyScoreToScreen   ; Make sure the score is updated in screen memory.
+	jsr PrintFrogsAndLives
 	lda #2
 	sta EventCounter
 	lda #0

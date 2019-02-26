@@ -313,12 +313,12 @@ DisplayGameScreen
 
 	jsr SetBoatSpeed       ; Animation speed set by number of saved frogs
 
-	lda #DISPLAY_GAME      ; Tell VBI to change screens.
-	jsr ChangeScreen       ; Then copy the color tables.
-
 	; Display the current score and number of frogs that crossed the river.
 	jsr CopyScoreToScreen
 	jsr PrintFrogsAndLives
+
+	lda #DISPLAY_GAME      ; Tell VBI to change screens.
+	jsr ChangeScreen       ; Then copy the color tables.
 
 	mRegRestoreAYX          ; Restore X, Y and A
 
