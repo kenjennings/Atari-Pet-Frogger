@@ -341,24 +341,34 @@ DoAnimateClock
 ScrollTheCreditLine               ; scroll the text identifying the perpetrators
 	dec ScrollCounter             ; subtract from scroll delay counter
 	bne ManagePressAButtonPrompt  ; Not 0 yet, so no scrolling.
-	lda #2                        ; Reset counter to original value.
+	lda #1                      ; Reset counter to original value.
 	sta ScrollCounter
 	; Yeah, ANTIC support fine horizontal scrolling 16 color clocks or 
 	; 4 text characters at a time.  But, this is a little more simple 
 	; code if we scroll only one character per each coarse scroll.
-	dec CreditHSCROL              ; Fine scroll 1 position.
-	bne ManagePressAButtonPrompt  ; If it did not go to 0 then we're done here...
-	lda #4
-	sta CreditHSCROL              ; Reset horizontal scrolling.
-	sta HSCROL
-	inc SCROLL_CREDIT_LMS         ; Move text left one position.
+
+	dec CreditHSCROL             ; Subtract one color clock from the left (aka fine scroll).
+	beq ResetCreditScroll        ; If it is 0, then time for the next coarse scroll.
+	
+	lda CreditHSCROL             ; Not zero.  Get current value.
+	bne UpdateCreditHSCROL       ; And go update the hardware fine scroll register.
+	
+ResetCreditScroll                ; Fine Scroll reached 0, so coarse scroll the text.
+	inc SCROLL_CREDIT_LMS        ; Move text left one character position.
 	lda SCROLL_CREDIT_LMS
-	cmp #<END_OF_CREDITS          ; Did scroll position reach the end of the text?
-	bne ManagePressAButtonPrompt  ; No.  We are done. 
+	cmp #<END_OF_CREDITS         ; Did coarse scroll position reach the end of the text?
+	bne RestartCreditHSCROL      ; No.  We are donewith coarse scroll, now reset fine scroll. 
 
-	lda #<SCROLLING_CREDIT        ; Yes, restart scroll from the beginning position.
+	lda #<SCROLLING_CREDIT        ; Yes, restart coarse scroll to the beginning position.
 	sta SCROLL_CREDIT_LMS
+	
+RestartCreditHSCROL               ; Reset the 
+	lda #4                        ; horizontal fine 
+	sta CreditHSCROL              ; scrolling.
 
+UpdateCreditHSCROL
+	sta HSCROL                    ; Update the hardware fine scroll register.
+	
 ; ======== Manage the prompt flashing for Press A Button ========
 ManagePressAButtonPrompt
 	lda EnablePressAButton

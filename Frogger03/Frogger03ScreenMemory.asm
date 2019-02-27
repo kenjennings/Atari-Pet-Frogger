@@ -221,12 +221,12 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 6  |                                        |
 
 ; Now:
-SCROLLING_CREDIT   ; 40+48+62+61+40 == 251 ; almost a page, how nice.
+SCROLLING_CREDIT   ; 40+52+62+61+40 == 255 ; almost a page, how nice.
 BLANK_MEM ; Blank text also used for blanks in other places.
 	.sb "                                        " ; 40
 
 ; The perpetrators identified...
-	.sb "PET FROGGER    (c) November 1983 by Dales" ATASCII_HEART "ft.   " ; 48
+	.sb "    PET FROGGER    (c) November 1983 by Dales" ATASCII_HEART "ft.   " ; 52
 
 	.sb "Original program for CBM PET 4032 written by John C. Dale.    " ; 62
 
@@ -284,6 +284,11 @@ TITLE_MEM3
 	.align $0100
 
 PLAYFIELD_MEM1
+PLAYFIELD_MEM4
+PLAYFIELD_MEM7
+PLAYFIELD_MEM10
+PLAYFIELD_MEM13
+PLAYFIELD_MEM16
 ; 4  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
 	mBoatsGoRight
 
@@ -309,6 +314,11 @@ INSTRUCT_MEM3
 	.align $0100
 
 PLAYFIELD_MEM2
+PLAYFIELD_MEM5
+PLAYFIELD_MEM8
+PLAYFIELD_MEM11
+PLAYFIELD_MEM14
+PLAYFIELD_MEM17
 ; 5  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
 	mBoatsGoLeft
 
@@ -334,9 +344,9 @@ INSTRUCT_MEM7
 
 	.align $0100
 
-PLAYFIELD_MEM4
-; 7  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
-	mBoatsGoRight
+;PLAYFIELD_MEM4
+;; 7  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
+;	mBoatsGoRight
 
 
 INSTRUCT_MEM8
@@ -358,9 +368,9 @@ SCORING_MEM3
 
 	.align $0100
 
-PLAYFIELD_MEM5
+;PLAYFIELD_MEM5
 ; 8  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
-	mBoatsGoLeft
+;	mBoatsGoLeft
 
 
 CONTROLS_MEM1 ; Game Controls
@@ -395,9 +405,9 @@ PLAYFIELD_MEM3 ; Default display of "Beach", for lack of any other description, 
 
 	.align $0100
 
-PLAYFIELD_MEM7
-; 10  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
-	mBoatsGoRight
+;PLAYFIELD_MEM7
+;; 10  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
+;	mBoatsGoRight
 
 PLAYFIELD_MEM6 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 9  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
@@ -442,9 +452,9 @@ PLAYFIELD_MEM15 ; Default display of "Beach", for lack of any other description,
 
 	.align $0100
 
-PLAYFIELD_MEM8
-; 11  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
-	mBoatsGoLeft 
+;PLAYFIELD_MEM8
+;; 11  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
+;	mBoatsGoLeft 
 
 
 PLAYFIELD_MEM18 ; One last line of Beach
@@ -484,9 +494,9 @@ SCREEN_SAVED
 
 	.align $0100
 
-PLAYFIELD_MEM10
-; 13  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
-	mBoatsGoRight
+;PLAYFIELD_MEM10
+;; 13  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
+;	mBoatsGoRight
 
 
 ; FROG SAVED screen., 25 lines:
@@ -518,9 +528,9 @@ FROGSAVE_MEM
 
 	.align $0100
 
-PLAYFIELD_MEM11
-; 14  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
-	mBoatsGoLeft 
+;PLAYFIELD_MEM11
+;; 14  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
+;	mBoatsGoLeft 
 
 
 ; FROG DEAD screen., 25 lines:
@@ -552,9 +562,9 @@ FROGDEAD_MEM
 
 	.align $0100
 
-PLAYFIELD_MEM13
-; 16  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
-	mBoatsGoRight
+;PLAYFIELD_MEM13
+;; 16  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
+;	mBoatsGoRight
 
 ; GAME OVER screen., 25 lines:
 ; 10 blank lines.
@@ -583,25 +593,25 @@ GAMEOVER_MEM
 	.by $0 $0 $0 I_K  I_IK I_IL I_Y I_IY I_II I_IO I_Y I_IS I_S  I_IY I_Y I_IS I_U  I_U  I_S I_S I_S I_K  I_IK I_IL I_L I_S  I_IO I_II I_S I_IY I_IK I_U  I_O I_IY I_Y  I_IO I_O $0 $0 $0
 
 
-	.align $0100
+;	.align $0100
 
-PLAYFIELD_MEM14
-; 17  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
-	mBoatsGoLeft 
+;PLAYFIELD_MEM14
+;; 17  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
+;	mBoatsGoLeft 
 
 
-	.align $0100
+;	.align $0100
 
-PLAYFIELD_MEM16
+;PLAYFIELD_MEM16
 ; 19  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
-	mBoatsGoRight
+;	mBoatsGoRight
 
 
-	.align $0100
+;	.align $0100
 
-PLAYFIELD_MEM17
-; 20  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
-	mBoatsGoLeft 
+;PLAYFIELD_MEM17
+;; 20  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
+;	mBoatsGoLeft 
 
 
 	.align $0100
