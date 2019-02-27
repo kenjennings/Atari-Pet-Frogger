@@ -99,7 +99,7 @@ Add another hazard/enemy object?
 
 - Fine scrolling the credits scrolling line.   Looks most slick.  Someone may mistake me for a professional.
 
-- Use only one line of data for all the boats left, and one for all the boats right.  All lines in the same direction display the same data.  This reduces memory by 800 bytes (10 lines * 80) 
+- Use only one line of data for all the boats moving left, and one for all the boats moving right.  All lines going in the same direction display the same screen memory data.  This reduces memory by 800 bytes (10 lines * 80), close to 10% of the final size of Version 02. 
 
 
 ---
