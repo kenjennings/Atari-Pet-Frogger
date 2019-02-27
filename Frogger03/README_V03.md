@@ -93,4 +93,15 @@ Add another hazard/enemy object?
 
 ---
 
+**Version 03 PET FROGGER -- Current Experimentation in progress....**
+
+- Doubled the speed for Ode To Joy.   It was taking too long to play at normal speed.
+
+- Fine scrolling the credits scrolling line.   Looks most slick.  Someone may mistake me for a professional.
+
+- Use only one line of data for all the boats left, and one for all the boats right.  All lines in the same direction display the same data.  This reduces memory by 800 bytes (10 lines * 80) 
+
+
+---
+
 [Back to Home](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README.md "Home") 
