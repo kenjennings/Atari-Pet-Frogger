@@ -253,18 +253,36 @@ EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
 ; |i |  |  |  |i |U |U |  |  |i |  |  |  |i |  |  |  |i |K |iK|  |iO|U |iI|  |iO|U |i |  |iO|U |i |  |i |U |U |  |i |K |iK|
 
 ; Graphics data, PET FROGGER title  (40).  Fortunately it just fits into 30 characters.
-; To make this scroll will need some leading spaces befoore each line
+; To make this scroll will need some leading spaces before each line
 
-TITLE_MEM1 ; Title text.
-	.sb "                                        " ; Leading blanks  for  scrolling.
-	.by I_iS I_iU I_iK I_S I_iS I_iU I_iU I_S I_iU I_iS I_iU I_S I_S I_iS I_iU I_iU I_S I_iS I_iU I_iK I_S I_iL I_iU I_iK I_S I_iL I_iU I_iU I_S I_iL I_iU I_iU I_S I_iS I_iU I_iU I_S I_iS I_iU I_iK
-TITLE_MEM2
-	.sb "                                        "  ; Leading blanks  for  scrolling.
-	.by I_iS I_U  I_iI I_S I_iS I_iU I_L  I_S I_S  I_iS I_S  I_S I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI I_S I_iS I_S  I_iS I_S I_iS I_I  I_U  I_S I_iS I_I  I_U  I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI
-TITLE_MEM3
-	.sb "                                        "  ; Leading blanks  for  scrolling.
-	.by I_iS I_S  I_S  I_S I_iS I_U  I_U  I_S I_S  I_iS I_S  I_S I_S I_iS I_S  I_S  I_S I_iS I_K  I_iK I_S I_iO I_U  I_iI I_S I_iO I_U  I_iS I_S I_iO I_U  I_iS I_S I_iS I_U  I_U  I_S I_iS I_K  I_iK
+; TITLE_MEM1 ; Title text.
+	; .sb "                                        " ; Leading blanks  for  scrolling.
+	; .by I_iS I_iU I_iK I_S I_iS I_iU I_iU I_S I_iU I_iS I_iU I_S I_S I_iS I_iU I_iU I_S I_iS I_iU I_iK I_S I_iL I_iU I_iK I_S I_iL I_iU I_iU I_S I_iL I_iU I_iU I_S I_iS I_iU I_iU I_S I_iS I_iU I_iK
+; TITLE_MEM2
+	; .sb "                                        "  ; Leading blanks  for  scrolling.
+	; .by I_iS I_U  I_iI I_S I_iS I_iU I_L  I_S I_S  I_iS I_S  I_S I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI I_S I_iS I_S  I_iS I_S I_iS I_I  I_U  I_S I_iS I_I  I_U  I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI
+; TITLE_MEM3
+	; .sb "                                        "  ; Leading blanks  for  scrolling.
+	; .by I_iS I_S  I_S  I_S I_iS I_U  I_U  I_S I_S  I_iS I_S  I_S I_S I_iS I_S  I_S  I_S I_iS I_K  I_iK I_S I_iO I_U  I_iI I_S I_iO I_U  I_iS I_S I_iO I_U  I_iS I_S I_iS I_U  I_U  I_S I_iS I_K  I_iK
 
+; Title text.   Bitmapped version for Mode 9.
+; Will not scroll these, so no need for individual labels and leading blanks.
+; 60 bytes here instead of the 240 bytes used for the scrolling text version.
+
+TITLE_MEM1
+	.by %11111000 %11111100 %11111100 %00111111 %00111110 %00011110 %00011111 %00011111 %00111111 %00111110
+	.by %11001100 %11000000 %00110000 %00110000 %00110011 %00110011 %00110000 %00110000 %00110000 %00110011
+	.by %11001100 %11111000 %00110000 %00111110 %00110011 %00110011 %00110000 %00110000 %00111110 %00110011
+	.by %11111000 %11000000 %00110000 %00110000 %00111110 %00110011 %00110111 %00110111 %00110000 %00111110
+	.by %11000000 %11000000 %00110000 %00110000 %00110110 %00110011 %00110011 %00110011 %00110000 %00110110
+	.by %11000000 %11111100 %00110000 %00110000 %00110011 %00011110 %00011111 %00011111 %00111111 %00110011
+
+TITLE_MEM7
+; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE underline
+;	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00 $00
+;	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00
+;	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H
+	.by %11111100 %11111100 %11111100 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111
 
 ; Mo Playfield Groups-o-Data
 ; Remember the part about screen memory not needing to be contiguous?
@@ -292,11 +310,11 @@ PLAYFIELD_MEM16
 ; 4  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
 	mBoatsGoRight
 
-TITLE_MEM4
-; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE
-	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00 $00
-	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00
-	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H
+T;ITLE_MEM4
+;; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE
+;	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00 $00
+;	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00
+;	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H
 
 INSTRUCT_MEM1 ; Basic instructions...
 ; 6  |Help the frogs escape from Doc Hopper's | INSTXT_1
@@ -751,7 +769,7 @@ OVER_TEXT_COLORS
 ; Tables listing pointers to all the assets.
 ; --------------------------------------------------------------------------
 
-DISPLAYLIST_LO_TABLE
+DISPLAYLIST_LO_TABLE  
 	.byte <TITLE_DISPLAYLIST
 	.byte <GAME_DISPLAYLIST
 	.byte <FROGSAVED_DISPLAYLIST
@@ -764,6 +782,30 @@ DISPLAYLIST_HI_TABLE
 	.byte >FROGSAVED_DISPLAYLIST
 	.byte >FROGDEAD_DISPLAYLIST
 	.byte >GAMEOVER_DISPLAYLIST
+
+DLI_LO_TABLE  ; Address of first chained DLI per each screen.
+	.byte <TITLE_DLI
+;	.byte <GAME_DLI
+;	.byte <FROGSAVED_DLI
+;	.byte <FROGDEAD_DLI
+;	.byte <GAMEOVER_DLI
+
+DLI_HI_TABLE
+	.byte >TITLE_DLI
+;	.byte >GAME_DLI
+;	.byte >FROGSAVED_DLI
+;	.byte >FROGDEAD_DLI
+;	.byte >GAMEOVER_DLI
+
+TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
+	.byte TITLE_DLI_2
+	.byte TITLE_DLI_3
+	.byte TITLE_DLI_3
+	.byte TITLE_DLI_3
+	.byte TITLE_DLI_3
+	.byte TITLE_DLI_3
+	.byte TITLE_DLI_3
+
 
 COLOR_BACK_LO_TABLE
 	.byte <TITLE_BACK_COLORS

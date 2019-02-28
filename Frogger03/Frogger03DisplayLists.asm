@@ -88,41 +88,57 @@ DISPLAY_OVER  = 4
 ; text for animating transitions.
 
 TITLE_DISPLAYLIST
-	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4|DL_DLI ; 20 blank scan lines.
+	.byte DL_BLANK_8, DL_BLANK_8            ; 16 blank scan lines.
+	.byte DL_BLANK_4|DL_DLI                 ; 4 blank lines. DLI sets COLPF1, COLPF2 for score text. 
 
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1       ; scores
-	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
+	mDL_LMS DL_TEXT_2,SCORE_MEM1            ; scores
+	.byte DL_BLANK_8|DL_DLI                 ; An empty line. DLI Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1.
 
-SCROLL_TITLE_LMS0 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM1       ; Scroll In Title.
-SCROLL_TITLE_LMS1 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM2       ; Scroll In Title
-SCROLL_TITLE_LMS2 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM3       ; Scroll In Title.
-	mDL_LMS DL_TEXT_2|DL_DLI,TITLE_MEM4       ; Underlines
-	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
+; Replace the 3 lines of Text Mode 2 used in Version 00, 01, 02 
+; with 6 lines of Map Mode 9.  
+; Only 10 bytes for each line (20 bytes total for 8 scan lines 
+; worth of screen real estate). 
+; Text mode is 40 bytes for the same area not including the 
+; character set image.
+; Not going to scroll the title this time.  Just fade it in 
+; using the display list colors.  
+; Also, the DLI can make six gradient transitions in the title 
+; instead of 3.
+ 
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1       ; DLI Set COLPF0 for Line 2
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM2       ; DLI Set COLPF0 for Line 3
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM3       ; DLI Set COLPF0 for Line 4
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM4       ; DLI Set COLPF0 for Line 5
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM5       ; DLI Set COLPF0 for Line 6
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM6       ; DLI Set COLPF0 for underlines
 
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1    ; Basic instructions...
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM2
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM3
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM4
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM5
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM6
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM7
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM8
-	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
+	.byte DL_BLANK_2                         ; An empty line.     2
+	mDL_LMS DL_MAP_9,TITLE_MEM7              ; Underlines        +4
+	.byte DL_BLANK_2|DL_DLI                  ; An empty line.    +2 = 8, DLI set BLACK for COLBAK.
 
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM1     ; Scoring
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM2
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM3
-	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
+	.byte DL_BLANK_8|DL_DLI                  ; DLI set AQUA for COLBK and COLPF2
 
-	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM1    ; Game Controls
-	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM2
+	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM1      ; Basic instructions... DLI set COLPF2
+	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM2      ; DLI set COLPF2
+	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM3      ; DLI set COLPF2
+	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM4      ; DLI set COLPF2
+	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM5      ; DLI set COLPF2
+	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM6      ; DLI set COLPF2
+	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM7      ; DLI set COLPF2
+	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM8      ; DLI set BLACK for COLBAK
+	.byte DL_BLANK_8|DL_DLI                  ; An empty line.  DLI set ORANGE2 for COLBK and COLPF2
 
-	.byte DL_BLANK_8|DL_DLI                   ; An empty line.
+	mDL_LMS DL_TEXT_4|DL_DLI,SCORING_MEM1    ; Scoring.  DLI set COLPF2
+	mDL_LMS DL_TEXT_4|DL_DLI,SCORING_MEM2    ; DLI set COLPF2
+	mDL_LMS DL_TEXT_4|DL_DLI,SCORING_MEM3    ; DLI set BLACK for COLBAK
+	.byte DL_BLANK_8|DL_DLI                  ; An empty line.  DLI set PINK for COLBK and COLPF2
 
-	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
+	mDL_LMS DL_TEXT_4|DL_DLI,CONTROLS_MEM1   ; Game Controls.  DLI set COLPF2
+	mDL_LMS DL_TEXT_4|DL_DLI,CONTROLS_MEM2   ; DLI set BLACK for COLBAK
+
+	.byte DL_BLANK_8|DL_DLI                  ; An empty line.  DLI sets prompt colors.
+
+	mDL_JMP BOTTOM_OF_DISPLAY                ; End of display.  See Page 0 for the evil.
 
 
 

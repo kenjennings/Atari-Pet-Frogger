@@ -269,8 +269,65 @@ MyDLI
 ; Then the code would need a lookup table of addresses to directly update the
 ; immediate mode values in the routines.
 
+	.align $0100
 
+TITLE_DLI ; DLI sets COLPF1, COLPF2 for score text. 
+	mRegSaveAX
 
+	ldx ThisDLI
+	lda COLPF2_TABLE,x   ; Get background color;
+	sta WSYNC            ; sync to end of scan line
+	sta COLPF2           ; Write new background color
+	lda COLPF1_TABLE,x   ; Get text color (luminance)
+	sta COLPF1           ; write new text color.
+
+	lda TITLE_DLI_CHAIN_TABLE, x ; update low byte for next chained DLI.
+	sta VDSLST
+
+	inc ThisDLI          ; next DLI.
+
+	mRegRestoreAX
+
+	rti
+
+TITLE_DLI_2 ; DLI sets COLPF2, COLBK for score text.  Mode 4 Text is different from Mode 2 text.
+	mRegSaveAX
+
+	ldx ThisDLI
+	lda COLPF2_TABLE,x   ; Get background color;
+	sta WSYNC            ; sync to end of scan line
+	sta COLBK            ; Write new background color
+	lda COLPF1_TABLE,x   ; Get text color (luminance)
+	sta COLPF2           ; write new text color.
+
+	lda TITLE_DLI_CHAIN_TABLE, x ; update low byte for next chained DLI.
+	sta VDSLST
+
+	inc ThisDLI          ; next DLI.
+
+	mRegRestoreAX
+
+	rti
+
+	
+TITLE_DLI_3 ; DLI sets COLPF2 for title text.  Mode 4 Text is different from Mode 2 text.
+	mRegSaveAX
+
+	ldx ThisDLI
+	lda COLPF1_TABLE,x   ; Get text color (luminance)
+	sta WSYNC            ; sync to end of scan line
+	sta COLPF2           ; write new text color.
+
+	lda TITLE_DLI_CHAIN_TABLE, x ; update low byte for next chained DLI.
+	sta VDSLST
+
+	inc ThisDLI          ; next DLI.
+
+	mRegRestoreAX
+
+	rti
+	
+	
 ;==============================================================================
 ;                                                           MyImmediateVBI
 ;==============================================================================

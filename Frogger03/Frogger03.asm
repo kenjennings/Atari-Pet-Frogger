@@ -359,12 +359,12 @@ CreditHSCROL    .byte 4  ; Fine scrolling the credits
 ; LMS instruction currently in use.
 
 BOTTOM_OF_DISPLAY
-	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to start game.
+	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to start game.; DLI sets HSCROL, (and COLPF1 for text.)
 SCROLL_CREDIT_LMS = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_HSCROLL,SCROLLING_CREDIT        ; The perpetrators identified
 
 ; Note that as long as the system VBI is functioning the address 
-; provided fo JVB does not matter at all.  The system VBI will update
+; provided for JVB does not matter at all.  The system VBI will update
 ; ANTIC after this using the address in the shadow registers (SDLST)
 
 	mDL_JVB TITLE_DISPLAYLIST   ; Restart display at the same display list.
