@@ -290,7 +290,7 @@ TITLE_DLI ; DLI sets COLPF1, COLPF2 for score text.
 
 	rti
 
-TITLE_DLI_2 ; DLI sets COLPF2, COLBK for score text.  Mode 4 Text is different from Mode 2 text.
+TITLE_DLI_1 ; DLI sets COLPF2, COLBK for score text.  Mode 4 Text is different from Mode 2 text.
 	mRegSaveAX
 
 	ldx ThisDLI
@@ -310,7 +310,7 @@ TITLE_DLI_2 ; DLI sets COLPF2, COLBK for score text.  Mode 4 Text is different f
 	rti
 
 	
-TITLE_DLI_3 ; DLI sets COLPF2 for title text.  Mode 4 Text is different from Mode 2 text.
+TITLE_DLI_2 ; DLI sets COLPF2 for title text.  Mode 4 Text is different from Mode 2 text.
 	mRegSaveAX
 
 	ldx ThisDLI

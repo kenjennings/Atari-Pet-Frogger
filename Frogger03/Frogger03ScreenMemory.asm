@@ -10,30 +10,47 @@
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019
+; Version 03, March 2019
 ;
 ; --------------------------------------------------------------------------
 
 ; ==========================================================================
 ; Screen Memory
 ;
-; The custom Display lists make the Atari impersonate the PET 4032's
-; 40-column, 25 line display.  Each Display List averages about 81 bytes,
-; so three can fit in the same page.
+; The Atari OS text printing is not being used, therefore the Atari OS's
+; screen editor's 24-line limitation is not an issue.  The game can be 
+; 25 lines like the original Pet 4032 screen.  Or it can be more. 
+; Soo, custom display list means do what we want.
 ;
-; The Atari OS text printing is not being used, therefore the Atari screen
-; editor's 24-line limitation is not an issue.
+; Prior versions used Mode 2 text lines exclusively to perpetuate the 
+; flavor of the original's text-mode-based game.
+; 
+; However, Version 03 makes a few changes.  The chunky text used for the
+; title and the dead/saved/game-over screens was built from Atari 
+; graphics control characters.   Version 03 changes this to a graphics 
+; mode that provides the same chunky-pixel size, but at only half the 
+; memory for the same screen geometry.  Two lines of graphics is 
+; vertically the same height as one line of text.  The block characters
+; patterns provide two apparent rows of pixels, so, everything is equal.  
 ;
-; Where a display expects completely static, blank, black lines a
-; display list would use real, blank line instructions.  However, the
-; ANTIC mode 2 text uses color differently from other text modes.
-; The "background" behind text uses COLPF2 and COLPF4 for the border.
-; Other modes use COLPF4 as true background through the border and
-; empty background behind text.  Therefore where the program expects
-; to use color in the background behind text, it uses a text instruction
-; pointing to an empty line of blank spaces, so that COLPF2 can be used
-; to show color within the same horizontal limits as the other text
-; in the screen. This makes it easy to "animate" with color changes to
-; the text background.
+; Switching to a graphics mode for the big text allows:
+; * Complete color expression for background into the overscan 
+;   area, and for the pixels if we so choose.  (Text mode manages 
+;   playfield and border colors differently.) 
+; * Six lines of graphics in place of three lines of text makes it 
+;   trivial to double the number of color changes in the big text.
+;   Just a DLI for each line.
+; * Without a separate border vs text background an apparent wider 
+; screen width can be faked using the background through the 
+; overscan area. 
+;  
+; In Version 02 blank lines of text were used and colored to make 
+; animated prize displays.  Instead of using a text mode we use 
+; actual blank lines instructions.  Again, since these display 
+; background color into the overscan area the prize animations are 
+; larger, filling the entire screen width.  Also, blanks smaller 
+; than a text line allow more frequent color transitions, so more 
+; eye candy on one display.
 ;
 ; Remember, screen memory need not be contiguous from line to line.
 ; Therefore, we can re-think the declaration of screen contents and
@@ -43,10 +60,13 @@
 ;    screen memory.  It is not something that must be copied to screen
 ;    memory.  Data properly placed in any memory makes it the actual
 ;    screen memory thanks to the Display List LMS instructions.
-; 2) All the scrolling boats lines can be put at the beginning of pages
-;    to simplify the math for the LMS address. Only the low byte of the
-;    LMS need be updated to perform scrolling.  But, this would be pretty
-;    wasteful using only 80 bytes of a 256 byte page.  What to do?
+; 2) All the boats moving left look the same.   All the boats moving 
+;    right looks the same.   For each we use one line of data, and then
+;    just repeat it for other lines.   Scrolling directions need not 
+;    be identical for every line even though the data is the same. 
+; 3) Organizing the boats row of graphics to sit within one page of data 
+;    means scrolling updates and LMS math only need deal with the low
+;    byte of addresses. 
 ; 3) To avoid wasting space the lines of data from other displays can be
 ;    dropped into the unused spaces between scrolling sections.
 ; --------------------------------------------------------------------------
@@ -784,7 +804,7 @@ DISPLAYLIST_HI_TABLE
 	.byte >GAMEOVER_DISPLAYLIST
 
 DLI_LO_TABLE  ; Address of first chained DLI per each screen.
-	.byte <TITLE_DLI
+	.byte <TITLE_DLI ; DLI (0)
 ;	.byte <GAME_DLI
 ;	.byte <FROGSAVED_DLI
 ;	.byte <FROGDEAD_DLI
@@ -798,13 +818,32 @@ DLI_HI_TABLE
 ;	.byte >GAMEOVER_DLI
 
 TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
+	.byte TITLE_DLI_1 ; DLI (1)
+	.byte TITLE_DLI_2
+	.byte TITLE_DLI_2
+	.byte TITLE_DLI_2
+	.byte TITLE_DLI_2
+	.byte TITLE_DLI_2
 	.byte TITLE_DLI_2
 	.byte TITLE_DLI_3
+	.byte TITLE_DLI_4
+	.byte TITLE_DLI_5
+	.byte TITLE_DLI_5
+	.byte TITLE_DLI_5
+	.byte TITLE_DLI_5
+	.byte TITLE_DLI_5
+	.byte TITLE_DLI_5
+	.byte TITLE_DLI_5
 	.byte TITLE_DLI_3
+	.byte TITLE_DLI_4
+	.byte TITLE_DLI_5
+	.byte TITLE_DLI_5
 	.byte TITLE_DLI_3
+	.byte TITLE_DLI_4
+	.byte TITLE_DLI_5
 	.byte TITLE_DLI_3
-	.byte TITLE_DLI_3
-	.byte TITLE_DLI_3
+	.byte TITLE_DLI_SPC1
+;	.byte TITLE_DLI_SPC2 ; Special DLI for Press Button Prompt will go to the DLI for Scrolling text.
 
 
 COLOR_BACK_LO_TABLE

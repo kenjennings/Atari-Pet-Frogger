@@ -89,15 +89,14 @@ DISPLAY_OVER  = 4
 
 TITLE_DISPLAYLIST
 	.byte DL_BLANK_8, DL_BLANK_8            ; 16 blank scan lines.
-	.byte DL_BLANK_4|DL_DLI                 ; 4 blank lines. DLI sets COLPF1, COLPF2 for score text. 
+	.byte DL_BLANK_4|DL_DLI                 ; 4 blank lines. DLI 0/0 sets COLPF1, COLPF2 for score text. 
 
 	mDL_LMS DL_TEXT_2,SCORE_MEM1            ; scores
-	.byte DL_BLANK_8|DL_DLI                 ; An empty line. DLI Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1.
+	.byte DL_BLANK_8|DL_DLI                 ; An empty line. DLI 1/1 Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1.
 
 ; Replace the 3 lines of Text Mode 2 used in Version 00, 01, 02 
 ; with 6 lines of Map Mode 9.  
-; Only 10 bytes for each line (20 bytes total for 8 scan lines 
-; worth of screen real estate). 
+; Only 10 bytes per line (or 20 bytes for 2 lines occupying 8 scan lines.)
 ; Text mode is 40 bytes for the same area not including the 
 ; character set image.
 ; Not going to scroll the title this time.  Just fade it in 
@@ -105,38 +104,38 @@ TITLE_DISPLAYLIST
 ; Also, the DLI can make six gradient transitions in the title 
 ; instead of 3.
  
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1       ; DLI Set COLPF0 for Line 2
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM2       ; DLI Set COLPF0 for Line 3
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM3       ; DLI Set COLPF0 for Line 4
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM4       ; DLI Set COLPF0 for Line 5
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM5       ; DLI Set COLPF0 for Line 6
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM6       ; DLI Set COLPF0 for underlines
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1       ; DLI 2/2 Set COLPF0 for Line 2
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM2       ; DLI 2/3 Set COLPF0 for Line 3
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM3       ; DLI 2/4 Set COLPF0 for Line 4
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM4       ; DLI 2/5 Set COLPF0 for Line 5
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM5       ; DLI 2/6 Set COLPF0 for Line 6
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM6       ; DLI 2/7 Set COLPF0 for underlines
 
 	.byte DL_BLANK_2                         ; An empty line.     2
 	mDL_LMS DL_MAP_9,TITLE_MEM7              ; Underlines        +4
-	.byte DL_BLANK_2|DL_DLI                  ; An empty line.    +2 = 8, DLI set BLACK for COLBAK.
+	.byte DL_BLANK_2|DL_DLI                  ; An empty line.    +2 = 8, DLI 3/8 set BLACK for COLBAK.
 
-	.byte DL_BLANK_8|DL_DLI                  ; DLI set AQUA for COLBK and COLPF2
+	.byte DL_BLANK_8|DL_DLI                  ; DLI 4/9 set AQUA for COLBK and COLPF2, and set COLPF1
 
-	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM1      ; Basic instructions... DLI set COLPF2
-	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM2      ; DLI set COLPF2
-	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM3      ; DLI set COLPF2
-	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM4      ; DLI set COLPF2
-	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM5      ; DLI set COLPF2
-	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM6      ; DLI set COLPF2
-	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM7      ; DLI set COLPF2
-	mDL_LMS DL_TEXT_4|DLI,INSTRUCT_MEM8      ; DLI set BLACK for COLBAK
-	.byte DL_BLANK_8|DL_DLI                  ; An empty line.  DLI set ORANGE2 for COLBK and COLPF2
+	mDL_LMS DL_TEXT_2|DLI,INSTRUCT_MEM1      ; Basic instructions... DLI 5/10 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DLI,INSTRUCT_MEM2      ; DLI 5/11 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DLI,INSTRUCT_MEM3      ; DLI 5/12 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DLI,INSTRUCT_MEM4      ; DLI 5/13 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DLI,INSTRUCT_MEM5      ; DLI 5/14 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DLI,INSTRUCT_MEM6      ; DLI 5/15 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DLI,INSTRUCT_MEM7      ; DLI 5/16 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DLI,INSTRUCT_MEM8      ; DLI 3/17 set BLACK for COLBAK
+	.byte DL_BLANK_8|DL_DLI                  ; An empty line.  DLI 4/18 set ORANGE2 for COLBK and COLPF2, set COLPF1 text
 
-	mDL_LMS DL_TEXT_4|DL_DLI,SCORING_MEM1    ; Scoring.  DLI set COLPF2
-	mDL_LMS DL_TEXT_4|DL_DLI,SCORING_MEM2    ; DLI set COLPF2
-	mDL_LMS DL_TEXT_4|DL_DLI,SCORING_MEM3    ; DLI set BLACK for COLBAK
-	.byte DL_BLANK_8|DL_DLI                  ; An empty line.  DLI set PINK for COLBK and COLPF2
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM1    ; Scoring.  DLI 5/19 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM2    ; DLI 5/20 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM3    ; DLI 3/21 set BLACK for COLBAK
+	.byte DL_BLANK_8|DL_DLI                  ; An empty line.  DLI 4/22 set PINK for COLBK and COLPF2, and set COLPF1 text
 
-	mDL_LMS DL_TEXT_4|DL_DLI,CONTROLS_MEM1   ; Game Controls.  DLI set COLPF2
-	mDL_LMS DL_TEXT_4|DL_DLI,CONTROLS_MEM2   ; DLI set BLACK for COLBAK
+	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM1   ; Game Controls.  DLI 5/23 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM2   ; DLI 3/24 set BLACK for COLBAK
 
-	.byte DL_BLANK_8|DL_DLI                  ; An empty line.  DLI sets prompt colors.
+	.byte DL_BLANK_8|DL_DLI                  ; An empty line.  DLI SPC1/25 sets prompt colors.
 
 	mDL_JMP BOTTOM_OF_DISPLAY                ; End of display.  See Page 0 for the evil.
 
