@@ -82,11 +82,29 @@
 ;   separately declared in memory.
 ;
 ; --------------------------------------------------------------------------
-; Version 02.  March 2019
-; The absolute last version using the default text mode. Adding features
-; to make game play smoother.
+; Version 03.  March 2019
+; Changing features to make game appear smoother, slicker looking...
+; * Horizontal fine scrolling the continuously scrolling credits line.
+; * Halved the time for notes in Ode 2 Joy as it plays so long it 
+;   starts to sound like a funeral dirge.
 ; * Horizontal fine scrolling the boats.
+; * Manage Boat scrolling during the VBI, so it occurs without stopping
+;   regardless of the main program activities.
 ; * Implement the frog as Player/Missile graphics.
+; * Replace the chunky text "graphics" for Title, Saved, Game Over, and 
+;   the Dead Frog with bitmaps for ANTIC map mode 9.  This is effectively 
+;   the same pixel size, and uses half the memory to cover the exact 
+;   same screen real estate.
+; * Eliminate "blank" text lines where there is nothing displayed and use
+;   actual blank line instructions in the Display List.   Additionally, 
+;   the blank lines for the prize displays (Saved, Dead Frog, Game Over) 
+;   can use smaller blank lines and so have more DLIs doing color 
+;   changes on the displays.
+; * Revamp the DLI organization. Since each display has variations of 
+;   screen content (especially the difference between Title, Game, and 
+;   one of the "prize" screens) now each display has its own set of 
+;   chained DLIs.  The VBI maintaining screens and DLI counter will also
+;   enforce setting the base DLI routine for each display.
 ; --------------------------------------------------------------------------
 
 

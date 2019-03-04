@@ -35,7 +35,7 @@
 ;
 ; Switching to a graphics mode for the big text allows:
 ; * Complete color expression for background into the overscan 
-;   area, and for the pixels if we so choose.  (Text mode manages 
+;   area, and for the pixels if we so choose.  (Text mode 2 manages 
 ;   playfield and border colors differently.) 
 ; * Six lines of graphics in place of three lines of text makes it 
 ;   trivial to double the number of color changes in the big text.
@@ -44,13 +44,13 @@
 ; screen width can be faked using the background through the 
 ; overscan area. 
 ;  
-; In Version 02 blank lines of text were used and colored to make 
-; animated prize displays.  Instead of using a text mode we use 
-; actual blank lines instructions.  Again, since these display 
+; In Version 02 blank lines of mode 2 text were used and colored 
+; to make animated prize displays.  Instead of using a text mode 
+; we use actual blank lines instructions.  Again, since these display 
 ; background color into the overscan area the prize animations are 
 ; larger, filling the entire screen width.  Also, blanks smaller 
-; than a text line allow more frequent color transitions, so more 
-; eye candy on one display.
+; than a text line allow more frequent color transitions.  Thus more 
+; color on one display is more eye candy on one display.
 ;
 ; Remember, screen memory need not be contiguous from line to line.
 ; Therefore, we can re-think the declaration of screen contents and
@@ -60,10 +60,21 @@
 ;    screen memory.  It is not something that must be copied to screen
 ;    memory.  Data properly placed in any memory makes it the actual
 ;    screen memory thanks to the Display List LMS instructions.
-; 2) All the boats moving left look the same.   All the boats moving 
-;    right looks the same.   For each we use one line of data, and then
-;    just repeat it for other lines.   Scrolling directions need not 
-;    be identical for every line even though the data is the same. 
+; 2) a) In all the prior versions all the rows of boats moving left look 
+;       the same, and all the rows moving right looked the same.  
+;       Version 02 declared another copy of data for every line of boats.
+;       This was necessary, because the frog was drawn in screen memory 
+;       and must appear on every row.
+;    b) But now, since the frog is a Player/Missile object there is no 
+;       need to change the screen memory to draw the frog.   Therefore,
+;       all the boat rows could the the same screen memory.  Declaring 
+;       one row of left boats, and one row of right boats saves 800 
+;       bytes of memory which is about 10% of the entire executable for
+;       Version 02.  
+;    c) Even if the same data is used for each type of boat, they do not 
+;       need to appear identical on screen.   If each row has its own 
+;       concept of current scroll value, then all the rows can be in 
+;       different positions of scrolling, though using the same data.
 ; 3) Organizing the boats row of graphics to sit within one page of data 
 ;    means scrolling updates and LMS math only need deal with the low
 ;    byte of addresses. 
@@ -80,27 +91,6 @@ INTERNAL_0        = $10 ; Number '0' for scores.
 INTERNAL_SPACE    = $00 ; Blank space character.
 INTERNAL_HLINE    = $52 ; underline for title text.
 
-; Graphics chars shorthanded due to frequency in the code....
-; These characters "draw" the huge text on the screens for
-; the title, Dead Frog, Saved, and Game Over messages.
-I_I  = 73      ; Internal ctrl-I
-I_II = 73+$80  ; Internal ctrl-I Inverse
-I_K  = 75      ; Internal ctrl-K
-I_IK = 75+$80  ; Internal ctrl-K Inverse
-I_L  = 76      ; Internal ctrl-L
-I_IL = 76+$80  ; Internal ctrl-L Inverse
-I_O  = 79      ; Internal ctrl-O
-I_IO = 79+$80  ; Internal ctrl-O Inverse
-I_U  = 85      ; Internal ctrl-U
-I_IU = 85+$80  ; Internal ctrl-U Inverse
-I_Y  = 89      ; Internal ctrl-Y
-I_IY = 89+$80  ; Internal ctrl-Y Inverse
-I_S  = 0       ; Internal Space
-I_IS = 0+$80   ; Internal Space Inverse
-
-I_T  = $54     ; Internal ctrl-t (ball)
-I_IT = $54+$80 ; Internal ctrl-t Inverse
-
 I_H = INTERNAL_HLINE
 
 SIZEOF_LINE    = 39  ; That is, 40 - 1
@@ -109,28 +99,28 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 ; Revised V02 Title Screen and Instructions:
 ;    +----------------------------------------+
-; 1  |              PET FROGGER               | TITLE
-; 2  |              PET FROGGER               | TITLE
+; 1  |Score:00000000               00000000:Hi| SCORE_TXT
+; 2  |                                        |
 ; 3  |              PET FROGGER               | TITLE
-; 4  |              --- -------               | TITLE
-; 5  |                                        |
-; 6  |Help the frogs escape from Doc Hopper's | INSTXT_1
-; 7  |frog legs fast food franchise! But, the | INSTXT_1
-; 8  |frogs must cross piranha-infested rivers| INSTXT_1
-; 9  |to reach freedom. You have three chances| INSTXT_1
-; 10 |to prove your frog management skills by | INSTXT_1
-; 11 |directing frogs to jump on boats in the | INSTXT_1
-; 12 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
-; 13 |the seats in the boats.                 | INSTXT_1
-; 14 |                                        |
-; 15 |Scoring:                                | INSTXT_2
-; 16 |    10 points for each jump forward.    | INSTXT_2
-; 17 |   500 points for each rescued frog.    | INSTXT_2
-; 18 |                                        |
-; 19 |Use joystick control to jump forward,   | INSTXT_3
-; 20 |left, and right.                        | INSTXT_3
-; 21 |                                        |
-; 22 |                                        |
+; 4  |              PET FROGGER               | TITLE
+; 5  |              PET FROGGER               | TITLE
+; 6  |              --- -------               | TITLE
+; 7  |                                        |
+; 8  |Help the frogs escape from Doc Hopper's | INSTXT_1
+; 9  |frog legs fast food franchise! But, the | INSTXT_1
+; 10 |frogs must cross piranha-infested rivers| INSTXT_1
+; 11 |to reach freedom. You have three chances| INSTXT_1
+; 12 |to prove your frog management skills by | INSTXT_1
+; 13 |directing frogs to jump on boats in the | INSTXT_1
+; 14 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
+; 15 |the seats in the boats ('Q').           | INSTXT_1
+; 16 |                                        |
+; 17 |Scoring:                                | INSTXT_2
+; 18 |    10 points for each jump forward.    | INSTXT_2
+; 19 |   500 points for each rescued frog.    | INSTXT_2
+; 20 |                                        |
+; 21 |Use joystick control to jump forward,   | INSTXT_3
+; 22 |left, and right.                        | INSTXT_3
 ; 23 |                                        |
 ; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT

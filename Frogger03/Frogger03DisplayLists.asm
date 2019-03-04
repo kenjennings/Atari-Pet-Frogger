@@ -16,24 +16,14 @@
 ; ==========================================================================
 ; Display Lists.
 ;
-; The custom Display lists make the Atari impersonate the PET 4032's
-; 40-column, 25 line display.  Each averages about 75 bytes, so
-; three can fit in the same page.
+; In Versions 00 through 02 the the custom Display lists make the Atari 
+; impersonate the PET 4032's 40-column, 25 line display.  Version 03 now
+; substitutes graphics for some uses of text modes, and uses different 
+; sizes of blank lines to fill empty areas of the screen.  However the
+; total size of the siaply is still the 25 lines used by the Pet.
 ;
 ; The Atari OS text printing is not being used, therefore the Atari screen
 ; editor's 24-line limitation is not an issue.
-;
-; Where a display expects completely static, blank, black lines a
-; display list would use real, blank line instructions.  However, the
-; ANTIC mode 2 text uses color differently from other text modes.
-; The "background" behind text uses COLPF2 and COLPF4 for the border.
-; Other modes use COLPF4 as true background through the border and
-; empty background behind text.  Therefore where the program expects
-; to use color in the background behind text, it uses a text instruction
-; pointing to an empty line of blank spaces, so that COLPF2 can be used
-; to show color within the same horizontal limits as the other text
-; in the screen. This makes it easy to "animate" with color changes to
-; the text background.
 ;
 ; We could start at ANTIC's 1K boundary for display lists.  But,
 ; we can make due with aligning to pages and just making sure none of
