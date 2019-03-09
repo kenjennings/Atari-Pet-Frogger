@@ -201,7 +201,7 @@
 ; colorized displays was added to Version 01 code in just a few hours.
 ;
 ; Now that there is a VBI running various other timing controls can be
-; formally, put into the VBI rather than using looping code that detects
+; formally put into the VBI rather than using looping code that detects
 ; the start of a TV frame.
 ;
 ; Further use of the color indirection will eliminate the need to maintain
@@ -230,7 +230,7 @@
 ;
 ; We're mixing these two methods.  Each screen will have its own Display
 ; List with color tables.  Change the display list pointer and the entire
-; screen changes.  The game screen will also use updates to the the LMS
+; screen changes.  The game screen will also use updates to the  LMS
 ; for each moving boat line to coarse scroll the boat data without moving
 ; the boats in screen memory.
 ;
@@ -239,6 +239,9 @@
 ; frog is a Player/Missile object independent from screen data then it
 ; will be possible to reduce the boats to one line for left and one for
 ; right and re-use the data for each set of lines.
+;
+; --------------------------------------------------------------------------
+; Version 03 commentary. . . . . . . . . . . . . . . . . . . . . . . .
 ;
 ; --------------------------------------------------------------------------
 
@@ -328,6 +331,7 @@ InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits + trigge
 CurrentScreen   .byte $00 ; = identity of current screen.
 
 ; Pointer to the current color table sources in use.
+COLPBKPointer   .word $0000
 COLPF2Pointer   .word $0000
 COLPF1Pointer   .word $0000
 
@@ -376,10 +380,10 @@ CreditHSCROL    .byte 4  ; Fine scrolling the credits
 ; so that the scrolling code could find and update the correct 
 ; LMS instruction currently in use.
 
-BOTTOM_OF_DISPLAY                             ; Prior to this DLI SPC1/25 set colors.
-	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM    ; Prompt to start game.; DLI SPC2/26 sets HSCROL, (and COLPF1 for text.)
+BOTTOM_OF_DISPLAY                                  ; Prior to this DLI SPC1/25 set colors.
+	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM         ; Prompt to start game.; DLI SPC2/26 sets HSCROL, (and COLPF2/COLPF1 for text.)
 SCROLL_CREDIT_LMS = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_HSCROLL,SCROLLING_CREDIT        ; The perpetrators identified
+	mDL_LMS DL_TEXT_2|DL_HSCROLL,SCROLLING_CREDIT  ; The perpetrators identified
 
 ; Note that as long as the system VBI is functioning the address 
 ; provided for JVB does not matter at all.  The system VBI will update

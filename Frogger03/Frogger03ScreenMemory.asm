@@ -41,8 +41,8 @@
 ;   trivial to double the number of color changes in the big text.
 ;   Just a DLI for each line.
 ; * Without a separate border vs text background an apparent wider 
-; screen width can be faked using the background through the 
-; overscan area. 
+;   screen width can be faked using the background through the 
+;   overscan area. 
 ;  
 ; In Version 02 blank lines of mode 2 text were used and colored 
 ; to make animated prize displays.  Instead of using a text mode 
@@ -68,13 +68,19 @@
 ;    b) But now, since the frog is a Player/Missile object there is no 
 ;       need to change the screen memory to draw the frog.   Therefore,
 ;       all the boat rows could the the same screen memory.  Declaring 
-;       one row of left boats, and one row of right boats saves 800 
-;       bytes of memory which is about 10% of the entire executable for
-;       Version 02.  
+;       one row of left boats, and one row of right boats saves the 
+;       contents of 10 more rows of the same.  This is actually a 
+;       significant part of the entire executable. 
 ;    c) Even if the same data is used for each type of boat, they do not 
 ;       need to appear identical on screen.   If each row has its own 
 ;       concept of current scroll value, then all the rows can be in 
 ;       different positions of scrolling, though using the same data.
+; 3) Since scrolling is in effect the line width is whatever is needed 
+;    to allow the boats to move from an original position to destination
+;    and then return the the original scroll position.  If the boats 
+;    and waves between them are identical then the entire line of boats 
+;    does not need to be duplicated.  There only need to be enough 
+;    data to scroll from one boat position to the next.
 ; 3) Organizing the boats row of graphics to sit within one page of data 
 ;    means scrolling updates and LMS math only need deal with the low
 ;    byte of addresses. 
@@ -89,15 +95,15 @@ ATASCII_HEART  = $00 ; heart graphics
 ; bytes directly to the screen:
 INTERNAL_0        = $10 ; Number '0' for scores.
 INTERNAL_SPACE    = $00 ; Blank space character.
-INTERNAL_HLINE    = $52 ; underline for title text.
+;INTERNAL_HLINE    = $52 ; underline for title text.
 
-I_H = INTERNAL_HLINE
+;I_H = INTERNAL_HLINE
 
 SIZEOF_LINE    = 39  ; That is, 40 - 1
 SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 
-; Revised V02 Title Screen and Instructions:
+; Revised V03 Title Screen and Instructions:
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
 ; 2  |                                        |
@@ -128,80 +134,67 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 
 ; Revised V02 Main Game Play Screen:
+; FYI: Old boats.
+; 8  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
+; 9  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
+; New boats are larger to provide more safe surface for the larger 
+; frog and to provide some additional graphics enhancement for 
+; the boats.  Illustration below shows the entire memory needed 
+; for scrolling.
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; 3  |                                        | <-Grassy color
 ; 4  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
-; 5  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
-; 6  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
+; 5  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        | ; Boats Right
+; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left
 ; 7  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
-; 8  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
-; 9  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
+; 8  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
+; 9  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 10 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
-; 11 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3
-; 12 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3
+; 11 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
+; 12 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 13 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
-; 14 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4
-; 15 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4
+; 14 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
+; 15 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 16 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
-; 17 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5
-; 18 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5
+; 17 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
+; 18 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 19 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
-; 20 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
-; 21 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
+; 20 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
+; 21 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
 ; 23 |                                        | <-Grassy color
 ; 24 |                                        |
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
 
-; These things repeat six times.   Let's just type it once and macro it elsewhere.
-; Unfortunately, can't next .rept, so have to do the macro twice.
+; These things repeat four times.
+; Let's just type it once and macro it elsewhere.
 
-; 4  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
+; 5  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        | ; Boats Right
+	.macro mBoatGoRight
+		.by I_BOAT_RB I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF           ;   8
+		.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R ; + 8 = 16
+	.endm
+
 	.macro mLineOfRightBoats
-		.by I_WAVES_L I_WAVES_R                                 ;  2
-		.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF ; +6
-		.rept 3
-			.by I_WAVES_L I_WAVES_R                             ; +6
-		.endr
-		.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF ; +6
 		.rept 4
-			.by I_WAVES_L I_WAVES_R                             ; +8
-		.endr
-		.by I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF ; +6
-		.rept 3
-			.by I_WAVES_L I_WAVES_R                             ; +6 = 40
+			mBoatGoRight ; 16 * 4 = 64
 		.endr
 	.endm
 
-	.macro mBoatsGoRight
-		mLineOfRightBoats ;   40
-		mLineOfRightBoats ; + 40 = 80
+
+; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left
+	.macro mBoatGoLeft
+		.by I_BOAT_RB I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF           ;   8
+		.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R ; + 8 = 16
 	.endm
 
-
-; 5  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
 	.macro mLineOfLeftBoats
-		.rept 3
-			.by I_WAVES_L I_WAVES_R                             ;  6
-		.endr
-		.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; +6
-		.rept 3
-			.by I_WAVES_L I_WAVES_R                             ; +6
-		.endr
-		.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; +6
 		.rept 4
-			.by I_WAVES_L I_WAVES_R                             ; +8
+			mBoatGoRight ; 16 * 4 = 64
 		.endr
-		.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB ; +6
-		.by I_WAVES_L I_WAVES_R                                 ; +2 = 40
-	.endm
-
-	.macro mBoatsGoLeft
-		mLineOfLeftBoats ;   40
-		mLineOfLeftBoats ; + 40 = 80
 	.endm
 
 
@@ -210,24 +203,89 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; will prevent any line of displayed data from crossing over a
 ; 4K boundary.
 
-	.align $0100
+; No need to align here, since the previous file was the character 
+; set, so we know the first declaration will start at a page.
+
+;	.align $0100 ; Realign to next page.
+
 ; The declarations below are arranged to make sure
 ; each line of data fits within 256 byte pages.
 
 ; Remember, lines of screen data need not be contiguous to
-; each other since LMS for each line tells where to start
-; reading screen memory.  Therefore we can declare lines in
+; each other since LMS in the Display List tells ANTIC where to 
+; start reading screen memory.  Therefore we can declare lines in
 ; any order....
 
-; First the Credit text.  Rather than three lines on the main
+
+; The lines of scrolling boats.  Only one line of data for each 
+; direction is declared here.  Every other moving row can re-use the 
+; same data for display.  Also, since the entire data fits within 
+; one page, the coarse scrolling need only update the low byte of 
+; the LMS instruction....
+ 
+; 5  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        | ; Boats Right ;   64
+; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
+; End   Scroll position = LMS + 0,              HSCROL 15
+PLAYFIELD_MEM1
+PLAYFIELD_MEM4
+PLAYFIELD_MEM7
+PLAYFIELD_MEM10
+PLAYFIELD_MEM13
+PLAYFIELD_MEM16
+	mBoatsGoRight
+
+; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left ; + 64 
+; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
+; End   Scroll position = LMS + 12,            HSCROL 0
+PLAYFIELD_MEM2
+PLAYFIELD_MEM5
+PLAYFIELD_MEM8
+PLAYFIELD_MEM11
+PLAYFIELD_MEM14
+PLAYFIELD_MEM17
+	mBoatsGoLeft
+
+; Title text.  Bitmapped version for Mode 9.
+; Will not scroll these, so no need for individual labels and leading blanks.
+; 60 bytes here instead of the 240 bytes used for the scrolling text version.
+
+; Graphics chars design, PET FROGGER
+; |**|**|* |  |**|**|**|  |**|**|**|  |  |**|**|**|  |**|**|* |  | *|**|* |  | *|**|**|  | *|**|**|  |**|**|**|  |**|**|* |
+; |**|  |**|  |**|  |  |  |  |**|  |  |  |**|  |  |  |**|  |**|  |**|  |**|  |**|  |  |  |**|  |  |  |**|  |  |  |**|  |**|
+; |**|  |**|  |**|**|* |  |  |**|  |  |  |**|**|* |  |**|  |**|  |**|  |**|  |**|  |  |  |**|  |  |  |**|**|* |  |**|  |**|
+; |**|**|* |  |**|  |  |  |  |**|  |  |  |**|  |  |  |**|**|* |  |**|  |**|  |**| *|**|  |**| *|**|  |**|  |  |  |**|**|* |
+; |**|  |  |  |**|  |  |  |  |**|  |  |  |**|  |  |  |**| *|* |  |**|  |**|  |**|  |**|  |**|  |**|  |**|  |  |  |**| *|* |
+; |**|  |  |  |**|**|**|  |  |**|  |  |  |**|  |  |  |**|  |**|  | *|**|* |  | *|**|**|  | *|**|**|  |**|**|**|  |**|  |**|
+
+TITLE_MEM1
+	.by %11111000 %11111100 %11111100 %00111111 %00111110 %00011110 %00011111 %00011111 %00111111 %00111110
+	.by %11001100 %11000000 %00110000 %00110000 %00110011 %00110011 %00110000 %00110000 %00110000 %00110011
+	.by %11001100 %11111000 %00110000 %00111110 %00110011 %00110011 %00110000 %00110000 %00111110 %00110011
+	.by %11111000 %11000000 %00110000 %00110000 %00111110 %00110011 %00110111 %00110111 %00110000 %00111110
+	.by %11000000 %11000000 %00110000 %00110000 %00110110 %00110011 %00110011 %00110011 %00110000 %00110110
+	.by %11000000 %11111100 %00110000 %00110000 %00110011 %00011110 %00011111 %00011111 %00111111 %00110011 ; + 60
+
+; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE underline
+
+	.by %11111100 %11111100 %11111100 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111 ; + 10 
+
+	ANYBUTTON_MEM ; Prompt to start game.
+; 24 |   Press joystick button to continue.   | INSTXT_4             ; 64 + 64 + 60 + 10 + 40 == 238
+	.sb "   Press joystick button to continue.   "
+
+
+	.align $0100 ; Realign to next page.
+
+
+; The Credit text.  Rather than three lines on the main
 ; and game screen let's make this a continuously scrolling
 ; line of text on all screens.  This requires two more blocks
 ; of blank text to space out the start and end of the text.
 
-; Formerly:
+; Originally:
 ; 3  |     (c) November 1983 by DalesOft      | CREDIT
 ; 4  |        Written by John C Dale          | CREDIT
-; 5  |Atari V02 port by Ken Jennings, Feb 2019| CREDIT
+; 5  |Atari V02 port by Ken Jennings, Nov 2018| CREDIT
 ; 6  |                                        |
 
 ; Now:
@@ -240,7 +298,7 @@ BLANK_MEM ; Blank text also used for blanks in other places.
 
 	.sb "Original program for CBM PET 4032 written by John C. Dale.    " ; 62
 
-	.sb "Atari 8-bit computer port by Ken Jennings, V02, February 2019" ; 61
+	.sb "Atari 8-bit computer port by Ken Jennings, V03, March 2019" ; 61
 
 END_OF_CREDITS
 EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
@@ -249,82 +307,6 @@ EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
 
 	.align $0100  ; Realign to next page.
 
-; Graphics chars design, PET FROGGER
-; |**|**|* |  |**|**|**|  |**|**|**|  |  |**|**|**|  |**|**|* |  | *|**|* |  | *|**|**|  | *|**|**|  |**|**|**|  |**|**|* |
-; |**|  |**|  |**|  |  |  |  |**|  |  |  |**|  |  |  |**|  |**|  |**|  |**|  |**|  |  |  |**|  |  |  |**|  |  |  |**|  |**|
-; |**|  |**|  |**|**|* |  |  |**|  |  |  |**|**|* |  |**|  |**|  |**|  |**|  |**|  |  |  |**|  |  |  |**|**|* |  |**|  |**|
-; |**|**|* |  |**|  |  |  |  |**|  |  |  |**|  |  |  |**|**|* |  |**|  |**|  |**| *|**|  |**| *|**|  |**|  |  |  |**|**|* |
-; |**|  |  |  |**|  |  |  |  |**|  |  |  |**|  |  |  |**| *|* |  |**|  |**|  |**|  |**|  |**|  |**|  |**|  |  |  |**| *|* |
-; |**|  |  |  |**|**|**|  |  |**|  |  |  |**|  |  |  |**|  |**|  | *|**|* |  | *|**|**|  | *|**|**|  |**|**|**|  |**|  |**|
-
-; Graphics chars, PET FROGGER
-; |i |iU|iK|  |i |iU|iU|  |iU|i |iU|  |  |i |iU|iU|  |i |iU|iK|  |iL|iU|iK|  |iL|iU|iU|  |iL|iU|iU|  |i |iU|iU|  |i |iU|iK|
-; |i |U |iI|  |i |iU|L |  |  |i |  |  |  |i |iU|L |  |i |U |iI|  |i |  |i |  |i |I |U |  |i |I |U |  |i |iU|L |  |i |U |iI|
-; |i |  |  |  |i |U |U |  |  |i |  |  |  |i |  |  |  |i |K |iK|  |iO|U |iI|  |iO|U |i |  |iO|U |i |  |i |U |U |  |i |K |iK|
-
-; Graphics data, PET FROGGER title  (40).  Fortunately it just fits into 30 characters.
-; To make this scroll will need some leading spaces before each line
-
-; TITLE_MEM1 ; Title text.
-	; .sb "                                        " ; Leading blanks  for  scrolling.
-	; .by I_iS I_iU I_iK I_S I_iS I_iU I_iU I_S I_iU I_iS I_iU I_S I_S I_iS I_iU I_iU I_S I_iS I_iU I_iK I_S I_iL I_iU I_iK I_S I_iL I_iU I_iU I_S I_iL I_iU I_iU I_S I_iS I_iU I_iU I_S I_iS I_iU I_iK
-; TITLE_MEM2
-	; .sb "                                        "  ; Leading blanks  for  scrolling.
-	; .by I_iS I_U  I_iI I_S I_iS I_iU I_L  I_S I_S  I_iS I_S  I_S I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI I_S I_iS I_S  I_iS I_S I_iS I_I  I_U  I_S I_iS I_I  I_U  I_S I_iS I_iU I_L  I_S I_iS I_U  I_iI
-; TITLE_MEM3
-	; .sb "                                        "  ; Leading blanks  for  scrolling.
-	; .by I_iS I_S  I_S  I_S I_iS I_U  I_U  I_S I_S  I_iS I_S  I_S I_S I_iS I_S  I_S  I_S I_iS I_K  I_iK I_S I_iO I_U  I_iI I_S I_iO I_U  I_iS I_S I_iO I_U  I_iS I_S I_iS I_U  I_U  I_S I_iS I_K  I_iK
-
-; Title text.   Bitmapped version for Mode 9.
-; Will not scroll these, so no need for individual labels and leading blanks.
-; 60 bytes here instead of the 240 bytes used for the scrolling text version.
-
-TITLE_MEM1
-	.by %11111000 %11111100 %11111100 %00111111 %00111110 %00011110 %00011111 %00011111 %00111111 %00111110
-	.by %11001100 %11000000 %00110000 %00110000 %00110011 %00110011 %00110000 %00110000 %00110000 %00110011
-	.by %11001100 %11111000 %00110000 %00111110 %00110011 %00110011 %00110000 %00110000 %00111110 %00110011
-	.by %11111000 %11000000 %00110000 %00110000 %00111110 %00110011 %00110111 %00110111 %00110000 %00111110
-	.by %11000000 %11000000 %00110000 %00110000 %00110110 %00110011 %00110011 %00110011 %00110000 %00110110
-	.by %11000000 %11111100 %00110000 %00110000 %00110011 %00011110 %00011111 %00011111 %00111111 %00110011
-
-TITLE_MEM7
-; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE underline
-;	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00 $00
-;	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00
-;	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H
-	.by %11111100 %11111100 %11111100 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111
-
-; Mo Playfield Groups-o-Data
-; Remember the part about screen memory not needing to be contiguous?
-; Here we do more deviant things to screen memory.   We declare each
-; boat row at specific places relative to page alignments which makes the
-; low byte of each screen memory address location the same value for
-; each row.  This means the math for the LMS is the same for all right 
-; rows, and then the same for all the left rows.
-; And, only the low byte of the LMS address needs to be updated which 
-; means less code for managing the coarse scrolling, and it makes the LMS 
-; update display-safe for ANTIC and can be done at any time without 
-; messing up ANTIC. Win, win, win.
-
-; All the moving rows of boats start at low byte $00/0 (dec)
-; Other lines of data start after to fill in the page.
-
-	.align $0100
-
-PLAYFIELD_MEM1
-PLAYFIELD_MEM4
-PLAYFIELD_MEM7
-PLAYFIELD_MEM10
-PLAYFIELD_MEM13
-PLAYFIELD_MEM16
-; 4  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
-	mBoatsGoRight
-
-T;ITLE_MEM4
-;; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE
-;	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00 $00
-;	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H $00
-;	.by I_H I_H I_H $00 I_H I_H I_H $00 I_H I_H I_H
 
 INSTRUCT_MEM1 ; Basic instructions...
 ; 6  |Help the frogs escape from Doc Hopper's | INSTXT_1
@@ -338,19 +320,6 @@ INSTRUCT_MEM3
 ; 8  |frogs must cross piranha-infested rivers| INSTXT_1
 	.sb "frogs must cross piranha-infested rivers"
 
-
-	.align $0100
-
-PLAYFIELD_MEM2
-PLAYFIELD_MEM5
-PLAYFIELD_MEM8
-PLAYFIELD_MEM11
-PLAYFIELD_MEM14
-PLAYFIELD_MEM17
-; 5  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
-	mBoatsGoLeft
-
-
 INSTRUCT_MEM4
 ; 9  |to reach freedom. You have three chances| INSTXT_1
 	.sb "to reach freedom. You have three chances"
@@ -363,19 +332,15 @@ INSTRUCT_MEM6
 ; 11 |directing frogs to jump on boats in the | INSTXT_1
 	.sb "directing frogs to jump on boats in the "
 
+
+	.align $0100  ; Realign to next page.
+
+
 INSTRUCT_MEM7
-; 12 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
+; 12 |rivers like this:  <QQQQ]]  Land only on| INSTXT_1
 	.sb "rivers like this:  "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB
-	.sb "  Land only on "
-
-
-	.align $0100
-
-;PLAYFIELD_MEM4
-;; 7  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
-;	mBoatsGoRight
-
+	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB I_BOAT_LB
+	.sb "  Land only on"
 
 INSTRUCT_MEM8
 ; 13 |the seats in the boats.                 | INSTXT_1
@@ -393,22 +358,17 @@ SCORING_MEM3
 ; 17 |   500 points for each rescued frog.    | INSTXT_2
 	.sb "   500 points for each rescued frog.    "
 
-
-	.align $0100
-
-;PLAYFIELD_MEM5
-; 8  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
-;	mBoatsGoLeft
-
-
 CONTROLS_MEM1 ; Game Controls
 ; 19 |Use joystick control to jump forward,   | INSTXT_3
 	.sb "Use joystick control to jump forward,   "
 
+
+	.align $0100 ; Realign to next page.
+
+
 CONTROLS_MEM2
 ; 20 |left, and right.                        | INSTXT_3
 	.sb "left, and right.                        "
-
 
 PLAYFIELD_MEM0 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
@@ -429,13 +389,6 @@ PLAYFIELD_MEM3 ; Default display of "Beach", for lack of any other description, 
 	.sb "                "
 	.by I_BEACH3
 	.sb "           " ; "Beach"
-
-
-	.align $0100
-
-;PLAYFIELD_MEM7
-;; 10  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
-;	mBoatsGoRight
 
 PLAYFIELD_MEM6 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 9  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
@@ -467,6 +420,10 @@ PLAYFIELD_MEM12 ; Default display of "Beach", for lack of any other description,
 	.by I_BEACH1
 	.sb "          " ; "Beach"
 
+
+	.align $0100 ; Realign to next page.
+
+
 PLAYFIELD_MEM15 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 18  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
 	.sb "           "
@@ -476,14 +433,6 @@ PLAYFIELD_MEM15 ; Default display of "Beach", for lack of any other description,
 	.sb "          "
 	.by I_BEACH3
 	.sb "       " ; "Beach"
-
-
-	.align $0100
-
-;PLAYFIELD_MEM8
-;; 11  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
-;	mBoatsGoLeft 
-
 
 PLAYFIELD_MEM18 ; One last line of Beach
 ; 21  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT2
@@ -495,9 +444,6 @@ PLAYFIELD_MEM18 ; One last line of Beach
 	.by I_BEACH1
 	.sb "    " ; "Beach"
 
-ANYBUTTON_MEM ; Prompt to start game.
-; 24 |   Press joystick button to continue.   | INSTXT_4
-	.sb "   Press joystick button to continue.   "
 
 ; Two lines for Scores, lives, and frogs saved.
 
@@ -520,21 +466,13 @@ SCREEN_SAVED
 	.sb "                 "
 
 
-	.align $0100
-
-;PLAYFIELD_MEM10
-;; 13  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
-;	mBoatsGoRight
-
-
 ; FROG SAVED screen., 25 lines:
 ; 10 blank lines.
 ; 3 lines of big text.
 ; 10 blank lines
 ; Press Any Key Line
-; 1 blank line
+; Scrolling Credit Line
 
-FROGSAVE_MEM
 ; Graphics chars design, SAVED!
 ; |  |**|**|  |  | *|* |  | *|* | *|* | *|**|**|* | *|**|* |  |  |**|
 ; | *|* |  |  |  |**|**|  | *|* | *|* | *|* |  |  | *|* |**|  |  |**|
@@ -543,22 +481,16 @@ FROGSAVE_MEM
 ; |  |  | *|* | *|**|**|* |  |**|**|  | *|* |  |  | *|* |**|  |  |  |
 ; |  |**|**|  | *|* | *|* |  | *|* |  | *|**|**|* | *|**|* |  |  |**|
 
-; Graphics chars, SAVED!
-; | I|iI|iU|  |  |iL|iK|  |iY| Y|iY| Y|iY|iI|iU| L|iY|iI|iK|  |  |i |
-; |  |iU|iO| O|iY| Y|iY| Y|iY| Y|iY|Y |iY|iI|iU|  |iY| Y|iY| Y|  |i |
-; |  | U|iL| L|iY|iI|iO| Y|  |iO|iI|  |iY|iK| U| O|iY|iK|iI|  |  | U|
-
-; Graphics data, SAVED!  (22) + 18 spaces.
-	.by $0 $0 $0 $0 $0 $0 $0 $0 $0 I_I I_II I_IU I_S I_S  I_IL I_IK I_S I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_L I_IY I_II I_IK I_S I_S I_IS $0 $0 $0 $0 $0 $0 $0 $0 $0
-	.by $0 $0 $0 $0 $0 $0 $0 $0 $0 I_S I_IU I_IO I_O I_IY I_Y  I_IY I_Y I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_S I_IY I_Y  I_IY I_Y I_S I_IS $0 $0 $0 $0 $0 $0 $0 $0 $0
-	.by $0 $0 $0 $0 $0 $0 $0 $0 $0 I_S I_U  I_IL I_L I_IY I_II I_IO I_Y I_S  I_IO I_II I_S I_IY I_IK I_U  I_O I_IY I_IK I_II I_S I_S I_U  $0 $0 $0 $0 $0 $0 $0 $0 $0
+FROGSAVE_MEM   ; Graphics data, SAVED!  (22) + 18 spaces.
+	.byte %00000000 %00000000 %00011110 %00001100 %00110011 %00111111 %00111100 %000110000 %00000000 %00000000
+	.byte %00000000 %00000000 %00110000 %00011110 %00110011 %00110000 %00110110 %000110000 %00000000 %00000000
+	.byte %00000000 %00000000 %00011110 %00110011 %00110011 %00111110 %00110011 %000110000 %00000000 %00000000
+	.byte %00000000 %00000000 %00000011 %00110011 %00110011 %00110000 %00110011 %000110000 %00000000 %00000000
+	.byte %00000000 %00000000 %00000011 %00111111 %00011110 %00110000 %00110110 %000000000 %00000000 %00000000
+	.byte %00000000 %00000000 %00011110 %00110011 %00001100 %00111111 %00111100 %000110000 %00000000 %00000000
 
 
-	.align $0100
-
-;PLAYFIELD_MEM11
-;; 14  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
-;	mBoatsGoLeft 
+	.align $0100 ; Realign to next page.
 
 
 ; FROG DEAD screen., 25 lines:
@@ -568,7 +500,6 @@ FROGSAVE_MEM
 ; Press Any Key Line
 ; 1 blank line
 
-FROGDEAD_MEM
 ; Graphics chars design, DEAD FROG!
 ; | *|**|* |  | *|**|**|* |  | *|* |  | *|**|* |  |  |  |  | *|**|**|* | *|**|**|  |  |**|**|  |  |**|**|* |  |**|
 ; | *|* |**|  | *|* |  |  |  |**|**|  | *|* |**|  |  |  |  | *|* |  |  | *|* | *|* | *|* | *|* | *|* |  |  |  |**|
@@ -577,22 +508,19 @@ FROGDEAD_MEM
 ; | *|* |**|  | *|* |  |  | *|**|**|* | *|* |**|  |  |  |  | *|* |  |  | *|* |**|  | *|* | *|* | *|* | *|* |  |  |
 ; | *|**|* |  | *|**|**|* | *|* | *|* | *|**|* |  |  |  |  | *|* |  |  | *|* | *|* |  |**|**|  |  |**|**|* |  |**|
 
-; Graphics chars, DEAD FROG!
-; |iY|iI|iK|  |iY|iI|iU| L|  |iL|iK|  |iY|iI|iK|  |  |  |  |iY|iI|iU| L|iY|iI|iO| O| I|iI|iO| O| I|iI|iU| L|  |i |
-; |iY| Y|iY| Y|iY|iI|iU|  |iY| Y|iY| Y|iY| Y|iY| Y|  |  |  |iY|iI|iU|  |iY|iK|iL| L|iY| Y|iY| Y|iY| Y| U| O|  |i |
-; |iY|iK|iI|  |iY|iK| U| O|iY|iI|iO| Y|iY|iK|iI|  |  |  |  |iY| Y|  |  |iY| Y|iO| O| K|iK|iL| L| K|iK|iL|iY|  | U|
+FROGDEAD_MEM   ; Graphics data, DEAD FROG!  (37) + 3 spaces.
 
-; Graphics data, DEAD FROG!  (37) + 3 spaces.
+	.byte % %00000111 %10000111 %11100001 %10000111 %10000000 %00011111 %10011111 %00001111 %00001111 %10001100 %
+	.byte % %00000110 %11000110 %00000011 %11000110 %11000000 %00011000 %00011001 %10011001 %10011000 %00001100 %
+	.byte % %00000110 %01100111 %11000110 %01100110 %01100000 %00011111 %00011001 %10011001 %10011000 %00001100 %
+	.byte % %00000110 %01100110 %00000110 %01100110 %01100000 %00011000 %00011111 %00011001 %10011011 %10001100 %
+	.byte % %00000110 %11000110 %00000111 %11100110 %11000000 %00011000 %00011011 %00011001 %10011001 %10000000 %
+	.byte % %00000111 %10000111 %11100110 %01100111 %10000000 %00011000 %00011001 %10001111 %00001111 %10001100 %
+
 	.by $0 $0 I_IY I_II I_IK I_S I_IY I_II I_IU I_L I_S  I_IL I_IK I_S I_IY I_II I_IK I_S I_S I_S I_S I_IY I_II I_IU I_L I_IY I_II I_IO I_O I_I  I_II I_IO I_O I_I  I_II I_IU I_L I_S I_IS $0
 	.by $0 $0 I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_S I_IY I_Y  I_IY I_Y I_IY I_Y  I_IY I_Y I_S I_S I_S I_IY I_II I_IU I_S I_IY I_IK I_IL I_L I_IY I_Y  I_IY I_Y I_IY I_Y  I_U  I_O I_S I_IS $0
 	.by $0 $0 I_IY I_IK I_II I_S I_IY I_IK I_U  I_O I_IY I_II I_IO I_Y I_IY I_IK I_II I_S I_S I_S I_S I_IY I_Y  I_S  I_S I_IY I_Y  I_IO I_O I_K  I_IK I_IL I_L I_K  I_IK I_IL I_Y I_S I_U  $0
 
-
-	.align $0100
-
-;PLAYFIELD_MEM13
-;; 16  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
-;	mBoatsGoRight
 
 ; GAME OVER screen., 25 lines:
 ; 10 blank lines.
@@ -601,7 +529,8 @@ FROGDEAD_MEM
 ; Press Any Key Line
 ; 1 blank line
 
-GAMEOVER_MEM
+GAMEOVER_MEM ; Graphics data, Game Over.  (34) + 6 spaces.
+
 ; Graphics chars design, GAME OVER
 ; |  |**|**|* |  | *|* |  |**|  | *|* |**|**|**|  |  |  |  |**|**|  | *|* | *|* | *|**|**|* | *|**|**|  |
 ; | *|* |  |  |  |**|**|  |**|* |**|* |**|  |  |  |  |  | *|* | *|* | *|* | *|* | *|* |  |  | *|* | *|* |
@@ -610,39 +539,12 @@ GAMEOVER_MEM
 ; | *|* | *|* | *|**|**|* |**|  | *|* |**|  |  |  |  |  | *|* | *|* |  |**|**|  | *|* |  |  | *|* |**|  |
 ; |  |**|**|* | *|* | *|* |**|  | *|* |**|**|**|  |  |  |  |**|**|  |  | *|* |  | *|**|**|* | *|* | *|* |
 
-; Graphics chars, Game Over.
-; | I|iI|iU| L|  |iL|iK|  |iS| O|iL| Y|i |iU|iU|  |  |  | I|iI|iO| O|iY| Y|iY| Y|iY|iI|iU| L|iY|iI|iO| O|
-; |iY| Y| U| O|iY| Y|iY| Y|i |iO|iO| Y|i |iU| L|  |  |  |iY| Y|iY| Y|iY| Y|iY| Y|iY|iI|iU|  |iY|iK|iL| L|
-; | K|iK|iL| Y|iY|iI|iO| Y|i |  |iY| Y|i | U| U|  |  |  | K|iK|iL| L|  |iO|iI|  |iY| K| U| O|iY| Y|iO| O|
-
-; Graphics data, Game Over.  (34) + 6 spaces.
 	.by $0 $0 $0 I_I  I_II I_IU I_L I_S  I_IL I_IK I_S I_IS I_O  I_IL I_Y I_IS I_IU I_IU I_S I_S I_S I_I  I_II I_IO I_O I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_L I_IY I_II I_IO I_O $0 $0 $0
 	.by $0 $0 $0 I_IY I_Y  I_U  I_O I_IY I_Y  I_IY I_Y I_IS I_IO I_IO I_Y I_IS I_IU I_L  I_S I_S I_S I_IY I_Y  I_IY I_Y I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_S I_IY I_IK I_IL I_L $0 $0 $0
 	.by $0 $0 $0 I_K  I_IK I_IL I_Y I_IY I_II I_IO I_Y I_IS I_S  I_IY I_Y I_IS I_U  I_U  I_S I_S I_S I_K  I_IK I_IL I_L I_S  I_IO I_II I_S I_IY I_IK I_U  I_O I_IY I_Y  I_IO I_O $0 $0 $0
 
 
-;	.align $0100
-
-;PLAYFIELD_MEM14
-;; 17  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
-;	mBoatsGoLeft 
-
-
-;	.align $0100
-
-;PLAYFIELD_MEM16
-; 19  |  [QQQQ>      [QQQQ>        [QQQQ>      | TEXT1_1 ; Boats Right
-;	mBoatsGoRight
-
-
-;	.align $0100
-
-;PLAYFIELD_MEM17
-;; 20  |      <QQQQ]      <QQQQ]        <QQQQ]   | TEXT1_1 ; Boats Left
-;	mBoatsGoLeft 
-
-
-	.align $0100
+	.align $0100 ; Realign to next page.
 
 ; ==========================================================================
 ; Color Layouts for the screens.
@@ -773,7 +675,8 @@ OVER_TEXT_COLORS
 	.endr
 
 
-	.align $0100
+	.align $0100 ; Realign to next page.
+
 
 ; ==========================================================================
 ; Tables listing pointers to all the assets.
@@ -809,31 +712,31 @@ DLI_HI_TABLE
 
 TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 	.byte TITLE_DLI_1 ; DLI (1)
-	.byte TITLE_DLI_2
-	.byte TITLE_DLI_2
-	.byte TITLE_DLI_2
-	.byte TITLE_DLI_2
-	.byte TITLE_DLI_2
-	.byte TITLE_DLI_2
-	.byte TITLE_DLI_3
-	.byte TITLE_DLI_4
-	.byte TITLE_DLI_5
-	.byte TITLE_DLI_5
-	.byte TITLE_DLI_5
-	.byte TITLE_DLI_5
-	.byte TITLE_DLI_5
-	.byte TITLE_DLI_5
-	.byte TITLE_DLI_5
-	.byte TITLE_DLI_3
-	.byte TITLE_DLI_4
-	.byte TITLE_DLI_5
-	.byte TITLE_DLI_5
-	.byte TITLE_DLI_3
-	.byte TITLE_DLI_4
-	.byte TITLE_DLI_5
-	.byte TITLE_DLI_3
-	.byte TITLE_DLI_SPC1
-;	.byte TITLE_DLI_SPC2 ; Special DLI for Press Button Prompt will go to the DLI for Scrolling text.
+	.byte TITLE_DLI_2 ; 2
+	.byte TITLE_DLI_2 ; 3
+	.byte TITLE_DLI_2 ; 4
+	.byte TITLE_DLI_2 ; 5
+	.byte TITLE_DLI_2 ; 6
+	.byte TITLE_DLI_2 ; 7
+	.byte TITLE_DLI_3 ; 8
+	.byte TITLE_DLI_4 ; 9
+	.byte TITLE_DLI_5 ; 10
+	.byte TITLE_DLI_5 ; 11
+	.byte TITLE_DLI_5 ; 12
+	.byte TITLE_DLI_5 ; 13
+	.byte TITLE_DLI_5 ; 14 
+	.byte TITLE_DLI_5 ; 15
+	.byte TITLE_DLI_5 ; 16
+	.byte TITLE_DLI_3 ; 17
+	.byte TITLE_DLI_4 ; 18
+	.byte TITLE_DLI_5 ; 19
+	.byte TITLE_DLI_5 ; 20
+	.byte TITLE_DLI_3 ; 21
+	.byte TITLE_DLI_4 ; 22
+	.byte TITLE_DLI_5 ; 23
+	.byte TITLE_DLI_3 ; 24
+	.byte TITLE_DLI_SPC1 ; 25 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
+;	.byte TITLE_DLI_SPC2 ; 26 
 
 
 COLOR_BACK_LO_TABLE
