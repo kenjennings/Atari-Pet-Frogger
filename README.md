@@ -32,11 +32,13 @@ As much of the original PET 4032 assembly code is used as possible.  In most pla
 
 [![V01 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger01/V01_Composite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01/README_V01.md)
 
-Reorganized, rewritten, and refactored to implement modular code.  The game structure is remade into an event-like loop driven by monitoring video frame changes.  Yes, there still is no sound.
+Reorganized, rewritten, and refactored to implement modular code.  The game structure is remade into an event-like loop driven by monitoring video frame changes.
 
 The reorganization made it easier to add new, "graphics" displays for dead frog, saved frog, and game over as well as animated transitions between the screens.  Driving off the vertical blank for timing eliminated the CPU loop used for delays.
 
 Other than the timer control routine monitoring for vertical blank changes there is nothing very Atari-specific going on here, and this could be ported back to the Pet 4032 provided character and keyboard code values are turned back into the values for the Pet.
+
+Yes, there still is no sound.
 
 ---
 
@@ -46,7 +48,9 @@ Other than the timer control routine monitoring for vertical blank changes there
 
 Version 02 continues to maintain the same game play in the same format as prior version.  The screen display is still the plain text mode (ANTIC mode 2, OS Text Mode 0) and frog movement is the size of a character.  Everything else about the game working and operation has been Atari-fied.
 
-Short version: There is now sound and music (minimally), the game uses joystick input instead of the keyboard, animated color is applied to the custom screens, and a redefined character set provides a frog and boats that look more like a frog and boats.
+Short version: The game now uses joystick input instead of the keyboard, animated color is applied to the custom screens, and a redefined character set provides a frog and boats that look more like a frog and boats.  
+
+By the way, there is now sound and "music" (minimally).
 
 ---
 
