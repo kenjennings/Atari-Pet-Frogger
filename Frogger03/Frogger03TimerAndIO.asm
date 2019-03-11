@@ -222,6 +222,56 @@ bLoopWaitFrame
 ; Note the DLIs don't care where the index ends as this is managed by the VBI.
 ;==============================================================================
 
+; DLI to set colors for the Prompt line.  
+; And while we're here do the HSCROLL for the scrolling credits.
+; Then link to DLI_SPC2 to set colors for the scrolling line.
+; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
+
+DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text. 
+	mRegSaveA
+
+	lda PressAButtonText  ; Get text color (luminance)
+	sta COLPF1            ; write new text luminance.
+	
+	lda PressAButtonColor ; Black for background and text background.
+	sta WSYNC             ; sync to end of scan line
+	sta COLBK             ; Write new border color.
+	sta COLPF2            ; Write new background color
+
+	lda CreditHSCROL      ; HScroll for credits.
+	sta HSCROL
+
+	lda #<DLI_SPC2        ; Update the DLI vector for the last routine for credit color.
+	sta VDSLST
+	lda #>DLI_SPC2 
+	sta VDSLST+1
+
+	mRegRestoreA
+
+	rti
+
+
+; DLI to set colors for the Scrolling credits.   
+; There is no need to link to another DLI, since we trust the VBI to reset to the beginning.
+
+DLI_SPC2  ; DLI just sets black for background COLBK, COLPF2, and text luminance for scrolling text.
+	mRegSaveAX
+
+	lda #0C              ; luminance for text
+	ldx #COLOR_BLACK     ; color for background.
+
+	sta WSYNC            ; sync to end of scan line
+
+	sta COLPF1           ; Write text luminance for credits.
+	stx COLBK            ; Write new border color.
+	stx COLPF2           ; Write new background color
+
+	mRegRestoreA
+
+	rti
+
+
+
 MyDLI
 
 	mRegSaveAX
@@ -271,15 +321,22 @@ MyDLI
 
 	.align $0100
 
-TITLE_DLI ; DLI sets COLPF1, COLPF2 for score text. 
+; This is called on a blank line and the background should already be black.  
+; This just makes sure everything is correct.
+; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
+
+TITLE_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
 	mRegSaveAX
 
 	ldx ThisDLI
-	lda COLPF2_TABLE,x   ; Get background color;
-	sta WSYNC            ; sync to end of scan line
-	sta COLPF2           ; Write new background color
+	
 	lda COLPF1_TABLE,x   ; Get text color (luminance)
 	sta COLPF1           ; write new text color.
+	
+	lda #COLOR_BLACK     ; Black for background and text background.
+	sta WSYNC            ; sync to end of scan line
+	sta COLBK            ; Write new border color.
+	sta COLPF2           ; Write new background color
 
 	lda TITLE_DLI_CHAIN_TABLE, x ; update low byte for next chained DLI.
 	sta VDSLST
@@ -290,7 +347,133 @@ TITLE_DLI ; DLI sets COLPF1, COLPF2 for score text.
 
 	rti
 
-TITLE_DLI_1 ; DLI sets COLPF2, COLBK for score text.  Mode 4 Text is different from Mode 2 text.
+
+TITLE_DLI_1 ; DLI sets COLBK and COLPF0 for title graphics.
+	mRegSaveAX
+
+	ldx ThisDLI
+
+	lda #COLOR_ORANGE_GREEN  ; For variety, adjusted the color two hues up on the pallette.
+	sta WSYNC
+	sta COLBK
+
+	lda COLPF1_TABLE,x ; Borrowing for the text (luminance table) (BTW, this is COLOR_GREEN)
+	sta COLPF0         ; But using for Color 0.
+
+	lda TITLE_DLI_CHAIN_TABLE, x ; update low byte for next chained DLI.
+	sta VDSLST
+
+	inc ThisDLI          ; next DLI.
+
+	mRegRestoreAX
+
+	rti
+
+
+TITLE_DLI_2 ; DLI sets only COLPF0 for title graphics.
+	mRegSaveAX
+
+	ldx ThisDLI
+
+	lda COLPF1_TABLE,x ; Borrowing for the text (luminance table) (BTW, this is COLOR_GREEN)
+	sta WSYNC
+	sta COLPF0         ; But using for Color 0.
+
+	lda TITLE_DLI_CHAIN_TABLE, x ; update low byte for next chained DLI.
+	sta VDSLST
+
+	inc ThisDLI          ; next DLI.
+
+	mRegRestoreAX
+
+	rti
+
+
+TITLE_DLI_3 ; DLI Sets background to Black for blank area.
+	mRegSaveAX
+
+	lda #COLOR_BLACK     ; Black for background and text background.
+	sta WSYNC            ; sync to end of scan line
+	sta COLBK            ; Write new border color.
+
+	ldx ThisDLI
+
+	lda TITLE_DLI_CHAIN_TABLE, x ; update low byte for next chained DLI.
+	sta VDSLST
+
+	inc ThisDLI          ; next DLI.
+
+	mRegRestoreAX
+
+	rti
+
+
+; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
+
+TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to AQUA for Instructions text.
+	mRegSaveAX
+
+	ldx ThisDLI
+
+	lda COLPF1_TABLE,x   ; Get text color (luminance)
+	sta COLPF1           ; write new text luminance.
+
+	lda #COLOR_AQUA      ; For Text Background.
+	sta WSYNC
+	sta COLBK
+	sta COLPF2
+
+	lda TITLE_DLI_CHAIN_TABLE, x ; update low byte for next chained DLI.
+	sta VDSLST
+
+	inc ThisDLI          ; next DLI.
+
+	mRegRestoreAX
+
+	rti
+
+
+TITLE_DLI_5 ; DLI sets only COLPF1 text luminance from the table.
+	mRegSaveAX
+
+	ldx ThisDLI
+
+	lda COLPF1_TABLE,x   ; Get text color (luminance)
+	sta WSYNC
+	sta COLPF1           ; write new text luminance.
+
+	lda TITLE_DLI_CHAIN_TABLE, x ; update low byte for next chained DLI.
+	sta VDSLST
+
+	inc ThisDLI          ; next DLI.
+
+	mRegRestoreAX
+
+	rti
+
+
+TITLE_DLI_SPC1
+	jmp DLI_SPC1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;TITLE_DLI_1 ; DLI sets COLPF2, COLBK for score text.  Mode 4 Text is different from Mode 2 text.
 	mRegSaveAX
 
 	ldx ThisDLI
@@ -310,7 +493,7 @@ TITLE_DLI_1 ; DLI sets COLPF2, COLBK for score text.  Mode 4 Text is different f
 	rti
 
 	
-TITLE_DLI_2 ; DLI sets COLPF2 for title text.  Mode 4 Text is different from Mode 2 text.
+;TITLE_DLI_2 ; DLI sets COLPF2 for title text.  Mode 4 Text is different from Mode 2 text.
 	mRegSaveAX
 
 	ldx ThisDLI

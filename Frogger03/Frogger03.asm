@@ -381,7 +381,7 @@ CreditHSCROL    .byte 4  ; Fine scrolling the credits
 ; LMS instruction currently in use.
 
 BOTTOM_OF_DISPLAY                                  ; Prior to this DLI SPC1/25 set colors.
-	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM         ; Prompt to start game.; DLI SPC2/26 sets HSCROL, (and COLPF2/COLPF1 for text.)
+	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM         ; Prompt to start game.; DLI SPC2/26 sets HSCROL, (and COLBK/COLPF2/COLPF1 for text.)
 SCROLL_CREDIT_LMS = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_HSCROLL,SCROLLING_CREDIT  ; The perpetrators identified
 
@@ -400,11 +400,13 @@ EnablePressAButton .byte 0
 
 ; 0/1 toggle for light/dark state of Press a button prompt.
 ; 0 = Background fade up, text fades down/
-
 PressAButtonState  .byte 0   ; 0 means fading background down.   1 means fading up.
 
 ; Timer value for Press A Button Prompt updating.
 PressAButtonFrames .byte BLINK_SPEED
+
+PressAButtonColor  .byte 0 ; The actual color of the promopt.
+PressAButtonText   .byte 0 ; The text luminance.
 
 
 ; ======== D L I ======== COLOR TABLES

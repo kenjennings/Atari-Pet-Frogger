@@ -105,27 +105,29 @@ TITLE_DISPLAYLIST
 
 	.byte   DL_BLANK_2                     ; An empty line.      2
 	.byte   DL_MAP_9                       ; Underlines        + 4
-	.byte   DL_BLANK_2|DL_DLI              ; An empty line.    + 2 = 8, DLI 3/8 set BLACK for COLBAK.
+	.byte   DL_BLANK_2|DL_DLI              ; An empty line.    + 2 = 8, DLI 3/8 set BLACK for COLBK.
 
 	.byte   DL_BLANK_8|DL_DLI              ; DLI 4/9 set AQUA for COLBK and COLPF2, and set COLPF1
 
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1 ; Basic instructions... DLI 5/10 set COLPF1 text
 	.byte   DL_TEXT_2|DL_DLI               ; DLI 5/11 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; DLI 5/12 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM3 ; DLI 5/12 set COLPF1 text
 	.byte   DL_TEXT_2|DL_DLI               ; DLI 5/13 set COLPF1 text
 	.byte   DL_TEXT_2|DL_DLI               ; DLI 5/14 set COLPF1 text
 	.byte   DL_TEXT_2|DL_DLI               ; DLI 5/15 set COLPF1 text
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM7 ; DLI 5/16 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; DLI 3/17 set BLACK for COLBAK
+	.byte   DL_TEXT_2|DL_DLI,INSTRUCT_MEM7 ; DLI 5/16 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; DLI 3/17 set BLACK for COLBK
+
 	.byte   DL_BLANK_8|DL_DLI              ; An empty line.  DLI 4/18 set ORANGE2 for COLBK and COLPF2, set COLPF1 text
 
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM1  ; Scoring.  DLI 5/19 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; Scoring.  DLI 5/19 set COLPF1 text
 	.byte   DL_TEXT_2|DL_DLI               ; DLI 5/20 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; DLI 3/21 set BLACK for COLBAK
+	.byte   DL_TEXT_2|DL_DLI               ; DLI 3/21 set BLACK for COLBK
+
 	.byte   DL_BLANK_8|DL_DLI              ; An empty line.  DLI 4/22 set PINK for COLBK and COLPF2, and set COLPF1 text
 
 	.byte   DL_TEXT_2|DL_DLI               ; Game Controls.  DLI 5/23 set COLPF1 text
-	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM2 ; DLI 3/24 set BLACK for COLBAK
+	mDL_LMS DL_TEXT_2|DL_DLI               ; DLI 3/24 set BLACK for COLBK
 
 	.byte   DL_BLANK_8|DL_DLI              ; An empty line.  DLI SPC1/25 sets COLBK, COLPF2, COLPF1 colors.
 

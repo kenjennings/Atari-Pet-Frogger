@@ -199,9 +199,11 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 
 ; ANTIC has a 4K boundary for screen memory.
-; But, we can simply align screen data into pages and that
-; will prevent any line of displayed data from crossing over a
-; 4K boundary.
+; But, since the visibly adjacent lines of screen data need not be
+; contiguous in memory we can simply align screen data into 256
+; byte pages only making sure a line doesn't cross the end of a 
+; bage.  This will prevent any line of displayed data from crossing 
+; over a4K boundary.
 
 ; No need to align here, since the previous file was the character 
 ; set, so we know the first declaration will start at a page.
@@ -214,11 +216,12 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; Remember, lines of screen data need not be contiguous to
 ; each other since LMS in the Display List tells ANTIC where to 
 ; start reading screen memory.  Therefore we can declare lines in
-; any order....
+; any order....   Just remember to use LMS in the Display List 
+; when data is not contiguous, OK.
 
 
 ; The lines of scrolling boats.  Only one line of data for each 
-; direction is declared here.  Every other moving row can re-use the 
+; direction is declared.  Every other moving row can re-use the 
 ; same data for display.  Also, since the entire data fits within 
 ; one page, the coarse scrolling need only update the low byte of 
 ; the LMS instruction....
@@ -234,16 +237,6 @@ PLAYFIELD_MEM13
 PLAYFIELD_MEM16
 	mBoatsGoRight
 
-; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left ; + 64 
-; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
-; End   Scroll position = LMS + 12,            HSCROL 0
-PLAYFIELD_MEM2
-PLAYFIELD_MEM5
-PLAYFIELD_MEM8
-PLAYFIELD_MEM11
-PLAYFIELD_MEM14
-PLAYFIELD_MEM17
-	mBoatsGoLeft
 
 ; Title text.  Bitmapped version for Mode 9.
 ; Will not scroll these, so no need for individual labels and leading blanks.
@@ -270,8 +263,47 @@ TITLE_MEM1
 	.by %11111100 %11111100 %11111100 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111 ; + 10 
 
 	ANYBUTTON_MEM ; Prompt to start game.
-; 24 |   Press joystick button to continue.   | INSTXT_4             ; 64 + 64 + 60 + 10 + 40 == 238
+; 24 |   Press joystick button to continue.   | INSTXT_4 
 	.sb "   Press joystick button to continue.   "
+
+INSTRUCT_MEM1 ; Basic instructions...
+; 6  |Help the frogs escape from Doc Hopper's | INSTXT_1
+	.sb "Help the frogs escape from Doc Hopper's "
+
+INSTRUCT_MEM2
+; 7  |frog legs fast food franchise! But, the | INSTXT_1
+	.sb "frog legs fast food franchise! But, the "
+
+
+	.align $0100 ; Realign to next page.
+
+
+; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left ; + 64 
+; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
+; End   Scroll position = LMS + 12,            HSCROL 0
+PLAYFIELD_MEM2
+PLAYFIELD_MEM5
+PLAYFIELD_MEM8
+PLAYFIELD_MEM11
+PLAYFIELD_MEM14
+PLAYFIELD_MEM17
+	mBoatsGoLeft
+
+INSTRUCT_MEM3
+; 8  |frogs must cross piranha-infested rivers| INSTXT_1
+	.sb "frogs must cross piranha-infested rivers"
+
+INSTRUCT_MEM4
+; 9  |to reach freedom. You have three chances| INSTXT_1
+	.sb "to reach freedom. You have three chances"
+
+INSTRUCT_MEM5
+; 10 |to prove your frog management skills by | INSTXT_1
+	.sb "to prove your frog management skills by "
+
+INSTRUCT_MEM6
+; 11 |directing frogs to jump on boats in the | INSTXT_1
+	.sb "directing frogs to jump on boats in the "
 
 
 	.align $0100 ; Realign to next page.
@@ -308,34 +340,6 @@ EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
 	.align $0100  ; Realign to next page.
 
 
-INSTRUCT_MEM1 ; Basic instructions...
-; 6  |Help the frogs escape from Doc Hopper's | INSTXT_1
-	.sb "Help the frogs escape from Doc Hopper's "
-
-INSTRUCT_MEM2
-; 7  |frog legs fast food franchise! But, the | INSTXT_1
-	.sb "frog legs fast food franchise! But, the "
-
-INSTRUCT_MEM3
-; 8  |frogs must cross piranha-infested rivers| INSTXT_1
-	.sb "frogs must cross piranha-infested rivers"
-
-INSTRUCT_MEM4
-; 9  |to reach freedom. You have three chances| INSTXT_1
-	.sb "to reach freedom. You have three chances"
-
-INSTRUCT_MEM5
-; 10 |to prove your frog management skills by | INSTXT_1
-	.sb "to prove your frog management skills by "
-
-INSTRUCT_MEM6
-; 11 |directing frogs to jump on boats in the | INSTXT_1
-	.sb "directing frogs to jump on boats in the "
-
-
-	.align $0100  ; Realign to next page.
-
-
 INSTRUCT_MEM7
 ; 12 |rivers like this:  <QQQQ]]  Land only on| INSTXT_1
 	.sb "rivers like this:  "
@@ -363,7 +367,8 @@ CONTROLS_MEM1 ; Game Controls
 	.sb "Use joystick control to jump forward,   "
 
 
-	.align $0100 ; Realign to next page.
+
+	.align $0100  ; Realign to next page.
 
 
 CONTROLS_MEM2
@@ -481,13 +486,14 @@ SCREEN_SAVED
 ; |  |  | *|* | *|**|**|* |  |**|**|  | *|* |  |  | *|* |**|  |  |  |
 ; |  |**|**|  | *|* | *|* |  | *|* |  | *|**|**|* | *|**|* |  |  |**|
 
-FROGSAVE_MEM   ; Graphics data, SAVED!  (22) + 18 spaces.
-	.byte %00000000 %00000000 %00011110 %00001100 %00110011 %00111111 %00111100 %000110000 %00000000 %00000000
-	.byte %00000000 %00000000 %00110000 %00011110 %00110011 %00110000 %00110110 %000110000 %00000000 %00000000
-	.byte %00000000 %00000000 %00011110 %00110011 %00110011 %00111110 %00110011 %000110000 %00000000 %00000000
-	.byte %00000000 %00000000 %00000011 %00110011 %00110011 %00110000 %00110011 %000110000 %00000000 %00000000
-	.byte %00000000 %00000000 %00000011 %00111111 %00011110 %00110000 %00110110 %000000000 %00000000 %00000000
-	.byte %00000000 %00000000 %00011110 %00110011 %00001100 %00111111 %00111100 %000110000 %00000000 %00000000
+; Another benefir of using the bitmap is it makes the data much more obvious. 
+FROGSAVE_MEM   ; Graphics data, SAVED!  43 pixels.  40 - 21 == 19 blanks. 43 + 19 = 62.  + 18 = 80
+	.byte %00000000 %00000000 %00001111 %00000110 %00011001 %10011111 %10011110 %00001100 %00000000 %00000000
+	.byte %00000000 %00000000 %00011000 %00001111 %00011001 %10011000 %00011011 %00001100 %00000000 %00000000
+	.byte %00000000 %00000000 %00001111 %00011001 %10011001 %10011111 %00011001 %10001100 %00000000 %00000000
+	.byte %00000000 %00000000 %00000001 %10011001 %10011001 %10011000 %00011001 %10001100 %00000000 %00000000
+	.byte %00000000 %00000000 %00000001 %10011111 %10001111 %00011000 %00011011 %00000000 %00000000 %00000000
+	.byte %00000000 %00000000 %00001111 %00011001 %10000110 %00011111 %10011110 %00001100 %00000000 %00000000
 
 
 	.align $0100 ; Realign to next page.
@@ -509,17 +515,12 @@ FROGSAVE_MEM   ; Graphics data, SAVED!  (22) + 18 spaces.
 ; | *|**|* |  | *|**|**|* | *|* | *|* | *|**|* |  |  |  |  | *|* |  |  | *|* | *|* |  |**|**|  |  |**|**|* |  |**|
 
 FROGDEAD_MEM   ; Graphics data, DEAD FROG!  (37) + 3 spaces.
-
-	.byte % %00000111 %10000111 %11100001 %10000111 %10000000 %00011111 %10011111 %00001111 %00001111 %10001100 %
-	.byte % %00000110 %11000110 %00000011 %11000110 %11000000 %00011000 %00011001 %10011001 %10011000 %00001100 %
-	.byte % %00000110 %01100111 %11000110 %01100110 %01100000 %00011111 %00011001 %10011001 %10011000 %00001100 %
-	.byte % %00000110 %01100110 %00000110 %01100110 %01100000 %00011000 %00011111 %00011001 %10011011 %10001100 %
-	.byte % %00000110 %11000110 %00000111 %11100110 %11000000 %00011000 %00011011 %00011001 %10011001 %10000000 %
-	.byte % %00000111 %10000111 %11100110 %01100111 %10000000 %00011000 %00011001 %10001111 %00001111 %10001100 %
-
-	.by $0 $0 I_IY I_II I_IK I_S I_IY I_II I_IU I_L I_S  I_IL I_IK I_S I_IY I_II I_IK I_S I_S I_S I_S I_IY I_II I_IU I_L I_IY I_II I_IO I_O I_I  I_II I_IO I_O I_I  I_II I_IU I_L I_S I_IS $0
-	.by $0 $0 I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_S I_IY I_Y  I_IY I_Y I_IY I_Y  I_IY I_Y I_S I_S I_S I_IY I_II I_IU I_S I_IY I_IK I_IL I_L I_IY I_Y  I_IY I_Y I_IY I_Y  I_U  I_O I_S I_IS $0
-	.by $0 $0 I_IY I_IK I_II I_S I_IY I_IK I_U  I_O I_IY I_II I_IO I_Y I_IY I_IK I_II I_S I_S I_S I_S I_IY I_Y  I_S  I_S I_IY I_Y  I_IO I_O I_K  I_IK I_IL I_L I_K  I_IK I_IL I_Y I_S I_U  $0
+	.byte %00001111 %00001111 %11000011 %00001111 %00000000 %00111111 %00111110 %00011110 %00011111 %00011000
+	.byte %00001101 %10001100 %00000111 %10001101 %10000000 %00110000 %00110011 %00110011 %00110000 %00011000
+	.byte %00001100 %11001111 %10001100 %11001100 %11000000 %00111110 %00110011 %00110011 %00110000 %00011000
+	.byte %00001100 %11001100 %00001100 %11001100 %11000000 %00110000 %00111110 %00110011 %00110111 %00011000
+	.byte %00001101 %10001100 %00001111 %11001101 %10000000 %00110000 %00110110 %00110011 %00110011 %00000000
+	.byte %00001111 %00001111 %11001100 %11001111 %00000000 %00110000 %00110011 %00011110 %00011111 %00011000
 
 
 ; GAME OVER screen., 25 lines:
@@ -529,8 +530,6 @@ FROGDEAD_MEM   ; Graphics data, DEAD FROG!  (37) + 3 spaces.
 ; Press Any Key Line
 ; 1 blank line
 
-GAMEOVER_MEM ; Graphics data, Game Over.  (34) + 6 spaces.
-
 ; Graphics chars design, GAME OVER
 ; |  |**|**|* |  | *|* |  |**|  | *|* |**|**|**|  |  |  |  |**|**|  | *|* | *|* | *|**|**|* | *|**|**|  |
 ; | *|* |  |  |  |**|**|  |**|* |**|* |**|  |  |  |  |  | *|* | *|* | *|* | *|* | *|* |  |  | *|* | *|* |
@@ -539,9 +538,14 @@ GAMEOVER_MEM ; Graphics data, Game Over.  (34) + 6 spaces.
 ; | *|* | *|* | *|**|**|* |**|  | *|* |**|  |  |  |  |  | *|* | *|* |  |**|**|  | *|* |  |  | *|* |**|  |
 ; |  |**|**|* | *|* | *|* |**|  | *|* |**|**|**|  |  |  |  |**|**|  |  | *|* |  | *|**|**|* | *|* | *|* |
 
-	.by $0 $0 $0 I_I  I_II I_IU I_L I_S  I_IL I_IK I_S I_IS I_O  I_IL I_Y I_IS I_IU I_IU I_S I_S I_S I_I  I_II I_IO I_O I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_L I_IY I_II I_IO I_O $0 $0 $0
-	.by $0 $0 $0 I_IY I_Y  I_U  I_O I_IY I_Y  I_IY I_Y I_IS I_IO I_IO I_Y I_IS I_IU I_L  I_S I_S I_S I_IY I_Y  I_IY I_Y I_IY I_Y  I_IY I_Y I_IY I_II I_IU I_S I_IY I_IK I_IL I_L $0 $0 $0
-	.by $0 $0 $0 I_K  I_IK I_IL I_Y I_IY I_II I_IO I_Y I_IS I_S  I_IY I_Y I_IS I_U  I_U  I_S I_S I_S I_K  I_IK I_IL I_L I_S  I_IO I_II I_S I_IY I_IK I_U  I_O I_IY I_Y  I_IO I_O $0 $0 $0
+GAMEOVER_MEM ; Graphics data, Game Over.  (34) + 6 spaces.
+	.byte %00000000 %11111000 %01100011 %00011011 %11110000 %00001111 %00011001 %10011111 %10011111 %00000000
+	.byte %00000001 %10000000 %11110011 %10111011 %00000000 %00011001 %10011001 %10011000 %00011001 %10000000
+	.byte %00000001 %10000001 %10011011 %11111011 %11100000 %00011001 %10011001 %10011111 %00011001 %10000000
+	.byte %00000001 %10111001 %10011011 %01011011 %00000000 %00011001 %10011001 %10011000 %00011111 %00000000
+	.byte %00000001 %10011001 %11111011 %00011011 %00000000 %00011001 %10001111 %00011000 %00011011 %00000000
+	.byte %00000000 %11111001 %10011011 %00011011 %11110000 %00001111 %00000110 %00011111 %10011001 %10000000
+
 
 
 	.align $0100 ; Realign to next page.
@@ -697,7 +701,7 @@ DISPLAYLIST_HI_TABLE
 	.byte >GAMEOVER_DISPLAYLIST
 
 DLI_LO_TABLE  ; Address of first chained DLI per each screen.
-	.byte <TITLE_DLI ; DLI (0)
+	.byte <TITLE_DLI ; DLI (0) -- Set colors for Scores.
 ;	.byte <GAME_DLI
 ;	.byte <FROGSAVED_DLI
 ;	.byte <FROGDEAD_DLI
