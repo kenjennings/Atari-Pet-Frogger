@@ -382,6 +382,8 @@ CreditHSCROL    .byte 4  ; Fine scrolling the credits
 
 BOTTOM_OF_DISPLAY                                  ; Prior to this DLI SPC1/25 set colors.
 	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM         ; Prompt to start game.; DLI SPC2/26 sets HSCROL, (and COLBK/COLPF2/COLPF1 for text.)
+
+DL_SCROLLING_CREDIT
 SCROLL_CREDIT_LMS = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_HSCROLL,SCROLLING_CREDIT  ; The perpetrators identified
 

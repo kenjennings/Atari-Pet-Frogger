@@ -81,8 +81,8 @@ TITLE_DISPLAYLIST
 	.byte   DL_BLANK_8, DL_BLANK_8          ; 16 blank scan lines.
 	.byte   DL_BLANK_4|DL_DLI               ; 4 blank lines. DLI 0/0 sets COLPF1, COLPF2 for score text. 
 
-	mDL_LMS DL_TEXT_2,SCORE_MEM1            ; scores
-	.byte   DL_BLANK_8|DL_DLI               ; An empty line. DLI 1/1 Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1.
+	mDL_LMS DL_TEXT_2,SCORE_MEM1            ; (1-8) scores
+	.byte   DL_BLANK_8|DL_DLI               ; (9-16) An empty line. DLI 1/1 Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1.
 
 ; Replace the 3 lines of Text Mode 2 used in Version 00, 01, 02 
 ; with 6 lines of Map Mode 9.  
@@ -96,129 +96,181 @@ TITLE_DISPLAYLIST
 ; (Based on the way screen memory is declared, every line does
 ;  not require an LMS, so reducing 3 byte instructions to 1 byte.)
  
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1     ; DLI 2/2 Set COLPF0 for Line 2
-	.byte   DL_MAP_9|DL_DLI                ; DLI 2/3 Set COLPF0 for Line 3
-	.byte   DL_MAP_9|DL_DLI                ; DLI 2/4 Set COLPF0 for Line 4
-	.byte   DL_MAP_9|DL_DLI                ; DLI 2/5 Set COLPF0 for Line 5
-	.byte   DL_MAP_9|DL_DLI                ; DLI 2/6 Set COLPF0 for Line 6
-	.byte   DL_MAP_9|DL_DLI                ; DLI 2/7 Set COLPF0 for underlines
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1     ; (17-20) DLI 2/2 Set COLPF0 for Line 2
+	.byte   DL_MAP_9|DL_DLI                ; (21-24) DLI 2/3 Set COLPF0 for Line 3
+	.byte   DL_MAP_9|DL_DLI                ; (25-28) DLI 2/4 Set COLPF0 for Line 4
+	.byte   DL_MAP_9|DL_DLI                ; (29-32) DLI 2/5 Set COLPF0 for Line 5
+	.byte   DL_MAP_9|DL_DLI                ; (33-36) DLI 2/6 Set COLPF0 for Line 6
+	.byte   DL_MAP_9|DL_DLI                ; (37-40) DLI 2/7 Set COLPF0 for underlines
 
-	.byte   DL_BLANK_2                     ; An empty line.      2
-	.byte   DL_MAP_9                       ; Underlines        + 4
-	.byte   DL_BLANK_2|DL_DLI              ; An empty line.    + 2 = 8, DLI 3/8 set BLACK for COLBK.
+	.byte   DL_BLANK_2                     ; (41-42) An empty line.      2
+	.byte   DL_MAP_9                       ; (43-46) Underlines        + 4
+	.byte   DL_BLANK_2|DL_DLI              ; (47-48) An empty line.    + 2 = 8, DLI 3/8 set BLACK for COLBK.
 
-	.byte   DL_BLANK_8|DL_DLI              ; DLI 4/9 set AQUA for COLBK and COLPF2, and set COLPF1
+	.byte   DL_BLANK_8|DL_DLI              ; (49-56) DLI 4/9 set AQUA for COLBK and COLPF2, and set COLPF1
 
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1 ; Basic instructions... DLI 5/10 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; DLI 5/11 set COLPF1 text
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM3 ; DLI 5/12 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; DLI 5/13 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; DLI 5/14 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; DLI 5/15 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI,INSTRUCT_MEM7 ; DLI 5/16 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; DLI 3/17 set BLACK for COLBK
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1 ; (57-64) Basic instructions... DLI 5/10 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (65-72) DLI 5/11 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM3 ; (73-80) DLI 5/12 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (81-88) DLI 5/13 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (89-96) DLI 5/14 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (97-104) DLI 5/15 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI,INSTRUCT_MEM7 ; (105-112) DLI 5/16 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (113-120) DLI 3/17 set BLACK for COLBK
 
-	.byte   DL_BLANK_8|DL_DLI              ; An empty line.  DLI 4/18 set ORANGE2 for COLBK and COLPF2, set COLPF1 text
+	.byte   DL_BLANK_8|DL_DLI              ; (121-128) An empty line.  DLI 4/18 set ORANGE2 for COLBK and COLPF2, set COLPF1 text
 
-	.byte   DL_TEXT_2|DL_DLI               ; Scoring.  DLI 5/19 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; DLI 5/20 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; DLI 3/21 set BLACK for COLBK
+	.byte   DL_TEXT_2|DL_DLI               ; (129-136) Scoring.  DLI 5/19 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (137-144) DLI 5/20 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (145-152) DLI 3/21 set BLACK for COLBK
 
-	.byte   DL_BLANK_8|DL_DLI              ; An empty line.  DLI 4/22 set PINK for COLBK and COLPF2, and set COLPF1 text
+	.byte   DL_BLANK_8|DL_DLI              ; (153-160) An empty line.  DLI 4/22 set PINK for COLBK and COLPF2, and set COLPF1 text
 
-	.byte   DL_TEXT_2|DL_DLI               ; Game Controls.  DLI 5/23 set COLPF1 text
-	mDL_LMS DL_TEXT_2|DL_DLI               ; DLI 3/24 set BLACK for COLBK
+	.byte   DL_TEXT_2|DL_DLI               ; (161-168) Game Controls.  DLI 5/23 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DL_DLI               ; (169-176) DLI 3/24 set BLACK for COLBK
 
-	.byte   DL_BLANK_8|DL_DLI              ; An empty line.  DLI SPC1/25 sets COLBK, COLPF2, COLPF1 colors.
+	.byte   DL_BLANK_8|DL_DLI              ; (177-184) An empty line.  DLI SPC1/25 sets COLBK, COLPF2, COLPF1 colors.
 
-	mDL_JMP BOTTOM_OF_DISPLAY              ; End of display.  See Page 0 for this evil.
+	mDL_JMP BOTTOM_OF_DISPLAY              ; (185-192, 193-200) End of display.  See Page 0 for this evil.
 
 
-
-; Revised V02 Main Game Play Screen:
+; Revised V03 Main Game Play Screen:
+; FYI: Old boats.
+; 8  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
+; 9  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
+; Old:  [QQQQ>
+; New: [[QQQQQ>
+; New boats are larger to provide more safe surface for the larger 
+; frog and to provide some additional graphics enhancement for 
+; the boats.  Illustration below shows the entire memory needed 
+; for scrolling.
+; The two grassy areas at the top and the bottom are sacrificed to 
+; distribute their scan lines between each game line providing 9 scan 
+; lines per boat line which are used to extend the water area and 
+; allow for a 10 scan line frog image and also provide a space safe 
+; for updating five color registers plus HSCROL.  (a few of the scan 
+; lines from the unused Press A Button line also participate.)
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
-; 3  |                                        | <-Grassy color
+; 3  |                                        | 
 ; 4  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
-; 5  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
-; 6  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
+; 5  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        | ; Boats Right
+; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left
 ; 7  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
-; 8  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
-; 9  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
+; 8  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
+; 9  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 10 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
-; 11 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3
-; 12 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3
+; 11 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
+; 12 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 13 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
-; 14 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4
-; 15 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4
+; 14 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
+; 15 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 16 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
-; 17 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5
-; 18 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5
+; 17 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
+; 18 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 19 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
-; 20 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
-; 21 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
+; 20 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
+; 21 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
-; 23 |                                        | <-Grassy color
+; 23 |                                        |
 ; 24 |                                        |
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
 
 GAME_DISPLAYLIST
-	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4|DL_DLI ; 20 blank scan lines.
+	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4|DL_DLI ; 20 blank scan lines.  DLI 0/0 sets COLPF1, COLPF2 for score text.
 
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1      ; Labels for crossings counter, scores, and lives
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM2
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM               ; An empty line of spaces.  (green grass)
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1      ; (1-8) Labels for crossings, scores, and lives. DLI 1/1 sets COLPF1 for text.
+	mDL_LMS DL_TEXT_2,SCORE_MEM2             ; (9-16) 
+	.byte DL_BLANK_1|DL_DLI                  ; (17) DLI 2/2 sets COLPF0,1,2,3,BK for Beach.
 
-PF_LMS0 = [* + 1] ; Plus 1 is the address of the display list LMS
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM0  ; "Beach", and the two lines of Boats
-PF_LMS1 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM1  ; Right Boats.
-PF_LMS2 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM2  ; Left Boats.
-PF_LMS3 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM3  ; "Beach", and the two lines of Boats
-PF_LMS4 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM4
-PF_LMS5 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM5
-PF_LMS6 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM6  ; "Beach", and the two lines of Boats
+PF_LMS0 = [* + 1]                            ; Plus 1 is the address of the display list LMS
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM0  ; (18-25) Beach. DLI 3/3 sets boats COLPF0,1,2,3,BK, HSCROLL.
+	.byte DL_BLANK_1                         ; (26) One scan line 
+
+PF_LMS1 = [* + 1] ; Right
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM1  ; (27-34) Boats. DLI 3/4 sets boats COLPF0,1,2,3,BK, HSCROLL.
+	.byte DL_BLANK_1                         ; (35) One scan line 
+
+PF_LMS2 = [* + 1] ; Left
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM2  ; (36-43) Boats. DLI 2/5 sets COLPF0,1,2,3,BK for Beach.
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS3 = [* + 1] 
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM3  ; (-) Beach. DLI 3/6 sets boats COLPF0,1,2,3,BK, HSCROLL.
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS4 = [* + 1] ; Right
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM4  ; (-) Boats. 
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS5 = [* + 1] ; Left
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM5  ; (-) Boats. 
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS6 = [* + 1] ; 
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM6  ; (-) Beach. DLI 
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
 PF_LMS7 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM7
-PF_LMS8 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM8
-PF_LMS9 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM9  ; "Beach", and the two lines of Boats
-PF_LMS10 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM10
-PF_LMS11 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM11
-PF_LMS12 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM12 ; "Beach", and the two lines of Boats
-PF_LMS13 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM13
-PF_LMS14 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM14
-PF_LMS15 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM15 ; "Beach", and the two lines of Boats
-PF_LMS16 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM16
-PF_LMS17 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM17
-PF_LMS18 = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_DLI,PLAYFIELD_MEM18 ; Frog starting beach.
-	mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM        ; An empty line of spaces.  (green grass)
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM7  ; (-) Boats.
+	.byte DL_BLANK_1                         ; (44) One scan line 
 
-	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
+PF_LMS8 = [* + 1]
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM8  ; (-) Boats.
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS9 = [* + 1]
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM9  ; (-) Beach. DLI 
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS10 = [* + 1]
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM10 ; (-) Boats.
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS11 = [* + 1]
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM11 ; (-) Boats.
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS12 = [* + 1]
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM12 ; (-) Beach. DLI 
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS13 = [* + 1]
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM13 ; (-) Boats.
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS14 = [* + 1]
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM14 ; (-) Boats.
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS15 = [* + 1]
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM15 ; (-) Beach. DLI 
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS16 = [* + 1]
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM16 ; (-) Boats.
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS17 = [* + 1]
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM17 ; (-) Boats.
+	.byte DL_BLANK_1                         ; (44) One scan line 
+
+PF_LMS18 = [* + 1]
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM18 ; (-) Frog starting Beach. DLI 
+
+	.byte DL_BLANK_1|DLI                     ; (??) Some scan lines. DLI SPC2/26 sets HSCROL, (and COLBK/COLPF2/COLPF1 for credit.)
+
+	mDL_JMP DL_SCROLLING_CREDIT              ; (193-200) End of display. No prompt for button.  See Page 0 for the evil.
+
 
 
 ; FROG SAVED screen, 25 lines:
 ; 10 blank lines.
 ; 3 lines of big text.
 ; 10 blank lines
-; Press Any Key Line
+; Press A Button Line
 ; 1 blank line
 
 FROGSAVED_DISPLAYLIST

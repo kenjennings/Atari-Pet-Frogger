@@ -410,7 +410,7 @@ TITLE_DLI_3 ; DLI Sets background to Black for blank area.
 
 ; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
 
-TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to AQUA for Instructions text.
+TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to start a text block.
 	mRegSaveAX
 
 	ldx ThisDLI
@@ -418,7 +418,7 @@ TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to
 	lda COLPF1_TABLE,x   ; Get text color (luminance)
 	sta COLPF1           ; write new text luminance.
 
-	lda #COLOR_AQUA      ; For Text Background.
+	lda COLPF2_TABLE,x   ; For Text Background.
 	sta WSYNC
 	sta COLBK
 	sta COLPF2

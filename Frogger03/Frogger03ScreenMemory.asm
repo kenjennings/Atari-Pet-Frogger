@@ -133,7 +133,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ;    +----------------------------------------+
 
 
-; Revised V02 Main Game Play Screen:
+; Revised V03 Main Game Play Screen:
 ; FYI: Old boats.
 ; 8  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
 ; 9  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
