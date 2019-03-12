@@ -486,7 +486,7 @@ SCREEN_SAVED
 ; |  |  | *|* | *|**|**|* |  |**|**|  | *|* |  |  | *|* |**|  |  |  |
 ; |  |**|**|  | *|* | *|* |  | *|* |  | *|**|**|* | *|**|* |  |  |**|
 
-; Another benefir of using the bitmap is it makes the data much more obvious. 
+; Another benefit of using the bitmap is it makes the data much more obvious. 
 FROGSAVE_MEM   ; Graphics data, SAVED!  43 pixels.  40 - 21 == 19 blanks. 43 + 19 = 62.  + 18 = 80
 	.byte %00000000 %00000000 %00001111 %00000110 %00011001 %10011111 %10011110 %00001100 %00000000 %00000000
 	.byte %00000000 %00000000 %00011000 %00001111 %00011001 %10011000 %00011011 %00001100 %00000000 %00000000
@@ -708,8 +708,8 @@ DLI_LO_TABLE  ; Address of first chained DLI per each screen.
 ;	.byte <GAMEOVER_DLI
 
 DLI_HI_TABLE
-	.byte >TITLE_DLI
-;	.byte >GAME_DLI
+	.byte >TITLE_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
+	.byte >GAME_DLI  ; DLI sets COLPF1, COLPF2, COLBK for score text. 
 ;	.byte >FROGSAVED_DLI
 ;	.byte >FROGDEAD_DLI
 ;	.byte >GAMEOVER_DLI
@@ -741,6 +741,34 @@ TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 	.byte TITLE_DLI_3 ; 24
 	.byte TITLE_DLI_SPC1 ; 25 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
 ;	.byte TITLE_DLI_SPC2 ; 26 
+
+GAME_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
+	.byte GAME_DLI_1 ; DLI (1)
+	.byte GAME_DLI_2 ; 2
+	.byte GAME_DLI_2 ; 3
+	.byte GAME_DLI_2 ; 4
+	.byte GAME_DLI_2 ; 5
+	.byte GAME_DLI_2 ; 6
+	.byte GAME_DLI_2 ; 7
+	.byte GAME_DLI_3 ; 8
+	.byte GAME_DLI_4 ; 9
+	.byte GAME_DLI_5 ; 10
+	.byte GAME_DLI_5 ; 11
+	.byte GAME_DLI_5 ; 12
+	.byte GAME_DLI_5 ; 13
+	.byte GAME_DLI_5 ; 14 
+	.byte GAME_DLI_5 ; 15
+	.byte GAME_DLI_5 ; 16
+	.byte GAME_DLI_3 ; 17
+	.byte GAME_DLI_4 ; 18
+	.byte GAME_DLI_5 ; 19
+	.byte GAME_DLI_5 ; 20
+	.byte GAME_DLI_3 ; 21
+	.byte GAME_DLI_4 ; 22
+	.byte GAME_DLI_5 ; 23
+	.byte GAME_DLI_3 ; 24
+	.byte GAME_DLI_SPC1 ; 25 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
+;	.byte GAME_DLI_SPC2 ; 26 
 
 
 COLOR_BACK_LO_TABLE

@@ -412,6 +412,8 @@ PressAButtonText   .byte 0 ; The text luminance.
 
 
 ; ======== D L I ======== COLOR TABLES
+; Pointer to current DLI address table.
+ThisDLIAddr     .word $0000
 ; Data read by the Display List Interrupts to change the colors for each line.
 ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
 
