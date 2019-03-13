@@ -266,80 +266,96 @@ PF_LMS18 = [* + 1]
 
 
 
-; FROG SAVED screen, 25 lines:
-; 10 blank lines.
-; 3 lines of big text.
-; 10 blank lines
-; Press A Button Line
-; 1 blank line
+; Until some other eye candy improvement is conceived, these 
+; three  graphics Display Lists are nearly identical with 
+; the only difference the bitmap shown in the graphics 
+; section (and the main code color manipulation routines.)
+
+; So, instead of three display lists, just use one.  The VBI
+; will know which graphics memory address to use for the
+; GFX_LMS in the display list.
+
+; FROG SAVED screen, 200 scan lines....:
+;    80 scan lines = 20 blank lines (by 4 scan lines each) of color cycling.
+; +  24 scan lines = 6 lines (by 4 scan lines each) of big text.
+; +  80 scan lines = 20 blank lines (by 4 scan lines each) of color cycling.
+; +   8 scan lines = Press A Button Line of text
+; +   8 scan lines = infinitely scrolling credit. 
+; = 200 scan lines.
 
 FROGSAVED_DISPLAYLIST
-	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4|DL_DLI ; 20 blank scan lines.
-
-	.rept 10
-		mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM          ; An empty line. times 10
-	.endr
-
-	mDL_LMS DL_TEXT_2|DL_DLI,FROGSAVE_MEM           ; Frog Saved Line 1, 2, and 3.
-	mDL_LMS DL_TEXT_2|DL_DLI,FROGSAVE_MEM+40
-	mDL_LMS DL_TEXT_2|DL_DLI,FROGSAVE_MEM+80
-
-	.rept 10
-		mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM          ; An empty line. times 10
-	.endr
-
-	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
-
-
-
-	.align $0100 ; Align in the next page.
-
-; FROG DEAD screen., 25 lines:
-; 10 blank lines.
-; 3 lines of big text.
-; 10 blank lines
-; Press Any Key Line
-; 1 blank line
-
 FROGDEAD_DISPLAYLIST
-	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4|DL_DLI ; 20 blank scan lines.
-
-	.rept 10
-		mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM          ; An empty line. times 10
-	.endr
-
-	mDL_LMS DL_TEXT_2|DL_DLI,FROGDEAD_MEM           ; Dead Frog Line 1, 2, and 3.
-	mDL_LMS DL_TEXT_2|DL_DLI,FROGDEAD_MEM+40
-	mDL_LMS DL_TEXT_2|DL_DLI,FROGDEAD_MEM+80
-
-	.rept 10
-		mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM          ; An empty line. times 10
-	.endr
-
-	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
-
-
-; GAME OVER screen., 25 lines:
-; 10 blank lines.
-; 3 lines of big text.
-; 10 blank lines
-; Press Any Key Line
-; 1 blank line
-
 GAMEOVER_DISPLAYLIST
-	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4|DL_DLI ; 20 blank scan lines.
+	.byte DL_BLANK_8, DL_BLANK_8
+	.byte DL_BLANK_4|DL_DLI                ; 20 blank scan lines. DLI 0/0 Set COLBK color
 
-	.rept 10
-		mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM          ; An empty line. times 10
-	.endr
+	.rept 20                               ; an empty line. times 20
+		.byte DL_BLANK_4|DL_DLI            ; (1 - 80) DLI 0/1 - 0/17 COLBK color, 
+	.endr                                  ;          DLI 1/18 COLBK Black, DLI 2/19 COLBK Title, COLPF0 gfx
 
-	mDL_LMS DL_TEXT_2|DL_DLI,GAMEOVER_MEM           ; Game Over Line 1, 2, and 3.
-	mDL_LMS DL_TEXT_2|DL_DLI,GAMEOVER_MEM+40
-	mDL_LMS DL_TEXT_2|DL_DLI,GAMEOVER_MEM+80
+GFX_LMS = [* + 1]
+	mDL_LMS DL_MAP_9|DL_DLI,FROGSAVE_MEM   ; (81-84) DLI 3/20   COLPF0 gfx
+	.byte DL_MAP_9                         ; (85-88) DLI 3/21   COLPF0 gfx
+	.byte DL_MAP_9                         ; (89-92) DLI 3/22   COLPF0 gfx
+	.byte DL_MAP_9                         ; (93-96) DLI 3/23  COLPF0 gfx
+	.byte DL_MAP_9                         ; (97-100) DLI 3/24   COLPF0 gfx
+	.byte DL_MAP_9                         ; (101-104) DLI 1/25   COLBK Black
 
-	.rept 10
-		mDL_LMS DL_TEXT_2|DL_DLI,BLANK_MEM          ; An empty line. times 10
-	.endr
+	.rept 20                               ; an empty line. times 20
+		.byte DL_BLANK_4|DL_DLI            ; (105-184) DLI 0/26 - 0/43 COLBK color, 
+	.endr                                  ;           DLI DLI SPC1/44 sets COLBK, COLPF2, COLPF1 colors.
 
 	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
+
+
+
+;	.align $0100 ; Align in the next page.
+
+; FROG DEAD screen.
+
+;FROGDEAD_DISPLAYLIST
+;	.byte DL_BLANK_8, DL_BLANK_8
+;	.byte DL_BLANK_4|DL_DLI                ; 20 blank scan lines. DLI 0/0 Set COLBK color
+
+;	.rept 20                               ; an empty line. times 20
+;		.byte DL_BLANK_4|DL_DLI            ; (1 - 80) DLI 0/1 - 0/17 COLBK color, 
+;	.endr                                  ;          DLI 1/18 COLBK Black, DLI 2/19 COLBK Title, COLPF0 gfx
+
+;	mDL_LMS DL_MAP_9|DL_DLI,FROGDEAD_MEM   ; (81-84) DLI 3/20   COLPF0 gfx
+;	.byte DL_MAP_9                         ; (85-88) DLI 3/21   COLPF0 gfx
+;	.byte DL_MAP_9                         ; (89-92) DLI 3/22   COLPF0 gfx
+;	.byte DL_MAP_9                         ; (93-96) DLI 3/23  COLPF0 gfx
+;	.byte DL_MAP_9                         ; (97-100) DLI 3/24   COLPF0 gfx
+;	.byte DL_MAP_9                         ; (101-104) DLI 1/25   COLBK Black
+
+;	.rept 20                               ; an empty line. times 20
+;		.byte DL_BLANK_4|DL_DLI            ; (105-184) DLI 0/26 - 0/43 COLBK color, 
+;	.endr                                  ;           DLI DLI SPC1/44 sets COLBK, COLPF2, COLPF1 colors.
+
+;	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
+
+
+; GAME OVER screen.
+
+;GAMEOVER_DISPLAYLIST
+;	.byte DL_BLANK_8, DL_BLANK_8
+;	.byte DL_BLANK_4|DL_DLI                ; 20 blank scan lines. DLI 0/0 Set COLBK color
+
+;	.rept 20                               ; an empty line. times 20
+;		.byte DL_BLANK_4|DL_DLI            ; (1 - 80) DLI 0/1 - 0/17 COLBK color, 
+;	.endr                                  ;          DLI 1/18 COLBK Black, DLI 2/19 COLBK Title, COLPF0 gfx
+
+;	mDL_LMS DL_MAP_9|DL_DLI,GAMEOVER_MEM   ; (81-84) DLI 3/20   COLPF0 gfx
+;	.byte DL_MAP_9                         ; (85-88) DLI 3/21   COLPF0 gfx
+;	.byte DL_MAP_9                         ; (89-92) DLI 3/22   COLPF0 gfx
+;	.byte DL_MAP_9                         ; (93-96) DLI 3/23  COLPF0 gfx
+;	.byte DL_MAP_9                         ; (97-100) DLI 3/24   COLPF0 gfx
+;	.byte DL_MAP_9                         ; (101-104) DLI 1/25   COLBK Black
+
+;	.rept 20                               ; an empty line. times 20
+;		.byte DL_BLANK_4|DL_DLI            ; (105-184) DLI 0/26 - 0/43 COLBK color, 
+;	.endr                                  ;           DLI DLI SPC1/44 sets COLBK, COLPF2, COLPF1 colors.
+
+;	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
+
 
