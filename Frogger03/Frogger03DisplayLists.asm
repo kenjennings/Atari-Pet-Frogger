@@ -179,10 +179,11 @@ TITLE_DISPLAYLIST
 ;    +----------------------------------------+
 
 GAME_DISPLAYLIST
-	.byte DL_BLANK_8, DL_BLANK_8, DL_BLANK_4|DL_DLI ; 20 blank scan lines.  DLI 0/0 sets COLPF1, COLPF2 for score text.
+	.byte DL_BLANK_8, DL_BLANK_8
+	.byte DL_BLANK_4|DL_DLI                  ; 20 blank scan lines.  DLI 0/0 sets COLPF1, COLPF2 for score text.
 
 	mDL_LMS DL_TEXT_2|DL_DL1,SCORE_MEM1      ; (1-8) Labels for crossings, scores, and lives. DLI 1/1 sets COLPF1 for text. (fading)
-	mDL_LMS DL_TEXT_2|DL_DL1,SCORE_MEM2      ; (9-16) DLI 2/2 sets COLPF0,1,2,3,BK for Beach.
+	.byte DL_TEXT_2|DL_DL1; second line of scores ; (9-16) DLI 2/2 sets COLPF0,1,2,3,BK for Beach.
 
 	.byte DL_BLANK_1                         ; (17) One scan line 
 PF_LMS0 = [* + 1]                            ; Plus 1 is the address of the display list LMS
@@ -273,7 +274,8 @@ PF_LMS18 = [* + 1]
 
 ; So, instead of three display lists, just use one.  The VBI
 ; will know which graphics memory address to use for the
-; GFX_LMS in the display list.
+; GFX_LMS in the display list.  And since all the bitmaps are
+; in the same page only the LMS low byte needs to be updated.
 
 ; FROG SAVED screen, 200 scan lines....:
 ;    80 scan lines = 20 blank lines (by 4 scan lines each) of color cycling.
@@ -287,25 +289,25 @@ FROGSAVED_DISPLAYLIST
 FROGDEAD_DISPLAYLIST
 GAMEOVER_DISPLAYLIST
 	.byte DL_BLANK_8, DL_BLANK_8
-	.byte DL_BLANK_4|DL_DLI                ; 20 blank scan lines. DLI 0/0 Set COLBK color
+	.byte DL_BLANK_4|DL_DLI              ; 20 blank scan lines. DLI 0/0 Set COLBK color
 
-	.rept 20                               ; an empty line. times 20
-		.byte DL_BLANK_4|DL_DLI            ; (1 - 80) DLI 0/1 - 0/17 COLBK color, 
-	.endr                                  ;          DLI 1/18 COLBK Black, DLI 2/19 COLBK Title, COLPF0 gfx
+	.rept 20                             ; an empty line. times 20
+		.byte DL_BLANK_4|DL_DLI          ; (1 - 80) DLI 0/1 - 0/18 COLBK color, 
+	.endr                                ;          DLI 1/19 COLBK Title, COLPF0 gfx
 
 GFX_LMS = [* + 1]
-	mDL_LMS DL_MAP_9|DL_DLI,FROGSAVE_MEM   ; (81-84) DLI 3/20   COLPF0 gfx
-	.byte DL_MAP_9                         ; (85-88) DLI 3/21   COLPF0 gfx
-	.byte DL_MAP_9                         ; (89-92) DLI 3/22   COLPF0 gfx
-	.byte DL_MAP_9                         ; (93-96) DLI 3/23  COLPF0 gfx
-	.byte DL_MAP_9                         ; (97-100) DLI 3/24   COLPF0 gfx
-	.byte DL_MAP_9                         ; (101-104) DLI 1/25   COLBK Black
+	mDL_LMS DL_MAP_9|DL_DLI,FROGSAVE_MEM ; (81-84) DLI 1/20   COLPF0 gfx
+	.byte DL_MAP_9|DL_DLI                ; (85-88) DLI 1/21   COLPF0 gfx
+	.byte DL_MAP_9|DL_DLI                ; (89-92) DLI 1/22   COLPF0 gfx
+	.byte DL_MAP_9|DL_DLI                ; (93-96) DLI 1/23   COLPF0 gfx
+	.byte DL_MAP_9|DL_DLI                ; (97-100) DLI 1/24   COLPF0 gfx
+	.byte DL_MAP_9|DL_DLI                ; (101-104) DLI 0/25   COLBK Black
 
-	.rept 20                               ; an empty line. times 20
-		.byte DL_BLANK_4|DL_DLI            ; (105-184) DLI 0/26 - 0/43 COLBK color, 
-	.endr                                  ;           DLI DLI SPC1/44 sets COLBK, COLPF2, COLPF1 colors.
+	.rept 20                             ; an empty line. times 20
+		.byte DL_BLANK_4|DL_DLI          ; (105-184) DLI 0/26 - 0/43 COLBK color, 
+	.endr                                ;           DLI DLI SPC1/44 sets COLBK, COLPF2, COLPF1 colors.
 
-	mDL_JMP BOTTOM_OF_DISPLAY                 ; End of display.  See Page 0 for the evil.
+	mDL_JMP BOTTOM_OF_DISPLAY            ; End of display.  See Page 0 for the evil.
 
 
 
@@ -322,11 +324,11 @@ GFX_LMS = [* + 1]
 ;	.endr                                  ;          DLI 1/18 COLBK Black, DLI 2/19 COLBK Title, COLPF0 gfx
 
 ;	mDL_LMS DL_MAP_9|DL_DLI,FROGDEAD_MEM   ; (81-84) DLI 3/20   COLPF0 gfx
-;	.byte DL_MAP_9                         ; (85-88) DLI 3/21   COLPF0 gfx
-;	.byte DL_MAP_9                         ; (89-92) DLI 3/22   COLPF0 gfx
-;	.byte DL_MAP_9                         ; (93-96) DLI 3/23  COLPF0 gfx
-;	.byte DL_MAP_9                         ; (97-100) DLI 3/24   COLPF0 gfx
-;	.byte DL_MAP_9                         ; (101-104) DLI 1/25   COLBK Black
+;	.byte DL_MAP_9|DL_DLI                  ; (85-88) DLI 3/21   COLPF0 gfx
+;	.byte DL_MAP_9|DL_DLI                  ; (89-92) DLI 3/22   COLPF0 gfx
+;	.byte DL_MAP_9|DL_DLI                  ; (93-96) DLI 3/23  COLPF0 gfx
+;	.byte DL_MAP_9|DL_DLI                  ; (97-100) DLI 3/24   COLPF0 gfx
+;	.byte DL_MAP_9|DL_DLI                  ; (101-104) DLI 1/25   COLBK Black
 
 ;	.rept 20                               ; an empty line. times 20
 ;		.byte DL_BLANK_4|DL_DLI            ; (105-184) DLI 0/26 - 0/43 COLBK color, 

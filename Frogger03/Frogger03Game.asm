@@ -28,10 +28,10 @@ GAMESTART
 	;
 	; So, this problem is solved by giving responsibility for Display List
 	; changes to a custom Vertical Blank Interrupt. The main code simply
-	; writes a byte to a page 0 location monitored by the vertical blank
-	; interrupt and this directs the interrupt to change the current
+	; writes a byte to a page 0 location monitored by the Vertical Blank
+	; Interrupt and this directs the interrupt to change the current
 	; display list.  Easy-peasy and never updated at the wrong time.
-	
+
 	lda #AUDCTL_CLOCK_64KHZ    ; Set only this one bit for clock.
 	sta AUDCTL                 ; Global POKEY Audio Control.
 	lda #3                     ; Set SKCTL to 3 to stop possible cassette noise. 
@@ -44,9 +44,9 @@ GAMESTART
 	lda #NMI_VBI               ; Turn Off DLI
 	sta NMIEN
 
-	lda #<MyDLI                ; Set DLI vector.
+	lda #<TITLE_DLI            ; Set DLI vector. (will be reset by VBI on screen setup)
 	sta VDSLST
-	lda #>MyDLI
+	lda #>TITLE_DLI
 	sta VDSLST+1
 
 	lda #[NMI_DLI|NMI_VBI]     ; Turn On DLI

@@ -375,6 +375,67 @@ CONTROLS_MEM2
 ; 20 |left, and right.                        | INSTXT_3
 	.sb "left, and right.                        "
 
+
+; FROG SAVED screen.
+; Graphics chars design, SAVED!
+; |  |**|**|  |  | *|* |  | *|* | *|* | *|**|**|* | *|**|* |  |  |**|
+; | *|* |  |  |  |**|**|  | *|* | *|* | *|* |  |  | *|* |**|  |  |**|
+; |  |**|**|  | *|* | *|* | *|* | *|* | *|**|**|  | *|* | *|* |  |**|
+; |  |  | *|* | *|* | *|* | *|* | *|* | *|* |  |  | *|* | *|* |  |**|
+; |  |  | *|* | *|**|**|* |  |**|**|  | *|* |  |  | *|* |**|  |  |  |
+; |  |**|**|  | *|* | *|* |  | *|* |  | *|**|**|* | *|**|* |  |  |**|
+
+; Another benefit of using the bitmap is it makes the data much more obvious. 
+FROGSAVE_MEM   ; Graphics data, SAVED!  43 pixels.  40 - 21 == 19 blanks. 43 + 19 = 62.  + 18 = 80
+	.byte %00000000 %00000000 %00001111 %00000110 %00011001 %10011111 %10011110 %00001100 %00000000 %00000000
+	.byte %00000000 %00000000 %00011000 %00001111 %00011001 %10011000 %00011011 %00001100 %00000000 %00000000
+	.byte %00000000 %00000000 %00001111 %00011001 %10011001 %10011111 %00011001 %10001100 %00000000 %00000000
+	.byte %00000000 %00000000 %00000001 %10011001 %10011001 %10011000 %00011001 %10001100 %00000000 %00000000
+	.byte %00000000 %00000000 %00000001 %10011111 %10001111 %00011000 %00011011 %00000000 %00000000 %00000000
+	.byte %00000000 %00000000 %00001111 %00011001 %10000110 %00011111 %10011110 %00001100 %00000000 %00000000
+
+
+
+
+; FROG DEAD screen.
+; Graphics chars design, DEAD FROG!
+; | *|**|* |  | *|**|**|* |  | *|* |  | *|**|* |  |  |  |  | *|**|**|* | *|**|**|  |  |**|**|  |  |**|**|* |  |**|
+; | *|* |**|  | *|* |  |  |  |**|**|  | *|* |**|  |  |  |  | *|* |  |  | *|* | *|* | *|* | *|* | *|* |  |  |  |**|
+; | *|* | *|* | *|**|**|  | *|* | *|* | *|* | *|* |  |  |  | *|**|**|  | *|* | *|* | *|* | *|* | *|* |  |  |  |**|
+; | *|* | *|* | *|* |  |  | *|* | *|* | *|* | *|* |  |  |  | *|* |  |  | *|**|**|  | *|* | *|* | *|* |**|* |  |**|
+; | *|* |**|  | *|* |  |  | *|**|**|* | *|* |**|  |  |  |  | *|* |  |  | *|* |**|  | *|* | *|* | *|* | *|* |  |  |
+; | *|**|* |  | *|**|**|* | *|* | *|* | *|**|* |  |  |  |  | *|* |  |  | *|* | *|* |  |**|**|  |  |**|**|* |  |**|
+
+FROGDEAD_MEM   ; Graphics data, DEAD FROG!  (37) + 3 spaces.
+	.byte %00001111 %00001111 %11000011 %00001111 %00000000 %00111111 %00111110 %00011110 %00011111 %00011000
+	.byte %00001101 %10001100 %00000111 %10001101 %10000000 %00110000 %00110011 %00110011 %00110000 %00011000
+	.byte %00001100 %11001111 %10001100 %11001100 %11000000 %00111110 %00110011 %00110011 %00110000 %00011000
+	.byte %00001100 %11001100 %00001100 %11001100 %11000000 %00110000 %00111110 %00110011 %00110111 %00011000
+	.byte %00001101 %10001100 %00001111 %11001101 %10000000 %00110000 %00110110 %00110011 %00110011 %00000000
+	.byte %00001111 %00001111 %11001100 %11001111 %00000000 %00110000 %00110011 %00011110 %00011111 %00011000
+
+
+; GAME OVER screen.
+; Graphics chars design, GAME OVER
+; |  |**|**|* |  | *|* |  |**|  | *|* |**|**|**|  |  |  |  |**|**|  | *|* | *|* | *|**|**|* | *|**|**|  |
+; | *|* |  |  |  |**|**|  |**|* |**|* |**|  |  |  |  |  | *|* | *|* | *|* | *|* | *|* |  |  | *|* | *|* |
+; | *|* |  |  | *|* | *|* |**|**|**|* |**|**|* |  |  |  | *|* | *|* | *|* | *|* | *|**|**|  | *|* | *|* |
+; | *|* |**|* | *|* | *|* |**| *| *|* |**|  |  |  |  |  | *|* | *|* | *|* | *|* | *|* |  |  | *|**|**|  |
+; | *|* | *|* | *|**|**|* |**|  | *|* |**|  |  |  |  |  | *|* | *|* |  |**|**|  | *|* |  |  | *|* |**|  |
+; |  |**|**|* | *|* | *|* |**|  | *|* |**|**|**|  |  |  |  |**|**|  |  | *|* |  | *|**|**|* | *|* | *|* |
+
+GAMEOVER_MEM ; Graphics data, Game Over.  (34) + 6 spaces.
+	.byte %00000000 %11111000 %01100011 %00011011 %11110000 %00001111 %00011001 %10011111 %10011111 %00000000
+	.byte %00000001 %10000000 %11110011 %10111011 %00000000 %00011001 %10011001 %10011000 %00011001 %10000000
+	.byte %00000001 %10000001 %10011011 %11111011 %11100000 %00011001 %10011001 %10011111 %00011001 %10000000
+	.byte %00000001 %10111001 %10011011 %01011011 %00000000 %00011001 %10011001 %10011000 %00011111 %00000000
+	.byte %00000001 %10011001 %11111011 %00011011 %00000000 %00011001 %10001111 %00011000 %00011011 %00000000
+	.byte %00000000 %11111001 %10011011 %00011011 %11110000 %00001111 %00000110 %00011111 %10011001 %10000000
+
+
+	.align $0100 ; Realign to next page.
+
+
 PLAYFIELD_MEM0 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
 	.sb "         "
@@ -425,10 +486,6 @@ PLAYFIELD_MEM12 ; Default display of "Beach", for lack of any other description,
 	.by I_BEACH1
 	.sb "          " ; "Beach"
 
-
-	.align $0100 ; Realign to next page.
-
-
 PLAYFIELD_MEM15 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 18  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
 	.sb "           "
@@ -439,6 +496,10 @@ PLAYFIELD_MEM15 ; Default display of "Beach", for lack of any other description,
 	.by I_BEACH3
 	.sb "       " ; "Beach"
 
+
+	.align $0100 ; Realign to next page.
+
+
 PLAYFIELD_MEM18 ; One last line of Beach
 ; 21  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT2
 	.sb "        "
@@ -448,7 +509,6 @@ PLAYFIELD_MEM18 ; One last line of Beach
 	.sb "                 "
 	.by I_BEACH1
 	.sb "    " ; "Beach"
-
 
 ; Two lines for Scores, lives, and frogs saved.
 
@@ -470,81 +530,6 @@ SCREEN_LIVES
 SCREEN_SAVED
 	.sb "                 "
 
-
-; FROG SAVED screen., 25 lines:
-; 10 blank lines.
-; 3 lines of big text.
-; 10 blank lines
-; Press Any Key Line
-; Scrolling Credit Line
-
-; Graphics chars design, SAVED!
-; |  |**|**|  |  | *|* |  | *|* | *|* | *|**|**|* | *|**|* |  |  |**|
-; | *|* |  |  |  |**|**|  | *|* | *|* | *|* |  |  | *|* |**|  |  |**|
-; |  |**|**|  | *|* | *|* | *|* | *|* | *|**|**|  | *|* | *|* |  |**|
-; |  |  | *|* | *|* | *|* | *|* | *|* | *|* |  |  | *|* | *|* |  |**|
-; |  |  | *|* | *|**|**|* |  |**|**|  | *|* |  |  | *|* |**|  |  |  |
-; |  |**|**|  | *|* | *|* |  | *|* |  | *|**|**|* | *|**|* |  |  |**|
-
-; Another benefit of using the bitmap is it makes the data much more obvious. 
-FROGSAVE_MEM   ; Graphics data, SAVED!  43 pixels.  40 - 21 == 19 blanks. 43 + 19 = 62.  + 18 = 80
-	.byte %00000000 %00000000 %00001111 %00000110 %00011001 %10011111 %10011110 %00001100 %00000000 %00000000
-	.byte %00000000 %00000000 %00011000 %00001111 %00011001 %10011000 %00011011 %00001100 %00000000 %00000000
-	.byte %00000000 %00000000 %00001111 %00011001 %10011001 %10011111 %00011001 %10001100 %00000000 %00000000
-	.byte %00000000 %00000000 %00000001 %10011001 %10011001 %10011000 %00011001 %10001100 %00000000 %00000000
-	.byte %00000000 %00000000 %00000001 %10011111 %10001111 %00011000 %00011011 %00000000 %00000000 %00000000
-	.byte %00000000 %00000000 %00001111 %00011001 %10000110 %00011111 %10011110 %00001100 %00000000 %00000000
-
-
-	.align $0100 ; Realign to next page.
-
-
-; FROG DEAD screen., 25 lines:
-; 10 blank lines.
-; 3 lines of big text.
-; 10 blank lines
-; Press Any Key Line
-; 1 blank line
-
-; Graphics chars design, DEAD FROG!
-; | *|**|* |  | *|**|**|* |  | *|* |  | *|**|* |  |  |  |  | *|**|**|* | *|**|**|  |  |**|**|  |  |**|**|* |  |**|
-; | *|* |**|  | *|* |  |  |  |**|**|  | *|* |**|  |  |  |  | *|* |  |  | *|* | *|* | *|* | *|* | *|* |  |  |  |**|
-; | *|* | *|* | *|**|**|  | *|* | *|* | *|* | *|* |  |  |  | *|**|**|  | *|* | *|* | *|* | *|* | *|* |  |  |  |**|
-; | *|* | *|* | *|* |  |  | *|* | *|* | *|* | *|* |  |  |  | *|* |  |  | *|**|**|  | *|* | *|* | *|* |**|* |  |**|
-; | *|* |**|  | *|* |  |  | *|**|**|* | *|* |**|  |  |  |  | *|* |  |  | *|* |**|  | *|* | *|* | *|* | *|* |  |  |
-; | *|**|* |  | *|**|**|* | *|* | *|* | *|**|* |  |  |  |  | *|* |  |  | *|* | *|* |  |**|**|  |  |**|**|* |  |**|
-
-FROGDEAD_MEM   ; Graphics data, DEAD FROG!  (37) + 3 spaces.
-	.byte %00001111 %00001111 %11000011 %00001111 %00000000 %00111111 %00111110 %00011110 %00011111 %00011000
-	.byte %00001101 %10001100 %00000111 %10001101 %10000000 %00110000 %00110011 %00110011 %00110000 %00011000
-	.byte %00001100 %11001111 %10001100 %11001100 %11000000 %00111110 %00110011 %00110011 %00110000 %00011000
-	.byte %00001100 %11001100 %00001100 %11001100 %11000000 %00110000 %00111110 %00110011 %00110111 %00011000
-	.byte %00001101 %10001100 %00001111 %11001101 %10000000 %00110000 %00110110 %00110011 %00110011 %00000000
-	.byte %00001111 %00001111 %11001100 %11001111 %00000000 %00110000 %00110011 %00011110 %00011111 %00011000
-
-
-; GAME OVER screen., 25 lines:
-; 10 blank lines.
-; 3 lines of big text.
-; 10 blank lines
-; Press Any Key Line
-; 1 blank line
-
-; Graphics chars design, GAME OVER
-; |  |**|**|* |  | *|* |  |**|  | *|* |**|**|**|  |  |  |  |**|**|  | *|* | *|* | *|**|**|* | *|**|**|  |
-; | *|* |  |  |  |**|**|  |**|* |**|* |**|  |  |  |  |  | *|* | *|* | *|* | *|* | *|* |  |  | *|* | *|* |
-; | *|* |  |  | *|* | *|* |**|**|**|* |**|**|* |  |  |  | *|* | *|* | *|* | *|* | *|**|**|  | *|* | *|* |
-; | *|* |**|* | *|* | *|* |**| *| *|* |**|  |  |  |  |  | *|* | *|* | *|* | *|* | *|* |  |  | *|**|**|  |
-; | *|* | *|* | *|**|**|* |**|  | *|* |**|  |  |  |  |  | *|* | *|* |  |**|**|  | *|* |  |  | *|* |**|  |
-; |  |**|**|* | *|* | *|* |**|  | *|* |**|**|**|  |  |  |  |**|**|  |  | *|* |  | *|**|**|* | *|* | *|* |
-
-GAMEOVER_MEM ; Graphics data, Game Over.  (34) + 6 spaces.
-	.byte %00000000 %11111000 %01100011 %00011011 %11110000 %00001111 %00011001 %10011111 %10011111 %00000000
-	.byte %00000001 %10000000 %11110011 %10111011 %00000000 %00011001 %10011001 %10011000 %00011001 %10000000
-	.byte %00000001 %10000001 %10011011 %11111011 %11100000 %00011001 %10011001 %10011111 %00011001 %10000000
-	.byte %00000001 %10111001 %10011011 %01011011 %00000000 %00011001 %10011001 %10011000 %00011111 %00000000
-	.byte %00000001 %10011001 %11111011 %00011011 %00000000 %00011001 %10001111 %00011000 %00011011 %00000000
-	.byte %00000000 %11111001 %10011011 %00011011 %11110000 %00001111 %00000110 %00011111 %10011001 %10000000
 
 
 
@@ -686,6 +671,7 @@ OVER_TEXT_COLORS
 ; Tables listing pointers to all the assets.
 ; --------------------------------------------------------------------------
 
+; All Display lists fit in one page, so only only byte update is needed.
 DISPLAYLIST_LO_TABLE  
 	.byte <TITLE_DISPLAYLIST
 	.byte <GAME_DISPLAYLIST
@@ -700,76 +686,164 @@ DISPLAYLIST_HI_TABLE
 	.byte >FROGDEAD_DISPLAYLIST
 	.byte >GAMEOVER_DISPLAYLIST
 
+DISPLAYLIST_GFXLMS_TABLE
+	.byte $00, $00  ; no gfx pointer for title and game screen.
+	.byte <FROGSAVE_MEM
+	.byte <FROGDEAD_MEM
+	.byte <GAMEOVER_MEM
+
 DLI_LO_TABLE  ; Address of first chained DLI per each screen.
-	.byte <TITLE_DLI ; DLI (0) -- Set colors for Scores.
-;	.byte <GAME_DLI
-;	.byte <FROGSAVED_DLI
-;	.byte <FROGDEAD_DLI
-;	.byte <GAMEOVER_DLI
+	.byte <TITLE_DLI_CHAIN_TABLE ; DLI (0) -- Set colors for Scores.
+	.byte <GAME_DLI_CHAIN_TABLE
+	.byte <SPLASH_DLI_CHAIN_TABLE ; FROGSAVED_DLI
+	.byte <SPLASH_DLI_CHAIN_TABLE ; FROGDEAD_DLI
+	.byte <SPLASH_DLI_CHAIN_TABLE ; GAMEOVER_DLI
 
 DLI_HI_TABLE
-	.byte >TITLE_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
-	.byte >GAME_DLI  ; DLI sets COLPF1, COLPF2, COLBK for score text. 
-;	.byte >FROGSAVED_DLI
-;	.byte >FROGDEAD_DLI
-;	.byte >GAMEOVER_DLI
+	.byte >TITLE_DLI_CHAIN_TABLE ; DLI sets COLPF1, COLPF2, COLBK for score text. 
+	.byte >GAME_DLI_CHAIN_TABLE  ; DLI sets COLPF1, COLPF2, COLBK for score text. 
+	.byte >SPLASH_DLI_CHAIN_TABLE ; FROGSAVED_DLI
+	.byte >SPLASH_DLI_CHAIN_TABLE ; FROGDEAD_DLI
+	.byte >SPLASH_DLI_CHAIN_TABLE ; GAMEOVER_DLI
+
 
 TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte TITLE_DLI_1 ; DLI (1)
-	.byte TITLE_DLI_2 ; 2
-	.byte TITLE_DLI_2 ; 3
-	.byte TITLE_DLI_2 ; 4
-	.byte TITLE_DLI_2 ; 5
-	.byte TITLE_DLI_2 ; 6
-	.byte TITLE_DLI_2 ; 7
-	.byte TITLE_DLI_3 ; 8
-	.byte TITLE_DLI_4 ; 9
-	.byte TITLE_DLI_5 ; 10
-	.byte TITLE_DLI_5 ; 11
-	.byte TITLE_DLI_5 ; 12
-	.byte TITLE_DLI_5 ; 13
-	.byte TITLE_DLI_5 ; 14 
-	.byte TITLE_DLI_5 ; 15
-	.byte TITLE_DLI_5 ; 16
-	.byte TITLE_DLI_3 ; 17
-	.byte TITLE_DLI_4 ; 18
-	.byte TITLE_DLI_5 ; 19
-	.byte TITLE_DLI_5 ; 20
-	.byte TITLE_DLI_3 ; 21
-	.byte TITLE_DLI_4 ; 22
-	.byte TITLE_DLI_5 ; 23
-	.byte TITLE_DLI_3 ; 24
-	.byte TITLE_DLI_SPC1 ; 25 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
-;	.byte TITLE_DLI_SPC2 ; 26 
+	.byte <TITLE_DLI   ; DLI (0)
+	.byte <TITLE_DLI_1 ; DLI (1)
+	.byte <TITLE_DLI_2 ; DLI 2
+	.byte <TITLE_DLI_2 ; DLI 3
+	.byte <TITLE_DLI_2 ; DLI 4
+	.byte <TITLE_DLI_2 ; DLI 5
+	.byte <TITLE_DLI_2 ; DLI 6
+	.byte <TITLE_DLI_2 ; DLI 7
+	.byte <TITLE_DLI_3 ; DLI 8
+	.byte <TITLE_DLI_4 ; DLI 9
+	.byte <TITLE_DLI_5 ; DLI 10
+	.byte <TITLE_DLI_5 ; DLI 11
+	.byte <TITLE_DLI_5 ; DLI 12
+	.byte <TITLE_DLI_5 ; DLI 13
+	.byte <TITLE_DLI_5 ; DLI 14 
+	.byte <TITLE_DLI_5 ; DLI 15
+	.byte <TITLE_DLI_5 ; DLI 16
+	.byte <TITLE_DLI_3 ; DLI 17
+	.byte <TITLE_DLI_4 ; DLI 18
+	.byte <TITLE_DLI_5 ; DLI 19
+	.byte <TITLE_DLI_5 ; DLI 20
+	.byte <TITLE_DLI_3 ; DLI 21
+	.byte <TITLE_DLI_4 ; DLI 22
+	.byte <TITLE_DLI_5 ; DLI 23
+	.byte <TITLE_DLI_3 ; DLI 24
+	.byte <TITLE_DLI_SPC1 ; DLI 25 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
+;	.byte <TITLE_DLI_SPC2 ; DLI 26 
 
 GAME_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte GAME_DLI_1 ; DLI (1)
-	.byte GAME_DLI_2 ; 2
-	.byte GAME_DLI_2 ; 3
-	.byte GAME_DLI_2 ; 4
-	.byte GAME_DLI_2 ; 5
-	.byte GAME_DLI_2 ; 6
-	.byte GAME_DLI_2 ; 7
-	.byte GAME_DLI_3 ; 8
-	.byte GAME_DLI_4 ; 9
-	.byte GAME_DLI_5 ; 10
-	.byte GAME_DLI_5 ; 11
-	.byte GAME_DLI_5 ; 12
-	.byte GAME_DLI_5 ; 13
-	.byte GAME_DLI_5 ; 14 
-	.byte GAME_DLI_5 ; 15
-	.byte GAME_DLI_5 ; 16
-	.byte GAME_DLI_3 ; 17
-	.byte GAME_DLI_4 ; 18
-	.byte GAME_DLI_5 ; 19
-	.byte GAME_DLI_5 ; 20
-	.byte GAME_DLI_3 ; 21
-	.byte GAME_DLI_4 ; 22
-	.byte GAME_DLI_5 ; 23
-	.byte GAME_DLI_3 ; 24
-	.byte GAME_DLI_SPC1 ; 25 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
-;	.byte GAME_DLI_SPC2 ; 26 
+	.byte <GAME_DLI   ; DLI (0) for scores
+	.byte <GAME_DLI_1 ; DLI (1) for scores
+	.byte <GAME_DLI_2 ; DLI 2 Beach 18 goal 
+	.byte <GAME_DLI_3 ; DLI 3 Boats 17
+	.byte <GAME_DLI_3 ; DLI 4 Boats 16 
+	.byte <GAME_DLI_2 ; DLI 5 Beach 15
+	.byte <GAME_DLI_3 ; DLI 6 Boats 14
+	.byte <GAME_DLI_3 ; DLI 7 Boats 13
+	.byte <GAME_DLI_2 ; DLI 8 Beach 12
+	.byte <GAME_DLI_3 ; DLI 9 Boats 11
+	.byte <GAME_DLI_3 ; DLI 10 Boats 10
+	.byte <GAME_DLI_2 ; DLI 11 Beach 09
+	.byte <GAME_DLI_3 ; DLI 12 Boats 08
+	.byte <GAME_DLI_3 ; DLI 13 Boats 07
+	.byte <GAME_DLI_2 ; DLI 14 Beach 06
+	.byte <GAME_DLI_3 ; DLI 15 Boats 05
+	.byte <GAME_DLI_3 ; DLI 16 Boats 04
+	.byte <GAME_DLI_2 ; DLI 17 Beach 03
+	.byte <GAME_DLI_3 ; DLI 18 Boats 02
+	.byte <GAME_DLI_3 ; DLI 19 Boats 01
+	.byte <GAME_DLI_2 ; DLI 20 Beach 00 (home)
+	.byte <GAME_DLI_4 ; DLI 21
+	.byte <GAME_DLI_5 ; DLI 22  Calls SPC2 to set scrolling credits HSCROL and colors.
 
+
+; All three graphics screens use the same list.
+; Basically, the background color is updated per every line
+SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
+	.byte <COLPF0_COLBK_DLI ; DLI (0)
+	.byte <COLPF0_COLBK_DLI ; DLI (1)
+	.byte <COLPF0_COLBK_DLI ; DLI (2)
+	.byte <COLPF0_COLBK_DLI ; DLI (3)
+	.byte <COLPF0_COLBK_DLI ; DLI (4)
+	.byte <COLPF0_COLBK_DLI ; DLI (5)
+	.byte <COLPF0_COLBK_DLI ; DLI (6)
+	.byte <COLPF0_COLBK_DLI ; DLI (7)
+	.byte <COLPF0_COLBK_DLI ; DLI (8)
+	.byte <COLPF0_COLBK_DLI ; DLI (9)
+	.byte <COLPF0_COLBK_DLI ; DLI (10)
+	.byte <COLPF0_COLBK_DLI ; DLI (11)
+	.byte <COLPF0_COLBK_DLI ; DLI (12)
+	.byte <COLPF0_COLBK_DLI ; DLI (13)
+	.byte <COLPF0_COLBK_DLI ; DLI (14)
+	.byte <COLPF0_COLBK_DLI ; DLI (15)
+	.byte <COLPF0_COLBK_DLI ; DLI (16)
+	.byte <COLPF0_COLBK_DLI ; DLI (17)
+	.byte <COLPF0_COLBK_DLI ; DLI (18)
+	.byte <COLPF0_COLBK_DLI ; DLI (19)
+	.byte <COLPF0_COLBK_DLI ; DLI (20)
+	.byte <COLPF0_COLBK_DLI ; DLI (21)
+	.byte <COLPF0_COLBK_DLI ; DLI (22)
+	.byte <COLPF0_COLBK_DLI ; DLI (23)
+	.byte <COLPF0_COLBK_DLI ; DLI (24)
+	.byte <COLPF0_COLBK_DLI ; DLI (25)
+	.byte <COLPF0_COLBK_DLI ; DLI (26)
+	.byte <COLPF0_COLBK_DLI ; DLI (27)
+	.byte <COLPF0_COLBK_DLI ; DLI (28)
+	.byte <COLPF0_COLBK_DLI ; DLI (29)
+	.byte <COLPF0_COLBK_DLI ; DLI (30)
+	.byte <COLPF0_COLBK_DLI ; DLI (31)
+	.byte <COLPF0_COLBK_DLI ; DLI (32)
+	.byte <COLPF0_COLBK_DLI ; DLI (33)
+	.byte <COLPF0_COLBK_DLI ; DLI (34)
+	.byte <COLPF0_COLBK_DLI ; DLI (35)
+	.byte <COLPF0_COLBK_DLI ; DLI (36)
+	.byte <COLPF0_COLBK_DLI ; DLI (37)
+	.byte <COLPF0_COLBK_DLI ; DLI (38)
+	.byte <COLPF0_COLBK_DLI ; DLI (39)
+	.byte <COLPF0_COLBK_DLI ; DLI (40)
+	.byte <COLPF0_COLBK_DLI ; DLI (41)
+	.byte <COLPF0_COLBK_DLI ; DLI (42)
+	.byte <COLPF0_COLBK_DLI ; DLI (43)
+	.byte <GAME_DLI_SPC1    ; DLI 44 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
+;	.byte <GAME_DLI_SPC2    ; DLI 45 
+
+; C0olor tables must be big enough to contain data up to the maximum index that
+; occurs of all the screens. 
+
+COLBK_TABLE ; Must be big enough to do splash screens.
+	.rept 44
+		.byte 0
+	.endr
+
+COLPF0_TABLE ; Must be big enough to do Game screen up to last beach.
+	.rept 21
+		.byte 0
+	.endr
+
+COLPF1_TABLE ; Must be big enough to do Title screen.
+	.rept 26
+		.byte 0
+	.endr
+
+COLPF2_TABLE ; Must be big enough to do Title screen.
+	.rept 26
+		.byte 0
+	.endr
+
+COLPF3_TABLE ; Must be big enough to do Game  screen up to last boat row.
+	.rept 20
+		.byte 0
+	.endr
+
+HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row.
+	.rept 20
+		.byte 0
+	.endr
 
 COLOR_BACK_LO_TABLE
 	.byte <TITLE_BACK_COLORS
@@ -804,44 +878,46 @@ COLOR_TEXT_HI_TABLE
 ; only the part of the game screen that presents the beaches and boats.
 ; It does not include anything else before or after the playfield.
 ; --------------------------------------------------------------------------
-PLAYFIELD_MEM_LO_TABLE
-	.byte <PLAYFIELD_MEM0
-	.byte <PLAYFIELD_MEM1
-	.byte <PLAYFIELD_MEM2
-	.byte <PLAYFIELD_MEM3
-	.byte <PLAYFIELD_MEM4
-	.byte <PLAYFIELD_MEM5
-	.byte <PLAYFIELD_MEM6
-	.byte <PLAYFIELD_MEM7
-	.byte <PLAYFIELD_MEM8
-	.byte <PLAYFIELD_MEM9
-	.byte <PLAYFIELD_MEM10
-	.byte <PLAYFIELD_MEM11
-	.byte <PLAYFIELD_MEM12
-	.byte <PLAYFIELD_MEM13
-	.byte <PLAYFIELD_MEM14
-	.byte <PLAYFIELD_MEM15
-	.byte <PLAYFIELD_MEM16
-	.byte <PLAYFIELD_MEM17
-	.byte <PLAYFIELD_MEM18
+; Not needed due to Frog being done as Player/Missile.
 
-PLAYFIELD_MEM_HI_TABLE
-	.byte >PLAYFIELD_MEM0
-	.byte >PLAYFIELD_MEM1
-	.byte >PLAYFIELD_MEM2
-	.byte >PLAYFIELD_MEM3
-	.byte >PLAYFIELD_MEM4
-	.byte >PLAYFIELD_MEM5
-	.byte >PLAYFIELD_MEM6
-	.byte >PLAYFIELD_MEM7
-	.byte >PLAYFIELD_MEM8
-	.byte >PLAYFIELD_MEM9
-	.byte >PLAYFIELD_MEM10
-	.byte >PLAYFIELD_MEM11
-	.byte >PLAYFIELD_MEM12
-	.byte >PLAYFIELD_MEM13
-	.byte >PLAYFIELD_MEM14
-	.byte >PLAYFIELD_MEM15
-	.byte >PLAYFIELD_MEM16
-	.byte >PLAYFIELD_MEM17
-	.byte >PLAYFIELD_MEM18
+; PLAYFIELD_MEM_LO_TABLE
+	; .byte <PLAYFIELD_MEM0
+	; .byte <PLAYFIELD_MEM1
+	; .byte <PLAYFIELD_MEM2
+	; .byte <PLAYFIELD_MEM3
+	; .byte <PLAYFIELD_MEM4
+	; .byte <PLAYFIELD_MEM5
+	; .byte <PLAYFIELD_MEM6
+	; .byte <PLAYFIELD_MEM7
+	; .byte <PLAYFIELD_MEM8
+	; .byte <PLAYFIELD_MEM9
+	; .byte <PLAYFIELD_MEM10
+	; .byte <PLAYFIELD_MEM11
+	; .byte <PLAYFIELD_MEM12
+	; .byte <PLAYFIELD_MEM13
+	; .byte <PLAYFIELD_MEM14
+	; .byte <PLAYFIELD_MEM15
+	; .byte <PLAYFIELD_MEM16
+	; .byte <PLAYFIELD_MEM17
+	; .byte <PLAYFIELD_MEM18
+
+; PLAYFIELD_MEM_HI_TABLE
+	; .byte >PLAYFIELD_MEM0
+	; .byte >PLAYFIELD_MEM1
+	; .byte >PLAYFIELD_MEM2
+	; .byte >PLAYFIELD_MEM3
+	; .byte >PLAYFIELD_MEM4
+	; .byte >PLAYFIELD_MEM5
+	; .byte >PLAYFIELD_MEM6
+	; .byte >PLAYFIELD_MEM7
+	; .byte >PLAYFIELD_MEM8
+	; .byte >PLAYFIELD_MEM9
+	; .byte >PLAYFIELD_MEM10
+	; .byte >PLAYFIELD_MEM11
+	; .byte >PLAYFIELD_MEM12
+	; .byte >PLAYFIELD_MEM13
+	; .byte >PLAYFIELD_MEM14
+	; .byte >PLAYFIELD_MEM15
+	; .byte >PLAYFIELD_MEM16
+	; .byte >PLAYFIELD_MEM17
+	; .byte >PLAYFIELD_MEM18

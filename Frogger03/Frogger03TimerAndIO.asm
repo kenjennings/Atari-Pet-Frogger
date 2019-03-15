@@ -207,340 +207,7 @@ bLoopWaitFrame
 	rts                ; No.  Clock changed means frame ended.  exit.
 
 
-;==============================================================================
-;                                                           MyDLI
-;==============================================================================
-; Display List Interrupt
-;
-; Get background color from table.
-; Get text luminance from table.
-; sync display.
-; Store background color.
-; store text color (luminance.)
-; Increment index for next call.
-;
-; Note the DLIs don't care where the index ends as this is managed by the VBI.
-;==============================================================================
 
-; DLI to set colors for the Prompt line.  
-; And while we're here do the HSCROLL for the scrolling credits.
-; Then link to DLI_SPC2 to set colors for the scrolling line.
-; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
-
-DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text. 
-	mRegSaveA ; aka pha
-
-	lda PressAButtonText  ; Get text color (luminance)
-	sta COLPF1            ; write new text luminance.
-	
-	lda PressAButtonColor ; Black for background and text background.
-	sta WSYNC             ; sync to end of scan line
-	sta COLBK             ; Write new border color.
-	sta COLPF2            ; Write new background color
-
-	lda CreditHSCROL      ; HScroll for credits.
-	sta HSCROL
-
-	lda #<DLI_SPC2        ; Update the DLI vector for the last routine for credit color.
-	sta VDSLST
-	lda #>DLI_SPC2 
-	sta VDSLST+1
-
-	mRegRestoreA ; aka pla
-
-	rti
-
-
-; DLI to set colors for the Scrolling credits.   ALWAYS the last DLI on screen.
-
-DLI_SPC2  ; DLI just sets black for background COLBK, COLPF2, and text luminance for scrolling text.
-	mRegSaveAY
-
-DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
-
-	lda #0C              ; luminance for text
-	ldy #COLOR_BLACK     ; color for background.
-
-	sta WSYNC            ; sync to end of scan line
-
-	sta COLPF1           ; Write text luminance for credits.
-	sty COLBK            ; Write new border color.
-	sty COLPF2           ; Write new background color
-
-; There is no need to link to another DLI, since we trust the VBI to reset to the beginning.
-
-	mRegRestoreAY
-
-	rti
-
-
-
-;MyDLI
-
-;	mRegSaveAX
-
-;	ldx ThisDLI
-;	lda COLPF2_TABLE,x   ; Get background color;
-;	sta WSYNC            ; sync to end of scan line
-;	sta COLPF2           ; Write new background color
-;	lda COLPF1_TABLE,x   ; Get text color (luminance)
-;	sta COLPF1           ; write new text color.
-
-;	inc ThisDLI          ; next DLI.
-
-;	mRegRestoreAX
-
-;	rti
-
-
-; Other thoughts....
-; or if the writes are not fast enough...
-;	ldx ThisDLI
-;	lda COLPF1_TABLE,x   ; Get text color (luminance)
-;	pha                  ; save on stack
-;	lda COLPF2_TABLE,x   ; Get background color;
-;	sta WSYNC            ; sync to end of scan line
-;	sta COLPF2           ; Write new background color
-;	pla                  ; and restore from stack
-;	sta COLPF1           ; write new text color.
-
-; or if fine scrolling is used...
-;	ldx ThisDLI
-;	lda COLPF1_TABLE,x   ; Get text color (luminance)
-;	pha                  ; save on stack
-;	lda COLPF2_TABLE,x   ; Get background color;
-;   pha                  ; save on stack
-;   lda HSCROLL_TABLE,x  ; Get fine scroll offset
-;	sta WSYNC            ; sync to end of scan line
-;	sta HSCROL           ; Write new fine scroll position
-;   pla                  ; and restore from stack
-;	sta COLPF2           ; Write new background color
-;	pla                  ; and restore from stack
-;	sta COLPF1           ; write new text color.
-
-; The only way to speed that up is to have 25 specific DLI routines, one for
-; each screen line, and then use immediate mode load (lda #00 ; sta foo).
-; Then the code would need a lookup table of addresses to directly update the
-; immediate mode values in the routines.
-
-; shorthand for starting DLI  (that do not JMP immediately to common code)
-	.macro mStart_DLI
-		mregSaveAY
-
-		ldy ThisDLI
-	.endm
-
-
-	.align $0100
-
-; This is called on a blank line and the background should already be black.  
-; This just makes sure everything is correct.
-; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
-
-TITLE_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
-	jmp Score_DLI
-
-
-TITLE_DLI_1 ; DLI sets COLBK and COLPF0 for title graphics.
-	mStart_DLI
-
-	lda #COLOR_ORANGE_GREEN  ; For variety, adjusted the color two hues up on the pallette.
-	sta WSYNC
-	sta COLBK
-
-	lda COLPF1_TABLE,y ; Borrowing for the text (luminance table) (BTW, this is COLOR_GREEN)
-	sta COLPF0         ; But using for Color 0.
-
-	jmp Exit_DLI
-
-
-TITLE_DLI_2 ; DLI sets only COLPF0 for title graphics.
-	mStart_DLI
-
-	lda COLPF1_TABLE,y ; Borrowing for the text (luminance table) (BTW, this is COLOR_GREEN)
-	sta WSYNC
-	sta COLPF0         ; But using for Color 0.
-
-	jmp Exit_DLI
-
-
-TITLE_DLI_3 ; DLI Sets background to Black for blank area.
-	mStart_DLI
-
-	jmp SetBlack_DLI
-
-
-; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
-
-TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to start a text block.
-	mStart_DLI
-
-	lda COLPF1_TABLE,y   ; Get text color (luminance)
-	sta COLPF1           ; write new text luminance.
-
-	lda COLPF2_TABLE,y   ; For Text Background.
-	sta WSYNC
-	sta COLBK
-	sta COLPF2
-
-	jmp Exit_DLI
-
-
-TITLE_DLI_5 ; DLI sets only COLPF1 text luminance from the table. (e.g. for fading)
-	mStart_DLI
-
-	lda COLPF1_TABLE,y   ; Get text color (luminance)
-	sta WSYNC
-	sta COLPF1           ; write new text luminance.
-
-	jmp Exit_DLI
-
-
-TITLE_DLI_SPC1 ; How to solve getting from point A to point B with only a low byte address update
-	jmp DLI_SPC1
-
-
-
-; GAME DLIs
-
-; This is called on a blank line and the background should already be black.  
-; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
-; Since the game fades the screen COLPF1 must pull from the table.
-
-; SCORES 1
-GAME_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
-	jmp Score_DLI
-
-; SCORES 2
-GAME_DLI_1 ; DLI 1 sets COLPF1 for text. (e.g. for fading)
-	jmp TITLE_DLI_5
-
-
-; BEACH
-; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has a whole 
-; blank scan line to finish everything else.  
-; Collect Player/Playfield collisions.
-GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for Beach.
-	mStart_DLI
-
-	lda COLBK_TABLE,y    ; Get Dirt 2 color
-	sta WSYNC
-	sta COLBK
-
-	lda POPF             ; Get Player 0 collision with playfield
-	ora P1PF             ; Add Player 1 collision 
-	sta PXPF_TABLE,y     ; Save for later reference
-
-	lda COLPF0_TABLE,y   ; Get color Rocks 1   
-	sta COLPF0
-	lda COLPF1_TABLE,y   ; Get color Rocks 2
-	sta COLPF1
-	lda COLPF2_TABLE,y   ; Get color Rocks 3 
-	sta COLPF2
-	lda COLPF3_TABLE,y   ; Get color Dirt 1
-	sta COLPF3
-
-	sta HITCLR           ; clear Player/Playfield collisions from here.
-
-	jmp Exit_DLI
-
-
-; BOATS
-; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has a whole 
-; blank scan line to finish everything else.  
-; Collect Player/Playfield collisions.
-GAME_DLI_3 ; DLI 3 sets COLPF0,1,2,3,BK and HSCROL for Boats.
-	mStart_DLI
-
-	lda COLBK_TABLE,y    ; Get Water 2 color
-	sta WSYNC
-	sta COLBK
-
-	lda HSCROL_TABLE,y   ; Get boat fine scroll.
-	sta HSCROL
-
-	lda POPF             ; Get Player 0 collision with playfield
-	ora P1PF             ; Add Player 1 collision 
-	sta PXPF_TABLE,y     ; Save for later reference
-
-	lda COLPF0_TABLE,y   ; Get color Boats 1   
-	sta COLPF0
-	lda COLPF1_TABLE,y   ; Get color Boats 2
-	sta COLPF1
-	lda COLPF2_TABLE,y   ; Get color Boats 3 
-	sta COLPF2
-	lda COLPF3_TABLE,y   ; Get color Water 1
-	sta COLPF3
-
-	sta HITCLR           ; clear Player/Playfield collisions from here.
-
-	jmp Exit_DLI
-
-
-GAME_DLI_4 ; Set background to black.
-	jmp TITLE_DLI_3 ; re-use what is done already....
-
-
-GAME_DLI_5 ; Needs to set HSCROL for credits, then call to text text color.
-	mRegSaveAY
-
-	lda CreditHSCROL      ; HScroll for credits.
-	sta HSCROL
-
-	jmp DLI_SPC2_SetCredits ; Finish by setting text luminance.
-
-
-
-;TITLE_DLI_1 ; DLI sets COLPF2, COLBK for score text.  Mode 4 Text is different from Mode 2 text.
-;	mStart_DLI
-
-;	lda COLPF2_TABLE,y   ; Get background color;
-;	sta WSYNC            ; sync to end of scan line
-;	sta COLBK            ; Write new background color
-;	lda COLPF1_TABLE,y   ; Get text color (luminance)
-;	sta COLPF2           ; write new text color.
-
-;	jmp Exit_DLI
-
-
-;TITLE_DLI_2 ; DLI sets COLPF2 for title text.  Mode 4 Text is different from Mode 2 text.
-;SetTextLuminance_DLI
-;	mStart_DLI
-;
-;	lda COLPF1_TABLE,y   ; Get text color (luminance)
-;	sta WSYNC            ; sync to end of scan line
-;	sta COLPF2           ; write new text color.
-
-;	jmp Exit_DLI
-
-
-; Used on multiple screens.  JMP here.
-; This is called on a blank line and the background should already be black.  
-; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
-; Since the game fades the screen COLPF1 must pull from the table.
-Score_DLI
-	mStart_DLI
-
-	lda COLPF1_TABLE,y   ; Get text color (luminance)
-	sta COLPF1           ; write new text color.
-
-SetBlack_DLI
-	lda #COLOR_BLACK     ; Black for background and text background.
-	sta WSYNC            ; sync to end of scan line
-	sta COLBK            ; Write new border color.
-	sta COLPF2           ; Write new background color
-
-; Exit DLI.
-; JMP here is 3 byte instruction to execute 11 bytes of common DLI closure.
-Exit_DLI
-	lda (ThisDLIAddr), y ; update low byte for next chained DLI.
-	sta VDSLST
-
-	inc ThisDLI          ; next DLI.
-
-	mRegRestoreAY
-
-	rti
 ;==============================================================================
 ;                                                           MyImmediateVBI
 ;==============================================================================
@@ -552,19 +219,24 @@ Exit_DLI
 ;==============================================================================
 
 MyImmediateVBI
-	lda #$00                 ; Initialize.
-	sta ThisDLI              ; Make the DLI index restart at 0.
+
 
 ; ======== Manage Changing Display List ========
 	lda VBICurrentDL            ; Main code signals to change screens?
-	bmi ExitMyImmediateVBI      ; Negative value is no change. Exit.
+	bmi VBIResetDLIChain        ; No, restore current DLI chain.
 
+VBISetupDisplay
 	tax                         ; Use this as index to tables.
 
 	lda DISPLAYLIST_LO_TABLE,x  ; Copy Display List Pointer
 	sta SDLSTL                  ; for the OS
 	lda DISPLAYLIST_HI_TABLE,x
 	sta SDLSTH
+
+	lda DLI_LO_TABLE,x          ; Display List Interrupt chain table starting address
+	sta VBIPointer1
+	lda DLI_LO_TABLE,x          ; Display List Interrupt chain table starting address
+	sta VBIPointer1
 
 	lda COLOR_BACK_LO_TABLE,x   ; Get pointer to the source color table
 	sta COLPF2POINTER
@@ -578,6 +250,19 @@ MyImmediateVBI
 
 	lda #$FF                      ; Turn off the signal to change screens.
 	sta VBICurrentDL
+
+	lda #$00                 ; Initialize.
+	sta ThisDLI              ; Make the DLI index restart at 0.
+
+VBIResetDLIChain
+	ldy #0
+	lda (ThisDLIAddr),y      ; Grab 0 entry from this DLI chain
+	sta VDSLST               ; and restart the DLI routine.
+;	lda #>TITLE_DLI
+;	sta VDSLST+1
+
+	iny                     ; Start at 1, because 0 provided the entry point
+	sty ThisDLI ; 
 
 ExitMyImmediateVBI
 	jmp SYSVBV ; Return to OS.  XITVBV for Deferred interrupt.
@@ -769,3 +454,263 @@ RunPromptForButton
 
 ExitRunPrompt
 	rts
+
+
+	.align $0100
+
+
+;==============================================================================
+;                                                           MyDLI
+;==============================================================================
+; Display List Interrupts
+;
+; Note the DLIs don't care where the ThisDLI index ends as 
+; this is managed by the VBI.
+;==============================================================================
+
+; shorthand for starting DLI  (that do not JMP immediately to common code)
+	.macro mStart_DLI
+		mregSaveAY
+
+		ldy ThisDLI
+	.endm
+
+
+; This is called on a blank line and the background should already be black.  
+; This just makes sure everything is correct.
+; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
+
+TITLE_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
+	jmp Score_DLI
+
+
+TITLE_DLI_1 ; DLI sets COLBK and COLPF0 for title graphics.
+	jmp COLPF0_COLBK_DLI
+
+
+TITLE_DLI_2 ; DLI sets only COLPF0 for title graphics.
+	jmp COLPF0_COLBK_DLI
+
+
+TITLE_DLI_3 ; DLI Sets background to Black for blank area.
+	mStart_DLI
+
+	jmp SetBlack_DLI
+
+
+; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
+
+TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to start a text block.
+	mStart_DLI
+
+	lda COLPF1_TABLE,y   ; Get text color (luminance)
+	sta COLPF1           ; write new text luminance.
+
+	lda COLPF2_TABLE,y   ; For Text Background.
+	sta WSYNC
+	sta COLBK
+	sta COLPF2
+
+	jmp Exit_DLI
+
+
+TITLE_DLI_5 ; DLI sets only COLPF1 text luminance from the table. (e.g. for fading)
+	mStart_DLI
+
+	lda COLPF1_TABLE,y   ; Get text color (luminance)
+	sta WSYNC
+	sta COLPF1           ; write new text luminance.
+
+	jmp Exit_DLI
+
+
+TITLE_DLI_SPC1 ; How to solve getting from point A to point B with only a low byte address update
+	jmp DLI_SPC1
+
+
+
+; GAME DLIs
+
+; This is called on a blank line and the background should already be black.  
+; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
+; Since the game fades the screen COLPF1 must pull from the table.
+
+; SCORES 1
+GAME_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
+	jmp Score_DLI
+
+; SCORES 2
+GAME_DLI_1 ; DLI 1 sets COLPF1 for text. (e.g. for fading)
+	jmp TITLE_DLI_5
+
+
+; BEACH
+; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has a whole 
+; blank scan line to finish everything else.  
+; Collect Player/Playfield collisions.
+GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for Beach.
+	mStart_DLI
+
+	lda COLBK_TABLE,y    ; Get Dirt 2 color
+	sta WSYNC
+	sta COLBK
+
+SetupAllColors_DLI
+	lda COLPF0_TABLE,y   ; Get color Rocks 1   
+	sta COLPF0
+	lda COLPF1_TABLE,y   ; Get color Rocks 2
+	sta COLPF1
+	lda COLPF2_TABLE,y   ; Get color Rocks 3 
+	sta COLPF2
+	lda COLPF3_TABLE,y   ; Get color Dirt 1
+	sta COLPF3
+
+	lda POPF             ; Get Player 0 collision with playfield
+	ora P1PF             ; Add Player 1 collision 
+	sta PXPF_TABLE,y     ; Save for later reference
+
+	sta HITCLR           ; clear Player/Playfield collisions from here.
+
+	jmp Exit_DLI
+
+
+; BOATS
+; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has a whole 
+; blank scan line to finish everything else.  
+; Collect Player/Playfield collisions.
+GAME_DLI_3 ; DLI 3 sets COLPF0,1,2,3,BK and HSCROL for Boats.
+	mStart_DLI
+
+	lda COLBK_TABLE,y    ; Get Water 2 color
+	sta WSYNC
+	sta COLBK
+
+	lda HSCROL_TABLE,y   ; Get boat fine scroll.
+	sta HSCROL
+
+	jmp SetupAllColors_DLI
+
+
+
+GAME_DLI_4 ; Set background to black.
+	jmp TITLE_DLI_3 ; re-use what is done already....
+
+	
+
+GAME_DLI_5 ; Needs to set HSCROL for credits, then call to set text color.  LAST DLI on screen.
+	mRegSaveAY
+
+	lda CreditHSCROL      ; HScroll for credits.
+	sta HSCROL
+
+	jmp DLI_SPC2_SetCredits ; Finish by setting text luminance.
+
+
+
+; SPLASH DLIs
+
+; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
+; same display list structure and DLIs.  
+; Sets background color and the COLPF0 pixel color.  
+; Table driven.  
+; Perfectly re-usable for anywhere Map Mode 9 or Blank instructions are 
+; being managed.  In the case of blank lines you just don't see the pixel 
+; color change, so it does not matter what is in the COLPF0 color table. 
+
+COLPF0_COLBK_DLI
+	mStart_DLI
+
+	lda COLPF0_TABLE,y   ; Get pixels color
+	pha
+	lda COLBK_TABLE,y    ; Get background color
+	sta WSYNC
+	sta COLBK            ; Set background
+	pla
+	sta COLPF1           ; Set pixels.
+
+	jmp Exit_DLI
+
+
+
+; Used on multiple screens.  JMP here.
+; This is called on a blank line and the background should already be black.  
+; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
+; Since the game fades the screen COLPF1 must pull from the table.
+Score_DLI
+	mStart_DLI
+
+	lda COLPF1_TABLE,y   ; Get text color (luminance)
+	sta COLPF1           ; write new text color.
+
+SetBlack_DLI
+	lda #COLOR_BLACK     ; Black for background and text background.
+	sta WSYNC            ; sync to end of scan line
+	sta COLBK            ; Write new border color.
+	sta COLPF2           ; Write new background color
+
+; Exit DLI.
+; JMP here is 3 byte instruction to execute 11 bytes of common DLI closure.
+Exit_DLI
+	lda (ThisDLIAddr), y ; update low byte for next chained DLI.
+	sta VDSLST
+
+	inc ThisDLI          ; next DLI.
+
+	mRegRestoreAY
+
+	rti
+
+
+
+; DLI to set colors for the Prompt line.  
+; And while we're here do the HSCROLL for the scrolling credits.
+; Then link to DLI_SPC2 to set colors for the scrolling line.
+; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
+
+DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text. 
+	mRegSaveA ; aka pha
+
+	lda PressAButtonText  ; Get text color (luminance)
+	sta COLPF1            ; write new text luminance.
+	
+	lda PressAButtonColor ; Black for background and text background.
+	sta WSYNC             ; sync to end of scan line
+	sta COLBK             ; Write new border color.
+	sta COLPF2            ; Write new background color
+
+	lda CreditHSCROL      ; HScroll for credits.
+	sta HSCROL
+
+	lda #<DLI_SPC2        ; Update the DLI vector for the last routine for credit color.
+	sta VDSLST
+	lda #>DLI_SPC2 
+	sta VDSLST+1
+
+	mRegRestoreA ; aka pla
+
+	rti
+
+
+
+; DLI to set colors for the Scrolling credits.   ALWAYS the last DLI on screen.
+
+DLI_SPC2  ; DLI just sets black for background COLBK, COLPF2, and text luminance for scrolling text.
+	mRegSaveAY
+
+DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
+	lda #0C              ; luminance for text
+	ldy #COLOR_BLACK     ; color for background.
+
+	sta WSYNC            ; sync to end of scan line
+
+	sta COLPF1           ; Write text luminance for credits.
+	sty COLBK            ; Write new border color.
+	sty COLPF2           ; Write new background color
+
+; There is no need to link to another DLI, since we trust the VBI to reset to the beginning.
+
+	mRegRestoreAY
+
+	rti
+
+

@@ -330,10 +330,12 @@ InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits + trigge
 ; features are in effect.  Value is enumerated from SCREEN_LIST table.
 CurrentScreen   .byte $00 ; = identity of current screen.
 
-; Pointer to the current color table sources in use.
+; Pointer to the current color table sources in use. (?)
 COLPBKPointer   .word $0000
+COLPF3Pounter   .word $0000
 COLPF2Pointer   .word $0000
 COLPF1Pointer   .word $0000
+COLPF0Pointer   .word $0000
 
 ; Scrolling offsets for LMS in the playfield.
 ; All scroll data occupies page data from  0 to 79.
@@ -364,6 +366,15 @@ AnimateFrames    .byte $00 ; = ANIMATION_FRAMES,X.
 ; $FF when update is completed.
 VBICurrentDL     .byte $FF ; = Direct VBI to change screens.
 
+; ======== D L I ======== COLOR TABLES
+; Pointer to current DLI address chain table.  (ThisDLIAddr),Y = DLI routine low byte.
+ThisDLIAddr     .word TITLE_DLI_CHAIN_TABLE  ; by default
+; Index read by the Display List Interrupts to change the colors for each line.
+; Note that since entry 0 in the DLI chain tables is for the first entry set
+; by the VBI, the VBI starts the counter for DLI operation at 1 instead of 0
+ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
+; Need a pointer for random uses.
+VBIPointer1      .word $0000
 
 ; ======== V B I ======== SCROLLING CREDITS MANAGEMENT
 ; VBI's Animation counter for scrolling the credit line. when it reaches 0, then scroll.
@@ -391,7 +402,7 @@ SCROLL_CREDIT_LMS = [* + 1]
 ; provided for JVB does not matter at all.  The system VBI will update
 ; ANTIC after this using the address in the shadow registers (SDLST)
 
-	mDL_JVB TITLE_DISPLAYLIST   ; Restart display at the same display list.
+	mDL_JVB TITLE_DISPLAYLIST   ; Restart display.
 
 ; ======== V B I ======== PRESS A BUTTON MANAGEMENT
 ; ON/Off status of the Press A Button Prompt. 
@@ -410,22 +421,6 @@ PressAButtonFrames .byte BLINK_SPEED
 PressAButtonColor  .byte 0 ; The actual color of the promopt.
 PressAButtonText   .byte 0 ; The text luminance.
 
-
-; ======== D L I ======== COLOR TABLES
-; Pointer to current DLI address table.
-ThisDLIAddr     .word $0000
-; Data read by the Display List Interrupts to change the colors for each line.
-ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
-
-COLPF2_TABLE ; Text background color. ; Default Black
-	.rept 25
-		.byte COLOR_BLACK
-	.endr
-
-COLPF1_TABLE ; Text color (luminance) ; default all to $0A/10 (dec)
-	.rept 25
-		.byte $0A
-	.endr
 
 
 ; ======== The world's most inept sound system. ========
