@@ -223,10 +223,10 @@ MyImmediateVBI
 
 ; ======== Manage Changing Display List ========
 	lda VBICurrentDL            ; Main code signals to change screens?
-	bmi VBIResetDLIChain        ; No, restore current DLI chain.
+	bmi VBIResetDLIChain        ; -1, No, restore current DLI chain.
 
 VBISetupDisplay
-	tax                         ; Use this as index to tables.
+	tax                         ; Use VBICurrentDL  as index to tables.
 
 	lda DISPLAYLIST_LO_TABLE,x  ; Copy Display List Pointer
 	sta SDLSTL                  ; for the OS
@@ -234,25 +234,22 @@ VBISetupDisplay
 	sta SDLSTH
 
 	lda DLI_LO_TABLE,x          ; Display List Interrupt chain table starting address
-	sta VBIPointer1
-	lda DLI_LO_TABLE,x          ; Display List Interrupt chain table starting address
-	sta VBIPointer1
+	sta ThisDLIAddr
+	lda DLI_Hi_TABLE,x          ; Display List Interrupt chain table starting address
+	sta ThisDLIAddr
 
-	lda COLOR_BACK_LO_TABLE,x   ; Get pointer to the source color table
-	sta COLPF2POINTER
-	lda COLOR_BACK_HI_TABLE,x
-	sta COLPF2POINTER+1
+;	lda COLOR_BACK_LO_TABLE,x   ; Get pointer to the source color table
+;	sta COLPF2POINTER
+;	lda COLOR_BACK_HI_TABLE,x
+;	sta COLPF2POINTER+1
 
-	lda COLOR_TEXT_LO_TABLE,x   ; Get pointer to the source text table
-	sta COLPF1POINTER
-	lda COLOR_TEXT_HI_TABLE,x
-	sta COLPF1POINTER+1
+;	lda COLOR_TEXT_LO_TABLE,x   ; Get pointer to the source text table
+;	sta COLPF1POINTER
+;	lda COLOR_TEXT_HI_TABLE,x
+;	sta COLPF1POINTER+1
 
 	lda #$FF                      ; Turn off the signal to change screens.
 	sta VBICurrentDL
-
-	lda #$00                 ; Initialize.
-	sta ThisDLI              ; Make the DLI index restart at 0.
 
 VBIResetDLIChain
 	ldy #0
@@ -262,7 +259,7 @@ VBIResetDLIChain
 ;	sta VDSLST+1
 
 	iny                     ; Start at 1, because 0 provided the entry point
-	sty ThisDLI ; 
+	sty ThisDLI 
 
 ExitMyImmediateVBI
 	jmp SYSVBV ; Return to OS.  XITVBV for Deferred interrupt.
@@ -282,6 +279,9 @@ ExitMyImmediateVBI
 
 MyDeferredVBI
 ; ======== Manage InputScanFrames ========
+
+; Set Frog position per main directions.
+
 	lda InputScanFrames      ; Is input delay already 0?
 	beq DoAnimateClock       ; Yes, do not decrement it again.
 	dec InputScanFrames      ; Minus 1.
@@ -296,9 +296,9 @@ DoAnimateClock
 ScrollTheCreditLine               ; scroll the text identifying the perpetrators
 	dec ScrollCounter             ; subtract from scroll delay counter
 	bne ManagePressAButtonPrompt  ; Not 0 yet, so no scrolling.
-	lda #1                      ; Reset counter to original value.
+	lda #1                        ; Reset counter to original value.
 	sta ScrollCounter
-	; Yeah, ANTIC support fine horizontal scrolling 16 color clocks or 
+	; Yeah, ANTIC supports fine horizontal scrolling 16 color clocks or 
 	; 4 text characters at a time.  But, this is a little more simple 
 	; code if we scroll only one character per each coarse scroll.
 
