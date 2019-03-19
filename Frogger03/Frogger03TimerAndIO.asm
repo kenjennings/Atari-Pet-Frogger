@@ -565,7 +565,7 @@ SetupAllColors_DLI
 	lda COLPF3_TABLE,y   ; Get color Dirt 1
 	sta COLPF3
 
-	lda POPF             ; Get Player 0 collision with playfield
+	lda P0PF             ; Get Player 0 collision with playfield
 	ora P1PF             ; Add Player 1 collision 
 	sta PXPF_TABLE,y     ; Save for later reference
 
@@ -668,7 +668,7 @@ Exit_DLI
 ; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
 
 DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text. 
-	mRegSaveA ; aka pha
+	pha ; aka pha
 
 	lda PressAButtonText  ; Get text color (luminance)
 	sta COLPF1            ; write new text luminance.
@@ -686,7 +686,7 @@ DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text.
 	lda #>DLI_SPC2 
 	sta VDSLST+1
 
-	mRegRestoreA ; aka pla
+	pla ; aka pla
 
 	rti
 
@@ -698,7 +698,7 @@ DLI_SPC2  ; DLI just sets black for background COLBK, COLPF2, and text luminance
 	mRegSaveAY
 
 DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
-	lda #0C              ; luminance for text
+	lda #$0C              ; luminance for text
 	ldy #COLOR_BLACK     ; color for background.
 
 	sta WSYNC            ; sync to end of scan line

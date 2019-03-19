@@ -189,9 +189,9 @@ FrogMoveUp
 	dec FrogRow
 	ldx FrogRow
 
-	lda PLAYFIELD_MEM_LO_TABLE,x
+;	lda PLAYFIELD_MEM_LO_TABLE,x
 	sta FrogLocation
-	lda PLAYFIELD_MEM_HI_TABLE,x
+;	lda PLAYFIELD_MEM_HI_TABLE,x
 	sta FrogLocation+1
 
 	ldx FrogRow ; Make sure CPU flags reflect X = 0 or !0

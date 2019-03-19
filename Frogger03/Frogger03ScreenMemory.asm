@@ -193,7 +193,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 	.macro mLineOfLeftBoats
 		.rept 4
-			mBoatGoRight ; 16 * 4 = 64
+			mBoatGoLeft ; 16 * 4 = 64
 		.endr
 	.endm
 
@@ -203,12 +203,10 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; contiguous in memory we can simply align screen data into 256
 ; byte pages only making sure a line doesn't cross the end of a 
 ; bage.  This will prevent any line of displayed data from crossing 
-; over a4K boundary.
+; over a 4K boundary.
 
-; No need to align here, since the previous file was the character 
-; set, so we know the first declaration will start at a page.
 
-;	.align $0100 ; Realign to next page.
+	.align $0100 ; Realign to next page.
 
 ; The declarations below are arranged to make sure
 ; each line of data fits within 256 byte pages.
@@ -235,7 +233,7 @@ PLAYFIELD_MEM7
 PLAYFIELD_MEM10
 PLAYFIELD_MEM13
 PLAYFIELD_MEM16
-	mBoatsGoRight
+	mLineOfRightBoats
 
 
 ; Title text.  Bitmapped version for Mode 9.
@@ -262,7 +260,7 @@ TITLE_MEM1
 
 	.by %11111100 %11111100 %11111100 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111 ; + 10 
 
-	ANYBUTTON_MEM ; Prompt to start game.
+ANYBUTTON_MEM ; Prompt to start game.
 ; 24 |   Press joystick button to continue.   | INSTXT_4 
 	.sb "   Press joystick button to continue.   "
 
@@ -287,7 +285,7 @@ PLAYFIELD_MEM8
 PLAYFIELD_MEM11
 PLAYFIELD_MEM14
 PLAYFIELD_MEM17
-	mBoatsGoLeft
+	mLineOfLeftBoats
 
 INSTRUCT_MEM3
 ; 8  |frogs must cross piranha-infested rivers| INSTXT_1
@@ -387,12 +385,12 @@ CONTROLS_MEM2
 
 ; Another benefit of using the bitmap is it makes the data much more obvious. 
 FROGSAVE_MEM   ; Graphics data, SAVED!  43 pixels.  40 - 21 == 19 blanks. 43 + 19 = 62.  + 18 = 80
-	.byte %00000000 %00000000 %00001111 %00000110 %00011001 %10011111 %10011110 %00001100 %00000000 %00000000
-	.byte %00000000 %00000000 %00011000 %00001111 %00011001 %10011000 %00011011 %00001100 %00000000 %00000000
-	.byte %00000000 %00000000 %00001111 %00011001 %10011001 %10011111 %00011001 %10001100 %00000000 %00000000
-	.byte %00000000 %00000000 %00000001 %10011001 %10011001 %10011000 %00011001 %10001100 %00000000 %00000000
-	.byte %00000000 %00000000 %00000001 %10011111 %10001111 %00011000 %00011011 %00000000 %00000000 %00000000
-	.byte %00000000 %00000000 %00001111 %00011001 %10000110 %00011111 %10011110 %00001100 %00000000 %00000000
+	.by %00000000 %00000000 %00001111 %00000110 %00011001 %10011111 %10011110 %00001100 %00000000 %00000000
+	.by %00000000 %00000000 %00011000 %00001111 %00011001 %10011000 %00011011 %00001100 %00000000 %00000000
+	.by %00000000 %00000000 %00001111 %00011001 %10011001 %10011111 %00011001 %10001100 %00000000 %00000000
+	.by %00000000 %00000000 %00000001 %10011001 %10011001 %10011000 %00011001 %10001100 %00000000 %00000000
+	.by %00000000 %00000000 %00000001 %10011111 %10001111 %00011000 %00011011 %00000000 %00000000 %00000000
+	.by %00000000 %00000000 %00001111 %00011001 %10000110 %00011111 %10011110 %00001100 %00000000 %00000000
 
 
 
@@ -407,12 +405,12 @@ FROGSAVE_MEM   ; Graphics data, SAVED!  43 pixels.  40 - 21 == 19 blanks. 43 + 1
 ; | *|**|* |  | *|**|**|* | *|* | *|* | *|**|* |  |  |  |  | *|* |  |  | *|* | *|* |  |**|**|  |  |**|**|* |  |**|
 
 FROGDEAD_MEM   ; Graphics data, DEAD FROG!  (37) + 3 spaces.
-	.byte %00001111 %00001111 %11000011 %00001111 %00000000 %00111111 %00111110 %00011110 %00011111 %00011000
-	.byte %00001101 %10001100 %00000111 %10001101 %10000000 %00110000 %00110011 %00110011 %00110000 %00011000
-	.byte %00001100 %11001111 %10001100 %11001100 %11000000 %00111110 %00110011 %00110011 %00110000 %00011000
-	.byte %00001100 %11001100 %00001100 %11001100 %11000000 %00110000 %00111110 %00110011 %00110111 %00011000
-	.byte %00001101 %10001100 %00001111 %11001101 %10000000 %00110000 %00110110 %00110011 %00110011 %00000000
-	.byte %00001111 %00001111 %11001100 %11001111 %00000000 %00110000 %00110011 %00011110 %00011111 %00011000
+	.by %00001111 %00001111 %11000011 %00001111 %00000000 %00111111 %00111110 %00011110 %00011111 %00011000
+	.by %00001101 %10001100 %00000111 %10001101 %10000000 %00110000 %00110011 %00110011 %00110000 %00011000
+	.by %00001100 %11001111 %10001100 %11001100 %11000000 %00111110 %00110011 %00110011 %00110000 %00011000
+	.by %00001100 %11001100 %00001100 %11001100 %11000000 %00110000 %00111110 %00110011 %00110111 %00011000
+	.by %00001101 %10001100 %00001111 %11001101 %10000000 %00110000 %00110110 %00110011 %00110011 %00000000
+	.by %00001111 %00001111 %11001100 %11001111 %00000000 %00110000 %00110011 %00011110 %00011111 %00011000
 
 
 ; GAME OVER screen.
@@ -425,12 +423,12 @@ FROGDEAD_MEM   ; Graphics data, DEAD FROG!  (37) + 3 spaces.
 ; |  |**|**|* | *|* | *|* |**|  | *|* |**|**|**|  |  |  |  |**|**|  |  | *|* |  | *|**|**|* | *|* | *|* |
 
 GAMEOVER_MEM ; Graphics data, Game Over.  (34) + 6 spaces.
-	.byte %00000000 %11111000 %01100011 %00011011 %11110000 %00001111 %00011001 %10011111 %10011111 %00000000
-	.byte %00000001 %10000000 %11110011 %10111011 %00000000 %00011001 %10011001 %10011000 %00011001 %10000000
-	.byte %00000001 %10000001 %10011011 %11111011 %11100000 %00011001 %10011001 %10011111 %00011001 %10000000
-	.byte %00000001 %10111001 %10011011 %01011011 %00000000 %00011001 %10011001 %10011000 %00011111 %00000000
-	.byte %00000001 %10011001 %11111011 %00011011 %00000000 %00011001 %10001111 %00011000 %00011011 %00000000
-	.byte %00000000 %11111001 %10011011 %00011011 %11110000 %00001111 %00000110 %00011111 %10011001 %10000000
+	.by %00000000 %11111000 %01100011 %00011011 %11110000 %00001111 %00011001 %10011111 %10011111 %00000000
+	.by %00000001 %10000000 %11110011 %10111011 %00000000 %00011001 %10011001 %10011000 %00011001 %10000000
+	.by %00000001 %10000001 %10011011 %11111011 %11100000 %00011001 %10011001 %10011111 %00011001 %10000000
+	.by %00000001 %10111001 %10011011 %01011011 %00000000 %00011001 %10011001 %10011000 %00011111 %00000000
+	.by %00000001 %10011001 %11111011 %00011011 %00000000 %00011001 %10001111 %00011000 %00011011 %00000000
+	.by %00000000 %11111001 %10011011 %00011011 %11110000 %00001111 %00000110 %00011111 %10011001 %10000000
 
 
 	.align $0100 ; Realign to next page.
@@ -563,7 +561,11 @@ TITLE_BACK_COLORS
 	.by COLOR_BLACK COLOR_BLACK                     ; Scores, and blank line
 	.by COLOR_GREEN COLOR_GREEN                     ; Title line
 	.by COLOR_GREEN COLOR_GREEN                     ; Title line
+	.by COLOR_GREEN COLOR_GREEN                     ; Title line
+	.by COLOR_GREEN                                 ; Title line
 	.by COLOR_BLACK                                 ; Space
+	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
+	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
 	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
 	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
 	.by COLOR_BLACK                                 ; Space
@@ -574,8 +576,8 @@ TITLE_BACK_COLORS
 
 
 TITLE_TEXT_COLORS ; Text luminance
-	.by $0C $00                                     ; Scores, and blank line
-	.by $0C $08 $04 $00                             ; Scrolling title
+	.by $0C $0C                                     ; Scores, and blank line
+	.by $AC $AA $A8 $A6 $A4 $A2 $AC                 ; Scrolling title
 	.rept 17
 		.by $0C                                     ; The rest of the text on screen
 	.endr
@@ -809,7 +811,7 @@ SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 	.byte <COLPF0_COLBK_DLI ; DLI (41)
 	.byte <COLPF0_COLBK_DLI ; DLI (42)
 	.byte <COLPF0_COLBK_DLI ; DLI (43)
-	.byte <GAME_DLI_SPC1    ; DLI 44 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
+	.byte <DLI_SPC1    ; DLI 44 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
 ;	.byte <GAME_DLI_SPC2    ; DLI 45 
 
 ; C0olor tables must be big enough to contain data up to the maximum index that
@@ -842,6 +844,11 @@ COLPF3_TABLE ; Must be big enough to do Game  screen up to last boat row.
 
 HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row.
 	.rept 20
+		.byte 0
+	.endr
+
+PXPF_TABLE ; Big enough for game area for Frog.
+	.rept 22
 		.byte 0
 	.endr
 

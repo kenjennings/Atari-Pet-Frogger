@@ -83,34 +83,34 @@ EventTransitionToTitle
 	; === STAGE 1 ===
 	; Each line is 40 spaces followed by the graphics.
 	; Scroll each one one at a time.
-	lda SCROLL_TITLE_LMS0    
-	cmp #<[TITLE_MEM1+40]      ; Reached the slide maximum ?
-	beq NowScroll2             ; Yes.  Skip this line slide.
+;	lda SCROLL_TITLE_LMS0    
+;	cmp #<[TITLE_MEM1+40]      ; Reached the slide maximum ?
+;	beq NowScroll2             ; Yes.  Skip this line slide.
 
 	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
 
-	inc SCROLL_TITLE_LMS0      ; Top line slide in progress.
-	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
+;	inc SCROLL_TITLE_LMS0      ; Top line slide in progress.
+;	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
 
-NowScroll2
-	lda SCROLL_TITLE_LMS1
-	cmp #<[TITLE_MEM2+40]      ; Reached the slide maximum ?
-	beq NowScroll3             ; Yes.  Skip this line slide.
+;NowScroll2
+;	lda SCROLL_TITLE_LMS1
+;	cmp #<[TITLE_MEM2+40]      ; Reached the slide maximum ?
+;	beq NowScroll3             ; Yes.  Skip this line slide.
 
-	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
+;	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
 
-	inc SCROLL_TITLE_LMS1      ; Middle line slide in progress.
-	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
+;	inc SCROLL_TITLE_LMS1      ; Middle line slide in progress.
+;	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
 
-NowScroll3
-	lda SCROLL_TITLE_LMS2
-	cmp #<[TITLE_MEM3+40]      ; Reached the slide maximum ?
-	beq FinishedNowSetupStage2 ; Yes.  All 3 lines moved.  Now do the glowing line.
+;NowScroll3
+;	lda SCROLL_TITLE_LMS2
+;	cmp #<[TITLE_MEM3+40]      ; Reached the slide maximum ?
+;	beq FinishedNowSetupStage2 ; Yes.  All 3 lines moved.  Now do the glowing line.
 
-	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
-
-	inc SCROLL_TITLE_LMS2      ; Bottom line slide in progress.
-	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
+;	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
+;
+;	inc SCROLL_TITLE_LMS2      ; Bottom line slide in progress.
+;	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
 
 FinishedNowSetupStage2
 	ldx #0                     ; Setup channel 0 to play saber A sound.
@@ -232,11 +232,11 @@ EventTransitionToGame
 	; Decrement twice here, because once was not fast enough.
 	; The fade and wipe was becoming boring.
 	ldx EventCounter2
-	lda COLPF1_TABLE,x
-	beq ZeroCOLPF2          ; Safety check, because I am untrustworthy.
-	dec COLPF1_TABLE,x
-	beq ZeroCOLPF2
-	dec COLPF1_TABLE,x
+;	lda COLPF1_TABLE,x
+;	beq ZeroCOLPF2          ; Safety check, because I am untrustworthy.
+;	dec COLPF1_TABLE,x
+;	beq ZeroCOLPF2
+;	dec COLPF1_TABLE,x
 	bne EndTransitionToGame
 ZeroCOLPF2
 	lda #0
@@ -591,7 +591,7 @@ LoopDeadFadeText
 	ldy COLPF1_TABLE+3,x    ; Get text color. 
 	beq SkipDeadFade        ; If it is 0 now, then do not decrement.
 	dey
-	sty COLPF1_TABLE+3,x    ; Save text color. 
+;	sty COLPF1_TABLE+3,x    ; Save text color. 
 SkipDeadFade
 	dex                     ; Next row.
 	bpl LoopDeadFadeText    ; 18 to 0...
@@ -806,7 +806,7 @@ LoopOverToBlack
 	bmi BlackOutCOLPF1      ; If it went negative, then we're done.
 	dey                     ; Decrement Text luminance
 	bmi BlackOutCOLPF1      ; If it went negative, then we're done.
-	sty COLPF1_TABLE,x      ; Save the updated value in the color table.
+;	sty COLPF1_TABLE,x      ; Save the updated value in the color table.
 	
 ; Yes, this is a little inconsistent.  The pass when the text 
 ; luminance reaches 0 will end up skipping the fade on the background. 

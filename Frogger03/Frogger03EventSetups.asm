@@ -43,16 +43,27 @@ SetupTransitionToTitle
 	lda #1
 	sta EventCounter         ; Declare stage 1 behavior for scrolling.
 
-	lda #<TITLE_MEM1         ; Initialize the
-	sta SCROLL_TITLE_LMS0    ; Display List
-	lda #<TITLE_MEM2         ; LMS
-	sta SCROLL_TITLE_LMS1    ; Addresses
-	lda #<TITLE_MEM3         ; for scrolling
-	sta SCROLL_TITLE_LMS2    ; in the title.
+;	lda #<TITLE_MEM1         ; Initialize the
+;	sta SCROLL_TITLE_LMS0    ; Display List
+;	lda #<TITLE_MEM2         ; LMS
+;	sta SCROLL_TITLE_LMS1    ; Addresses
+;	lda #<TITLE_MEM3         ; for scrolling
+;	sta SCROLL_TITLE_LMS2    ; in the title.
 
 	lda #DISPLAY_TITLE       ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
+	ldx #27
+TempLoopCopyToTitle
+	lda TITLE_BACK_COLORS,x
+	sta COLBK_TABLE,x
+	sta COLPF2_TABLE,x
+	lda TITLE_TEXT_COLORS,x
+	sta COLPF0_TABLE,x
+	sta COLPF1_TABLE,x
+	dex
+	bpl TempLoopCopyToTitle
+	
 	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
 	sta CurrentScreen
 

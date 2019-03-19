@@ -78,8 +78,8 @@ DISPLAY_OVER  = 4
 ; text for animating transitions.
 
 TITLE_DISPLAYLIST
-	.byte   DL_BLANK_8, DL_BLANK_8          ; 16 blank scan lines.
-	.byte   DL_BLANK_4|DL_DLI               ; 4 blank lines. DLI 0/0 sets COLPF1, COLPF2 for score text. 
+	.byte   DL_BLANK_8, DL_BLANK_8|DL_DLI          ; 16 blank scan lines. DLI 0/0 sets COLPF1, COLPF2 for score text. 
+	.byte   DL_BLANK_4                             ; 4 blank lines. 
 
 	mDL_LMS DL_TEXT_2,SCORE_MEM1            ; (1-8) scores
 	.byte   DL_BLANK_8|DL_DLI               ; (9-16) An empty line. DLI 1/1 Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1.
@@ -115,7 +115,7 @@ TITLE_DISPLAYLIST
 	.byte   DL_TEXT_2|DL_DLI               ; (81-88) DLI 5/13 set COLPF1 text
 	.byte   DL_TEXT_2|DL_DLI               ; (89-96) DLI 5/14 set COLPF1 text
 	.byte   DL_TEXT_2|DL_DLI               ; (97-104) DLI 5/15 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI,INSTRUCT_MEM7 ; (105-112) DLI 5/16 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM7 ; (105-112) DLI 5/16 set COLPF1 text
 	.byte   DL_TEXT_2|DL_DLI               ; (113-120) DLI 3/17 set BLACK for COLBK
 
 	.byte   DL_BLANK_8|DL_DLI              ; (121-128) An empty line.  DLI 4/18 set ORANGE2 for COLBK and COLPF2, set COLPF1 text
@@ -127,7 +127,7 @@ TITLE_DISPLAYLIST
 	.byte   DL_BLANK_8|DL_DLI              ; (153-160) An empty line.  DLI 4/22 set PINK for COLBK and COLPF2, and set COLPF1 text
 
 	.byte   DL_TEXT_2|DL_DLI               ; (161-168) Game Controls.  DLI 5/23 set COLPF1 text
-	mDL_LMS DL_TEXT_2|DL_DLI               ; (169-176) DLI 3/24 set BLACK for COLBK
+	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM2 ; (169-176) DLI 3/24 set BLACK for COLBK
 
 	.byte   DL_BLANK_8|DL_DLI              ; (177-184) An empty line.  DLI SPC1/25 sets COLBK, COLPF2, COLPF1 colors.
 
@@ -182,8 +182,8 @@ GAME_DISPLAYLIST
 	.byte DL_BLANK_8, DL_BLANK_8
 	.byte DL_BLANK_4|DL_DLI                  ; 20 blank scan lines.  DLI 0/0 sets COLPF1, COLPF2 for score text.
 
-	mDL_LMS DL_TEXT_2|DL_DL1,SCORE_MEM1      ; (1-8) Labels for crossings, scores, and lives. DLI 1/1 sets COLPF1 for text. (fading)
-	.byte DL_TEXT_2|DL_DL1; second line of scores ; (9-16) DLI 2/2 sets COLPF0,1,2,3,BK for Beach.
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1      ; (1-8) Labels for crossings, scores, and lives. DLI 1/1 sets COLPF1 for text. (fading)
+	.byte DL_TEXT_2|DL_DLI; second line of scores ; (9-16) DLI 2/2 sets COLPF0,1,2,3,BK for Beach.
 
 	.byte DL_BLANK_1                         ; (17) One scan line 
 PF_LMS0 = [* + 1]                            ; Plus 1 is the address of the display list LMS
@@ -261,7 +261,7 @@ PF_LMS17 = [* + 1]
 PF_LMS18 = [* + 1]
 	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM18 ; (180-187) Frog first Beach.  DLI 4/21 sets COLPF2/COLBK Black
 
-	.byte DL_BLANK_5|DLI                     ; (188-192) Some scan lines. DLI 5/22 sets HSCROL for credit, calls SPC2
+	.byte DL_BLANK_5|DL_DLI                  ; (188-192) Some scan lines. DLI 5/22 sets HSCROL for credit, calls SPC2
 
 	mDL_JMP DL_SCROLLING_CREDIT              ; (193-200) End of display. No prompt for button. See Page 0 for the evil.
 
