@@ -4,9 +4,9 @@ PET FROGGER game for Commodore PET 4032 ported to the Atari 8-bit computers
 
 Video of the game play on YouTube: A URL for YouTube goes here
   
-Title Screen:
+Prototype Title Screen:
 
-[![Title Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V03_Title.png "Title Screen")](#features1)
+[![Title Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V03_NewProtoTitle.png "Title Screen")](#features1)
 
 Various Screen grabs go here...
 
