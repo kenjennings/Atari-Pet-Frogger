@@ -6,7 +6,7 @@ Video of the game play on YouTube: A URL for YouTube goes here
   
 Prototype Title Screen:
 
-[![Title Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/V03_NewProtoTitle.png "Title Screen")](#features1)
+[![Title Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_NewProtoTitle.png "Title Screen")](#features1)
 
 Various Screen grabs go here...
 
@@ -14,11 +14,11 @@ Various Screen grabs go here...
 
 **Porting/Enhancing PET FROGGER for Atari**
 
-[Frogger03.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03.asm "Frogger03.asm") Main assembly source and Page Zero variables.
+[Frogger03.asm](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03/Frogger03.asm "Frogger03.asm") Main assembly source and Page Zero variables.
 
 Other source files go here....
 
-[Frogger03.xex](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03.asm "Frogger03.xex") Atari executable program.
+[Frogger03.xex](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03/Frogger03.xex "Frogger03.xex") Atari executable program.
 
 ---
 
@@ -40,7 +40,7 @@ I generally build in eclipse from the WUDSN ide.  WUDSN can be found here: https
 
 [Version 02](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V02.md "Version 02") Further enhanced for Atari 8-bit computers February 2019 by Ken Jennings 
 
-Version 03, February 2019 ? . . . .  
+Version 03, April 2019 ? . . . .  
 
 ---
 
@@ -100,7 +100,6 @@ Add another hazard/enemy object?
 - Fine scrolling the credits scrolling line.   Looks most slick.  Someone may mistake me for a professional.
 
 - Use only one line of data for all the boats moving left, and one for all the boats moving right.  All lines going in the same direction display the same screen memory data.  This reduces memory by 800 bytes (10 lines * 80), close to 10% of the final size of Version 02. 
-
 
 ---
 
