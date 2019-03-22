@@ -20,7 +20,7 @@
 ; The Atari OS text printing is not being used, therefore the Atari OS's
 ; screen editor's 24-line limitation is not an issue.  The game can be 
 ; 25 lines like the original Pet 4032 screen.  Or it can be more. 
-; Soo, custom display list means do what we want.
+; Sooooo, custom display list means do what we want.
 ;
 ; Prior versions used Mode 2 text lines exclusively to perpetuate the 
 ; flavor of the original's text-mode-based game.
@@ -529,8 +529,6 @@ SCREEN_SAVED
 	.sb "                 "
 
 
-
-
 	.align $0100 ; Realign to next page.
 
 ; ==========================================================================
@@ -558,29 +556,29 @@ SCREEN_SAVED
 ; COLOR_LITE_ORANGE =  $F0
 
 TITLE_BACK_COLORS
-	.by COLOR_BLACK COLOR_BLACK                     ; Scores, and blank line
-	.by COLOR_GREEN COLOR_GREEN                     ; Title line
-	.by COLOR_GREEN COLOR_GREEN                     ; Title line
-	.by COLOR_GREEN COLOR_GREEN                     ; Title line
-	.by COLOR_GREEN                                 ; Title line
+	.by COLOR_BLACK        COLOR_BLACK              ; Scores, and blank line
+	.by COLOR_BLUE1        COLOR_PURPLE_BLUE+2      ; Title lines
+	.by COLOR_PURPLE+4     COLOR_PINK+6             ; Title lines
+	.by COLOR_RED_ORANGE+8 COLOR_ORANGE2+10         ; Title lines
+	.by COLOR_ORANGE1+12                            ; Title lines
 	.by COLOR_BLACK                                 ; Space
-	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
-	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
-	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
-	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Directions
+	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Instructions
+	.by COLOR_AQUA COLOR_AQUA COLOR_AQUA COLOR_AQUA ; Instructions
 	.by COLOR_BLACK                                 ; Space
 	.by COLOR_ORANGE2 COLOR_ORANGE2 COLOR_ORANGE2   ; Scoring
 	.by COLOR_BLACK                                 ; Space
 	.by COLOR_PINK COLOR_PINK                       ; Controls
-	.by COLOR_BLACK                                 ; Space
-
 
 TITLE_TEXT_COLORS ; Text luminance
 	.by $0C $0C                                     ; Scores, and blank line
-	.by $AC $AA $A8 $A6 $A4 $A2 $AC                 ; Scrolling title
-	.rept 17
-		.by $0C                                     ; The rest of the text on screen
-	.endr
+	.by $EC $DA $C8 $B6 $A4 $92 $C2                 ; title
+	.by $00                                         ; blank
+	.by $04 $06 $08 $0A                             ; Instructions
+	.by $0C $0A $08 $06                             ; Instructions
+	.by $00                                         ; blank
+	.by $06 $08 $0a                                 ; Scoring
+	.by $00                                         ; blank
+	.by $08 $0A                                     ; controls
 
 
 GAME_BACK_COLORS
@@ -710,107 +708,110 @@ DLI_HI_TABLE
 
 
 TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte <TITLE_DLI   ; DLI (0)
-	.byte <TITLE_DLI_1 ; DLI (1)
-	.byte <TITLE_DLI_2 ; DLI 2
-	.byte <TITLE_DLI_2 ; DLI 3
-	.byte <TITLE_DLI_2 ; DLI 4
-	.byte <TITLE_DLI_2 ; DLI 5
-	.byte <TITLE_DLI_2 ; DLI 6
-	.byte <TITLE_DLI_2 ; DLI 7
-	.byte <TITLE_DLI_3 ; DLI 8
-	.byte <TITLE_DLI_4 ; DLI 9
-	.byte <TITLE_DLI_5 ; DLI 10
-	.byte <TITLE_DLI_5 ; DLI 11
-	.byte <TITLE_DLI_5 ; DLI 12
-	.byte <TITLE_DLI_5 ; DLI 13
-	.byte <TITLE_DLI_5 ; DLI 14 
-	.byte <TITLE_DLI_5 ; DLI 15
-	.byte <TITLE_DLI_5 ; DLI 16
-	.byte <TITLE_DLI_3 ; DLI 17
-	.byte <TITLE_DLI_4 ; DLI 18
-	.byte <TITLE_DLI_5 ; DLI 19
-	.byte <TITLE_DLI_5 ; DLI 20
-	.byte <TITLE_DLI_3 ; DLI 21
-	.byte <TITLE_DLI_4 ; DLI 22
-	.byte <TITLE_DLI_5 ; DLI 23
-	.byte <TITLE_DLI_3 ; DLI 24
-	.byte <TITLE_DLI_SPC1 ; DLI 25 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
-;	.byte <TITLE_DLI_SPC2 ; DLI 26 
+	.byte <Score_DLI        ; DLI (0) Text - COLPF1, Black - COLBK COLPF2
+	.byte <COLPF0_COLBK_DLI ; DLI (1) Table - COLBK, Pixels - COLPF0
+	.byte <COLPF0_COLBK_DLI ; DLI 2   Table - COLBK, Pixels - COLPF0
+	.byte <COLPF0_COLBK_DLI ; DLI 3   Table - COLBK, Pixels - COLPF0
+	.byte <COLPF0_COLBK_DLI ; DLI 4   Table - COLBK, Pixels - COLPF0
+	.byte <COLPF0_COLBK_DLI ; DLI 5   Table - COLBK, Pixels - COLPF0
+	.byte <COLPF0_COLBK_DLI ; DLI 6   Table - COLBK, Pixels - COLPF0
+	.byte <COLPF0_COLBK_DLI ; DLI 7   Table - COLBK, Pixels - COLPF0
+	.byte <TITLE_DLI_3      ; DLI 8   Black - COLBK COLPF2
+	.byte <TITLE_DLI_4      ; DLI 9   Text - COLPF1, Table - COLBK COLPF2. - start instructions
+	.byte <TITLE_DLI_5      ; DLI 10  Text - COLPF1
+	.byte <TITLE_DLI_5      ; DLI 11  Text - COLPF1
+	.byte <TITLE_DLI_5      ; DLI 12  Text - COLPF1
+	.byte <TITLE_DLI_5      ; DLI 13  Text - COLPF1
+	.byte <TITLE_DLI_5      ; DLI 14  Text - COLPF1
+	.byte <TITLE_DLI_5      ; DLI 15  Text - COLPF1
+	.byte <TITLE_DLI_5      ; DLI 16  Text - COLPF1 - end instructions.
+	.byte <TITLE_DLI_3      ; DLI 17  Black - COLBK COLPF2
+	.byte <TITLE_DLI_4      ; DLI 18  Text - COLPF1, Table - COLBK COLPF2. - start scoring
+	.byte <TITLE_DLI_5      ; DLI 19  Text - COLPF1
+	.byte <TITLE_DLI_5      ; DLI 20  Text - COLPF1 - end scoring
+	.byte <TITLE_DLI_3      ; DLI 21  Black - COLBK COLPF2
+	.byte <TITLE_DLI_4      ; DLI 22  Text - COLPF1, Table - COLBK COLPF2. - start controls
+	.byte <TITLE_DLI_5      ; DLI 23  Text - COLPF1 - end controls
+	.byte <TITLE_DLI_3      ; DLI 24  Black - COLBK COLPF2
+	.byte <DLI_SPC1         ; DLI 25 Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.	
+;	.byte <TITLE_DLI_SPC2   ; DLI 26 
+
 
 GAME_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte <GAME_DLI   ; DLI (0) for scores
-	.byte <GAME_DLI_1 ; DLI (1) for scores
-	.byte <GAME_DLI_2 ; DLI 2 Beach 18 goal 
-	.byte <GAME_DLI_3 ; DLI 3 Boats 17
-	.byte <GAME_DLI_3 ; DLI 4 Boats 16 
-	.byte <GAME_DLI_2 ; DLI 5 Beach 15
-	.byte <GAME_DLI_3 ; DLI 6 Boats 14
-	.byte <GAME_DLI_3 ; DLI 7 Boats 13
-	.byte <GAME_DLI_2 ; DLI 8 Beach 12
-	.byte <GAME_DLI_3 ; DLI 9 Boats 11
-	.byte <GAME_DLI_3 ; DLI 10 Boats 10
-	.byte <GAME_DLI_2 ; DLI 11 Beach 09
-	.byte <GAME_DLI_3 ; DLI 12 Boats 08
-	.byte <GAME_DLI_3 ; DLI 13 Boats 07
-	.byte <GAME_DLI_2 ; DLI 14 Beach 06
-	.byte <GAME_DLI_3 ; DLI 15 Boats 05
-	.byte <GAME_DLI_3 ; DLI 16 Boats 04
-	.byte <GAME_DLI_2 ; DLI 17 Beach 03
-	.byte <GAME_DLI_3 ; DLI 18 Boats 02
-	.byte <GAME_DLI_3 ; DLI 19 Boats 01
-	.byte <GAME_DLI_2 ; DLI 20 Beach 00 (home)
-	.byte <GAME_DLI_4 ; DLI 21
-	.byte <GAME_DLI_5 ; DLI 22  Calls SPC2 to set scrolling credits HSCROL and colors.
+	.byte <Score_DLI   ; DLI (0) for scores
+	.byte <GAME_DLI_1  ; DLI (1) Text - COLPF1, for scores  (Same as TITLE_DLI_5)
+	.byte <GAME_DLI_2  ; DLI 2   Beach 18 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A).
+	.byte <GAME_DLI_3  ; DLI 3   Boats 17 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+	.byte <GAME_DLI_3  ; DLI 4   Boats 16 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 17)
+	.byte <GAME_DLI_2  ; DLI 5   Beach 15 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 16).
+	.byte <GAME_DLI_3  ; DLI 6   Boats 14 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+	.byte <GAME_DLI_3  ; DLI 7   Boats 13 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 14)
+	.byte <GAME_DLI_2  ; DLI 8   Beach 12 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 13).
+	.byte <GAME_DLI_3  ; DLI 9   Boats 11 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+	.byte <GAME_DLI_3  ; DLI 10  Boats 10 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 11)
+	.byte <GAME_DLI_2  ; DLI 11  Beach 09 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 10).
+	.byte <GAME_DLI_3  ; DLI 12  Boats 08 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+	.byte <GAME_DLI_3  ; DLI 13  Boats 07 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 8)
+	.byte <GAME_DLI_2  ; DLI 14  Beach 06 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 7).
+	.byte <GAME_DLI_3  ; DLI 15  Boats 05 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+	.byte <GAME_DLI_3  ; DLI 16  Boats 04 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 5)
+	.byte <GAME_DLI_2  ; DLI 17  Beach 03 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 4).
+	.byte <GAME_DLI_3  ; DLI 18  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+	.byte <GAME_DLI_3  ; DLI 19  Boats 01 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 2)
+	.byte <GAME_DLI_2  ; DLI 20  Beach 00 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 1).
+	.byte <TITLE_DLI_3 ; DLI 21  Black - COLBK COLPF2
+	.byte <GAME_DLI_5  ; DLI 22  Calls SPC2 to set scrolling credits HSCROL and colors.
 
 
 ; All three graphics screens use the same list.
 ; Basically, the background color is updated per every line
 SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte <COLPF0_COLBK_DLI ; DLI (0)
-	.byte <COLPF0_COLBK_DLI ; DLI (1)
-	.byte <COLPF0_COLBK_DLI ; DLI (2)
-	.byte <COLPF0_COLBK_DLI ; DLI (3)
-	.byte <COLPF0_COLBK_DLI ; DLI (4)
-	.byte <COLPF0_COLBK_DLI ; DLI (5)
-	.byte <COLPF0_COLBK_DLI ; DLI (6)
-	.byte <COLPF0_COLBK_DLI ; DLI (7)
-	.byte <COLPF0_COLBK_DLI ; DLI (8)
-	.byte <COLPF0_COLBK_DLI ; DLI (9)
-	.byte <COLPF0_COLBK_DLI ; DLI (10)
-	.byte <COLPF0_COLBK_DLI ; DLI (11)
-	.byte <COLPF0_COLBK_DLI ; DLI (12)
-	.byte <COLPF0_COLBK_DLI ; DLI (13)
-	.byte <COLPF0_COLBK_DLI ; DLI (14)
-	.byte <COLPF0_COLBK_DLI ; DLI (15)
-	.byte <COLPF0_COLBK_DLI ; DLI (16)
-	.byte <COLPF0_COLBK_DLI ; DLI (17)
-	.byte <COLPF0_COLBK_DLI ; DLI (18)
-	.byte <COLPF0_COLBK_DLI ; DLI (19)
-	.byte <COLPF0_COLBK_DLI ; DLI (20)
-	.byte <COLPF0_COLBK_DLI ; DLI (21)
-	.byte <COLPF0_COLBK_DLI ; DLI (22)
-	.byte <COLPF0_COLBK_DLI ; DLI (23)
-	.byte <COLPF0_COLBK_DLI ; DLI (24)
-	.byte <COLPF0_COLBK_DLI ; DLI (25)
-	.byte <COLPF0_COLBK_DLI ; DLI (26)
-	.byte <COLPF0_COLBK_DLI ; DLI (27)
-	.byte <COLPF0_COLBK_DLI ; DLI (28)
-	.byte <COLPF0_COLBK_DLI ; DLI (29)
-	.byte <COLPF0_COLBK_DLI ; DLI (30)
-	.byte <COLPF0_COLBK_DLI ; DLI (31)
-	.byte <COLPF0_COLBK_DLI ; DLI (32)
-	.byte <COLPF0_COLBK_DLI ; DLI (33)
-	.byte <COLPF0_COLBK_DLI ; DLI (34)
-	.byte <COLPF0_COLBK_DLI ; DLI (35)
-	.byte <COLPF0_COLBK_DLI ; DLI (36)
-	.byte <COLPF0_COLBK_DLI ; DLI (37)
-	.byte <COLPF0_COLBK_DLI ; DLI (38)
-	.byte <COLPF0_COLBK_DLI ; DLI (39)
-	.byte <COLPF0_COLBK_DLI ; DLI (40)
-	.byte <COLPF0_COLBK_DLI ; DLI (41)
-	.byte <COLPF0_COLBK_DLI ; DLI (42)
-	.byte <COLPF0_COLBK_DLI ; DLI (43)
+	.byte <COLPF0_COLBK_DLI ; DLI (0)  1
+	.byte <COLPF0_COLBK_DLI ; DLI (1)  2
+	.byte <COLPF0_COLBK_DLI ; DLI (2)  3
+	.byte <COLPF0_COLBK_DLI ; DLI (3)  4
+	.byte <COLPF0_COLBK_DLI ; DLI (4)  5
+	.byte <COLPF0_COLBK_DLI ; DLI (5)  6
+	.byte <COLPF0_COLBK_DLI ; DLI (6)  7
+	.byte <COLPF0_COLBK_DLI ; DLI (7)  8
+	.byte <COLPF0_COLBK_DLI ; DLI (8)  9
+	.byte <COLPF0_COLBK_DLI ; DLI (9)  10
+	.byte <COLPF0_COLBK_DLI ; DLI (10) 11
+	.byte <COLPF0_COLBK_DLI ; DLI (11) 12
+	.byte <COLPF0_COLBK_DLI ; DLI (12) 13
+	.byte <COLPF0_COLBK_DLI ; DLI (13) 14
+	.byte <COLPF0_COLBK_DLI ; DLI (14) 15
+	.byte <COLPF0_COLBK_DLI ; DLI (15) 16
+	.byte <COLPF0_COLBK_DLI ; DLI (16) 17
+	.byte <COLPF0_COLBK_DLI ; DLI (17) 18
+	.byte <COLPF0_COLBK_DLI ; DLI (18) 19
+	.byte <COLPF0_COLBK_DLI ; DLI (19) 20
+	.byte <COLPF0_COLBK_DLI ; DLI (20) 1 Splash Graphics
+	.byte <COLPF0_COLBK_DLI ; DLI (21) 2 Splash Graphics
+	.byte <COLPF0_COLBK_DLI ; DLI (22) 3 Splash Graphics
+	.byte <COLPF0_COLBK_DLI ; DLI (23) 4 Splash Graphics
+	.byte <COLPF0_COLBK_DLI ; DLI (24) 5 Splash Graphics
+	.byte <COLPF0_COLBK_DLI ; DLI (25) 6 Splash Graphics
+	.byte <COLPF0_COLBK_DLI ; DLI (26) 20 
+	.byte <COLPF0_COLBK_DLI ; DLI (27) 19 
+	.byte <COLPF0_COLBK_DLI ; DLI (28) 18 
+	.byte <COLPF0_COLBK_DLI ; DLI (29) 17 
+	.byte <COLPF0_COLBK_DLI ; DLI (30) 16 
+	.byte <COLPF0_COLBK_DLI ; DLI (31) 15 
+	.byte <COLPF0_COLBK_DLI ; DLI (32) 14
+	.byte <COLPF0_COLBK_DLI ; DLI (33) 13
+	.byte <COLPF0_COLBK_DLI ; DLI (34) 12
+	.byte <COLPF0_COLBK_DLI ; DLI (35) 11
+	.byte <COLPF0_COLBK_DLI ; DLI (36) 10
+	.byte <COLPF0_COLBK_DLI ; DLI (37) 9
+	.byte <COLPF0_COLBK_DLI ; DLI (38) 8
+	.byte <COLPF0_COLBK_DLI ; DLI (39) 7
+	.byte <COLPF0_COLBK_DLI ; DLI (40) 6
+	.byte <COLPF0_COLBK_DLI ; DLI (41) 5
+	.byte <COLPF0_COLBK_DLI ; DLI (42) 4
+	.byte <COLPF0_COLBK_DLI ; DLI (43) 3
+	.byte <COLPF0_COLBK_DLI ; DLI (44) 2
+	.byte <COLPF0_COLBK_DLI ; DLI (45) 1
 	.byte <DLI_SPC1    ; DLI 44 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
 ;	.byte <GAME_DLI_SPC2    ; DLI 45 
 
@@ -818,39 +819,25 @@ SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 ; occurs of all the screens. 
 
 COLBK_TABLE ; Must be big enough to do splash screens.
-	.rept 44
-		.byte 0
-	.endr
+	.ds 46
 
-COLPF0_TABLE ; Must be big enough to do Game screen up to last beach.
-	.rept 21
-		.byte 0
-	.endr
+COLPF0_TABLE ; Must be big enough to do splash screens.
+	.ds 46
 
 COLPF1_TABLE ; Must be big enough to do Title screen.
-	.rept 26
-		.byte 0
-	.endr
+	.ds 25
 
 COLPF2_TABLE ; Must be big enough to do Title screen.
-	.rept 26
-		.byte 0
-	.endr
+	.ds 25
 
 COLPF3_TABLE ; Must be big enough to do Game  screen up to last boat row.
-	.rept 20
-		.byte 0
-	.endr
+	.ds 22
 
 HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row.
-	.rept 20
-		.byte 0
-	.endr
+	.ds 22
 
 PXPF_TABLE ; Big enough for game area for Frog.
-	.rept 22
-		.byte 0
-	.endr
+	.ds 22
 
 COLOR_BACK_LO_TABLE
 	.byte <TITLE_BACK_COLORS
@@ -928,3 +915,21 @@ COLOR_TEXT_HI_TABLE
 	; .byte >PLAYFIELD_MEM16
 	; .byte >PLAYFIELD_MEM17
 	; .byte >PLAYFIELD_MEM18
+
+	
+; ==========================================================================
+; PLAYER/MISSILE GRAPHICS
+; only the part of the game screen that presents the beaches and boats.
+; It does not include anything else before or after the playfield.
+; --------------------------------------------------------------------------
+
+	.align $0800 ; single line P/M needs 2K boundary.
+
+PMADR
+
+MISSILEADR = PMADR+$300
+PLAYERADR0 = PMADR+$400
+PLAYERADR1 = PMADR+$500
+PLAYERADR2 = PMADR+$600
+PLAYERADR3 = PMADR+$700
+

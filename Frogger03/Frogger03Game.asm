@@ -44,11 +44,14 @@ GAMESTART
 	lda #NMI_VBI               ; Turn Off DLI
 	sta NMIEN
 
-	lda #<TITLE_DLI            ; Set DLI vector. (will be reset by VBI on screen setup)
-	sta VDSLST
-	lda #>TITLE_DLI
-	sta VDSLST+1
+	lda #0
+	sta ThisDLI
 
+	lda #<Score_DLI; TITLE_DLI            ; Set DLI vector. (will be reset by VBI on screen setup)
+	sta VDSLST
+	lda #>Score_DLI; TITLE_DLI
+	sta VDSLST+1
+	
 	lda #[NMI_DLI|NMI_VBI]     ; Turn On DLI
 	sta NMIEN
 

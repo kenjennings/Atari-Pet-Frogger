@@ -583,3 +583,36 @@ LoopCopyColors
 	bpl LoopCopyColors
 
 	rts
+
+	
+	
+	
+;==============================================================================
+;												PmgInit  A  X  Y
+;==============================================================================
+
+libPmgInit
+
+	; get all Players/Missiles off screen.
+;	jsr libPmgMoveAllZero
+
+	; clear all bitmap images
+;	jsr libPmgClearBitmaps
+
+	; Tell ANTIC where P/M memory occurs for DMA to GTIA
+	lda #>PMADR
+	sta PMBASE
+
+	; Enable GTIA to accept DMA to the GRAFxx registers.
+	lda #ENABLE_PLAYERS|ENABLE_MISSILES
+	sta GRACTL
+
+	; update DMACTL, too
+	
+	rts
+
+	
+	
+	
+	
+	

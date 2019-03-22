@@ -235,8 +235,8 @@ VBISetupDisplay
 
 	lda DLI_LO_TABLE,x          ; Display List Interrupt chain table starting address
 	sta ThisDLIAddr
-	lda DLI_Hi_TABLE,x          ; Display List Interrupt chain table starting address
-	sta ThisDLIAddr
+	lda DLI_HI_TABLE,x          ; Display List Interrupt chain table starting address
+	sta ThisDLIAddr+1
 
 ;	lda COLOR_BACK_LO_TABLE,x   ; Get pointer to the source color table
 ;	sta COLPF2POINTER
@@ -329,8 +329,8 @@ ManagePressAButtonPrompt
 	lda EnablePressAButton
 	bne DoAnimateButtonTimer ; Not zero is enabled.
 	; Prompt is off.  Zero everything.
-	sta COLPF2_TABLE+23      ; Set background
-	sta COLPF1_TABLE+23      ; Set text.
+	sta PressAButtonColor      ; Set background
+	sta PressAButtonText      ; Set text.
 	sta PressAButtonFrames   ; This makes sure it will restart as soon as enabled.
 	beq DoCheesySoundService  
 
@@ -390,25 +390,25 @@ ToggleButtonPrompt
 	bne PromptFadeUp            ; 1 == up.
 
 	; Prompt Fading the background down.
-	lda COLPF2_TABLE+23         ; Get the current background color.
+	lda PressAButtonColor         ; Get the current background color.
 	AND #$0F                    ; Look at only the luminance.
 	bne RegularPromptFadeDown   ; Not 0 yet, do a normal job on it.
 
 SetNewPromptColor
 	lda RANDOM                  ; A random color and then prevent same 
-	eor COLPF2_TABLE+23         ; value by chewing on it with the original color.
+	eor PressAButtonColor         ; value by chewing on it with the original color.
 	and #$F0                    ; Mask out the luminance for Dark.
 	beq SetNewPromptColor       ; Do again if black/color 0 turned up
-	sta COLPF2_TABLE+23         ; Set background.
+	sta PressAButtonColor         ; Set background.
 	jsr TogglePressAButtonState ; Change fading mode to up (1)
 	bne SetTextAsInverse        ; Text Brightness inverse from the background
 
 RegularPromptFadeDown
-	dec COLPF2_TABLE+23         ; Subtract 1 from the color (which is the luminance)
+	dec PressAButtonColor         ; Subtract 1 from the color (which is the luminance)
 	jmp SetTextAsInverse        ; And reset the text to accordingly.
 
 PromptFadeUp
-	lda COLPF2_TABLE+23
+	lda PressAButtonColor
 	AND #$0F                    ; Look at only the luminance.
 	cmp #$0F                    ; Is it is at max luminance now?
 	bne RegularPromptFadeUp     ; No, do the usual fade.
@@ -417,13 +417,13 @@ PromptFadeUp
 	rts
 
 RegularPromptFadeUp
-	inc COLPF2_TABLE+23         ; Add 1 to the color (which is the luminance)
+	inc PressAButtonColor         ; Add 1 to the color (which is the luminance)
 	; and fall into setting the text luminance setup....
 
 SetTextAsInverse  ; Make the text luminance the opposite of the background.
-	lda COLPF2_TABLE+23         ; Background color...
+	lda PressAButtonColor         ; Background color...
 	eor #$0F                    ; Not (!) the background color's luminance.
-	sta COLPF1_TABLE+23         ; Use as the text's luminance.
+	sta PressAButtonText         ; Use as the text's luminance.
 	rts
 
 
@@ -475,26 +475,37 @@ ExitRunPrompt
 		ldy ThisDLI
 	.endm
 
+; Note that the Title screen uses the COLBK table for both COLBK and COLPF2.
+
 
 ; This is called on a blank line and the background should already be black.  
 ; This just makes sure everything is correct.
 ; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
 
-TITLE_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
-	jmp Score_DLI
+; Save 3 bytes.  Use Score_DLI directly in the DLI address table.  duh.
+
+; TITLE_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
+;	jmp Score_DLI
 
 
-TITLE_DLI_1 ; DLI sets COLBK and COLPF0 for title graphics.
-	jmp COLPF0_COLBK_DLI
+; Save 3 bytes.  Use COLPF0_COLBK_DLI directly in the DLI address table.  duh.
 
+; TITLE_DLI_1 ; DLI sets COLBK and COLPF0 for title graphics.
+;	jmp COLPF0_COLBK_DLI
 
-TITLE_DLI_2 ; DLI sets only COLPF0 for title graphics.
-	jmp COLPF0_COLBK_DLI
+; Save 3 bytes.  Use COLPF0_COLBK_DLI directly in the DLI address table.  duh.
+
+; TITLE_DLI_2 ; DLI sets only COLPF0 for title graphics.
+;	jmp COLPF0_COLBK_DLI
 
 
 TITLE_DLI_3 ; DLI Sets background to Black for blank area.
 	mStart_DLI
 
+;	lda RANDOM
+;	and #$F0
+;	sta COLBK
+	
 	jmp SetBlack_DLI
 
 
@@ -506,26 +517,37 @@ TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to
 	lda COLPF1_TABLE,y   ; Get text color (luminance)
 	sta COLPF1           ; write new text luminance.
 
-	lda COLPF2_TABLE,y   ; For Text Background.
+	lda COLBK_TABLE,y   ; For Text Background.
 	sta WSYNC
 	sta COLBK
 	sta COLPF2
 
+;	lda RANDOM
+;	and #$F0
+;	sta COLBK
+	
 	jmp Exit_DLI
 
 
 TITLE_DLI_5 ; DLI sets only COLPF1 text luminance from the table. (e.g. for fading)
+GAME_DLI_1
 	mStart_DLI
 
 	lda COLPF1_TABLE,y   ; Get text color (luminance)
 	sta WSYNC
 	sta COLPF1           ; write new text luminance.
 
+;	lda RANDOM
+;	and #$F0
+;	sta COLBK
+	
 	jmp Exit_DLI
 
 
-TITLE_DLI_SPC1 ; How to solve getting from point A to point B with only a low byte address update
-	jmp DLI_SPC1
+; Save 3 bytes.  Use DLI_SPC1 directly in the DLI address table.  duh.
+
+;TITLE_DLI_SPC1 ; How to solve getting from point A to point B with only a low byte address update
+;	jmp DLI_SPC1
 
 
 
@@ -536,12 +558,12 @@ TITLE_DLI_SPC1 ; How to solve getting from point A to point B with only a low by
 ; Since the game fades the screen COLPF1 must pull from the table.
 
 ; SCORES 1
-GAME_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
-	jmp Score_DLI
+; GAME_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
+;	jmp Score_DLI
 
 ; SCORES 2
-GAME_DLI_1 ; DLI 1 sets COLPF1 for text. (e.g. for fading)
-	jmp TITLE_DLI_5
+; GAME_DLI_1 ; DLI 1 sets COLPF1 for text. (e.g. for fading)
+;	jmp TITLE_DLI_5
 
 
 ; BEACH
@@ -591,9 +613,10 @@ GAME_DLI_3 ; DLI 3 sets COLPF0,1,2,3,BK and HSCROL for Boats.
 	jmp SetupAllColors_DLI
 
 
+; Save 3 bytes.  Use TITLE_DLI_3 directly in the DLI address table.  duh.
 
-GAME_DLI_4 ; Set background to black.
-	jmp TITLE_DLI_3 ; re-use what is done already....
+; GAME_DLI_4 ; Set background to black.
+;	jmp TITLE_DLI_3 ; re-use what is done already....
 
 	
 
@@ -626,7 +649,11 @@ COLPF0_COLBK_DLI
 	sta WSYNC
 	sta COLBK            ; Set background
 	pla
-	sta COLPF1           ; Set pixels.
+	sta COLPF0           ; Set pixels.
+
+;	lda RANDOM
+;	and #$F0
+;	sta COLBK
 
 	jmp Exit_DLI
 
@@ -648,16 +675,25 @@ SetBlack_DLI
 	sta COLBK            ; Write new border color.
 	sta COLPF2           ; Write new background color
 
+;	lda RANDOM
+;	and #$F0
+;	sta COLBK
+
 ; Exit DLI.
 ; JMP here is 3 byte instruction to execute 11 bytes of common DLI closure.
 Exit_DLI
 	lda (ThisDLIAddr), y ; update low byte for next chained DLI.
 	sta VDSLST
 
+;	lda RANDOM
+;	and #$F0
+;	sta COLBK
+	
 	inc ThisDLI          ; next DLI.
 
 	mRegRestoreAY
 
+DoNothing_DLI
 	rti
 
 
@@ -681,10 +717,14 @@ DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text.
 	lda CreditHSCROL      ; HScroll for credits.
 	sta HSCROL
 
+;	lda RANDOM
+;	and #$F0
+;	sta COLBK
+	
 	lda #<DLI_SPC2        ; Update the DLI vector for the last routine for credit color.
 	sta VDSLST
-	lda #>DLI_SPC2 
-	sta VDSLST+1
+;	lda #>DLI_SPC2 
+;	sta VDSLST+1
 
 	pla ; aka pla
 
@@ -706,6 +746,10 @@ DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
 	sta COLPF1           ; Write text luminance for credits.
 	sty COLBK            ; Write new border color.
 	sty COLPF2           ; Write new background color
+
+;	lda RANDOM
+;	and #$0F
+;	sta COLBK
 
 ; There is no need to link to another DLI, since we trust the VBI to reset to the beginning.
 

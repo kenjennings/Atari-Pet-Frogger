@@ -342,7 +342,7 @@ COLPF0Pointer   .word $0000
 ; Left scroll moves from LMS offset 0 to 39
 ; Right scroll moves from LMS offset 39 to 0
 CurrentRightOffset .byte $00
-CurrentLeftOffset  .byte $00
+CurrentLeftOffset  .byte $00 
 
 ; This is a 0, 1, toggle to remember the last state of
 ; something. For example, a blinking thing on screen.

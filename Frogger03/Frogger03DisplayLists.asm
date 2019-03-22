@@ -78,11 +78,11 @@ DISPLAY_OVER  = 4
 ; text for animating transitions.
 
 TITLE_DISPLAYLIST
-	.byte   DL_BLANK_8, DL_BLANK_8|DL_DLI          ; 16 blank scan lines. DLI 0/0 sets COLPF1, COLPF2 for score text. 
+	.byte   DL_BLANK_8, DL_BLANK_8|DL_DLI          ; 16 blank scan lines. DLI 0/0 Score_DLI sets COLPF1, COLPF2, COLBK for score text. 
 	.byte   DL_BLANK_4                             ; 4 blank lines. 
 
 	mDL_LMS DL_TEXT_2,SCORE_MEM1            ; (1-8) scores
-	.byte   DL_BLANK_8|DL_DLI               ; (9-16) An empty line. DLI 1/1 Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1.
+	.byte   DL_BLANK_8|DL_DLI               ; (9-16) An empty line. DLI 1/1 COLPF0_COLBK_DLI Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1.
 
 ; Replace the 3 lines of Text Mode 2 used in Version 00, 01, 02 
 ; with 6 lines of Map Mode 9.  
@@ -96,38 +96,38 @@ TITLE_DISPLAYLIST
 ; (Based on the way screen memory is declared, every line does
 ;  not require an LMS, so reducing 3 byte instructions to 1 byte.)
  
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1     ; (17-20) DLI 2/2 Set COLPF0 for Line 2
-	.byte   DL_MAP_9|DL_DLI                ; (21-24) DLI 2/3 Set COLPF0 for Line 3
-	.byte   DL_MAP_9|DL_DLI                ; (25-28) DLI 2/4 Set COLPF0 for Line 4
-	.byte   DL_MAP_9|DL_DLI                ; (29-32) DLI 2/5 Set COLPF0 for Line 5
-	.byte   DL_MAP_9|DL_DLI                ; (33-36) DLI 2/6 Set COLPF0 for Line 6
-	.byte   DL_MAP_9|DL_DLI                ; (37-40) DLI 2/7 Set COLPF0 for underlines
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1     ; (17-20) DLI 2/2 COLPF0_COLBK_DLI Set COLPF0 for Line 2
+	.byte   DL_MAP_9|DL_DLI                ; (21-24) DLI 2/3 COLPF0_COLBK_DLI Set COLPF0 for Line 3
+	.byte   DL_MAP_9|DL_DLI                ; (25-28) DLI 2/4 COLPF0_COLBK_DLI Set COLPF0 for Line 4
+	.byte   DL_MAP_9|DL_DLI                ; (29-32) DLI 2/5 COLPF0_COLBK_DLI Set COLPF0 for Line 5
+	.byte   DL_MAP_9|DL_DLI                ; (33-36) DLI 2/6 COLPF0_COLBK_DLI Set COLPF0 for Line 6
+	.byte   DL_MAP_9|DL_DLI                ; (37-40) DLI 2/7 COLPF0_COLBK_DLI Set COLPF0 for underlines
 
 	.byte   DL_BLANK_2                     ; (41-42) An empty line.      2
 	.byte   DL_MAP_9                       ; (43-46) Underlines        + 4
-	.byte   DL_BLANK_2|DL_DLI              ; (47-48) An empty line.    + 2 = 8, DLI 3/8 set BLACK for COLBK.
+	.byte   DL_BLANK_2|DL_DLI              ; (47-48) An empty line.    + 2 = 8, DLI 3/8 TITLE_DLI_3 set BLACK for COLBK.
 
-	.byte   DL_BLANK_8|DL_DLI              ; (49-56) DLI 4/9 set AQUA for COLBK and COLPF2, and set COLPF1
+	.byte   DL_BLANK_8|DL_DLI              ; (49-56) DLI 4/9 TITLE_DLI_4 set AQUA for COLBK and COLPF2, and set COLPF1
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1 ; (57-64) Basic instructions... DLI 5/10 TITLE_DLI_5 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (65-72) DLI 5/11 TITLE_DLI_5 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM3 ; (73-80) DLI 5/12 TITLE_DLI_5 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (81-88) DLI 5/13 TITLE_DLI_5 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (89-96) DLI 5/14 TITLE_DLI_5 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (97-104) DLI 5/15 TITLE_DLI_5 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM7 ; (105-112) DLI 5/16 TITLE_DLI_5 set COLPF1 text
 
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1 ; (57-64) Basic instructions... DLI 5/10 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (65-72) DLI 5/11 set COLPF1 text
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM3 ; (73-80) DLI 5/12 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (81-88) DLI 5/13 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (89-96) DLI 5/14 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (97-104) DLI 5/15 set COLPF1 text
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM7 ; (105-112) DLI 5/16 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (113-120) DLI 3/17 set BLACK for COLBK
+	.byte   DL_TEXT_2|DL_DLI               ; (113-120) DLI 3/17 TITLE_DLI_3 set BLACK for COLBK
 
-	.byte   DL_BLANK_8|DL_DLI              ; (121-128) An empty line.  DLI 4/18 set ORANGE2 for COLBK and COLPF2, set COLPF1 text
+	.byte   DL_BLANK_8|DL_DLI              ; (121-128) An empty line.  DLI 4/18 TITLE_DLI_4 set ORANGE2 for COLBK and COLPF2, set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (129-136) Scoring.  DLI 5/19 TITLE_DLI_5 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (137-144) DLI 5/20 TITLE_DLI_5 set COLPF1 text
 
-	.byte   DL_TEXT_2|DL_DLI               ; (129-136) Scoring.  DLI 5/19 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (137-144) DLI 5/20 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (145-152) DLI 3/21 set BLACK for COLBK
+	.byte   DL_TEXT_2|DL_DLI               ; (145-152) DLI 3/21 TITLE_DLI_3 set BLACK for COLBK
 
-	.byte   DL_BLANK_8|DL_DLI              ; (153-160) An empty line.  DLI 4/22 set PINK for COLBK and COLPF2, and set COLPF1 text
+	.byte   DL_BLANK_8|DL_DLI              ; (153-160) An empty line. DLI 4/22 TITLE_DLI_4 set PINK for COLBK and COLPF2, and set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (161-168) Game Controls. DLI 5/23 TITLE_DLI_5 set COLPF1 text
 
-	.byte   DL_TEXT_2|DL_DLI               ; (161-168) Game Controls.  DLI 5/23 set COLPF1 text
-	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM2 ; (169-176) DLI 3/24 set BLACK for COLBK
+	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM2 ; (169-176) DLI 3/24 TITLE_DLI_3 set BLACK for COLBK
 
 	.byte   DL_BLANK_8|DL_DLI              ; (177-184) An empty line.  DLI SPC1/25 sets COLBK, COLPF2, COLPF1 colors.
 

@@ -53,7 +53,7 @@ SetupTransitionToTitle
 	lda #DISPLAY_TITLE       ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
-	ldx #27
+	ldx #24
 TempLoopCopyToTitle
 	lda TITLE_BACK_COLORS,x
 	sta COLBK_TABLE,x
