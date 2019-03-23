@@ -693,7 +693,7 @@ Exit_DLI
 
 	mRegRestoreAY
 
-DoNothing_DLI
+DoNothing_DLI ; We can jump here to not do anything or to stop the DLI chain.
 	rti
 
 
@@ -723,8 +723,6 @@ DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text.
 	
 	lda #<DLI_SPC2        ; Update the DLI vector for the last routine for credit color.
 	sta VDSLST
-;	lda #>DLI_SPC2 
-;	sta VDSLST+1
 
 	pla ; aka pla
 
@@ -751,7 +749,8 @@ DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
 ;	and #$0F
 ;	sta COLBK
 
-; There is no need to link to another DLI, since we trust the VBI to reset to the beginning.
+	lda #<DoNothing_DLI  ; Stop DLI Chain.  VBI will restart the chain.
+	sta VDSLST
 
 	mRegRestoreAY
 

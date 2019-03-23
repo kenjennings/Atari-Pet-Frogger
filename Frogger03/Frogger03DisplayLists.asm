@@ -183,9 +183,10 @@ GAME_DISPLAYLIST
 	.byte DL_BLANK_4|DL_DLI                  ; 20 blank scan lines.  DLI 0/0 sets COLPF1, COLPF2 for score text.
 
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1      ; (1-8) Labels for crossings, scores, and lives. DLI 1/1 sets COLPF1 for text. (fading)
-	.byte DL_TEXT_2|DL_DLI; second line of scores ; (9-16) DLI 2/2 sets COLPF0,1,2,3,BK for Beach.
+	.byte DL_TEXT_2; second line of scores ; (9-16) 
 
-	.byte DL_BLANK_1                         ; (17) One scan line 
+	.byte DL_BLANK_2|DL_DLI ; DLI 2/2 sets COLPF0,1,2,3,BK for Beach.
+	.byte DL_BLANK_1                         ; (17) 3 scan lines
 PF_LMS0 = [* + 1]                            ; Plus 1 is the address of the display list LMS
 	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM0  ; (18-25) Beach. DLI 3/3 sets boats COLPF0,1,2,3,BK, HSCROLL.
 
@@ -261,7 +262,7 @@ PF_LMS17 = [* + 1]
 PF_LMS18 = [* + 1]
 	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM18 ; (180-187) Frog first Beach.  DLI 4/21 sets COLPF2/COLBK Black
 
-	.byte DL_BLANK_5|DL_DLI                  ; (188-192) Some scan lines. DLI 5/22 sets HSCROL for credit, calls SPC2
+	.byte DL_BLANK_3|DL_DLI                  ; (188-192) Some scan lines. DLI 5/22 sets HSCROL for credit, calls SPC2
 
 	mDL_JMP DL_SCROLLING_CREDIT              ; (193-200) End of display. No prompt for button. See Page 0 for the evil.
 

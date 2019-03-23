@@ -50,15 +50,15 @@ SetupTransitionToTitle
 ;	lda #<TITLE_MEM3         ; for scrolling
 ;	sta SCROLL_TITLE_LMS2    ; in the title.
 
-	lda #DISPLAY_TITLE       ; Tell VBI to change screens.
+	lda #DISPLAY_GAME       ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
 	ldx #24
 TempLoopCopyToTitle
-	lda TITLE_BACK_COLORS,x
+	lda GAME_BACK_COLORS,x
 	sta COLBK_TABLE,x
 	sta COLPF2_TABLE,x
-	lda TITLE_TEXT_COLORS,x
+	lda GAME_TEXT_COLORS,x
 	sta COLPF0_TABLE,x
 	sta COLPF1_TABLE,x
 	dex
