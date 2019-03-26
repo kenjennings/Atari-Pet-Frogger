@@ -362,7 +362,7 @@ SCORING_MEM3
 
 CONTROLS_MEM1 ; Game Controls
 ; 19 |Use joystick control to jump forward,   | INSTXT_3
-	.sb "Use joystick control to jump forward,   "
+	.sb "Use joystick controller to move         "
 
 
 
@@ -371,7 +371,7 @@ CONTROLS_MEM1 ; Game Controls
 
 CONTROLS_MEM2
 ; 20 |left, and right.                        | INSTXT_3
-	.sb "left, and right.                        "
+	.sb "forward, left, and right.               "
 
 
 ; FROG SAVED screen.
@@ -571,7 +571,7 @@ TITLE_BACK_COLORS
 
 TITLE_TEXT_COLORS ; Text luminance
 	.by $0C $0C                                     ; Scores, and blank line
-	.by $EC $DA $C8 $B6 $A4 $92 $C2                 ; title
+	.by COLOR_ORANGE_GREEN+$0C $DA $C8 $B6 $A4 $92 $C2                 ; title
 	.by $00                                         ; blank
 	.by $04 $06 $08 $0A                             ; Instructions
 	.by $0C $0A $08 $06                             ; Instructions

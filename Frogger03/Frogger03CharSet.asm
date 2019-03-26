@@ -17,29 +17,61 @@
 ; Custom Character Set for V02  . . .
 ;
 ; Internal Codes for redefined objects.
-; The usual text, A-z, a-z, 0-9, and necessary punctuation are
-; redefined in their natural positions, so every character does
-; not need to be declared.  There are special characters for the
-; text in the score line that are defined to display using the
-; Atari's artifact colors in ANTIC mode 2.
+; Several things going on here in one character set...
+; * The usual Mode 2 text:  
+;   A-z, a-z, 0-9, and necessary punctuation are used for the instructions 
+;   on the title screen.  These are redefined in their natural positions, 
+;   so every character does not need to be declared.  
+; * Mode 2 color artifacts: 
+;   Specific characters are defined for the text in the score lines.  
+; * Mode 4, 5 colors colors:
+; This provides the game's beach and rocks graphics, waves, animated boats 
+; and water effects. Five colors (including background.)
+; COLPF0 = blue (and varieties) for the water waves. 
+; COLPF1 = Browns Main boat body. 
+; COLPF2 = Boat Seats (collision color used for safe frog on boat.) 
+; COLPF3 = White (full screen) Wave effects, Missile colors for frog eyes. 
+; 
 ; --------------------------------------------------------------------------
 
-I_FROG    = $7F ; del
-I_SPLAT   = $0A ; *
+; I_FROG    = $7F ; del
+; I_SPLAT   = $0A ; *
 
-I_BOAT_LF = $03 ; #, boat, left, front
-I_BOAT_LB = $05 ; %, boat, left, back
-I_BOAT_RF = $04 ; $, boat, right, front
-I_BOAT_RB = $06 ; &, boat, right, back
-I_SEATS   = $0B ; +, boat seats
+I_BOAT_LF    = $03 ; #, boat, left, front,        animated (2 images)
+I_BOAT_LFW   = $?? ; ??, boat, left, front waves, animated (8 images)
+I_SEATS_L1   = $?? ; ??, boat, left, seats 1
+I_SEATS_L2   = $?? ; ??, boat, left, seats 2
+I_SEATS_L3   = $?? ; ??, boat, left, seats 3
+I_BOAT_EMPTY = $0B ; +, boat, common filler before engine. 
+I_BOAT_LB    = $05 ; %, boat, left, back (engine)
+I_BOAT_LBW   = $?? ; ??, boat, left, back waves,  animated (8 images)
+
+
+I_BOAT_RF    = $04 ; $, boat, right, front,        animated (2 images)
+I_BOAT_RFW   = $?? ; ??, boat, right, front waves, animated (8 images)
+I_SEATS_R1   = $?? ; ??, boat, right, seats 1
+I_SEATS_R2   = $?? ; ??, boat, right, seats 2
+I_SEATS_R3   = $?? ; ??, boat, right, seats 3
+I_BOAT_RB    = $06 ; &, boat, right, back (engine)
+I_BOAT_RBW   = $?? ; ??, boat, right, back waves,   animated (8 images)
+
+I_SAND1   = $??
+I_SAND2   = $??
+I_SAND3   = $??
+I_SAND4   = $??
+I_SAND5   = $??
+I_SAND6   = $??
+I_SAND7   = $?? ;
+I_SAND8   = $?? ;
+
 
 I_BEACH1  = $02 ; ", beach rocks
 I_BEACH2  = $0F ; /, beach rocks
 I_BEACH3  = $1B ; ;, beach rocks
 I_SPACE   = $00 ; space, also safe beach spot.
 
-I_WAVES_L = $1C ; <, left waves
-I_WAVES_R = $1E ; >, right waves
+I_WAVES_L = $1C ; <, left half of waves
+I_WAVES_R = $1E ; >, right half of waves
 
 ; Special artifact characters for Score:, :Hi, Frogs:, Saved Frogs:
 I_BS = $50 ; "S", ctrl-P
@@ -63,6 +95,8 @@ I_SD = $4A ; "d", ctrl-J
 
 	.align $0400 ; Start at ANTIC's 1K boundary for character sets
 
+; For
+ 
 CHARACTER_SET
 ; Page 0xE0.  Chars 0 to 31 -- Symbols, numbers
 ; Char $00: SPACE
@@ -1363,4 +1397,24 @@ CHARACTER_SET
 ; $3C: . . # # # # . .
 ; $66: . # # . . # # .
 ; $E7: # # # . . # # #
+
+
+; Here we reached the end of the 1K for the Character set, so the rest of this is a new page...
+
+LEFT_BOAT_FRONT_ANIM ; 2 images, each used 4 times with one frame from LEFT_BOAT_WATER_ANIM
+
+
+LEFT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat.
+
+
+LEFT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (frame 2 == frame 6)
+
+
+RIGHT_BOAT_FRONT_ANIM ; 2 images, each used 4 times with one frame from LEFT_BOAT_WATER_ANIM
+
+
+RIGHT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat.
+
+
+RIGHT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (frame 2 == frame 6)
 
