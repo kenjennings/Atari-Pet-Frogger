@@ -223,7 +223,7 @@
 ; Write the splat frog character into screen memeory.
 ; --------------------------------------------------------------------------
 SetSplatteredOnScreen
-	lda #I_SPLAT
+;	lda #I_SPLAT
 	bne UpdateFrogInScreenMemory
 
 ; ==========================================================================
@@ -232,7 +232,7 @@ SetSplatteredOnScreen
 ; Write the Frog character into screen memeory.
 ; --------------------------------------------------------------------------
 SetFrogOnScreen
-	lda #I_FROG
+;	lda #I_FROG
 	bne UpdateFrogInScreenMemory
 
 ; ==========================================================================

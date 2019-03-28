@@ -124,11 +124,11 @@ SetupGame
 	sty FrogRealColumn1     ; On a Beach row the physical locations are the same.
 	sty FrogRealColumn2     ; If on a scroll row then they are different.
 
-	lda #I_FROG             ; We're using $7F as the frog shape.
-	sta (FrogLocation),y    ; PLAYFIELD_MEM18 (beach) + $13/19 (dec)
+;	lda #I_FROG             ; We're using $7F as the frog shape.
+;	sta (FrogLocation),y    ; PLAYFIELD_MEM18 (beach) + $13/19 (dec)
 
-	lda #I_SPACE            ; the character at the default position.
-	sta LastCharacter       ; Preset the character under the frog.
+;	lda #I_SPACE            ; the character at the default position.
+;	sta LastCharacter       ; Preset the character under the frog.
 
 	jsr PlayWaterFX         ; Start water noises.  Now.
 

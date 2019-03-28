@@ -34,44 +34,46 @@
 ; 
 ; --------------------------------------------------------------------------
 
-; I_FROG    = $7F ; del
-; I_SPLAT   = $0A ; *
-
-I_BOAT_LF    = $03 ; #, boat, left, front,        animated (2 images)
-I_BOAT_LFW   = $?? ; ??, boat, left, front waves, animated (8 images)
-I_SEATS_L1   = $?? ; ??, boat, left, seats 1
-I_SEATS_L2   = $?? ; ??, boat, left, seats 2
-I_SEATS_L3   = $?? ; ??, boat, left, seats 3
-I_BOAT_EMPTY = $0B ; +, boat, common filler before engine. 
-I_BOAT_LB    = $05 ; %, boat, left, back (engine)
-I_BOAT_LBW   = $?? ; ??, boat, left, back waves,  animated (8 images)
 
 
-I_BOAT_RF    = $04 ; $, boat, right, front,        animated (2 images)
-I_BOAT_RFW   = $?? ; ??, boat, right, front waves, animated (8 images)
-I_SEATS_R1   = $?? ; ??, boat, right, seats 1
-I_SEATS_R2   = $?? ; ??, boat, right, seats 2
-I_SEATS_R3   = $?? ; ??, boat, right, seats 3
-I_BOAT_RB    = $06 ; &, boat, right, back (engine)
-I_BOAT_RBW   = $?? ; ??, boat, right, back waves,   animated (8 images)
 
-I_SAND1   = $??
-I_SAND2   = $??
-I_SAND3   = $??
-I_SAND4   = $??
-I_SAND5   = $??
-I_SAND6   = $??
-I_SAND7   = $?? ;
-I_SAND8   = $?? ;
+I_BOAT_LF    = $02 ; ", boat, left, front,       animated (2 images)
+I_BOAT_LFW   = $03 ; #, boat, left, front waves, animated (8 images)
+I_SEATS_L1   = $04 ; $, boat, left, seats 1
+I_SEATS_L2   = $05 ; %, boat, left, seats 2
+I_SEATS_L3   = $06 ; &, boat, left, seats 3
+I_BOAT_EMPTY = $0A ; *, boat, common filler before engine. 
+I_BOAT_LB    = $0B ; +, boat, left, back (engine)
+I_BOAT_LBW   = $0F ; /, boat, left, back waves,  animated (8 images)
 
+I_BOAT_RBW   = $1b ; ;, boat, right, back waves,   animated (8 images)
+I_BOAT_RB    = $1c ; <, boat, right, back (engine)
+;I_BOAT_EMPTY
+I_SEATS_R3   = $1e ; >, boat, right, seats 3
+I_SEATS_R2   = $46 ; ctrl-F, boat, right, seats 2
+I_SEATS_R1   = $47 ; ctrl-G, boat, right, seats 1
+I_BOAT_RFW   = $49 ; ctrl-I, boat, right, front waves, animated (8 images)
+I_BOAT_RF    = $4b ; ctrl-K;, boat, right, front,       animated (2 images)
 
-I_BEACH1  = $02 ; ", beach rocks
-I_BEACH2  = $0F ; /, beach rocks
-I_BEACH3  = $1B ; ;, beach rocks
-I_SPACE   = $00 ; space, also safe beach spot.
+I_BEACH1     = $4c ; ctrl-L, beach part 1
+I_BEACH2     = $4d ; ctrl-M, beach part 2
+I_BEACH3     = $4e ; ctrl-N, beach part 3
+I_BEACH4     = $4f ; ctrl-O, beach part 4
+I_BEACH5     = $51 ; ctrl-Q, beach part 5
+I_BEACH6     = $52 ; ctrl-R, beach part 6 (and alternate beack rocks)
+I_BEACH7     = $53 ; ctrl-S, beach part 7 (and alternate beach rocks)
+I_BEACH8     = $54 ; ctrl-T, beach part 8
 
-I_WAVES_L = $1C ; <, left half of waves
-I_WAVES_R = $1E ; >, right half of waves
+I_ROCKS1L    = $55 ; ctrl-U, alternate rocks1 (left)  I_BEACH6
+I_ROCKS1R    = $56 ; ctrl-V, alternate rocks1 (right) I_BEACH7
+I_ROCKS2     = $57 ; ctrl-W, alternate rocks2 (right) I_BEACH7
+I_ROCKS3     = $58 ; ctrl-X, alternate rocks3 (right) I_BEACH7
+I_ROCKS4     = $59 ; ctrl-Y, alternate rocks4 (left)  I_BEACH6
+
+I_WATER1     = $5A ; ctrl-Z, Water
+I_WATER2     = $5B ; escape, water
+I_WATER3     = $5C ; up,     water
+I_WATER4     = $5D ; down,   water
 
 ; Special artifact characters for Score:, :Hi, Frogs:, Saved Frogs:
 I_BS = $50 ; "S", ctrl-P
@@ -92,10 +94,10 @@ I_BA = $45 ; "a", ctrl-E
 I_SV = $48 ; "v", ctrl-H
 I_SD = $4A ; "d", ctrl-J
 
+I_FROG = $7F ; A Frog for frog counter. , TAB
 
 	.align $0400 ; Start at ANTIC's 1K boundary for character sets
 
-; For
  
 CHARACTER_SET
 ; Page 0xE0.  Chars 0 to 31 -- Symbols, numbers
@@ -1401,20 +1403,20 @@ CHARACTER_SET
 
 ; Here we reached the end of the 1K for the Character set, so the rest of this is a new page...
 
-LEFT_BOAT_FRONT_ANIM ; 2 images, each used 4 times with one frame from LEFT_BOAT_WATER_ANIM
+LEFT_BOAT_FRONT_ANIM ; 2 images, each used 4 times with one frame from LEFT_BOAT_WATER_ANIM (16 bytes)
 
 
-LEFT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat.
+LEFT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat. (64 bytes)
 
 
-LEFT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (frame 2 == frame 6)
+LEFT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (frame 2 == frame 6) (56 bytes)
 
 
-RIGHT_BOAT_FRONT_ANIM ; 2 images, each used 4 times with one frame from LEFT_BOAT_WATER_ANIM
+RIGHT_BOAT_FRONT_ANIM ; 2 images, each used 4 times with one frame from RIGHT_BOAT_WATER_ANIM (16 bytes)
 
 
-RIGHT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat.
+RIGHT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat. (64 bytes)
 
 
-RIGHT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (frame 2 == frame 6)
+RIGHT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (frame 2 == frame 6) (56 bytes)
 

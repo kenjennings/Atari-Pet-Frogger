@@ -387,16 +387,16 @@ SaveNewFrogLocation
 	jsr WhereIsThePhysicalFrog ; Update Frog Real Positions and the LastCharacter found there.
 
 ; Will the Pet Frog land on the Beach or a seat in the boat?
-	cmp #I_SPACE             ; = $00 ; space, also safe beach spot.
-	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
-	cmp #I_BEACH1            ; = $02 ;  beach rocks
-	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
-	cmp #I_BEACH2            ; = $0F ;  beach rocks
-	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
-	cmp #I_BEACH3            ; = $1B ;  beach rocks
-	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
-	cmp #I_SEATS             ; I_SEATS   = $0B ; +, boat seats
-	beq ReplaceFrogOnScreen  ; Yes.  Safe!  Draw the frog.
+;	cmp #I_SPACE             ; = $00 ; space, also safe beach spot.
+;	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
+;	cmp #I_BEACH1            ; = $02 ;  beach rocks
+;	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
+;	cmp #I_BEACH2            ; = $0F ;  beach rocks
+;	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
+;	cmp #I_BEACH3            ; = $1B ;  beach rocks
+;	beq ReplaceFrogOnScreen  ; The beach is safe. Draw the frog.
+;	cmp #I_SEATS             ; I_SEATS   = $0B ; +, boat seats
+;	beq ReplaceFrogOnScreen  ; Yes.  Safe!  Draw the frog.
 
 ; Safe locations have been accounted.
 ; Wherever the Frog will land now, it is Baaaaad.

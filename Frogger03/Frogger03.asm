@@ -254,13 +254,17 @@
 ;   for NTSC and PAL. (IMPLEMENTED, V01)  (V02 formalized this to a real
 ;   Vertical Blank Interrupt service routine.)
 ; * Joystick controls.  I hate the keyboard.  The joystick is free and
-;   easy on the Atari.
+;   easy on the Atari. (IMPLEMENTED, V02) 
 ; * Sound..  Some simple splats, plops, beeps, water sloshings.
+;    (IMPLEMENTE,D V02) 
 ; * Custom character set that looks more like beach, boats, water, and frog.
+;    (IMPLEMENTED, V02) 
 ; * Horizontal Fine scrolling text allows smoother movements for the boats.
+;    (IMPLEMENTED, V03) 
 ; * Player Missile Frog. This would make frog placement v the boat
 ;   positions easier when horizontal scrolling is in effect, not to mention
 ;   extra color for the frog.
+;    (IMPLEMENTED, V03) 
 ; * Stir, rinse, repeat -- more extreme of all of the above: more color,
 ;   more DLI, more custom character sets, isometric perspective.
 ;   Game additions -- pursuing enemies, alternate boat shapes, lily pads,

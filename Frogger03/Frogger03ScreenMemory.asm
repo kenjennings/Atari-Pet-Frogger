@@ -340,13 +340,11 @@ EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
 
 INSTRUCT_MEM7
 ; 12 |rivers like this:  <QQQQ]]  Land only on| INSTXT_1
-	.sb "rivers like this:  "
-	.by I_BOAT_LF I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_LB I_BOAT_LB
-	.sb "  Land only on"
+	.sb "rivers. Land in the middle of the boats."
 
 INSTRUCT_MEM8
 ; 13 |the seats in the boats.                 | INSTXT_1
-	.sb "the seats in the boats.                 "
+	.sb "Do not fall off or jump in the river.   "
 
 SCORING_MEM1 ; Scoring
 ; 15 |Scoring:                                | INSTXT_2
