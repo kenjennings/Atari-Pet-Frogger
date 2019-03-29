@@ -10,7 +10,7 @@
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019
-; Version 03, March 2019
+; Version 03, April 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -93,8 +93,8 @@
 ; * Implement the frog as Player/Missile graphics.
 ; * Replace the chunky text "graphics" for Title, Saved, Game Over, and 
 ;   the Dead Frog with bitmaps for ANTIC map mode 9.  This is effectively 
-;   the same pixel size, and uses half the memory to cover the exact 
-;   same screen real estate.
+;   the same pixel size, uses half the memory to cover the exact same
+;   same screen real estate, and allows more color flexibility than text.
 ; * Eliminate "blank" text lines where there is nothing displayed and use
 ;   actual blank line instructions in the Display List.   Additionally, 
 ;   the blank lines for the prize displays (Saved, Dead Frog, Game Over) 
@@ -489,11 +489,11 @@ SAVEY = $FF
 
 	; Label and Credit
 	.by "** Thanks to the Word (John 1:1), Creator of heaven, and earth, and "
-	.by "semiconductor chemistry and physics which makes all this fun possible. ** "
-	.by "Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. ** "
-	.by "Atari port by Ken Jennings, March 2019. Version 03. "
-	.by "Added color with DLIs, joystick interface, "
-	.by "display managed by VBI, and, finally, some sound **"
+	.by "semiconductor chemistry and physics which makes all this fun possible. "
+	.by "** Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. "
+	.by "** Atari port by Ken Jennings, April 2019, Version 03. "
+	.by "** Improved graphics for the playfield and frog. "
+	.by "Customized Display Lists and DLIs. More logic moved to VBI. **"
 
 
 ; ==========================================================================

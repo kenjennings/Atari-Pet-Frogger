@@ -10,6 +10,7 @@
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019
+; Version 03, April 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -25,17 +26,21 @@
 ; * Mode 2 color artifacts: 
 ;   Specific characters are defined for the text in the score lines.  
 ; * Mode 4, 5 colors colors:
-; This provides the game's beach and rocks graphics, waves, animated boats 
-; and water effects. Five colors (including background.)
+;   This provides the game's beach and rocks graphics, waves, animated
+;   boats and water effects. Five colors (including background.)
+; Boat Lines:
 ; COLPF0 = blue (and varieties) for the water waves. 
 ; COLPF1 = Browns Main boat body. 
 ; COLPF2 = Boat Seats (collision color used for safe frog on boat.) 
-; COLPF3 = White (full screen) Wave effects, Missile colors for frog eyes. 
-; 
+; COLPF3 = White (full screen) Wave effects, Missile colors for frog eyes.
+; COLBK  = Water waves (from above line)
+; Beach Lines:
+; COLPF0 = Water color (from line above)
+; COLPF1 = Rock 1 main color
+; COLPF2 = Sand background (darker) 
+; COLPF3 = White (rock hilight) 
+; COLBK  = Sand color
 ; --------------------------------------------------------------------------
-
-
-
 
 I_BOAT_LF    = $02 ; ", boat, left, front,       animated (2 images)
 I_BOAT_LFW   = $03 ; #, boat, left, front waves, animated (8 images)
@@ -94,7 +99,11 @@ I_BA = $45 ; "a", ctrl-E
 I_SV = $48 ; "v", ctrl-H
 I_SD = $4A ; "d", ctrl-J
 
-I_FROG = $7F ; A Frog for frog counter. , TAB
+; Frog shapes alternate in the Frog counter to make their 8-pixel wide
+; shapes more recognizable.
+I_FROG1 = $7E ; DELETE, A Frog for frog counter. 
+I_FROG2 = $7F ; TAB, A Frog for frog counter. 
+
 
 	.align $0400 ; Start at ANTIC's 1K boundary for character sets
 
@@ -1380,25 +1389,36 @@ CHARACTER_SET
 ; $06: . . . . . # # .
 ; $00: . . . . . . . .
 ; Char $7E: DELETE
-	.BYTE $08,$18,$38,$78,$38,$18,$08,$00
-; $08: . . . . # . . .
-; $18: . . . # # . . .
-; $38: . . # # # . . .
-; $78: . # # # # . . .
-; $38: . . # # # . . .
-; $18: . . . # # . . .
-; $08: . . . . # . . .
+	.BYTE $00,$00,$00,$66,$BD,$FF,$44,$3C
 ; $00: . . . . . . . .
-; Char $7F: TAB
-	.BYTE $E7,$BD,$FF,$7E,$18,$3C,$66,$E7
-; $E7: # # # . . # # #
+; $00: . . . . . . . .
+; $00: . . . . . . . . 
+; $66: . # # . . # # .
 ; $BD: # . # # # # . #
 ; $FF: # # # # # # # #
-; $7E: . # # # # # # .
-; $18: . . . # # . . .
+; $44: . # # . . # # .
 ; $3C: . . # # # # . .
+; Char $7F: TAB
+	.BYTE $66,$BD,$FF,$44,$3C,$00,$00,$00
 ; $66: . # # . . # # .
-; $E7: # # # . . # # #
+; $BD: # . # # # # . #
+; $FF: # # # # # # # #
+; $44: . # # . . # # .
+; $3C: . . # # # # . .
+; $00: . . . . . . . .
+; $00: . . . . . . . .
+; $00: . . . . . . . . 
+; Old Frog
+;	.BYTE $E7,$BD,$FF,$7E,$18,$3C,$66,$E7
+;; $E7: # # # . . # # #
+;; $BD: # . # # # # . #
+;; $FF: # # # # # # # #
+;; $7E: . # # # # # # .
+;; $18: . . . # # . . .
+;; $3C: . . # # # # . .
+;; $66: . # # . . # # .
+;; $E7: # # # . . # # #
+
 
 
 ; Here we reached the end of the 1K for the Character set, so the rest of this is a new page...

@@ -10,7 +10,7 @@
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019
-; Version 03, March 2019
+; Version 03, April 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -174,8 +174,8 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 ; 5  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        | ; Boats Right
 	.macro mBoatGoRight
-		.by I_BOAT_RB I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF           ;   8
-		.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R ; + 8 = 16
+		.by I_BOAT_RBW I_BOAT_RB I_BOAT_EMPTY I_SEATS_R3 I_SEATS_R2 I_SEATS_R1 I_BOAT_RFW I_BOAT_RF ;   8
+		.by I_WATER1 I_WATER2 I_WATER3 I_WATER4 I_WATER1 I_WATER2 I_WATER3 I_WATER4                 ; + 8 = 16
 	.endm
 
 	.macro mLineOfRightBoats
@@ -187,8 +187,8 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 ; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left
 	.macro mBoatGoLeft
-		.by I_BOAT_RB I_BOAT_RB I_SEATS I_SEATS I_SEATS I_SEATS I_SEATS I_BOAT_RF           ;   8
-		.by I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R I_WAVES_L I_WAVES_R ; + 8 = 16
+		.by I_BOAT_LF I_BOAT_LFW I_SEATS_L1 I_SEATS_L2 I_SEATS I_SEATS_L3 I_BOAT_EMPTY I_BOAT_LB I_BOAT_LBW ;   8
+		.by I_WATER1 I_WATER2 I_WATER3 I_WATER4 I_WATER1 I_WATER2 I_WATER3 I_WATER4                         ; + 8 = 16
 	.endm
 
 	.macro mLineOfLeftBoats
@@ -328,7 +328,7 @@ BLANK_MEM ; Blank text also used for blanks in other places.
 
 	.sb "Original program for CBM PET 4032 written by John C. Dale.    " ; 62
 
-	.sb "Atari 8-bit computer port by Ken Jennings, V03, March 2019" ; 61
+	.sb "Atari 8-bit computer port by Ken Jennings, V03, April 2019" ; 61
 
 END_OF_CREDITS
 EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
@@ -431,80 +431,35 @@ GAMEOVER_MEM ; Graphics data, Game Over.  (34) + 6 spaces.
 
 	.align $0100 ; Realign to next page.
 
-
+	
+; Defining one line of 80 characters of Beach decorations.
+; Each of the beach lines shows a 40 character subset of the larger line.
+; This eliminates 5 lines worth of data.
+ 
 PLAYFIELD_MEM0 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
-	.sb "         "
-	.by I_BEACH1
-	.sb "      "
-	.by I_BEACH2
-	.sb "              "
-	.by I_BEACH3
-	.sb "        " ; "Beach"
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_BEACH7  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_ROCKS1L I_ROCKS1L I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS2  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS3  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS4  I_BEACH8
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_BEACH7  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS3  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_ROCKS1L I_ROCKS1L I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_BEACH7  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS4  I_BEACH8 ; "Beach"
 
-PLAYFIELD_MEM3 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
-; 6  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
-	.sb "      "
-	.by I_BEACH3
-	.sb "    "
-	.by I_BEACH1
-	.sb "                "
-	.by I_BEACH3
-	.sb "           " ; "Beach"
+PLAYFIELD_MEM3 = PLAYFIELD_MEM0+40 ; Default display of "Beach", for lack of any other description.
 
-PLAYFIELD_MEM6 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
-; 9  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
-	.sb "     "
-	.by I_BEACH2
-	.sb "       "
-	.by I_BEACH3
-	.sb "              "
-	.by I_BEACH1
-	.sb "           " ; "Beach"
+PLAYFIELD_MEM6 = PLAYFIELD_MEM0+20 ; Default display of "Beach", for lack of any other description.
 
-PLAYFIELD_MEM9 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
-; 12  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
-	.sb "          "
-	.by I_BEACH1
-	.sb "         "
-	.by I_BEACH3
-	.sb "           "
-	.by I_BEACH2
-	.sb "       " ; "Beach"
+PLAYFIELD_MEM9 = PLAYFIELD_MEM0+7 ; Default display of "Beach", for lack of any other description.
 
-PLAYFIELD_MEM12 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
-; 15  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
-	.sb "       "
-	.by I_BEACH2
-	.sb "      "
-	.by I_BEACH2
-	.sb "              "
-	.by I_BEACH1
-	.sb "          " ; "Beach"
+PLAYFIELD_MEM12 = PLAYFIELD_MEM0+33 ; Default display of "Beach", for lack of any other description.
 
-PLAYFIELD_MEM15 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
-; 18  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
-	.sb "           "
-	.by I_BEACH1
-	.sb "         "
-	.by I_BEACH2
-	.sb "          "
-	.by I_BEACH3
-	.sb "       " ; "Beach"
+PLAYFIELD_MEM15 = PLAYFIELD_MEM0+14 ; Default display of "Beach", for lack of any other description.
 
-
-	.align $0100 ; Realign to next page.
-
-
-PLAYFIELD_MEM18 ; One last line of Beach
-; 21  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT2
-	.sb "        "
-	.by I_BEACH3
-	.sb "        "
-	.by I_BEACH1
-	.sb "                 "
-	.by I_BEACH1
-	.sb "    " ; "Beach"
+PLAYFIELD_MEM18 = PLAYFIELD_MEM0+23 ; One last line of Beach
 
 ; Two lines for Scores, lives, and frogs saved.
 
@@ -865,60 +820,10 @@ COLOR_TEXT_HI_TABLE
 	.byte >DEAD_TEXT_COLORS
 	.byte >OVER_TEXT_COLORS
 
-; ==========================================================================
-; A list of the game playfield screen memory locations.  Note this is
-; only the part of the game screen that presents the beaches and boats.
-; It does not include anything else before or after the playfield.
-; --------------------------------------------------------------------------
-; Not needed due to Frog being done as Player/Missile.
 
-; PLAYFIELD_MEM_LO_TABLE
-	; .byte <PLAYFIELD_MEM0
-	; .byte <PLAYFIELD_MEM1
-	; .byte <PLAYFIELD_MEM2
-	; .byte <PLAYFIELD_MEM3
-	; .byte <PLAYFIELD_MEM4
-	; .byte <PLAYFIELD_MEM5
-	; .byte <PLAYFIELD_MEM6
-	; .byte <PLAYFIELD_MEM7
-	; .byte <PLAYFIELD_MEM8
-	; .byte <PLAYFIELD_MEM9
-	; .byte <PLAYFIELD_MEM10
-	; .byte <PLAYFIELD_MEM11
-	; .byte <PLAYFIELD_MEM12
-	; .byte <PLAYFIELD_MEM13
-	; .byte <PLAYFIELD_MEM14
-	; .byte <PLAYFIELD_MEM15
-	; .byte <PLAYFIELD_MEM16
-	; .byte <PLAYFIELD_MEM17
-	; .byte <PLAYFIELD_MEM18
-
-; PLAYFIELD_MEM_HI_TABLE
-	; .byte >PLAYFIELD_MEM0
-	; .byte >PLAYFIELD_MEM1
-	; .byte >PLAYFIELD_MEM2
-	; .byte >PLAYFIELD_MEM3
-	; .byte >PLAYFIELD_MEM4
-	; .byte >PLAYFIELD_MEM5
-	; .byte >PLAYFIELD_MEM6
-	; .byte >PLAYFIELD_MEM7
-	; .byte >PLAYFIELD_MEM8
-	; .byte >PLAYFIELD_MEM9
-	; .byte >PLAYFIELD_MEM10
-	; .byte >PLAYFIELD_MEM11
-	; .byte >PLAYFIELD_MEM12
-	; .byte >PLAYFIELD_MEM13
-	; .byte >PLAYFIELD_MEM14
-	; .byte >PLAYFIELD_MEM15
-	; .byte >PLAYFIELD_MEM16
-	; .byte >PLAYFIELD_MEM17
-	; .byte >PLAYFIELD_MEM18
-
-	
 ; ==========================================================================
 ; PLAYER/MISSILE GRAPHICS
-; only the part of the game screen that presents the beaches and boats.
-; It does not include anything else before or after the playfield.
+;
 ; --------------------------------------------------------------------------
 
 	.align $0800 ; single line P/M needs 2K boundary.
@@ -930,4 +835,27 @@ PLAYERADR0 = PMADR+$400
 PLAYERADR1 = PMADR+$500
 PLAYERADR2 = PMADR+$600
 PLAYERADR3 = PMADR+$700
+
+; Players 0, 1 Are the greens of the Frog.
+; Po                 P1
+; . 0 0 . . 0 0 .    . 1 1 . . 1 1 .
+; 0 . . . 0 . . .    . . . 1 . . . 1
+; 0 . . . 0 . . .    . . . 1 . . . 1
+; 0 . . . 0 . . .    . . . 1 . . . 1
+; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1
+; . 0 . 0 0 0 . .    . . 1 1 1 . 1 .
+; . . 0 . . . . .    . . . . . 1 . .
+; . . . 0 0 . . .    . . . 1 1 . . .
+
+; Player 2 is the colored eye irises.
+; 2 . . . 2 . . . 
+
+; Player 3 is the mouth.
+; 3 . . . 3 . . .
+; . 3 3 3 . . . .
+
+; Player 5 (the Missiles) is COLPF3, White.
+; 1 1 . . . . . .  ; quad width
+; 1 1 . . . . . .  ; quad width
+; 1 1 . . . . . .  ; quad width
 

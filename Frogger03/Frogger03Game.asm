@@ -10,6 +10,7 @@
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019
+; Version 03, April 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -52,7 +53,7 @@ GAMESTART
 	lda #>Score_DLI; TITLE_DLI
 	sta VDSLST+1
 	
-	lda #[NMI_DLI|NMI_VBI]     ; Turn On DLI
+	lda #[NMI_DLI|NMI_VBI]     ; Turn On DLIs
 	sta NMIEN
 
 	ldy #<MyImmediateVBI       ; Add the VBI to the system (Display List dictatorship)

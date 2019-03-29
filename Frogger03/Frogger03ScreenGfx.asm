@@ -10,6 +10,7 @@
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019
+; Version 03, April 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -481,7 +482,7 @@ RemoveFroggies
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; --------------------------------------------------------------------------
 PrintFrogsAndLives
-	lda #I_FROG         ; On Atari we're using del/$7f as the frog shape.
+
 	ldx FrogsCrossed    ; Number of times successfully crossed the rivers.
 	beq WriteLives      ; then nothing to display. Skip to do lives.
 
@@ -489,8 +490,13 @@ PrintFrogsAndLives
 	bcc SavedFroggies
 	ldx #17
 
-SavedFroggies
-	sta SCREEN_SAVED,x  ; Write to screen. (second line, 24th position)
+SavedFroggies ; Write an alternating pattern of Frog1, Frog2 characters.
+	lda #I_FROG1        ; On Atari we're using tab/$7f as the frog shape.
+	sta SCREEN_SAVED,x  ; Write to screen. 
+	dex                 ; Decrement number of frogs.
+	beq WriteLives
+	lda #I_FROG2        ; On Atari we're using del/$7e as the frog shape.
+	sta SCREEN_SAVED,x  ; Write to screen. 
 	dex                 ; Decrement number of frogs.
 	bne SavedFroggies   ; then go back and display the next frog counter.
 
@@ -589,6 +595,7 @@ LoopCopyColors
 	
 ;==============================================================================
 ;												PmgInit  A  X  Y
+; One-time setup tasks to do Player/Missile graphics.
 ;==============================================================================
 
 libPmgInit
@@ -599,7 +606,7 @@ libPmgInit
 	; clear all bitmap images
 ;	jsr libPmgClearBitmaps
 
-	; Tell ANTIC where P/M memory occurs for DMA to GTIA
+	; Tell ANTIC where P/M memory is located for DMA to GTIA
 	lda #>PMADR
 	sta PMBASE
 
@@ -607,12 +614,43 @@ libPmgInit
 	lda #ENABLE_PLAYERS|ENABLE_MISSILES
 	sta GRACTL
 
-	; update DMACTL, too
-	
-	rts
+	; Set all the ANTIC screen controls and DMA options.
+	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_NORMAL
+	sta SDMCTL
 
-	
-	
-	
-	
-	
+	; Tell GTIA the various Player/Missile options and color controls
+	; Turn on 5th Player (Missiles COLPF3), Multicolor players, and 
+	; priority of 5th Player below regular Players. 
+	lda #FIFTH_PLAYER|MULTICOLOR_PM|%0001 
+	sta GPRIOR
+
+	; Players 0, 1 are the greens of the Frog.
+	lda #COLOR_GREEN+$4
+	sta PCOLOR0
+	lda #COLOR_GREEN+$8
+	sta PCOLOR1
+
+	; Player 2 is the colored eye irises.
+	lda #COLOR_PURPLE_BLUE+$6
+	sta PCOLOR2
+
+	; Player 3 is the mouth.
+	lda #COLOR_PINK+$8
+	sta PCOLOR3
+
+	; Player 5 (the Missiles) is COLPF3, White.
+	lda #COLOR_BLACK+$C
+	sta COLOR3         ; OS shadow for color
+
+	; Set Player/Missile sizes
+	lda #PM_SIZE_NORMAL
+	sta SIZEP0
+	sta SIZEP1
+	sta SIZEP2
+	sta SIZEP3
+
+	lda #PM_SIZE_QUAD ; Eyeballs are Missile/P5 showing through the holes in head.
+	sta SIZEM
+
+	rts 
+
