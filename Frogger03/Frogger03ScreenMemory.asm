@@ -836,26 +836,65 @@ PLAYERADR1 = PMADR+$500
 PLAYERADR2 = PMADR+$600
 PLAYERADR3 = PMADR+$700
 
+; The first three pages of P/M memory are free, so plenty of space
+; to lay out the simple and mostly un-animated frog stuff.
+
 ; Players 0, 1 Are the greens of the Frog.
-; Po                 P1
+; P0                 P1
 ; . 0 0 . . 0 0 .    . 1 1 . . 1 1 .
 ; 0 . . . 0 . . .    . . . 1 . . . 1
 ; 0 . . . 0 . . .    . . . 1 . . . 1
 ; 0 . . . 0 . . .    . . . 1 . . . 1
 ; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1
+; . 0 0 0 0 0 0 .    . 1 1 1 1 1 1 .
 ; . 0 . 0 0 0 . .    . . 1 1 1 . 1 .
 ; . . 0 . . . . .    . . . . . 1 . .
 ; . . . 0 0 . . .    . . . 1 1 . . .
 
+PLAYER0_FROG_DATA 
+	.by $66 $88 $88 $88 $FE $7E $5C $20 $18
+
+PLAYER1_FROG_DATA
+	.by $66 $11 $11 $11 $7F $7E $3A $04 $18
+
 ; Player 2 is the colored eye irises.
 ; 2 . . . 2 . . . 
+
+PLAYER2_FROG_DATA 
+	.by $88
 
 ; Player 3 is the mouth.
 ; 3 . . . 3 . . .
 ; . 3 3 3 . . . .
 
+
 ; Player 5 (the Missiles) is COLPF3, White.
 ; 1 1 . . . . . .  ; quad width
 ; 1 1 . . . . . .  ; quad width
 ; 1 1 . . . . . .  ; quad width
+
+; Splatty Frog
+; P0                 P1
+; . 0 0 . . . 0 0    . 1 1 . . . 1 1
+; 0 0 0 0 . 0 0 0    1 1 1 1 . 1 1 1
+; . 0 0 0 . 0 0 .    . 1 1 1 . 1 1 .
+; . . . 0 0 0 . .    . . . 1 1 1 . .
+; 0 0 . 0 0 0 0 0    1 1 . 1 1 1 1 1 
+; . 0 0 0 0 0 . .    . 1 1 1 1 1 . .
+; 0 0 0 . . 0 0 .    1 1 1 . . 1 1 .
+; 0 0 0 . . 0 0 0    1 1 1 . . 1 1 1
+; . . . . . 0 0 .    . . . . . 1 1 .
+
+; Interred Frog
+; P0                 P1
+; . . . . . . . .    . . . . . . . .
+; . . . . . . . .    . . . . . . . .
+; . . . . . . . .    . . . . . . . .
+; . . . 0 0 0 0 0    . . . . . . . .
+; . . . 0 . . . 0    . . . . . . . .
+; . . . 0 . 0 . 0    . . . . . . . .
+; . . . 0 . . . 0    . . . . . . . .
+; . . . 0 . 0 0 0    . . . . . . . .
+; . . . 0 . 0 0 0    . . . . . . . .
+; . . . 0 0 0 0 0    . . . . . . . .
 

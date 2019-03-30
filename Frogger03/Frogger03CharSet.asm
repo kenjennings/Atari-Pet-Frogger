@@ -65,7 +65,7 @@ I_BEACH2     = $4d ; ctrl-M, beach part 2
 I_BEACH3     = $4e ; ctrl-N, beach part 3
 I_BEACH4     = $4f ; ctrl-O, beach part 4
 I_BEACH5     = $51 ; ctrl-Q, beach part 5
-I_BEACH6     = $52 ; ctrl-R, beach part 6 (and alternate beack rocks)
+I_BEACH6     = $52 ; ctrl-R, beach part 6 (and alternate beach rocks)
 I_BEACH7     = $53 ; ctrl-S, beach part 7 (and alternate beach rocks)
 I_BEACH8     = $54 ; ctrl-T, beach part 8
 
