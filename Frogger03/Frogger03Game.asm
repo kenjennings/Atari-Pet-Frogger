@@ -71,6 +71,13 @@ GAMESTART
 	sta FlaggedHiScore
 	sta InputStick             ; no input from joystick
 
+	lda #COLOR_BLACK+$E        ; COLPF3 is white on all screens.
+	sta COLOR3
+
+	; Set all the ANTIC screen controls and DMA options.
+	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_NORMAL
+	sta SDMCTL
+
 	lda #4                     ; Quick hack to init the scrolling credits.
 	sta HSCROL
 

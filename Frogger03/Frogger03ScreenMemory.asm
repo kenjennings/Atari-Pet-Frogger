@@ -174,7 +174,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 ; 5  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        | ; Boats Right
 	.macro mBoatGoRight
-		.by I_BOAT_RBW I_BOAT_RB I_BOAT_EMPTY I_SEATS_R3 I_SEATS_R2 I_SEATS_R1 I_BOAT_RFW I_BOAT_RF ;   8
+		.by I_BOAT_RBW+$80 I_BOAT_RB+$80 I_BOAT_EMPTY I_SEATS_R3 I_SEATS_R2 I_SEATS_R1 I_BOAT_RFW+$80 I_BOAT_RF+$80 ;   8
 		.by I_WATER1 I_WATER2 I_WATER3 I_WATER4 I_WATER1 I_WATER2 I_WATER3 I_WATER4                 ; + 8 = 16
 	.endm
 
@@ -187,7 +187,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 ; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left
 	.macro mBoatGoLeft
-		.by I_BOAT_LF I_BOAT_LFW I_SEATS_L1 I_SEATS_L2 I_SEATS I_SEATS_L3 I_BOAT_EMPTY I_BOAT_LB I_BOAT_LBW ;   8
+		.by I_BOAT_LF+$80 I_BOAT_LFW+$80 I_SEATS_L1 I_SEATS_L2 I_SEATS_L3 I_BOAT_EMPTY I_BOAT_LB+$80 I_BOAT_LBW+$80 ;   8
 		.by I_WATER1 I_WATER2 I_WATER3 I_WATER4 I_WATER1 I_WATER2 I_WATER3 I_WATER4                         ; + 8 = 16
 	.endm
 
@@ -438,24 +438,24 @@ GAMEOVER_MEM ; Graphics data, Game Over.  (34) + 6 spaces.
  
 PLAYFIELD_MEM0 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_BEACH7  I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_ROCKS1L I_ROCKS1L I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS2  I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS3  I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS4  I_BEACH8
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_BEACH7  I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS3  I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_ROCKS1L I_ROCKS1L I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_BEACH7  I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS4  I_BEACH8 ; "Beach"
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_BEACH7      I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_ROCKS1L+$80 I_ROCKS1R+$80 I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_ROCKS2+$80  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_ROCKS3+$80  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_ROCKS4+$80  I_BEACH8
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_BEACH7      I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_ROCKS3+$80  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_ROCKS1L+$80 I_ROCKS1R+$80 I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_BEACH7      I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_ROCKS4+$80  I_BEACH8 ; "Beach"
 
-PLAYFIELD_MEM3 = PLAYFIELD_MEM0+40 ; Default display of "Beach", for lack of any other description.
+PLAYFIELD_MEM3 = PLAYFIELD_MEM0+32 ; Default display of "Beach", for lack of any other description.
 
 PLAYFIELD_MEM6 = PLAYFIELD_MEM0+20 ; Default display of "Beach", for lack of any other description.
 
 PLAYFIELD_MEM9 = PLAYFIELD_MEM0+7 ; Default display of "Beach", for lack of any other description.
 
-PLAYFIELD_MEM12 = PLAYFIELD_MEM0+33 ; Default display of "Beach", for lack of any other description.
+PLAYFIELD_MEM12 = PLAYFIELD_MEM0+29 ; Default display of "Beach", for lack of any other description.
 
 PLAYFIELD_MEM15 = PLAYFIELD_MEM0+14 ; Default display of "Beach", for lack of any other description.
 
@@ -534,24 +534,154 @@ TITLE_TEXT_COLORS ; Text luminance
 	.by $08 $0A                                     ; controls
 
 
+
 GAME_BACK_COLORS
-	.by COLOR_BLACK COLOR_BLACK                            ; Scores, lives, saved frogs.
-	.by COLOR_GREEN                                        ; Grassy gap
+	.by COLOR_BLACK 
+	.by COLOR_BLACK                    ; Scores, lives, saved frogs.
+	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
+	
+	.by COLOR_GREEN+6    
+	.by COLOR_AQUA+$2      
+	.by COLOR_AQUA+4      ; Beach, boats, boats.
 
-	.by COLOR_ORANGE2+2    COLOR_AQUA      COLOR_AQUA+4      ; Beach, boats, boats.
-	.by COLOR_RED_ORANGE+2 COLOR_BLUE1     COLOR_BLUE1+4     ; Beach, boats, boats.
-	.by COLOR_ORANGE2+2    COLOR_BLUE2     COLOR_BLUE2+4     ; Beach, boats, boats.
-	.by COLOR_RED_ORANGE+2 COLOR_LITE_BLUE COLOR_LITE_BLUE+4 ; Beach, boats, boats.
-	.by COLOR_ORANGE2+2    COLOR_BLUE1     COLOR_BLUE1+4     ; Beach, boats, boats.
-	.by COLOR_RED_ORANGE+2 COLOR_AQUA      COLOR_AQUA+4      ; Beach, boats, boats.
-	.by COLOR_ORANGE2+2                                      ; one last Beach.
+	.by COLOR_RED_ORANGE+6
+	.by COLOR_BLUE1+2     
+	.by COLOR_BLUE1+4     ; Beach, boats, boats.
 
-	.by COLOR_GREEN                                        ; grassy gap
+	.by COLOR_ORANGE2+6   
+	.by COLOR_BLUE2+2     
+	.by COLOR_BLUE2+4     ; Beach, boats, boats.
 
-GAME_TEXT_COLORS ; Text luminance
-	.rept 23
-		.by $0C                                     ; The rest of the text on screen
-	.endr
+	.by COLOR_RED_ORANGE+6 
+	.by COLOR_LITE_BLUE+2 
+	.by COLOR_LITE_BLUE+4 ; Beach, boats, boats.
+
+	.by COLOR_ORANGE2+6   
+	.by COLOR_BLUE1+2     
+	.by COLOR_BLUE1+4     ; Beach, boats, boats.
+
+	.by COLOR_RED_ORANGE+6
+	.by COLOR_AQUA+2      
+	.by COLOR_AQUA+4     ; Beach, boats, boats.
+
+	.by COLOR_GREEN+6                                    ; one last Beach.
+
+
+GAME_COLPF0_COLORS
+	.by COLOR_BLACK 
+	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
+	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
+
+	.by COLOR_BLUE1     ; Beach sky
+	.by COLOR_AQUA+4    ; Water top 1 with boats
+	.by COLOR_AQUA+6    ; Water top 2 with boats
+
+	.by COLOR_AQUA+6    ; Beach sky (water)
+	.by COLOR_BLUE1+4
+	.by COLOR_BLUE1+6     
+	
+	.by COLOR_BLUE1+6     ; Beach sky (water)
+	.by COLOR_BLUE2+4    
+	.by COLOR_BLUE2+6    
+	
+	.by COLOR_BLUE2+6     ; Beach sky (water)
+	.by COLOR_LITE_BLUE+4
+	.by COLOR_LITE_BLUE+6 
+	
+	.by COLOR_LITE_BLUE+6 ; Beach sky (water)
+	.by COLOR_BLUE1+4    
+	.by COLOR_BLUE1+6 
+	
+	.by COLOR_BLUE1+6     ; Beach sky (water)
+	.by COLOR_AQUA+4
+	.by COLOR_AQUA+6      
+	
+	.by COLOR_AQUA+6      ; Beach sky (water)
+;	.by COLOR_ORANGE2+2                                      ; one last Beach.
+
+
+GAME_COLPF2_COLORS
+	.by COLOR_BLACK 
+	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
+	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
+	
+	.by COLOR_GREEN+2
+	.by COLOR_YELLOW_GREEN
+	.by COLOR_YELLOW_GREEN+$6
+	
+	.by COLOR_RED_ORANGE+2
+	.by COLOR_RED_ORANGE+$4
+	.by COLOR_YELLOW_GREEN+$4
+	
+	.by COLOR_ORANGE2+2 
+	.by COLOR_RED_ORANGE+$4
+	.by COLOR_YELLOW_GREEN+$4
+	
+	.by COLOR_RED_ORANGE+2
+	.by COLOR_RED_ORANGE+$4
+	.by COLOR_YELLOW_GREEN+$4
+	
+	.by COLOR_ORANGE2+2  
+	.by COLOR_RED_ORANGE+$4
+	.by COLOR_YELLOW_GREEN+$4
+	
+	.by COLOR_RED_ORANGE+2 
+	.by COLOR_RED_ORANGE+$4
+	.by COLOR_YELLOW_GREEN+$4
+	
+	.by COLOR_GREEN+2
+
+	.by COLOR_BLACK+$0E
+	.by COLOR_BLACK+$0E
+
+
+GAME_TEXT_COLORS ; COLPF1 Text luminance
+	.by COLOR_BLACK
+	.by COLOR_BLACK+$e                        ; Scores, 
+	.by COLOR_BLACK+$a                        ; lives, saved frogs.
+	
+	.by COLOR_ORANGE2+$8     ; beach
+	.by COLOR_PINK+$C
+	.by COLOR_PURPLE+$C
+	
+	.by COLOR_RED_ORANGE+$8 ; beach
+	.by COLOR_PURPLE_BLUE+$C
+	.by COLOR_BLUE_GREEN+$C
+	
+	.by COLOR_ORANGE2+$8 ; beach
+	.by COLOR_GREEN+$C
+	.by COLOR_YELLOW_GREEN+$C
+	
+	.by COLOR_RED_ORANGE+$8 ; beach
+	.by COLOR_YELLOW_GREEN+$C
+	.by COLOR_ORANGE_GREEN+$C
+	
+	.by COLOR_ORANGE2+$8 ; beach
+	.by COLOR_LITE_ORANGE+$C
+	.by COLOR_ORANGE1+$C
+	
+	.by COLOR_RED_ORANGE+$8 ; beach
+	.by COLOR_ORANGE2+$C
+	.by COLOR_RED_ORANGE+$C
+	
+	.by COLOR_RED_ORANGE+$8 ; Last beach
+
+; COLOR_ORANGE1 =      $10
+; COLOR_ORANGE2 =      $20
+; COLOR_RED_ORANGE =   $30
+; COLOR_PINK =         $40
+; COLOR_PURPLE =       $50
+; COLOR_PURPLE_BLUE =  $60
+; COLOR_BLUE1 =        $70
+; COLOR_BLUE2 =        $80
+; COLOR_LITE_BLUE =    $90
+; COLOR_AQUA =         $A0
+; COLOR_BLUE_GREEN =   $B0
+; COLOR_GREEN =        $C0
+; COLOR_YELLOW_GREEN = $D0
+; COLOR_ORANGE_GREEN = $E0
+; COLOR_LITE_ORANGE =  $F0
+
 
 
 DEAD_BACK_COLORS ; Text luminance
@@ -694,25 +824,28 @@ GAME_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 	.byte <Score_DLI   ; DLI (0) for scores
 	.byte <GAME_DLI_1  ; DLI (1) Text - COLPF1, for scores  (Same as TITLE_DLI_5)
 	.byte <GAME_DLI_2  ; DLI 2   Beach 18 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A).
-	.byte <GAME_DLI_3  ; DLI 3   Boats 17 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+	.byte <GAME_DLI_25  ; DLI 3   Boats 17 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
 	.byte <GAME_DLI_3  ; DLI 4   Boats 16 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 17)
 	.byte <GAME_DLI_2  ; DLI 5   Beach 15 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 16).
-	.byte <GAME_DLI_3  ; DLI 6   Boats 14 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+	.byte <GAME_DLI_25  ; DLI 6   Boats 14 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
 	.byte <GAME_DLI_3  ; DLI 7   Boats 13 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 14)
 	.byte <GAME_DLI_2  ; DLI 8   Beach 12 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 13).
-	.byte <GAME_DLI_3  ; DLI 9   Boats 11 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+	.byte <GAME_DLI_25  ; DLI 9   Boats 11 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
 	.byte <GAME_DLI_3  ; DLI 10  Boats 10 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 11)
 	.byte <GAME_DLI_2  ; DLI 11  Beach 09 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 10).
-	.byte <GAME_DLI_3  ; DLI 12  Boats 08 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+	.byte <GAME_DLI_25  ; DLI 12  Boats 08 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
 	.byte <GAME_DLI_3  ; DLI 13  Boats 07 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 8)
 	.byte <GAME_DLI_2  ; DLI 14  Beach 06 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 7).
-	.byte <GAME_DLI_3  ; DLI 15  Boats 05 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+	.byte <GAME_DLI_25  ; DLI 15  Boats 05 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
 	.byte <GAME_DLI_3  ; DLI 16  Boats 04 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 5)
 	.byte <GAME_DLI_2  ; DLI 17  Beach 03 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 4).
-	.byte <GAME_DLI_3  ; DLI 18  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+	.byte <GAME_DLI_25  ; DLI 18  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
 	.byte <GAME_DLI_3  ; DLI 19  Boats 01 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 2)
 	.byte <GAME_DLI_2  ; DLI 20  Beach 00 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 1).
-	.byte <TITLE_DLI_3 ; DLI 21  Black - COLBK COLPF2
+
+	.byte <GAME_DLI_25  ; DLI 18  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+
+;	.byte <TITLE_DLI_25 ; DLI 21  Black - COLBK COLPF2
 	.byte <GAME_DLI_5  ; DLI 22  Calls SPC2 to set scrolling credits HSCROL and colors.
 
 
@@ -768,8 +901,10 @@ SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 	.byte <DLI_SPC1    ; DLI 44 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
 ;	.byte <GAME_DLI_SPC2    ; DLI 45 
 
-; C0olor tables must be big enough to contain data up to the maximum index that
+
+; Coolor tables must be big enough to contain data up to the maximum index that
 ; occurs of all the screens. 
+; COLPF3 is white all the time.
 
 COLBK_TABLE ; Must be big enough to do splash screens.
 	.ds 46
@@ -783,12 +918,20 @@ COLPF1_TABLE ; Must be big enough to do Title screen.
 COLPF2_TABLE ; Must be big enough to do Title screen.
 	.ds 25
 
-COLPF3_TABLE ; Must be big enough to do Game  screen up to last boat row.
-	.ds 22
-
 HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row.
-	.ds 22
-
+	.by 0 0 0 0 ; Top, scores, beach
+	.by 0 14
+	.by 0 ; beach
+	.by 2 12
+	.by 0 ; beach
+	.by 4 10
+	.by 0 ; beach
+	.by 6 8
+	.by 0 ; beach
+	.by 8 6
+	.by 0 ; beach
+	.by 10 4
+	
 PXPF_TABLE ; Big enough for game area for Frog.
 	.ds 22
 
@@ -867,11 +1010,16 @@ PLAYER2_FROG_DATA
 ; 3 . . . 3 . . .
 ; . 3 3 3 . . . .
 
+PLAYER3_FROG_DATA
+	.by $88 $70
 
 ; Player 5 (the Missiles) is COLPF3, White.
 ; 1 1 . . . . . .  ; quad width
 ; 1 1 . . . . . .  ; quad width
 ; 1 1 . . . . . .  ; quad width
+
+PLAYER5_FROG_DATA
+	.by $C0 $C0 $C0
 
 ; Splatty Frog
 ; P0                 P1

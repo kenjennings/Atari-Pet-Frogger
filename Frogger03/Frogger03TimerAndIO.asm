@@ -571,22 +571,55 @@ GAME_DLI_1
 ; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has a whole 
 ; blank scan line to finish everything else.  
 ; Collect Player/Playfield collisions.
+; Set Wide screen for Beach.
+
 GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for Beach.
 	mStart_DLI
 
-	lda COLBK_TABLE,y    ; Get Dirt 2 color
+	lda COLPF0_TABLE,y   ; for the extra line Get color Rocks (or water color) instead of COLBK
+	sta WSYNC
+	; Top of the line is sky or blue water from row above.   
+	; Make background temporarily match the playfield drawing this on the next line.
+	sta COLBK
+	sta COLPF0
+	
+	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_WIDE
+	sta DMACTL
+		
+	jmp SetupAlmostAllColors_DLI
+
+; BOATS 1
+; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has a whole 
+; blank scan line to finish everything else.  
+; Collect Player/Playfield collisions.
+; Set Normal width screen for Boats.
+
+GAME_DLI_25 ; DLI 2 sets COLPF0,1,2,3,BK for first line of boats.
+	mStart_DLI
+
+	lda COLBK_TABLE,y   ; Get color Rocks 1   
 	sta WSYNC
 	sta COLBK
-
+	
+	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_NORMAL
+	sta DMACTL
+	
+	lda HSCROL_TABLE,y   ; Get boat fine scroll.
+	sta HSCROL
+	
 SetupAllColors_DLI
 	lda COLPF0_TABLE,y   ; Get color Rocks 1   
 	sta COLPF0
+
+SetupAlmostAllColors_DLI
 	lda COLPF1_TABLE,y   ; Get color Rocks 2
 	sta COLPF1
 	lda COLPF2_TABLE,y   ; Get color Rocks 3 
 	sta COLPF2
-	lda COLPF3_TABLE,y   ; Get color Dirt 1
-	sta COLPF3
+
+	lda COLBK_TABLE,y   ; Get real background color again. (To repair the color for the Beach background)
+	sta WSYNC
+	sta COLBK
 
 	lda P0PF             ; Get Player 0 collision with playfield
 	ora P1PF             ; Add Player 1 collision 
@@ -596,8 +629,7 @@ SetupAllColors_DLI
 
 	jmp Exit_DLI
 
-
-; BOATS
+; BOATS 2
 ; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has a whole 
 ; blank scan line to finish everything else.  
 ; Collect Player/Playfield collisions.

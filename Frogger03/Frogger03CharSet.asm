@@ -243,15 +243,15 @@ CHARACTER_SET
 ; $18: . . . # # . . .
 ; $30: . . # # . . . .
 ; Char $0D:   -    
-  .BYTE $30,$78,$00,$00,$0E,$1F,$00,$00
-; $30: .. XX .. .. 
-; $78: ## XX OO .. 
-; $00: .. .. .. .. 
-; $00: .. .. .. .. 
-; $0E: .. .. XX OO 
-; $1F: .. ## XX XX 
-; $00: .. .. .. .. 
-; $00: .. .. .. .. 
+  .BYTE $00,$00,$00,$7e,$00,$00,$00,$00
+; $00: . . . . . . . .
+; $00: . . . . . . . .
+; $00: . . . . . . . .
+; $7E: . # # # # # # .
+; $00: . . . . . . . .
+; $18: . . . . . . . .
+; $18: . . . . . . . .
+; $00: . . . . . . . .
 ; Char $0E:   .
 	.BYTE $00,$00,$00,$00,$00,$18,$18,$00
 ; $00: . . . . . . . .
@@ -1414,19 +1414,377 @@ CHARACTER_SET
 ; Here we reached the end of the 1K for the Character set, so the rest of this is a new page...
 
 LEFT_BOAT_FRONT_ANIM ; 2 images, each used 4 times with one frame from LEFT_BOAT_WATER_ANIM (16 bytes)
-
+; Char $53: ctrl-S 
+  .BYTE $A0,$AA,$2A,$2A,$0A,$03,$17,$55
+; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
+; $2A: .. OO OO OO 
+; $2A: .. OO OO OO 
+; $0A: .. .. OO OO 
+; $03: .. .. .. XX 
+; $17: .. ## ## XX 
+; $55: ## ## ## ## 
+; Char $54: ctrl-T 
+  .BYTE $A0,$AA,$2A,$2A,$0A,$02,$17,$55
+; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
+; $2A: .. OO OO OO 
+; $2A: .. OO OO OO 
+; $0A: .. .. OO OO 
+; $02: .. .. .. OO 
+; $17: .. ## ## XX 
+; $55: ## ## ## ## 
+; Char $55: ctrl-U 
 
 LEFT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat. (64 bytes)
+; Char $4A: ctrl-J 
+  .BYTE $00,$00,$A0,$AA,$EA,$FA,$FE,$FF
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
+; $EA: XX OO OO OO 
+; $FA: XX XX OO OO 
+; $FE: XX XX XX OO 
+; $FF: XX XX XX XX 
+; Char $4B: ctrl-K 
+  .BYTE $00,$00,$A0,$AA,$AA,$EA,$FE,$FF
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $EA: XX OO OO OO 
+; $FE: XX XX XX OO 
+; $FF: XX XX XX XX 
+; Char $4C: ctrl-L 
+  .BYTE $00,$00,$A0,$AA,$AA,$FA,$FE,$FF
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $FA: XX XX OO OO 
+; $FE: XX XX XX OO 
+; $FF: XX XX XX XX 
+; Char $4D: ctrl-M 
+  .BYTE $00,$00,$A0,$AA,$AA,$AA,$BE,$FF
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $BE: OO XX XX OO 
+; $FF: XX XX XX XX 
+; Char $4E: ctrl-N 
+  .BYTE $00,$00,$A0,$AA,$AA,$AA,$AA,$FF
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $FF: XX XX XX XX 
+; Char $4F: ctrl-O 
+  .BYTE $00,$00,$A0,$AA,$AA,$AA,$AA,$FA
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $FA: XX XX OO OO 
+; Char $50: ctrl-P 
+  .BYTE $00,$00,$A0,$AA,$AA,$AA,$EA,$FA
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $EA: XX OO OO OO 
+; $FA: XX XX OO OO 
+; Char $51: ctrl-Q 
+  .BYTE $00,$00,$A0,$AA,$AA,$EA,$FA,$FE
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $EA: XX OO OO OO 
+; $FA: XX XX OO OO 
+; $FE: XX XX XX OO 
+
 
 
 LEFT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (frame 2 == frame 6) (56 bytes)
+; Char $41: ctrl-A 
+  .BYTE $00,$00,$00,$00,$00,$00,$CC,$F5
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $CC: XX .. XX .. 
+; $F5: XX XX ## ## 
+; Char $42: ctrl-B 
+  .BYTE $00,$00,$00,$00,$00,$33,$FF,$F5
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $33: .. XX .. XX 
+; $FF: XX XX XX XX 
+; $F5: XX XX ## ## 
+; Char $43: ctrl-C 
+  .BYTE $00,$00,$00,$00,$00,$0F,$3F,$FD
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $0F: .. .. XX XX 
+; $3F: .. XX XX XX 
+; $FD: XX XX XX ## 
+; Char $44: ctrl-D 
+  .BYTE $00,$00,$00,$00,$00,$03,$3F,$FD
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $03: .. .. .. XX 
+; $3F: .. XX XX XX 
+; $FD: XX XX XX ## 
+; Char $45: ctrl-E 
+  .BYTE $00,$00,$00,$00,$00,$03,$0F,$F5
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $03: .. .. .. XX 
+; $0F: .. .. XX XX 
+; $F5: XX XX ## ## 
+; Char $46: ctrl-F 
+  .BYTE $00,$00,$00,$00,$00,$33,$FF,$F5
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $33: .. XX .. XX 
+; $FF: XX XX XX XX 
+; $F5: XX XX ## ## 
+; Char $47: ctrl-G 
+  .BYTE $00,$00,$00,$00,$00,$0C,$3F,$FD
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $0C: .. .. XX .. 
+; $3F: .. XX XX XX 
+; $FD: XX XX XX ## 
+; Char $48: ctrl-H 
+  .BYTE $00,$00,$00,$00,$00,$03,$FF,$FD
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $03: .. .. .. XX 
+; $FF: XX XX XX XX 
+; $FD: XX XX XX ## 
 
 
 RIGHT_BOAT_FRONT_ANIM ; 2 images, each used 4 times with one frame from RIGHT_BOAT_WATER_ANIM (16 bytes)
-
+; Char $73:   s    
+  .BYTE $0A,$AA,$A8,$A8,$A0,$C0,$D4,$55
+; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
+; $A8: OO OO OO .. 
+; $A8: OO OO OO .. 
+; $A0: OO OO .. .. 
+; $C0: XX .. .. .. 
+; $D4: XX ## ## .. 
+; $55: ## ## ## ## 
+; Char $74:   t    
+  .BYTE $0A,$AA,$A8,$A8,$A0,$80,$D4,$55
+; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
+; $A8: OO OO OO .. 
+; $A8: OO OO OO .. 
+; $A0: OO OO .. .. 
+; $80: OO .. .. .. 
+; $D4: XX ## ## .. 
+; $55: ## ## ## ## 
 
 RIGHT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat. (64 bytes)
-
+; Char $6A:   j    
+  .BYTE $00,$00,$0A,$AA,$AB,$AF,$BF,$FF
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
+; $AB: OO OO OO XX 
+; $AF: OO OO XX XX 
+; $BF: OO XX XX XX 
+; $FF: XX XX XX XX 
+; Char $6B:   k    
+  .BYTE $00,$00,$0A,$AA,$AA,$AB,$BF,$FF
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AB: OO OO OO XX 
+; $BF: OO XX XX XX 
+; $FF: XX XX XX XX 
+; Char $6C:   l    
+  .BYTE $00,$00,$0A,$AA,$AA,$AF,$BF,$FF
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AF: OO OO XX XX 
+; $BF: OO XX XX XX 
+; $FF: XX XX XX XX 
+; Char $6D:   m    
+  .BYTE $00,$00,$0A,$AA,$AA,$AA,$BE,$FF
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $BE: OO XX XX OO 
+; $FF: XX XX XX XX 
+; Char $6E:   n    
+  .BYTE $00,$00,$0A,$AA,$AA,$AA,$AA,$FF
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $FF: XX XX XX XX 
+; Char $6F:   o    
+  .BYTE $00,$00,$0A,$AA,$AA,$AA,$AA,$AF
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AF: OO OO XX XX 
+; Char $70:   p    
+  .BYTE $00,$00,$0A,$AA,$AA,$AA,$AB,$AF
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AB: OO OO OO XX 
+; $AF: OO OO XX XX 
+; Char $71:   q    
+  .BYTE $00,$00,$0A,$AA,$AA,$AB,$AF,$BF
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
+; $AA: OO OO OO OO 
+; $AB: OO OO OO XX 
+; $AF: OO OO XX XX 
+; $BF: OO XX XX XX 
 
 RIGHT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (frame 2 == frame 6) (56 bytes)
-
+; Char $61:   a    
+  .BYTE $00,$00,$00,$00,$00,$00,$33,$5F
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $33: .. XX .. XX 
+; $5F: ## ## XX XX 
+; Char $62:   b    
+  .BYTE $00,$00,$00,$00,$00,$CC,$FF,$5F
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $CC: XX .. XX .. 
+; $FF: XX XX XX XX 
+; $5F: ## ## XX XX 
+; Char $63:   c    
+  .BYTE $00,$00,$00,$00,$00,$F0,$FC,$7F
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $F0: XX XX .. .. 
+; $FC: XX XX XX .. 
+; $7F: ## XX XX XX 
+; Char $64:   d    
+  .BYTE $00,$00,$00,$00,$00,$C0,$FC,$7F
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $C0: XX .. .. .. 
+; $FC: XX XX XX .. 
+; $7F: ## XX XX XX 
+; Char $65:   e    
+  .BYTE $00,$00,$00,$00,$00,$C0,$F0,$5F
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $C0: XX .. .. .. 
+; $F0: XX XX .. .. 
+; $5F: ## ## XX XX 
+; Char $66:   f    
+  .BYTE $00,$00,$00,$00,$00,$CC,$FF,$5F
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $CC: XX .. XX .. 
+; $FF: XX XX XX XX 
+; $5F: ## ## XX XX 
+; Char $67:   g    
+  .BYTE $00,$00,$00,$00,$00,$30,$FC,$7F
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $30: .. XX .. .. 
+; $FC: XX XX XX .. 
+; $7F: ## XX XX XX 
+; Char $68:   h    
+  .BYTE $00,$00,$00,$00,$00,$C0,$FF,$7F
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $00: .. .. .. .. 
+; $C0: XX .. .. .. 
+; $FF: XX XX XX XX 
+; $7F: ## XX XX XX 
