@@ -308,7 +308,15 @@ FrogRealColumn1 .byte $00   ; = Frog physical offset into current row
 FrogRealColumn2 .byte $00   ; = Frog physical offset into current row (second at +40 for scrolling)
 
 FrogRow         .byte $00   ; = Frog Y row position (in the beach/boat playfield not counting score lines)
-LastCharacter   .byte 0     ; = Last Character Under Frog
+
+; VBI manages moving Frog around, so there's never any visible tearing.
+; Also, its best to evaluate the P/M collisions when the display is not active.
+FrogPMY         .byte $00   ; = Frog's current Player/missile Y coordinate
+FrogPMX         .byte $00   ; = Frog's current Player/missile X coordinate
+FrogNewPMY      .byte $00   ; = Frog new/next Player/missile Y coordinate
+FrogNewPMX      .byte $00   ; = Frog new/next Player/missile X coordinate
+
+; LastCharacter   .byte 0     ; = Last Character Under Frog
 
 FrogSafety      .byte 0     ; = 0 When Frog OK.  !0 == Yer Dead.
 
