@@ -304,6 +304,7 @@ DisplayTitleScreen
 
 ; ==========================================================================
 ; Display the game screen.
+; ==========================================================================
 ; The credits at the bottom of the screen is still always redrawn.
 ; From the title screen it is animated to move to the bottom of the
 ; screen.  But from the Win and Dead frog screens the credits
@@ -330,6 +331,7 @@ DisplayGameScreen
 
 ; ==========================================================================
 ; ANIMATE BOATS
+; ==========================================================================
 ; Move the lines of boats around either left or right.
 ; Changed logic for moving lines.  The original code moved all the
 ; rows going right then all the rows going left.
@@ -375,6 +377,7 @@ UpdatePlayfieldLMS
 ; UPDATE GAME PLAYFIELD
 ; Update Game screen LMS addresses and scrolling offset to specified
 ; values.
+; ==========================================================================
 ;
 ; Note that only the low bytes needs to be reset as no line of data
 ; crosses over a page boundary.
@@ -410,6 +413,7 @@ UpdateGamePlayfield
 
 ; ==========================================================================
 ; RESET GAME PLAYFIELD
+; ==========================================================================
 ; Reset Game screen LMS addresses and scrolling offset to starting values.
 ; Note that only the low bytes needs to be reset as no line of data
 ; crosses over a page boundary.
@@ -435,7 +439,7 @@ HiScore .sb "00000000"
 
 ; ==========================================================================
 ; Copy the score from memory to screen positions.
-;
+; ==========================================================================
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; --------------------------------------------------------------------------
@@ -456,7 +460,7 @@ DoUpdateScreenScore
 ; ==========================================================================
 ; CLEAR SAVED FROGS
 ; Remove the number of saved frogs from the screen.
-;
+; ==========================================================================
 ; 1  |0000000:Score                 Hi:0000000| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; --------------------------------------------------------------------------
@@ -477,10 +481,11 @@ RemoveFroggies
 ; ==========================================================================
 ; PRINT FROGS AND LIVES
 ; Display the number of frogs that crossed the river and lives.
-;
+; ==========================================================================
 ; 1  |0000000:Score                 Hi:0000000| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; --------------------------------------------------------------------------
+
 PrintFrogsAndLives
 
 	ldx FrogsCrossed    ; Number of times successfully crossed the rivers.
@@ -511,7 +516,7 @@ WriteLives
 
 ; ==========================================================================
 ; ZERO CURRENT COLORS                                                 A  Y
-; --------------------------------------------------------------------------
+; ==========================================================================
 ; Force all the colors in the current table to black.
 ;
 ; --------------------------------------------------------------------------
@@ -530,7 +535,7 @@ LoopZeroColors
 
 ; ==========================================================================
 ; HIDE BUTTON PROMPT                                                   A
-; --------------------------------------------------------------------------
+; ==========================================================================
 ; In case of sloppy programmer, tell the VBI to shut off the prompt.
 ;
 ; Uses A
@@ -545,7 +550,7 @@ HideButtonPrompt
 
 ; ==========================================================================
 ; CHANGE SCREEN                                                     A (Y)
-; --------------------------------------------------------------------------
+; ==========================================================================
 ; Set a new display.
 ;
 ; 1. The Press Any Key Prompt is always disabled on the start of any screen.
@@ -595,16 +600,17 @@ LoopCopyColors
 	
 ;==============================================================================
 ;												PmgInit  A  X  Y
-; One-time setup tasks to do Player/Missile graphics.
 ;==============================================================================
+; One-time setup tasks to do Player/Missile graphics.
+; -----------------------------------------------------------------------------
 
 libPmgInit
 
 	; get all Players/Missiles off screen.
-;	jsr libPmgMoveAllZero
+	jsr libPmgMoveAllZero
 
 	; clear all bitmap images
-;	jsr libPmgClearBitmaps
+	jsr libPmgClearBitmaps
 
 	; Tell ANTIC where P/M memory is located for DMA to GTIA
 	lda #>PMADR
@@ -620,27 +626,16 @@ libPmgInit
 
 	; Tell GTIA the various Player/Missile options and color controls
 	; Turn on 5th Player (Missiles COLPF3), Multicolor players, and 
-	; priority of 5th Player below regular Players. 
+	; Priority bits put 5th Player below regular Players. 
 	lda #FIFTH_PLAYER|MULTICOLOR_PM|%0001 
 	sta GPRIOR
 
-	; Players 0, 1 are the greens of the Frog.
-	lda #COLOR_GREEN+$4
-	sta PCOLOR0
-	lda #COLOR_GREEN+$8
-	sta PCOLOR1
-
-	; Player 2 is the colored eye irises.
-	lda #COLOR_PURPLE_BLUE+$6
-	sta PCOLOR2
-
-	; Player 3 is the mouth.
-	lda #COLOR_PINK+$8
-	sta PCOLOR3
+	ldx #1 ; Frog Shape
+	jsr setPmgColors
 
 	; Player 5 (the Missiles) is COLPF3, White.
 	lda #COLOR_BLACK+$C
-	sta COLOR3         ; OS shadow for color
+	sta COLOR3         ; OS shadow for color, no DLI changes.
 
 	; Set Player/Missile sizes
 	lda #PM_SIZE_NORMAL
@@ -654,3 +649,89 @@ libPmgInit
 
 	rts 
 
+
+;==============================================================================
+;											PmgMoveAllZero  A  X
+;==============================================================================
+; Simple hardware reset of all Player/Missile registers.
+; Typically used only at program startup to zero everything
+; and prevent any screen glitchiness on startup.
+;
+; Reset all Players and Missiles horizontal positions to 0, so
+; that none are visible no matter the size or bitmap contents.
+; Also reset sizes.
+; -----------------------------------------------------------------------------
+
+libPmgMoveAllZero
+
+	lda #$00     ; 0 position
+	ldx #$03     ; four objects, 3 to 0
+
+bLoopZeroPMPosition
+	sta HPOSP0,x ; Player positions 3, 2, 1, 0
+	sta SIZEP0,x ; Player width 3, 2, 1, 0
+	sta HPOSM0,x ; Missiles 3, 2, 1, 0 just to be sure.
+	dex
+	bpl bLoopZeroPMPosition
+
+	sta SIZEM    ; and Missile size 3, 2, 1, 0
+
+	; Zero a group of page 0 values:
+	ldx #5
+bPMAZClearCoords ; Clear coordinates, and shape index.
+	sta FrogPMY,x
+	dex
+	bpl bPMAZClearCoords
+
+	rts
+
+
+;==============================================================================
+;											PmgClearBitmaps  A  X
+;==============================================================================
+; Zero the bitmaps for all players and missiles
+; -----------------------------------------------------------------------------
+
+libPmgClearBitmaps
+
+	lda #$00
+	tax      ; count 0 to 255.
+
+bCBloop
+	sta MISSILEADR0,x ; Missiles
+	sta PLAYERADR0,x  ; Player 0
+	sta PLAYERADR1,x  ; Player 1
+	sta PLAYERADR2,x  ; Player 2
+	sta PLAYERADR3,x  ; Player 3
+	inx
+	bne bCBloop       ; Count 1 to 255, then 0 breaks out of loop
+
+	rts
+
+	
+;==============================================================================
+;											PmgSetColors  A  X
+;==============================================================================
+; Load the P0-P3 colors based on shape identity.
+; -----------------------------------------------------------------------------
+libPmgSetColors
+	txa
+	asl
+	asl
+	tax
+
+	lda BASE_PMCOLORS_TABLE,x
+	sta PCOLOR0
+	lda BASE_PMCOLORS_TABLE+1,x
+	sta PCOLOR1
+	lda BASE_PMCOLORS_TABLE+2,x
+	sta PCOLOR2
+	lda BASE_PMCOLORS_TABLE+3,x
+	sta PCOLOR3
+
+	rts
+
+
+;==============================================================================
+;											PmgSetColors  A  X
+;==============================================================================

@@ -302,10 +302,10 @@
 	ORG $82
 
 ; ======== M A I N ======== 
-FrogLocation    .word $0000 ; = Pointer to start of Frog's current row in screen memory.
-FrogColumn      .byte $00   ; = Frog X coord (logical to screen)
-FrogRealColumn1 .byte $00   ; = Frog physical offset into current row
-FrogRealColumn2 .byte $00   ; = Frog physical offset into current row (second at +40 for scrolling)
+;FrogLocation    .word $0000 ; = Pointer to start of Frog's current row in screen memory.
+;FrogColumn      .byte $00   ; = Frog X coord (logical to screen)
+;FrogRealColumn1 .byte $00   ; = Frog physical offset into current row
+;FrogRealColumn2 .byte $00   ; = Frog physical offset into current row (second at +40 for scrolling)
 
 FrogRow         .byte $00   ; = Frog Y row position (in the beach/boat playfield not counting score lines)
 
@@ -313,8 +313,10 @@ FrogRow         .byte $00   ; = Frog Y row position (in the beach/boat playfield
 ; Also, its best to evaluate the P/M collisions when the display is not active.
 FrogPMY         .byte $00   ; = Frog's current Player/missile Y coordinate
 FrogPMX         .byte $00   ; = Frog's current Player/missile X coordinate
+FrogShape       .byte $00   ; = Image in use -- 0 = off, 1 = frog, 2 = splat, 3 = tombstone 
 FrogNewPMY      .byte $00   ; = Frog new/next Player/missile Y coordinate
 FrogNewPMX      .byte $00   ; = Frog new/next Player/missile X coordinate
+FrogNewShape    .byte $00   ; = Image to use -- 0 = off, 1 = frog, 2 = splat, 3 = tombstone 
 
 ; LastCharacter   .byte 0     ; = Last Character Under Frog
 

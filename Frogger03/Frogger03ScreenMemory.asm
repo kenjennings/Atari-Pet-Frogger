@@ -34,13 +34,13 @@
 ; patterns provide two apparent rows of pixels, so, everything is equal.  
 ;
 ; Switching to a graphics mode for the big text allows:
-; * Complete color expression for background into the overscan 
+; ] Complete color expression for background into the overscan 
 ;   area, and for the pixels if we so choose.  (Text mode 2 manages 
 ;   playfield and border colors differently.) 
-; * Six lines of graphics in place of three lines of text makes it 
+; ] Six lines of graphics in place of three lines of text makes it 
 ;   trivial to double the number of color changes in the big text.
 ;   Just a DLI for each line.
-; * Without a separate border vs text background an apparent wider 
+; ] Without a separate border vs text background an apparent wider 
 ;   screen width can be faked using the background through the 
 ;   overscan area. 
 ;  
@@ -118,8 +118,8 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 11 |to reach freedom. You have three chances| INSTXT_1
 ; 12 |to prove your frog management skills by | INSTXT_1
 ; 13 |directing frogs to jump on boats in the | INSTXT_1
-; 14 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
-; 15 |the seats in the boats ('Q').           | INSTXT_1
+; 14 |rivers. Land in the middle of the boats.| INSTXT_1
+; 15 |Do not fall off or jump in the river.   | INSTXT_1
 ; 16 |                                        |
 ; 17 |Scoring:                                | INSTXT_2
 ; 18 |    10 points for each jump forward.    | INSTXT_2
@@ -132,11 +132,10 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
 
-
 ; Revised V03 Main Game Play Screen:
 ; FYI: Old boats.
-; 8  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
-; 9  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
+; 8  | [QQQQ1        [QQQQ1       [QQQQ1      | TEXT1_2
+; 9  |      <QQQQ0        <QQQQ0    <QQQQ0    | TEXT1_2
 ; New boats are larger to provide more safe surface for the larger 
 ; frog and to provide some additional graphics enhancement for 
 ; the boats.  Illustration below shows the entire memory needed 
@@ -146,23 +145,23 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; 3  |                                        | <-Grassy color
 ; 4  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
-; 5  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        | ; Boats Right
-; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left
+; 5  |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        | ; Boats Right
+; 6  |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        | ; Boats Left
 ; 7  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
-; 8  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
-; 9  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
+; 8  |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 9  |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        |
 ; 10 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
-; 11 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
-; 12 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
+; 11 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 12 |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        |
 ; 13 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
-; 14 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
-; 15 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
+; 14 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 15 |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        |
 ; 16 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
-; 17 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
-; 18 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
+; 17 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 18 |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        |
 ; 19 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
-; 20 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
-; 21 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
+; 20 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 21 |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        |
 ; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
 ; 23 |                                        | <-Grassy color
 ; 24 |                                        |
@@ -172,7 +171,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; These things repeat four times.
 ; Let's just type it once and macro it elsewhere.
 
-; 5  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        | ; Boats Right
+; 5  |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        | ; Boats Right
 	.macro mBoatGoRight
 		.by I_BOAT_RBW+$80 I_BOAT_RB+$80 I_BOAT_EMPTY I_SEATS_R3 I_SEATS_R2 I_SEATS_R1 I_BOAT_RFW+$80 I_BOAT_RF+$80 ;   8
 		.by I_WATER1 I_WATER2 I_WATER3 I_WATER4 I_WATER1 I_WATER2 I_WATER3 I_WATER4                 ; + 8 = 16
@@ -180,12 +179,12 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 	.macro mLineOfRightBoats
 		.rept 4
-			mBoatGoRight ; 16 * 4 = 64
+			mBoatGoRight ; 16 ] 4 = 64
 		.endr
 	.endm
 
 
-; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left
+; 6  |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        | ; Boats Left
 	.macro mBoatGoLeft
 		.by I_BOAT_LF+$80 I_BOAT_LFW+$80 I_SEATS_L1 I_SEATS_L2 I_SEATS_L3 I_BOAT_EMPTY I_BOAT_LB+$80 I_BOAT_LBW+$80 ;   8
 		.by I_WATER1 I_WATER2 I_WATER3 I_WATER4 I_WATER1 I_WATER2 I_WATER3 I_WATER4                         ; + 8 = 16
@@ -193,7 +192,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 	.macro mLineOfLeftBoats
 		.rept 4
-			mBoatGoLeft ; 16 * 4 = 64
+			mBoatGoLeft ; 16 ] 4 = 64
 		.endr
 	.endm
 
@@ -224,7 +223,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; one page, the coarse scrolling need only update the low byte of 
 ; the LMS instruction....
  
-; 5  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        | ; Boats Right ;   64
+; 5  |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        | ; Boats Right ;   64
 ; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
 ; End   Scroll position = LMS + 0,              HSCROL 15
 PLAYFIELD_MEM1
@@ -241,12 +240,12 @@ PLAYFIELD_MEM16
 ; 60 bytes here instead of the 240 bytes used for the scrolling text version.
 
 ; Graphics chars design, PET FROGGER
-; |**|**|* |  |**|**|**|  |**|**|**|  |  |**|**|**|  |**|**|* |  | *|**|* |  | *|**|**|  | *|**|**|  |**|**|**|  |**|**|* |
-; |**|  |**|  |**|  |  |  |  |**|  |  |  |**|  |  |  |**|  |**|  |**|  |**|  |**|  |  |  |**|  |  |  |**|  |  |  |**|  |**|
-; |**|  |**|  |**|**|* |  |  |**|  |  |  |**|**|* |  |**|  |**|  |**|  |**|  |**|  |  |  |**|  |  |  |**|**|* |  |**|  |**|
-; |**|**|* |  |**|  |  |  |  |**|  |  |  |**|  |  |  |**|**|* |  |**|  |**|  |**| *|**|  |**| *|**|  |**|  |  |  |**|**|* |
-; |**|  |  |  |**|  |  |  |  |**|  |  |  |**|  |  |  |**| *|* |  |**|  |**|  |**|  |**|  |**|  |**|  |**|  |  |  |**| *|* |
-; |**|  |  |  |**|**|**|  |  |**|  |  |  |**|  |  |  |**|  |**|  | *|**|* |  | *|**|**|  | *|**|**|  |**|**|**|  |**|  |**|
+; |]]|]]|] |  |]]|]]|]]|  |]]|]]|]]|  |  |]]|]]|]]|  |]]|]]|] |  | ]|]]|] |  | ]|]]|]]|  | ]|]]|]]|  |]]|]]|]]|  |]]|]]|] |
+; |]]|  |]]|  |]]|  |  |  |  |]]|  |  |  |]]|  |  |  |]]|  |]]|  |]]|  |]]|  |]]|  |  |  |]]|  |  |  |]]|  |  |  |]]|  |]]|
+; |]]|  |]]|  |]]|]]|] |  |  |]]|  |  |  |]]|]]|] |  |]]|  |]]|  |]]|  |]]|  |]]|  |  |  |]]|  |  |  |]]|]]|] |  |]]|  |]]|
+; |]]|]]|] |  |]]|  |  |  |  |]]|  |  |  |]]|  |  |  |]]|]]|] |  |]]|  |]]|  |]]| ]|]]|  |]]| ]|]]|  |]]|  |  |  |]]|]]|] |
+; |]]|  |  |  |]]|  |  |  |  |]]|  |  |  |]]|  |  |  |]]| ]|] |  |]]|  |]]|  |]]|  |]]|  |]]|  |]]|  |]]|  |  |  |]]| ]|] |
+; |]]|  |  |  |]]|]]|]]|  |  |]]|  |  |  |]]|  |  |  |]]|  |]]|  | ]|]]|] |  | ]|]]|]]|  | ]|]]|]]|  |]]|]]|]]|  |]]|  |]]|
 
 TITLE_MEM1
 	.by %11111000 %11111100 %11111100 %00111111 %00111110 %00011110 %00011111 %00011111 %00111111 %00111110
@@ -276,7 +275,7 @@ INSTRUCT_MEM2
 	.align $0100 ; Realign to next page.
 
 
-; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left ; + 64 
+; 6  |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        | ; Boats Left ; + 64 
 ; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
 ; End   Scroll position = LMS + 12,            HSCROL 0
 PLAYFIELD_MEM2
@@ -339,7 +338,7 @@ EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
 
 
 INSTRUCT_MEM7
-; 12 |rivers like this:  <QQQQ]]  Land only on| INSTXT_1
+; 12 |rivers like this:  <QQQQ00  Land only on| INSTXT_1
 	.sb "rivers. Land in the middle of the boats."
 
 INSTRUCT_MEM8
@@ -374,12 +373,12 @@ CONTROLS_MEM2
 
 ; FROG SAVED screen.
 ; Graphics chars design, SAVED!
-; |  |**|**|  |  | *|* |  | *|* | *|* | *|**|**|* | *|**|* |  |  |**|
-; | *|* |  |  |  |**|**|  | *|* | *|* | *|* |  |  | *|* |**|  |  |**|
-; |  |**|**|  | *|* | *|* | *|* | *|* | *|**|**|  | *|* | *|* |  |**|
-; |  |  | *|* | *|* | *|* | *|* | *|* | *|* |  |  | *|* | *|* |  |**|
-; |  |  | *|* | *|**|**|* |  |**|**|  | *|* |  |  | *|* |**|  |  |  |
-; |  |**|**|  | *|* | *|* |  | *|* |  | *|**|**|* | *|**|* |  |  |**|
+; |  |]]|]]|  |  | ]|] |  | ]|] | ]|] | ]|]]|]]|] | ]|]]|] |  |  |]]|
+; | ]|] |  |  |  |]]|]]|  | ]|] | ]|] | ]|] |  |  | ]|] |]]|  |  |]]|
+; |  |]]|]]|  | ]|] | ]|] | ]|] | ]|] | ]|]]|]]|  | ]|] | ]|] |  |]]|
+; |  |  | ]|] | ]|] | ]|] | ]|] | ]|] | ]|] |  |  | ]|] | ]|] |  |]]|
+; |  |  | ]|] | ]|]]|]]|] |  |]]|]]|  | ]|] |  |  | ]|] |]]|  |  |  |
+; |  |]]|]]|  | ]|] | ]|] |  | ]|] |  | ]|]]|]]|] | ]|]]|] |  |  |]]|
 
 ; Another benefit of using the bitmap is it makes the data much more obvious. 
 FROGSAVE_MEM   ; Graphics data, SAVED!  43 pixels.  40 - 21 == 19 blanks. 43 + 19 = 62.  + 18 = 80
@@ -395,12 +394,12 @@ FROGSAVE_MEM   ; Graphics data, SAVED!  43 pixels.  40 - 21 == 19 blanks. 43 + 1
 
 ; FROG DEAD screen.
 ; Graphics chars design, DEAD FROG!
-; | *|**|* |  | *|**|**|* |  | *|* |  | *|**|* |  |  |  |  | *|**|**|* | *|**|**|  |  |**|**|  |  |**|**|* |  |**|
-; | *|* |**|  | *|* |  |  |  |**|**|  | *|* |**|  |  |  |  | *|* |  |  | *|* | *|* | *|* | *|* | *|* |  |  |  |**|
-; | *|* | *|* | *|**|**|  | *|* | *|* | *|* | *|* |  |  |  | *|**|**|  | *|* | *|* | *|* | *|* | *|* |  |  |  |**|
-; | *|* | *|* | *|* |  |  | *|* | *|* | *|* | *|* |  |  |  | *|* |  |  | *|**|**|  | *|* | *|* | *|* |**|* |  |**|
-; | *|* |**|  | *|* |  |  | *|**|**|* | *|* |**|  |  |  |  | *|* |  |  | *|* |**|  | *|* | *|* | *|* | *|* |  |  |
-; | *|**|* |  | *|**|**|* | *|* | *|* | *|**|* |  |  |  |  | *|* |  |  | *|* | *|* |  |**|**|  |  |**|**|* |  |**|
+; | ]|]]|] |  | ]|]]|]]|] |  | ]|] |  | ]|]]|] |  |  |  |  | ]|]]|]]|] | ]|]]|]]|  |  |]]|]]|  |  |]]|]]|] |  |]]|
+; | ]|] |]]|  | ]|] |  |  |  |]]|]]|  | ]|] |]]|  |  |  |  | ]|] |  |  | ]|] | ]|] | ]|] | ]|] | ]|] |  |  |  |]]|
+; | ]|] | ]|] | ]|]]|]]|  | ]|] | ]|] | ]|] | ]|] |  |  |  | ]|]]|]]|  | ]|] | ]|] | ]|] | ]|] | ]|] |  |  |  |]]|
+; | ]|] | ]|] | ]|] |  |  | ]|] | ]|] | ]|] | ]|] |  |  |  | ]|] |  |  | ]|]]|]]|  | ]|] | ]|] | ]|] |]]|] |  |]]|
+; | ]|] |]]|  | ]|] |  |  | ]|]]|]]|] | ]|] |]]|  |  |  |  | ]|] |  |  | ]|] |]]|  | ]|] | ]|] | ]|] | ]|] |  |  |
+; | ]|]]|] |  | ]|]]|]]|] | ]|] | ]|] | ]|]]|] |  |  |  |  | ]|] |  |  | ]|] | ]|] |  |]]|]]|  |  |]]|]]|] |  |]]|
 
 FROGDEAD_MEM   ; Graphics data, DEAD FROG!  (37) + 3 spaces.
 	.by %00001111 %00001111 %11000011 %00001111 %00000000 %00111111 %00111110 %00011110 %00011111 %00011000
@@ -413,12 +412,12 @@ FROGDEAD_MEM   ; Graphics data, DEAD FROG!  (37) + 3 spaces.
 
 ; GAME OVER screen.
 ; Graphics chars design, GAME OVER
-; |  |**|**|* |  | *|* |  |**|  | *|* |**|**|**|  |  |  |  |**|**|  | *|* | *|* | *|**|**|* | *|**|**|  |
-; | *|* |  |  |  |**|**|  |**|* |**|* |**|  |  |  |  |  | *|* | *|* | *|* | *|* | *|* |  |  | *|* | *|* |
-; | *|* |  |  | *|* | *|* |**|**|**|* |**|**|* |  |  |  | *|* | *|* | *|* | *|* | *|**|**|  | *|* | *|* |
-; | *|* |**|* | *|* | *|* |**| *| *|* |**|  |  |  |  |  | *|* | *|* | *|* | *|* | *|* |  |  | *|**|**|  |
-; | *|* | *|* | *|**|**|* |**|  | *|* |**|  |  |  |  |  | *|* | *|* |  |**|**|  | *|* |  |  | *|* |**|  |
-; |  |**|**|* | *|* | *|* |**|  | *|* |**|**|**|  |  |  |  |**|**|  |  | *|* |  | *|**|**|* | *|* | *|* |
+; |  |]]|]]|] |  | ]|] |  |]]|  | ]|] |]]|]]|]]|  |  |  |  |]]|]]|  | ]|] | ]|] | ]|]]|]]|] | ]|]]|]]|  |
+; | ]|] |  |  |  |]]|]]|  |]]|] |]]|] |]]|  |  |  |  |  | ]|] | ]|] | ]|] | ]|] | ]|] |  |  | ]|] | ]|] |
+; | ]|] |  |  | ]|] | ]|] |]]|]]|]]|] |]]|]]|] |  |  |  | ]|] | ]|] | ]|] | ]|] | ]|]]|]]|  | ]|] | ]|] |
+; | ]|] |]]|] | ]|] | ]|] |]]| ]| ]|] |]]|  |  |  |  |  | ]|] | ]|] | ]|] | ]|] | ]|] |  |  | ]|]]|]]|  |
+; | ]|] | ]|] | ]|]]|]]|] |]]|  | ]|] |]]|  |  |  |  |  | ]|] | ]|] |  |]]|]]|  | ]|] |  |  | ]|] |]]|  |
+; |  |]]|]]|] | ]|] | ]|] |]]|  | ]|] |]]|]]|]]|  |  |  |  |]]|]]|  |  | ]|] |  | ]|]]|]]|] | ]|] | ]|] |
 
 GAMEOVER_MEM ; Graphics data, Game Over.  (34) + 6 spaces.
 	.by %00000000 %11111000 %01100011 %00011011 %11110000 %00001111 %00011001 %10011111 %10011111 %00000000
@@ -431,7 +430,7 @@ GAMEOVER_MEM ; Graphics data, Game Over.  (34) + 6 spaces.
 
 	.align $0100 ; Realign to next page.
 
-	
+
 ; Defining one line of 80 characters of Beach decorations.
 ; Each of the beach lines shows a 40 character subset of the larger line.
 ; This eliminates 5 lines worth of data.
@@ -902,7 +901,7 @@ SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 ;	.byte <GAME_DLI_SPC2    ; DLI 45 
 
 
-; Coolor tables must be big enough to contain data up to the maximum index that
+; Color tables must be big enough to contain data up to the maximum index that
 ; occurs of all the screens. 
 ; COLPF3 is white all the time.
 
@@ -982,6 +981,23 @@ PLAYERADR3 = PMADR+$700
 ; The first three pages of P/M memory are free, so plenty of space
 ; to lay out the simple and mostly un-animated frog stuff.
 
+; HPOS changes:
+; P0 == X
+; P1 == X+1
+; P2 == X+1 (+2, +3)
+; P3 == X+2
+; M0 == X+1
+
+; . - ] + . - ] + .
+; - W W W ] W W W +
+; - W B W ] W B W +
+; - W W W ] W W W +
+; - ] ] ] ] ] ] ] +
+; . - ] ] ] ] ] + .
+; . - B ] ] ] B + .
+; . . - B B B + . .
+; . . . - ] + . . .
+
 ; Players 0, 1 Are the greens of the Frog.
 ; P0                 P1
 ; . 0 0 . . 0 0 .    . 1 1 . . 1 1 .
@@ -1003,7 +1019,7 @@ PLAYER1_FROG_DATA
 ; Player 2 is the colored eye irises.
 ; 2 . . . 2 . . . 
 
-PLAYER2_FROG_DATA 
+PLAYER2_FROG_DATA  ; at Y +1, +2, or +3
 	.by $88
 
 ; Player 3 is the mouth.
@@ -1013,36 +1029,261 @@ PLAYER2_FROG_DATA
 PLAYER3_FROG_DATA
 	.by $88 $70
 
-; Player 5 (the Missiles) is COLPF3, White.
-; 1 1 . . . . . .  ; quad width
-; 1 1 . . . . . .  ; quad width
-; 1 1 . . . . . .  ; quad width
+; Player 5 (the Missile, M3) is COLPF3, White.
+; 1 1 . . . . . .  ; 
+; 1 1 . . . . . .  ; 
+; 1 1 . . . . . .  ;
+; Player 5 (the Missile, M2) is COLPF3, White.
+; . . 1 . . . . .  ; 
+; . . 1 . . . . .  ; 
+; . . 1 . . . . .  ;
+; Player 5 (the Missile, M3) is COLPF3, White.
+; . . . . 1 1 . .  ; 
+; . . . . 1 1 . .  ; 
+; . . . . 1 1 . .  ; 
+; Player 5 (the Missile, M3) is COLPF3, White.
+; . . . . . . 1 .  ; 
+; . . . . . . 1 .  ; 
+; . . . . . . 1 .  ; 
 
-PLAYER5_FROG_DATA
-	.by $C0 $C0 $C0
+PLAYER5_FROG_DATA 
+	.by $EE $EE $EE
+
+
 
 ; Splatty Frog
 ; P0                 P1
-; . 0 0 . . . 0 0    . 1 1 . . . 1 1
-; 0 0 0 0 . 0 0 0    1 1 1 1 . 1 1 1
-; . 0 0 0 . 0 0 .    . 1 1 1 . 1 1 .
-; . . . 0 0 0 . .    . . . 1 1 1 . .
-; 0 0 . 0 0 0 0 0    1 1 . 1 1 1 1 1 
-; . 0 0 0 0 0 . .    . 1 1 1 1 1 . .
-; 0 0 0 . . 0 0 .    1 1 1 . . 1 1 .
-; 0 0 0 . . 0 0 0    1 1 1 . . 1 1 1
-; . . . . . 0 0 .    . . . . . 1 1 .
+; . 0 0 .  . . 0 0    . 1 1 .  . . 1 1
+; 0 0 0 0  . 0 0 0    1 1 1 1  . 1 1 1
+; . 0 0 0  . 0 0 .    . 1 1 1  . 1 1 .
+; . . . 0  0 0 . .    . . . 1  1 1 . .
+; 0 0 . 0  0 0 0 0    1 1 . 1  1 1 1 1 
+; . 0 0 0  0 0 . .    . 1 1 1  1 1 . .
+; 0 0 0 .  . 0 0 .    1 1 1 .  . 1 1 .
+; 0 0 0 .  . 0 0 0    1 1 1 .  . 1 1 1
+; . . . .  . 0 0 .    . . . .  . 1 1 .
 
-; Interred Frog
-; P0                 P1
-; . . . . . . . .    . . . . . . . .
-; . . . . . . . .    . . . . . . . .
-; . . . . . . . .    . . . . . . . .
-; . . . 0 0 0 0 0    . . . . . . . .
-; . . . 0 . . . 0    . . . . . . . .
-; . . . 0 . 0 . 0    . . . . . . . .
-; . . . 0 . . . 0    . . . . . . . .
-; . . . 0 . 0 0 0    . . . . . . . .
-; . . . 0 . 0 0 0    . . . . . . . .
-; . . . 0 0 0 0 0    . . . . . . . .
+PLAYER0_SPLATTER_DATA
+	.by $63 $F7 $76 $1C $DF $7C $E6 $E7 06
+
+PLAYER1_SPLATTER_DATA
+	.by $63 $F7 $76 $1C $DF $7C $E6 $E7 06
+
+
+; HPOS changes:
+; P0 == X
+; P1 == X+7
+; P2 == X+5
+; P3 == X+4
+; M0 == X+2
+
+; Interred Frog for Game Over
+; . . . . . . . . ~ . . . . . .  - 1
+; . . . . . . . ~ ~ ~ . . . . .  - 2
+; . . . . . . . . ~ . . . . . .  - 3
+; . . . . . . . . ~ . . . . . .  - 4
+; . . . > > > > > ~ . . . . . .  - 5 
+; . . > > > > ~ ~ ~ ~ ~ . . . .  - 6
+; . > > > > ~ ~ ~ ~ ~ ~ ~ . . .  - 7
+; . > > > ~ ~ ~ ~ ~ ~ ~ ~ ~ . .  - 8
+; > > > ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ .  - 9
+; > > > ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ .  - 10
+; > > ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  - 11
+; > > ~ ~ ] ] ~ ~ ] ~ ] ] ~ ~ ~  - 12
+; > > ~ ~ ] ~ ] ~ ] ~ ] ~ ] ~ ~  - 13
+; > > ~ ~ ] ] ~ ~ ] ~ ] ] ~ ~ ~  - 14
+; > > ~ ~ ] ] ~ ~ ] ~ ] ~ ~ ~ ~  - 15
+; > > ~ ~ ] ~ ] ~ ] ~ ] ~ ~ ~ ~  - 16
+; > > ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  - 17
+; > > ~ ~ ~ ~ ] ] ] ] ] ~ ~ ~ ~  - 18
+; > > ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  - 19
+; > > ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  - 20 
+; > > ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  - 21
+; . > ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  - 22
+; . . ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  - 23
+
+; P0 - Darker grey shadow.
+; | . . . . | . . . . . . . . . . .  - 1  $00
+; | . . . . | . . . . . . . . . . .  - 2  $00
+; | . . . . | . . . . . . . . . . .  - 3  $00
+; | . . . . | . . . . . . . . . . .  - 4  $00
+; | . . . > | > > > > . . . . . . .  - 5  $1F
+; | . . > > | > > . . . . . . . . .  - 6  $3C
+; | . > > > | > . . . . . . . . . .  - 7  $78
+; | . > > > | . . . . . . . . . . .  - 8  $70
+; | > > > . | . . . . . . . . . . .  - 9  $E0
+; | > > > . | . . . . . . . . . . .  - 10 $E0
+; | > > . . | . . . . . . . . . . .  - 11 $C0
+; | > > . . | . . . . . . . . . . .  - 12 $C0
+; | > > . . | . . . . . . . . . . .  - 13 $C0
+; | > > . . | . . . . . . . . . . .  - 14 $C0
+; | > > . . | . . . . . . . . . . .  - 15 $C0
+; | > > . . | . . . . . . . . . . .  - 16 $C0
+; | > > . . | . . . . . . . . . . .  - 17 $C0
+; | > > . . | . . . . . . . . . . .  - 18 $C0
+; | > > . . | . . . . . . . . . . .  - 19 $C0
+; | > > . . | . . . . . . . . . . .  - 20 $C0
+; | > > . . | . . . . . . . . . . .  - 21 $C0
+; | . > . . | . . . . . . . . . . .  - 22 $40
+; | . . . . | . . . . . . . . . . .  - 23 $00
+
+PLAYER0_GRAVE_DATA
+	.by $00 $00 $00 $00 $1F $3C $78 $70
+	.by $E0 $E0 $C0 $C0 $C0 $C0 $C0 $C0 
+	.by $C0 $C0 $C0 $C0 $C0 $40 $00
+
+; P1 - Detail right side
+; . . . . . . . | . ~ . . | . . . .  - 1  $40
+; . . . . . . . | ~ ~ ~ . | . . . .  - 2  $E0
+; . . . . . . . | . ~ . . | . . . .  - 3  $40
+; . . . . . . . | . ~ . . | . . . .  - 4  $40
+; . . . . . . . | . ~ . . | . . . .  - 5  $40
+; . . . . . . . | ~ ~ ~ ~ | . . . .  - 6  $F0
+; . . . . . . . | ~ ~ ~ ~ | ~ . . .  - 7  $F8
+; . . . . . . . | ~ ~ ~ ~ | ~ ~ . .  - 8  $FC
+; . . . . . . . | ~ ~ ~ ~ | ~ ~ ~ .  - 9  $FE
+; . . . . . . . | ~ ~ ~ ~ | ~ ~ ~ .  - 10 $FE
+; . . . . . . . | ~ ~ ~ ~ | ~ ~ ~ ~  - 11 $FF
+; . . . . . . . | ~ . ~ . | . ~ ~ ~  - 12 $A7
+; . . . . . . . | ~ . ~ . | ~ . ~ ~  - 13 $AB
+; . . . . . . . | ~ . ~ . | . ~ ~ ~  - 14 $A7
+; . . . . . . . | ~ . ~ . | ~ ~ ~ ~  - 15 $AF
+; . . . . . . . | ~ . ~ . | ~ ~ ~ ~  - 16 $AF
+; . . . . . . . | ~ ~ ~ ~ | ~ ~ ~ ~  - 17 $FF
+; . . . . . . . | . . . . | ~ ~ ~ ~  - 18 $0F
+; . . . . . . . | ~ ~ ~ ~ | ~ ~ ~ ~  - 19 $FF
+; . . . . . . . | ~ ~ ~ ~ | ~ ~ ~ ~  - 20 $FF
+; . . . . . . . | ~ ~ ~ ~ | ~ ~ ~ ~  - 21 $FF
+; . . . . . . . | ~ ~ ~ ~ | ~ ~ ~ ~  - 22 $FF
+; . . . . . . . | ~ ~ ~ ~ | ~ ~ ~ ~  - 23 $FF
+
+PLAYER1_GRAVE_DATA
+	.by $40 $E0 $40 $40 $40 $F0 $F8 $FC
+	.by $FE $FE $FF $A7 $AB $A7 $AF $AF
+	.by $FF $0F $FF $FF $FF $FF $FF
+
+
+; P2 + P3 - Black RIP 
+; . . . . | . | . . . . | . . . . . .  - 1  $00 $00
+; . . . . | . | . . . . | . . . . . .  - 2  $00 $00
+; . . . . | . | . . . . | . . . . . .  - 3  $00 $00
+; . . . . | . | . . . . | . . . . . .  - 4  $00 $00
+; . . . . | . | . . . . | . . . . . .  - 5  $00 $00
+; . . . . | . | . . . . | . . . . . .  - 6  $00 $00
+; . . . . | . | . . . . | . . . . . .  - 7  $00 $00
+; . . . . | . | . . . . | . . . . . .  - 8  $00 $00
+; . . . . | . | . . . . | . . . . . .  - 9  $00 $00
+; . . . . | . | . . . . | . . . . . .  - 10 $00 $00
+; . . . . | . | . . . . | . . . . . .  - 11 $00 $00
+; . . . . | 3 | 2 . . 2 | . 2 2 . . .  - 12 $80 $96
+; . . . . | 3 | . 2 . 2 | . 2 . 2 . .  - 13 $80 $55
+; . . . . | 3 | 2 . . 2 | . 2 2 . . .  - 14 $80 $96
+; . . . . | 3 | 2 . . 2 | . 2 . . . .  - 15 $80 $94
+; . . . . | 3 | . 2 . 2 | . 2 . . . .  - 16 $80 $54
+; . . . . | . | . . . . | . . . . . .  - 17 $00 $00
+; . . . . | . | . 2 2 2 | 2 2 . . . .  - 18 $80 $7C
+; . . . . | . | . . . . | . . . . . .  - 19 $00 $00
+; . . . . | . | . . . . | . . . . . .  - 20 $00 $00
+; . . . . | . | . . . . | . . . . . .  - 21 $00 $00
+; . . . . | . | . . . . | . . . . . .  - 22 $00 $00
+; . . . . | . | . . . . | . . . . . .  - 23 $00 $00
+
+PLAYER2_GRAVE_DATA
+	.by $00 $00 $00 $00 $00 $00 $00 $00 
+	.by $00 $00 $00 $96 $55 $96 $94 $54
+	.by $00 $7C $00 $00 $00 $00 $00
+
+PLAYER3_GRAVE_DATA
+	.by $00 $00 $00 $00 $00 $00 $00 $00
+	.by $00 $00 $00 $80 $80 $80 $80 $80
+	.by $00 $80 $00 $00 $00 $00 $00
+
+
+; FYI, remaining left detail...
+; . . . . . . . . . . . . . . .  - 1
+; . . . . . . . . . . . . . . .  - 2
+; . . . . . . . . . . . . . . .  - 3
+; . . . . . . . . . . . . . . .  - 4
+; . . . . . . . . . . . . . . .  - 5 
+; . . . . . . ~ . . . . . . . .  - 6
+; . . . . . ~ ~ . . . . . . . .  - 7
+; . . . . ~ ~ ~ . . . . . . . .  - 8
+; . . . ~ ~ ~ ~ . . . . . . . .  - 9
+; . . . ~ ~ ~ ~ . . . . . . . .  - 10
+; . . ~ ~ ~ ~ ~ . . . . . . . .  - 11
+; . . ~ ~ . . ~ . . . . . . . .  - 12
+; . . ~ ~ . ~ . . . . . . . . .  - 13
+; . . ~ ~ . . ~ . . . . . . . .  - 14
+; . . ~ ~ . . ~ . . . . . . . .  - 15
+; . . ~ ~ . ~ . . . . . . . . .  - 16
+; . . ~ ~ ~ ~ ~ . . . . . . . .  - 17
+; . . ~ ~ ~ ~ . . . . . . . . .  - 18
+; . . ~ ~ ~ ~ ~ . . . . . . . .  - 19
+; . . ~ ~ ~ ~ ~ . . . . . . . .  - 20 
+; . . ~ ~ ~ ~ ~ . . . . . . . .  - 21
+; . . ~ ~ ~ ~ ~ . . . . . . . .  - 22
+; . . ~ ~ ~ ~ ~ . . . . . . . .  - 23
+
+; Masking 
+; M0 (p%) - left detail - quad width lowest priority.
+; Upper section masked by shadow (P0) and this is 
+; also lower priority than P2 and P3 displaying text.
+ 
+; . ~  - 6   ; $01
+; ~ ~  - 7   ; $03
+; ~ ~  - 7   ; $03
+; ~ ~  - 7   ; $03
+. . .
+; ~ ~  - 22  ; $03 
+; ~ ~  - 23  ; $03
+
+; . . . . . . . . . . . . . . .  - 1  $00
+; . . . . . . . . . . . . . . .  - 2  $00
+; . . . . . . . . . . . . . . .  - 3  $00
+; . . . . . . . . . . . . . . .  - 4  $00
+; . . . . . . . . . . . . . . .  - 5  $00
+; . . . . . . ~ ~ ~ ~ . . . . .  - 6  $01
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 7  $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 8  $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 9  $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 10 $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 11 $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 12 $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 13 $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 14 $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 15 $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 16 $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 17 $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 18 $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 19 $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 20 $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 21 $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 22 $03
+; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 23 $03
+
+MISSILE0
+	.by $00 $00 $00 $00 $00 $01 $03 $03
+	.by $03 $03 $03 $03 $03 $03 $03 $03
+	.by $03 $03 $03 $03 $03 $03 $03
+
+BASE_PMCOLORS_TABLE ; When "off", and so multiplication for frog = 1 works.
+	.by 0 0 0 0
+	
+FROG_PMCOLORS_TABLE ; 0, 1, 2, 3
+	.by COLOR_PURPLE_BLUE+$6 ; P2, Colored eye irises
+	.by COLOR_PINK+$8        ; P3, frog 
+	.by COLOR_GREEN+$4       ; P0, frog
+	.by COLOR_GREEN+$8       ; P1, frog
+
+SPLAT_PMCOLORS_TABLE ; 0, 1, 2, 3
+	.by COLOR_PINK+$4        ; P0, splat
+	.by COLOR_PINK+$8        ; P1, splat
+	.by COLOR_PINK+$6        ; P2, 
+	.by COLOR_PINK+$8        ; P3, 
+
+GRAVE_PMCOLORS_RABLE ; 0, 1, 2, 3
+	.by COLOR_BLACK+$4        ; P0, splat
+	.by COLOR_BLACK+$8        ; P1, splat
+	.by COLOR_BLACK+$6        ; P2, 
+	.by COLOR_BLACK+$8        ; P3, 
 
