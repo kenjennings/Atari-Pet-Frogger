@@ -190,10 +190,10 @@ FrogMoveUp
 	dec FrogRow
 	ldx FrogRow
 
-;	lda PLAYFIELD_MEM_LO_TABLE,x
-	sta FrogLocation
-;	lda PLAYFIELD_MEM_HI_TABLE,x
-	sta FrogLocation+1
+;;	lda PLAYFIELD_MEM_LO_TABLE,x
+;	sta FrogLocation
+;;	lda PLAYFIELD_MEM_HI_TABLE,x
+;	sta FrogLocation+1
 
 	ldx FrogRow ; Make sure CPU flags reflect X = 0 or !0
 
@@ -212,7 +212,7 @@ FrogMoveUp
 ; --------------------------------------------------------------------------
 WhereIsThePhysicalFrog
 	clc
-	lda FrogColumn          ; Logical position (where visible on screen)
+;	lda FrogColumn          ; Logical position (where visible on screen)
 	ldx FrogRow             ; Get the current row number.
 	ldy MOVING_ROW_STATES,x ; Get the movement flag for the row.
 	beq FrogOnTheBeach      ; Zero is no scrolling, so no math.
@@ -226,7 +226,7 @@ FrogOnBoatRight
 	adc CurrentRightOffset
 
 NormalizeFrogPositions
-	sta FrogRealColumn1
+;	sta FrogRealColumn1
 	cmp #40                   ; Where is the first calculated position
 	bcs PhysicalFrogMinus40   ; Greater than, equal to 40, so subtract 40 
 
@@ -239,10 +239,10 @@ PhysicalFrogMinus40           ; Got here due to BCS, so no SEC needed.
 	bpl SaveSecondPosition
 
 FrogOnTheBeach                ; No alternate position for beach rows.  Trick the
-	sta FrogRealColumn1       ; future use by keeping the same value for both...
+;	sta FrogRealColumn1       ; future use by keeping the same value for both...
 
 SaveSecondPosition
-	sta FrogRealColumn2       ; 
+;	sta FrogRealColumn2       ; 
 
 ExitWhereIsThePhysicalFrog
 	jsr GetScreenMemoryUnderFrog ; Update the cached character where the frog resides.
@@ -268,7 +268,7 @@ ExitWhereIsThePhysicalFrog
 ; FrogSafety (and Z flag) indicates frog is now dead.
 ; --------------------------------------------------------------------------
 AnticipateFrogDeath
-	ldy FrogColumn          ; Logical position (where visible on screen)
+;	ldy FrogColumn          ; Logical position (where visible on screen)
 	ldx FrogRow             ; Get the current row number.
 	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
 	beq ExitFrogNowAlive    ; Is it 0?  Beach. Nothing to do.  Bail.
@@ -305,18 +305,18 @@ ExitFrogNowAlive
 ; 255 = second boat/river row, move left.
 ; --------------------------------------------------------------------------
 AutoMoveFrog
-	ldy FrogColumn          ; Logical position (where visible on screen)
+;	ldy FrogColumn          ; Logical position (where visible on screen)
 	ldx FrogRow             ; Get the current row number
 	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
 	beq ExitAutoMoveFrog    ; Is it 0?  Nothing to do.  Bail.
 	bpl AutoFrogRight       ; is it $1?  then automatic right move.
 
 ; Auto Frog Left
-	dec FrogColumn            ; It is not 0, so move Frog left one character
+;	dec FrogColumn            ; It is not 0, so move Frog left one character
 	rts                       ; Done, successful move.
 
 AutoFrogRight
-	inc FrogColumn            ; Move Frog right one character
+;	inc FrogColumn            ; Move Frog right one character
 
 ExitAutoMoveFrog
 	rts                       ; Done, successful move.

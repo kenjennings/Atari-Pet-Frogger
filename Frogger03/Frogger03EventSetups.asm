@@ -122,17 +122,17 @@ SetupGame
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
 
 	lda #<PLAYFIELD_MEM18   ; Low Byte, Frog position.
-	sta FrogLocation
+;	sta FrogLocation
 	lda #>PLAYFIELD_MEM18   ; Hi Byte, Frog position.
-	sta FrogLocation + 1
+;	sta FrogLocation + 1
 
 	lda #18                 ; 18 (dec), number of screen rows of game field.
 	sta FrogRow
 
 	ldy #19                 ; Frog horizontal coordinate, Y = 19 (dec)
-	sty FrogColumn          ; Logical X coordinate
-	sty FrogRealColumn1     ; On a Beach row the physical locations are the same.
-	sty FrogRealColumn2     ; If on a scroll row then they are different.
+;	sty FrogColumn          ; Logical X coordinate
+;	sty FrogRealColumn1     ; On a Beach row the physical locations are the same.
+;	sty FrogRealColumn2     ; If on a scroll row then they are different.
 
 ;	lda #I_FROG             ; We're using $7F as the frog shape.
 ;	sta (FrogLocation),y    ; PLAYFIELD_MEM18 (beach) + $13/19 (dec)

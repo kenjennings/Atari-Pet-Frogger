@@ -244,7 +244,7 @@ SetFrogOnScreen
 ; Note this falls right into UpdateFrogInMemory.
 ; --------------------------------------------------------------------------
 RemoveFrogOnScreen
-	lda LastCharacter  ; Get the last character (under the frog)
+;	lda LastCharacter  ; Get the last character (under the frog)
 
 ; ==========================================================================
 ; Update the frog image in screen memeory.
@@ -269,10 +269,10 @@ RemoveFrogOnScreen
 ; It could be the frog, splattered frog, or the character under the frog.
 ; --------------------------------------------------------------------------
 UpdateFrogInScreenMemory
-	ldy FrogRealColumn1  ; Current X coordinate
-	sta (FrogLocation),y ; Erase the frog with the last character.
-	ldy FrogRealColumn2  ; Current X coordinate of alternate scroll location
-	sta (FrogLocation),y ; Erase the frog with the last character.
+;	ldy FrogRealColumn1  ; Current X coordinate
+;	sta (FrogLocation),y ; Erase the frog with the last character.
+;	ldy FrogRealColumn2  ; Current X coordinate of alternate scroll location
+;	sta (FrogLocation),y ; Erase the frog with the last character.
 
 	rts
 
@@ -282,9 +282,9 @@ UpdateFrogInScreenMemory
 ; Save it to lastCharacter to restore as needed.
 ; --------------------------------------------------------------------------
 GetScreenMemoryUnderFrog
-	ldy FrogRealColumn1
-	lda (FrogLocation),y
-	sta lastCharacter
+;	ldy FrogRealColumn1
+;	lda (FrogLocation),y
+;	sta lastCharacter
 
 	rts
 
@@ -631,7 +631,7 @@ libPmgInit
 	sta GPRIOR
 
 	ldx #1 ; Frog Shape
-	jsr setPmgColors
+	jsr libPmgSetColors
 
 	; Player 5 (the Missiles) is COLPF3, White.
 	lda #COLOR_BLACK+$C
@@ -698,7 +698,7 @@ libPmgClearBitmaps
 	tax      ; count 0 to 255.
 
 bCBloop
-	sta MISSILEADR0,x ; Missiles
+	sta MISSILEADR,x ; Missiles
 	sta PLAYERADR0,x  ; Player 0
 	sta PLAYERADR1,x  ; Player 1
 	sta PLAYERADR2,x  ; Player 2

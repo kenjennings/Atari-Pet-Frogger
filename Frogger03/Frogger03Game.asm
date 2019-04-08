@@ -76,9 +76,6 @@ GAMESTART
 
 	jsr libPmgInit             ; Will also reset SDMACTL settings for P/M DMA
 
-;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_NORMAL
-;	sta SDMCTL
-
 	lda #4                     ; Quick hack to init the scrolling credits.
 	sta HSCROL
 

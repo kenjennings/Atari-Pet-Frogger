@@ -132,11 +132,11 @@ TestTransTitle2
 	bne TestTransTitle3
 
 GlowingTitleUnderline
-	lda COLPF1_TABLE+5         ; Get the text brightness of line 4.
-	cmp #$0E                   ; It is maximum brightness?
-	beq FinishedNowSetupStage3 ; Yes.  Time for the next stage.
-	inc COLPF1_TABLE+5         ; No. Increment brightness.
-	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
+;	lda COLPF1_TABLE+5         ; Get the text brightness of line 4.
+;	cmp #$0E                   ; It is maximum brightness?
+;	beq FinishedNowSetupStage3 ; Yes.  Time for the next stage.
+;	inc COLPF1_TABLE+5         ; No. Increment brightness.
+;	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
 
 FinishedNowSetupStage3
 	lda #3                    ; Set stage 3 as next part of Title screen event...
@@ -365,10 +365,10 @@ LeftStickTest
 	ror                      ; Roll out low bit. LEFT
 	bcc RightStickTest       ; No bit. Try Right.
 
-	ldy FrogColumn           ; Get "logical" apparent screen position.
+;	ldy FrogColumn           ; Get "logical" apparent screen position.
 	beq SaveNewFrogLocation  ; Already 0. Can't move left. Redraw frog.
 	dey                      ; Move Y to left.
-	sty FrogColumn
+;	sty FrogColumn
 	jsr PlayThump            ; Sound for when frog moves.
 	bpl SaveNewFrogLocation  ; Place frog on screen
 
@@ -376,11 +376,11 @@ RightStickTest
 	ror                      ; Roll out low bit. RIGHT
 	bcc ReplaceFrogOnScreen  ; No bit.  Replace Frog on screen.  Try boat animation.
 
-	ldy FrogColumn           ; Get "logical" apparent screen position.
+;	ldy FrogColumn           ; Get "logical" apparent screen position.
 	cpy #39                  ; Is it at limit?
 	beq SaveNewFrogLocation  ; At limit. Can't move right. Redraw frog.
 	iny                      ; Move Y to right.
-	sty FrogColumn
+;	sty FrogColumn
 	jsr PlayThump            ; Sound for when frog moves.
 	
 ; Row greater than 0.  Evaluate good/bad jump.
