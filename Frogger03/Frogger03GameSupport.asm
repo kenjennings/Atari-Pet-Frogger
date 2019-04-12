@@ -177,6 +177,7 @@ ExitHighScoreOrNot
 ;
 ; Add 10 to the score.
 ; Decrement the Row counter.
+; Set new Frog screen position.
 ; Update Playfield pointer based from table based on row number.
 ;
 ; On return BEQ means the frog has reached safety.
@@ -187,8 +188,13 @@ ExitHighScoreOrNot
 FrogMoveUp
 	jsr Add10ToScore
 
+	sec
+	lda FrogPMY    ; Old Frog vertical screen position.
+	sbc #9         ; 9 scan lines per row.
+	sta FrogNewPMY ; New location is one row higher.
+
 	dec FrogRow
-	ldx FrogRow
+;	ldx FrogRow
 
 ;;	lda PLAYFIELD_MEM_LO_TABLE,x
 ;	sta FrogLocation
@@ -199,6 +205,10 @@ FrogMoveUp
 
 	rts
 
+
+	; This has no direct purpose since the frog is not in screen memory.
+	; But, position adjustment/calculation is a thing for the P/M frog
+	; which is similar to this function.
 
 ; ==========================================================================
 ; Determine the new, real memory location of the frog.
@@ -211,44 +221,51 @@ FrogMoveUp
 ; second position is +40.   Otherwise the second position is -40
 ; --------------------------------------------------------------------------
 WhereIsThePhysicalFrog
-	clc
-;	lda FrogColumn          ; Logical position (where visible on screen)
-	ldx FrogRow             ; Get the current row number.
-	ldy MOVING_ROW_STATES,x ; Get the movement flag for the row.
-	beq FrogOnTheBeach      ; Zero is no scrolling, so no math.
-	bpl FrogOnBoatRight     ; +1 is boats going right
+;	clc
+;;	lda FrogColumn          ; Logical position (where visible on screen)
+;	ldx FrogRow             ; Get the current row number.
+;	ldy MOVING_ROW_STATES,x ; Get the movement flag for the row.
+;	beq FrogOnTheBeach      ; Zero is no scrolling, so no math.
+;	bpl FrogOnBoatRight     ; +1 is boats going right
 
-	; Determine frog on boats going left.
-	adc CurrentLeftOffset      ; Add scroll position to the logical column
-	bcc NormalizeFrogPositions ; Calculate second frog position
+;	; Determine frog on boats going left.
+;	adc CurrentLeftOffset      ; Add scroll position to the logical column
+;	bcc NormalizeFrogPositions ; Calculate second frog position
 
 FrogOnBoatRight
-	adc CurrentRightOffset
+;	adc CurrentRightOffset
 
 NormalizeFrogPositions
-;	sta FrogRealColumn1
-	cmp #40                   ; Where is the first calculated position
-	bcs PhysicalFrogMinus40   ; Greater than, equal to 40, so subtract 40 
+;;	sta FrogRealColumn1
+;	cmp #40                   ; Where is the first calculated position
+;	bcs PhysicalFrogMinus40   ; Greater than, equal to 40, so subtract 40 
 
-	; BCC == Less than 40, so add 40. 
-	adc #40
-	bpl SaveSecondPosition    ; We know the maximum value is 79
+;	; BCC == Less than 40, so add 40. 
+;	adc #40
+;	bpl SaveSecondPosition    ; We know the maximum value is 79
 
 PhysicalFrogMinus40           ; Got here due to BCS, so no SEC needed.
-	sbc #40 
-	bpl SaveSecondPosition
+;	sbc #40 
+;	bpl SaveSecondPosition
 
 FrogOnTheBeach                ; No alternate position for beach rows.  Trick the
-;	sta FrogRealColumn1       ; future use by keeping the same value for both...
+;;	sta FrogRealColumn1       ; future use by keeping the same value for both...
 
 SaveSecondPosition
-;	sta FrogRealColumn2       ; 
+;;	sta FrogRealColumn2       ; 
 
 ExitWhereIsThePhysicalFrog
-	jsr GetScreenMemoryUnderFrog ; Update the cached character where the frog resides.
+;	jsr GetScreenMemoryUnderFrog ; Update the cached character where the frog resides.
 
 	rts
 
+
+	; This does not have direct purpose.
+	; Frog Death occurs when 
+	; 1) Frog is on a boat row, and there is no collision with 
+	;    the special boat color.
+	; 2) Frog is on a boat row, and the automatic movement would move
+	;    the frog past the minimum or maximum screen position.
 
 ; ==========================================================================
 ; ANTICIPATE FROG DEATH

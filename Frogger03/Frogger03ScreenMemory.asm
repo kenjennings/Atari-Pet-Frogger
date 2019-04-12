@@ -390,8 +390,6 @@ FROGSAVE_MEM   ; Graphics data, SAVED!  43 pixels.  40 - 21 == 19 blanks. 43 + 1
 	.by %00000000 %00000000 %00001111 %00011001 %10000110 %00011111 %10011110 %00001100 %00000000 %00000000
 
 
-
-
 ; FROG DEAD screen.
 ; Graphics chars design, DEAD FROG!
 ; | ]|]]|] |  | ]|]]|]]|] |  | ]|] |  | ]|]]|] |  |  |  |  | ]|]]|]]|] | ]|]]|]]|  |  |]]|]]|  |  |]]|]]|] |  |]]|
@@ -1000,15 +998,15 @@ PLAYERADR3 = PMADR+$700
 
 ; Players 0, 1 Are the greens of the Frog.
 ; P0                 P1
-; . 0 0 . . 0 0 .    . 1 1 . . 1 1 .
-; 0 . . . 0 . . .    . . . 1 . . . 1
-; 0 . . . 0 . . .    . . . 1 . . . 1
-; 0 . . . 0 . . .    . . . 1 . . . 1
-; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1
-; . 0 0 0 0 0 0 .    . 1 1 1 1 1 1 .
-; . 0 . 0 0 0 . .    . . 1 1 1 . 1 .
-; . . 0 . . . . .    . . . . . 1 . .
-; . . . 0 0 . . .    . . . 1 1 . . .
+; . 0 0 . . 0 0 .    . 1 1 . . 1 1 .  - 0
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 1
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 2
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 3 
+; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1  - 4
+; . 0 0 0 0 0 0 .    . 1 1 1 1 1 1 .  - 5
+; . 0 . 0 0 0 . .    . . 1 1 1 . 1 .  - 6
+; . . 0 . . . . .    . . . . . 1 . .  - 7
+; . . . 0 0 . . .    . . . 1 1 . . .  - 8
 
 PLAYER0_FROG_DATA 
 	.by $66 $88 $88 $88 $FE $7E $5C $20 $18
@@ -1016,32 +1014,35 @@ PLAYER0_FROG_DATA
 PLAYER1_FROG_DATA
 	.by $66 $11 $11 $11 $7F $7E $3A $04 $18
 
+; The small frog parts are padded to minimum 3 bytes so they 
+; can be redrawn in a common loop.
+
 ; Player 2 is the colored eye irises.
 ; 2 . . . 2 . . . 
 
 PLAYER2_FROG_DATA  ; at Y +1, +2, or +3
-	.by $88
+	.by $88 $00 $00
 
 ; Player 3 is the mouth.
 ; 3 . . . 3 . . .
 ; . 3 3 3 . . . .
 
 PLAYER3_FROG_DATA
-	.by $88 $70
+	.by $88 $70 $00
 
-; Player 5 (the Missile, M3) is COLPF3, White.
+; Player 5 (the Missile, M3) is COLPF3, White. +1 
 ; 1 1 . . . . . .  ; 
 ; 1 1 . . . . . .  ; 
 ; 1 1 . . . . . .  ;
-; Player 5 (the Missile, M2) is COLPF3, White.
+; Player 5 (the Missile, M2) is COLPF3, White. +3
 ; . . 1 . . . . .  ; 
 ; . . 1 . . . . .  ; 
 ; . . 1 . . . . .  ;
-; Player 5 (the Missile, M3) is COLPF3, White.
+; Player 5 (the Missile, M1) is COLPF3, White.+5
 ; . . . . 1 1 . .  ; 
 ; . . . . 1 1 . .  ; 
 ; . . . . 1 1 . .  ; 
-; Player 5 (the Missile, M3) is COLPF3, White.
+; Player 5 (the Missile, M0) is COLPF3, White.+7
 ; . . . . . . 1 .  ; 
 ; . . . . . . 1 .  ; 
 ; . . . . . . 1 .  ; 

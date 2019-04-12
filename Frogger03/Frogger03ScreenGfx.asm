@@ -560,7 +560,7 @@ HideButtonPrompt
 ; 5. Copy the color tables to the current lookups.
 ;
 ; A  is the DISPLAY_* value (defined elsewhere) for the desired display.
-; Y  is used to turn off the Press A Button Prompt, and loop throrugh 
+; Y  is used to turn off the Press A Button Prompt, and loop through 
 ;    the color tables.
 ; --------------------------------------------------------------------------
 
@@ -575,14 +575,24 @@ LoopChangeScreenWaitForVBI
 	beq LoopChangeScreenWaitForVBI ; Yes.
 
 	; The VBI has changed the display and loaded page zero pointers.
+
+	; Display Win, Dead and Game Over are the same display lists.  
+	; The only difference is the LMS to point to the big text.
+	; So, reassign that here.
+	tay
+	lda DISPLAYLIST_GFXLMS_TABLE
+	beq bCSSkipLMSUpdate
+	sta GFX_LMS
+
 	; Now update the color tables.
 
-	lda #0               ; Always force prompt line to off, 0 color
-	sta COLPF2_TABLE+23
-	sta COLPF1_TABLE+23
-	sta COLPF2_TABLE+24
-	lda #$0C               ; And the credits on.
-	sta COLPF1_TABLE+24
+;	lda #0               ; Always force prompt line to off, 0 color
+;	sta COLPF2_TABLE+23
+;	sta COLPF1_TABLE+23
+;	sta COLPF2_TABLE+24
+;	lda #$0C               ; And the credits on.
+;	sta COLPF1_TABLE+24
+
 
 	ldy #22
 LoopCopyColors
@@ -595,9 +605,7 @@ LoopCopyColors
 
 	rts
 
-	
-	
-	
+
 ;==============================================================================
 ;												PmgInit  A  X  Y
 ;==============================================================================
@@ -636,16 +644,6 @@ libPmgInit
 	; Player 5 (the Missiles) is COLPF3, White.
 	lda #COLOR_BLACK+$C
 	sta COLOR3         ; OS shadow for color, no DLI changes.
-
-	; Set Player/Missile sizes
-	lda #PM_SIZE_NORMAL
-	sta SIZEP0
-	sta SIZEP1
-	sta SIZEP2
-	sta SIZEP3
-
-	lda #PM_SIZE_QUAD ; Eyeballs are Missile/P5 showing through the holes in head.
-	sta SIZEM
 
 	rts 
 
@@ -732,6 +730,141 @@ libPmgSetColors
 	rts
 
 
+
 ;==============================================================================
-;											PmgSetColors  A  X
+;											EraseFrog  A  X  Y
 ;==============================================================================
+; Erase old Frog at old position.
+
+EraseFrog
+	lda #0
+	ldx FrogPMY            ; Old frog Y
+	ldy #2
+
+bLoopEF_EraseCommon
+	sta PLAYERADR0,x   ; main frog 1
+	sta PLAYERADR1,x   ; main frog 2
+	sta PLAYERADR2+1,x ; iris
+	sta PLAYERADR3+6,x ; mouth
+	sta MISSILEADR+1,x ; eyeballs
+	inx
+	dey
+	bpl bLoopEF_EraseCommon
+
+	ldy #5
+bLoopEF_EraseRemainder
+	sta PLAYERADR0,x   ; main frog 1
+	sta PLAYERADR1,x   ; main frog 2
+	inx
+	dey
+	bpl bLoopEF_EraseRemainder
+
+	rts
+
+
+;==============================================================================
+;											DrawFrog  A  X  Y
+;==============================================================================
+; Draw old Frog at new position.
+
+DrawFrog
+	ldx FrogNewPMY            ; New frog Y
+	ldy #2
+
+bLoopDF_DrawCommon
+	lda PLAYER0_FROG_DATA,y
+	sta PLAYERADR0+2,x
+	lda PLAYER1_FROG_DATA,y
+	sta PLAYERADR1+2,x
+	lda PLAYER2_FROG_DATA,y
+	sta PLAYERADR2+3,x
+	lda PLAYER3_FROG_DATA,y
+	sta PLAYERADR2+8,x
+	dex
+	dey
+	bpl bLoopDF_DrawCommon
+
+	; Note, have subtracted 3 from frog Y, so compensate in offsets
+	ldy #5
+bLoopDF_DrawRemainder
+	lda PLAYER0_FROG_DATA+3,y 
+	sta PLAYERADR0+9,x
+	lda PLAYER1_FROG_DATA+3,y 
+	sta PLAYERADR1+9,x
+	dex
+	dey
+	bpl bLoopDF_DrawRemainder
+
+	rts
+
+
+;==============================================================================
+;											UpdateFrog  A  X  Y
+;==============================================================================
+; Erase old Frog position if needed.
+; Load frog into PM Memory at the new position.
+; Update current position == new position.
+
+UpdateFrog
+	ldx FrogPMY            ; Old frog Y...
+	cpx FrogNewPMY         ; ...is different from new frog Y?
+	beq bUFSkipFrogRedraw  ; No.  Skip erase/redraw.
+
+	; 1) Erase frog.
+	jsr EraseFrog
+
+	; Set current Frog Y == New Frog Y
+	ldx FrogNewPMY
+	stx FrogPMY
+
+	; 2) load new frog image
+	jsr DrawFrog
+
+bUFSkipFrogRedraw
+
+	; Set Player/Missile sizes
+	lda #PM_SIZE_NORMAL ; aka $00
+	sta SIZEP0 ; Frog parts 1
+	sta SIZEP1 ; Frog parts 2
+	sta SIZEP2 ; Frog colored iris
+	sta SIZEP3 ; Frog mouth
+	sta SIZEM  ; Eyeballs are Missile/P5 showing through the holes in head. (All need to be set 0)
+
+	ldx FrogNewPMX            ; New frog X...
+	cpx FrogPMX               ; ...is different from old frog X?
+	beq bUFSkipFrogReposition ; No.  Skip horizontal position update.
+
+	; Set current Frog X == New Frog X
+	stx FrogPMX
+
+	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
+	stx HPOSP0 ; + 0 is frog parts 1
+	inx
+	stx HPOSP1 ; + 1 is frog parts 2
+	stx HPOSM3 ; + 1 is p5 frog eyes
+	inx
+	stx HPOSP2 ; + 2 is frog eye iris
+	stx HPOSP3 ; + 2 is frog mouth
+	inx
+	stx HPOSM2 ; + 3 is p5 frog eyes
+	inx
+	inx
+	stx HPOSM1 ; + 5 is p5 frog eyes
+	inx
+	inx
+	stx HPOSM0 ; + 7 is p5 frog eyes
+
+bUFSkipFrogReposition
+
+	rts
+
+
+
+
+
+
+
+
+
+
+

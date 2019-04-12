@@ -51,9 +51,17 @@ SetupTransitionToTitle
 ;	lda #<TITLE_MEM3         ; for scrolling
 ;	sta SCROLL_TITLE_LMS2    ; in the title.
 
+;DISPLAY_TITLE = 0
+;DISPLAY_GAME  = 1
+;DISPLAY_WIN   = 2
+;DISPLAY_DEAD  = 3
+;DISPLAY_OVER  = 4
+
+	lda #DISPLAY_WIN        ; Tell VBI to change screens.
+
 ;	lda #DISPLAY_TITLE       ; Tell VBI to change screens.
-	lda #DISPLAY_GAME       ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
+
 
 	ldx #24
 TempLoopCopyToTitle
@@ -121,18 +129,29 @@ SetupGame
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
 
-	lda #<PLAYFIELD_MEM18   ; Low Byte, Frog position.
+;	lda #<PLAYFIELD_MEM18   ; Low Byte, Frog position.
 ;	sta FrogLocation
-	lda #>PLAYFIELD_MEM18   ; Hi Byte, Frog position.
+;	lda #>PLAYFIELD_MEM18   ; Hi Byte, Frog position.
 ;	sta FrogLocation + 1
 
 	lda #18                 ; 18 (dec), number of screen rows of game field.
 	sta FrogRow
 
-	ldy #19                 ; Frog horizontal coordinate, Y = 19 (dec)
+	lda #MIN_FROGX          ; Set "old" position to trigger Update to redraw.  
+	sta FrogPMX             ; 
+	lda #20
+	sta FrogPMY             ; 
+
+	lda #MAX_FROGY          ; Set new Y position to origin. (row 18)
+	sta FrogNewPMY
+
+;	ldy #19                 ; Frog horizontal coordinate, Y = 19 (dec)
 ;	sty FrogColumn          ; Logical X coordinate
 ;	sty FrogRealColumn1     ; On a Beach row the physical locations are the same.
 ;	sty FrogRealColumn2     ; If on a scroll row then they are different.
+
+	lda #MID_FROGX          ; Set new X position to middle of screen.
+	sta FrogNewPMX
 
 ;	lda #I_FROG             ; We're using $7F as the frog shape.
 ;	sta (FrogLocation),y    ; PLAYFIELD_MEM18 (beach) + $13/19 (dec)

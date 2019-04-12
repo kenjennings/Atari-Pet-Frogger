@@ -355,7 +355,7 @@ UpStickTest
 	ror                      ; Roll out low bit. UP
 	bcc LeftStickTest        ; No bit. Try Left.
 
-	jsr FrogMoveUp           ; Yes, go do UP. Subtract from FrogRow.
+	jsr FrogMoveUp           ; Yes, go do UP. Subtract from FrogRow and PM Y position.
 	beq DoSetupForFrogWins   ; No more rows to cross. Update to frog Wins!
 	jsr PlayThump            ; Sound for when frog moves.
 	bne SaveNewFrogLocation  ; Row greater than 0.  Evaluate good/bad position.
@@ -366,23 +366,51 @@ LeftStickTest
 	bcc RightStickTest       ; No bit. Try Right.
 
 ;	ldy FrogColumn           ; Get "logical" apparent screen position.
-	beq SaveNewFrogLocation  ; Already 0. Can't move left. Redraw frog.
-	dey                      ; Move Y to left.
+;	beq SaveNewFrogLocation  ; Already 0. Can't move left. Redraw frog.
+;	dey                      ; Move Y to left.
 ;	sty FrogColumn
-	jsr PlayThump            ; Sound for when frog moves.
-	bpl SaveNewFrogLocation  ; Place frog on screen
+
+	ldy FrogPMX              ; Get current Frog position
+	cpy #MIN_FROGX+1         ; Is it at minimum now? 
+	bcc SaveNewFrogLocation  ; Yes, skip input.
+
+	dey                      ; - minus 2 color clocks.
+	dey 
+
+	cmp #MIN_FROGX           ; Did it go less than minimum?
+	bcs FrogHasMoved         ; No.  Do not reset.
+
+	ldy #MIN_FROGX
+	sty FrogNewPMX
+	bne FrogHasMoved         ; Done here.  Frog moved.
 
 RightStickTest
 	ror                      ; Roll out low bit. RIGHT
 	bcc ReplaceFrogOnScreen  ; No bit.  Replace Frog on screen.  Try boat animation.
 
 ;	ldy FrogColumn           ; Get "logical" apparent screen position.
-	cpy #39                  ; Is it at limit?
-	beq SaveNewFrogLocation  ; At limit. Can't move right. Redraw frog.
-	iny                      ; Move Y to right.
+;	cpy #39                  ; Is it at limit?
+;	beq SaveNewFrogLocation  ; At limit. Can't move right. Redraw frog.
+;	iny                      ; Move Y to right.
 ;	sty FrogColumn
+
+	ldy FrogPMX              ; Get current Frog position
+	cpy #MAX_FROGX           ; Is it at maximum now? 
+	bcs SaveNewFrogLocation  ; Yes, skip input.
+
+	iny                      ; - minus 2 color clocks.
+	iny 
+
+	cmp #MAX_FROGX+1         ; Did it go greater than maximum?
+	bcs FrogHasMoved         ; No.  Do not reset.
+
+	ldy #MAX_FROGX
+	sty FrogNewPMX
+
+FrogHasMoved
 	jsr PlayThump            ; Sound for when frog moves.
-	
+	bpl SaveNewFrogLocation  ; Place frog on screen
+
 ; Row greater than 0.  Evaluate good/bad jump.
 SaveNewFrogLocation
 	jsr WhereIsThePhysicalFrog ; Update Frog Real Positions and the LastCharacter found there.

@@ -46,17 +46,38 @@ GAME_OVER_SPEED  = 12  ; Speed of Game over Res in animation
 
 
 ; Timer values.  NTSC.
-; About 7 Inputs per second.
+; About 9-ish Inputs per second.
 ; After processing input (from the joystick) this is the number of frames
 ; to count before new input is accepted.  This prevents moving the frog at
 ; 60 fps and compensates for any jitter/uneven toggling of the joystick
 ; bits by flaky controllers.
-INPUTSCAN_FRAMES = $09
+; At 9 events per second the frog moves horizontally 18 color clocks, max. 
+INPUTSCAN_FRAMES = $07 ; previously $09
 
-; based on number of frogs, how many frames between boat movements...
-ANIMATION_FRAMES .byte 30,25,20,18,15,13,11,10,9,8,7,6,5,4,3
+; Based on number of frogs, how many frames between the boats' 
+; character-based coarse scroll movement:
+; ANIMATION_FRAMES .byte 30,25,20,18,15,13,11,10,9,8,7,6,5,4,3
+;
+; Fine scroll increments 4 times faster to equal one character 
+; movement per timer above. 
+;
+; Minimum coarse scroll speed was 2 character per second, or 8 
+; color clocks per second, or between 7 and 8 frames per color clock.
+; The fine scroll will start at 10 frames per color clock.
+;
+; Maximum coarse scroll speed (3 frames == 20 character movements 
+; per second) was the equivalent of 4 color clocks in 3 frames.
+; The fine scroll speed will max out at 1 color clock per frame.
+;
+; The Starting speed is slower than the coarse scrolling version.
+; It ramps up to maximum speed in fewer levels/rescued frogs, and 
+; the maximum speed is slightly slower than the fastest coarse scroll
+; speed (still, this is 60 FPS fine scroll which is faaast.)
 
-MAX_FROG_SPEED=14
+ANIMATION_FRAMES .by 10 9 8 7 6 5 4 3 2 1 0
+ANIMATION_INCR   .by 1  1 1 1 1 1 1 1 1 1 1
+
+MAX_FROG_SPEED=10
 
 
 ; Timer values.  PAL ?? guesses...
