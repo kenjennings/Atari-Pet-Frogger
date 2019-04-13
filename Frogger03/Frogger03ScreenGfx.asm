@@ -580,9 +580,10 @@ LoopChangeScreenWaitForVBI
 	; The only difference is the LMS to point to the big text.
 	; So, reassign that here.
 	tay
-	lda DISPLAYLIST_GFXLMS_TABLE
+	lda DISPLAYLIST_GFXLMS_TABLE,y
 	beq bCSSkipLMSUpdate
 	sta GFX_LMS
+bCSSkipLMSUpdate
 
 	; Now update the color tables.
 
