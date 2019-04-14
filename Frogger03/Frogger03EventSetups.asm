@@ -57,21 +57,28 @@ SetupTransitionToTitle
 ;DISPLAY_DEAD  = 3
 ;DISPLAY_OVER  = 4
 
-	lda #DISPLAY_DEAD        ; Tell VBI to change screens.
 
 ;	lda #DISPLAY_TITLE       ; Tell VBI to change screens.
+;	lda #DISPLAY_GAME        ; Tell VBI to change screens.
+;	lda #DISPLAY_DEAD        ; Tell VBI to change screens.
+	lda #DISPLAY_WIN         ; Tell VBI to change screens.
+;	lda #DISPLAY_OVER        ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
 
-	ldx #45
+	ldx #46
 TempLoopCopyToTitle
 ;	lda TITLE_BACK_COLORS,x
 ;	lda GAME_BACK_COLORS,x
-	lda DEAD_BACK_COLORS,x
+;	lda DEAD_BACK_COLORS,x
+	lda WIN_BACK_COLORS,x
+;	lda OVER_BACK_COLORS,x
 	sta COLBK_TABLE,x
 
 ;	lda GAME_COLPF0_COLORS,x
-	lda DEAD_TEXT_COLORS,x
+;	lda DEAD_TEXT_COLORS,x
+	lda WIN_TEXT_COLORS,x
+;	lda OVER_TEXT_COLORS,x
 	sta COLPF0_TABLE,x
 
 ;	lda TITLE_TEXT_COLORS,x
@@ -83,7 +90,8 @@ TempLoopCopyToTitle
 
 	dex
 	bpl TempLoopCopyToTitle
-	
+
+
 	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
 	sta CurrentScreen
 

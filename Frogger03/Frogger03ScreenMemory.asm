@@ -506,7 +506,7 @@ SCREEN_SAVED
 ; COLOR_LITE_ORANGE =  $F0
 
 TITLE_BACK_COLORS
-	.by COLOR_BLACK        COLOR_BLACK              ; Scores, and blank line
+	.by COLOR_PINK        COLOR_BLACK              ; Scores, and blank line
 	.by COLOR_BLUE1        COLOR_PURPLE_BLUE+2      ; Title lines
 	.by COLOR_PURPLE+4     COLOR_PINK+6             ; Title lines
 	.by COLOR_RED_ORANGE+8 COLOR_ORANGE2+10         ; Title lines
@@ -520,11 +520,10 @@ TITLE_BACK_COLORS
 	.by COLOR_PINK COLOR_PINK                       ; Controls
 
 TITLE_TEXT_COLORS ; Text luminance
-	.by $0C $0C                                     ; Scores, and blank line
+	.by $0E $08                                     ; Scores, and blank line
 	.by COLOR_ORANGE_GREEN+$0C $DA $C8 $B6 $A4 $92 $C2                 ; title
 	.by $00                                         ; blank
-	.by $04 $06 $08 $0A                             ; Instructions
-	.by $0C $0A $08 $06                             ; Instructions
+	.by $04 $06 $08 $0A $0C $0A $08 $06             ; Instructions
 	.by $00                                         ; blank
 	.by $06 $08 $0a                                 ; Scoring
 	.by $00                                         ; blank
@@ -533,7 +532,7 @@ TITLE_TEXT_COLORS ; Text luminance
 
 
 GAME_BACK_COLORS
-	.by COLOR_BLACK 
+	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by COLOR_BLACK                    ; Scores, lives, saved frogs.
 	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
 	
@@ -565,7 +564,7 @@ GAME_BACK_COLORS
 
 
 GAME_COLPF0_COLORS
-	.by COLOR_BLACK 
+	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
 	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
 
@@ -598,7 +597,7 @@ GAME_COLPF0_COLORS
 
 
 GAME_COLPF2_COLORS
-	.by COLOR_BLACK 
+	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
 	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
 	
@@ -633,7 +632,7 @@ GAME_COLPF2_COLORS
 
 
 GAME_TEXT_COLORS ; COLPF1 Text luminance
-	.by COLOR_BLACK
+	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by COLOR_BLACK+$e                        ; Scores, 
 	.by COLOR_BLACK+$a                        ; lives, saved frogs.
 	
@@ -682,22 +681,24 @@ GAME_TEXT_COLORS ; COLPF1 Text luminance
 
 
 DEAD_BACK_COLORS ; Text luminance
-	.by 0
+	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
+	.by COLOR_PURPLE_BLUE+2  COLOR_PURPLE_BLUE+4  COLOR_PURPLE_BLUE+6  COLOR_PURPLE_BLUE+8
 	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
-	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
-	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
+	.by COLOR_PURPLE_BLUE+2  COLOR_PURPLE_BLUE+4  COLOR_PURPLE_BLUE+6  COLOR_PURPLE_BLUE+8
 	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
 
 	.by COLOR_PURPLE COLOR_PURPLE+2 COLOR_PURPLE+4 COLOR_PURPLE+6 COLOR_PURPLE+8 COLOR_PURPLE+10 
 
 	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
+	.by COLOR_PURPLE_BLUE+2  COLOR_PURPLE_BLUE+4  COLOR_PURPLE_BLUE+6  COLOR_PURPLE_BLUE+8
 	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
-	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
-	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
+	.by COLOR_PURPLE_BLUE+2  COLOR_PURPLE_BLUE+4  COLOR_PURPLE_BLUE+6  COLOR_PURPLE_BLUE+8
 	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8 
 
+
 DEAD_TEXT_COLORS ; Text luminance
+	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.rept 20
 		.by $00                                     ; Top Scroll.
 	.endr
@@ -710,20 +711,36 @@ DEAD_TEXT_COLORS ; Text luminance
 
 
 WIN_BACK_COLORS                                     ; The Win Screen will populate scrolling colors.
-	.rept 23
-		.by $00                                     ; The whole screen is black.
-	.endr
+	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
+	.by $14 $18 $1C $1E
+	.by $24 $28 $2C $2E
+	.by $34 $38 $3C $3E
+	.by $44 $48 $4C $4E
+	.by $54 $58 $5C $5E
+	
+	.by $60 $62 $64 $66 $68 $6a
+
+	.by $74 $78 $7C $7E
+	.by $84 $88 $8C $8E
+	.by $94 $98 $9C $9E
+	.by $A4 $A8 $AC $AE
+	.by $B4 $B8 $BC $BE
+
+
 
 WIN_TEXT_COLORS
-	.rept 10
+	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
+	.rept 20
 		.by $00                                     ; Top Scroll.
 	.endr
 
-	.by $0A $08 $06                                 ; SAVED!
+	.by $eC $eA $e8 $e6 $e4 $e2
 
-	.rept 10
+	.rept 20
 		.by $00                                     ; Bottom Scroll
 	.endr
+
+
 
 
 OVER_BACK_COLORS
@@ -900,7 +917,7 @@ SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 	.byte <COLPF0_COLBK_DLI ; DLI (43) 3
 	.byte <COLPF0_COLBK_DLI ; DLI (44) 2
 	.byte <COLPF0_COLBK_DLI ; DLI (45) 1
-	.byte <DLI_SPC1    ; DLI 44 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
+	.byte <DLI_SPC1    ; DLI 46 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
 ;	.byte <GAME_DLI_SPC2    ; DLI 45 
 
 
@@ -908,20 +925,21 @@ SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 ; occurs of all the screens. 
 ; COLPF3 is white all the time.
 
-COLBK_TABLE ; Must be big enough to do splash screens.
+COLBK_TABLE ; Must be big enough to do splash screens. +1 for entry 0
 	.ds 47
 
-COLPF0_TABLE ; Must be big enough to do splash screens.
+COLPF0_TABLE ; Must be big enough to do splash screens. +1 for entry 0
 	.ds 47
 
-COLPF1_TABLE ; Must be big enough to do Title screen.
+COLPF1_TABLE ; Must be big enough to do Title screen. 
 	.ds 25
 
 COLPF2_TABLE ; Must be big enough to do Title screen.
 	.ds 25
 
 HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row.
-	.by 0 0 0 0 ; Top, scores, beach
+	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
+	.by 0 0 0 ; Top, scores, beach
 	.by 0 14
 	.by 0 ; beach
 	.by 2 12

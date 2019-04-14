@@ -280,7 +280,7 @@ VBIResetDLIChain
 ;	lda #>TITLE_DLI
 ;	sta VDSLST+1
 
-	iny                     ; Start at 1, because 0 provided the entry point
+	iny                     ; !!! Start at 1, because 0 provided the entry point !!!
 	sty ThisDLI 
 
 ExitMyImmediateVBI
