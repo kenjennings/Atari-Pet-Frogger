@@ -524,10 +524,6 @@ ExitRunPrompt
 TITLE_DLI_3 ; DLI Sets background to Black for blank area.
 	mStart_DLI
 
-;	lda RANDOM
-;	and #$F0
-;	sta COLBK
-	
 	jmp SetBlack_DLI
 
 
@@ -544,10 +540,6 @@ TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to
 	sta COLBK
 	sta COLPF2
 
-;	lda RANDOM
-;	and #$F0
-;	sta COLBK
-	
 	jmp Exit_DLI
 
 
@@ -559,10 +551,6 @@ GAME_DLI_1
 	sta WSYNC
 	sta COLPF1           ; write new text luminance.
 
-;	lda RANDOM
-;	and #$F0
-;	sta COLBK
-	
 	jmp Exit_DLI
 
 
@@ -672,7 +660,7 @@ GAME_DLI_3 ; DLI 3 sets COLPF0,1,2,3,BK and HSCROL for Boats.
 ; GAME_DLI_4 ; Set background to black.
 ;	jmp TITLE_DLI_3 ; re-use what is done already....
 
-	
+
 
 GAME_DLI_5 ; Needs to set HSCROL for credits, then call to set text color.  LAST DLI on screen.
 	mRegSaveAY
@@ -705,10 +693,6 @@ COLPF0_COLBK_DLI
 	pla
 	sta COLPF0           ; Set pixels.
 
-;	lda RANDOM
-;	and #$F0
-;	sta COLBK
-
 	jmp Exit_DLI
 
 
@@ -729,20 +713,12 @@ SetBlack_DLI
 	sta COLBK            ; Write new border color.
 	sta COLPF2           ; Write new background color
 
-;	lda RANDOM
-;	and #$F0
-;	sta COLBK
-
 ; Exit DLI.
 ; JMP here is 3 byte instruction to execute 11 bytes of common DLI closure.
 Exit_DLI
 	lda (ThisDLIAddr), y ; update low byte for next chained DLI.
 	sta VDSLST
 
-;	lda RANDOM
-;	and #$F0
-;	sta COLBK
-	
 	inc ThisDLI          ; next DLI.
 
 	mRegRestoreAY
@@ -771,13 +747,12 @@ DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text.
 	lda CreditHSCROL      ; HScroll for credits.
 	sta HSCROL
 
-;	lda RANDOM
-;	and #$F0
-;	sta COLBK
-	
+; Unfortunately, DLI_SPC2 landed +8 bytes into the next page.  So full address needs to be set...
 	lda #<DLI_SPC2        ; Update the DLI vector for the last routine for credit color.
 	sta VDSLST
-
+	lda #>DLI_SPC2        ; Update the DLI vector for the last routine for credit color.
+	sta VDSLST+1
+	
 	pla ; aka pla
 
 	rti
@@ -790,22 +765,20 @@ DLI_SPC2  ; DLI just sets black for background COLBK, COLPF2, and text luminance
 	mRegSaveAY
 
 DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
-	lda #$0C              ; luminance for text
-	ldy #COLOR_BLACK     ; color for background.
+	ldy #$0C             ; luminance for text
+	lda #COLOR_BLACK     ; color for background.
 
 	sta WSYNC            ; sync to end of scan line
 
-	sta COLPF1           ; Write text luminance for credits.
-	sty COLBK            ; Write new border color.
-	sty COLPF2           ; Write new background color
-
-;	lda RANDOM
-;	and #$0F
-;	sta COLBK
+	sty COLPF1           ; Write text luminance for credits.
+	sta COLBK            ; Write new border color.
+	sta COLPF2           ; Write new background color
 
 	lda #<DoNothing_DLI  ; Stop DLI Chain.  VBI will restart the chain.
 	sta VDSLST
-
+	lda #>DoNothing_DLI  ; Stop DLI Chain.  VBI will restart the chain.
+	sta VDSLST+1
+	
 	mRegRestoreAY
 
 	rti

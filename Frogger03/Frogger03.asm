@@ -412,12 +412,12 @@ CreditHSCROL    .byte 4  ; Fine scrolling the credits
 ; so that the scrolling code could find and update the correct 
 ; LMS instruction currently in use.
 
-BOTTOM_OF_DISPLAY                                  ; Prior to this DLI SPC1/25 set colors.
-	mDL_LMS DL_TEXT_2|DL_DLI,ANYBUTTON_MEM         ; Prompt to start game.; DLI SPC2/26 sets HSCROL, (and COLBK/COLPF2/COLPF1 for text.)
-
+BOTTOM_OF_DISPLAY                                 ; Prior to this DLI SPC1/25 set colors and HSCROL
+	mDL_LMS DL_TEXT_2,ANYBUTTON_MEM               ; Prompt to start game.
+	.by DL_BLANK_1|DL_DLI                         ; DLI SPC2/26, set COLBK/COLPF2/COLPF1 for scrolling text.
 DL_SCROLLING_CREDIT
 SCROLL_CREDIT_LMS = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_HSCROLL,SCROLLING_CREDIT  ; The perpetrators identified
+	mDL_LMS DL_TEXT_2|DL_HSCROLL,SCROLLING_CREDIT ; The perpetrators identified
 
 ; Note that as long as the system VBI is functioning the address 
 ; provided for JVB does not matter at all.  The system VBI will update
