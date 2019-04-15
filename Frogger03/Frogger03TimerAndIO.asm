@@ -74,10 +74,31 @@ INPUTSCAN_FRAMES = $07 ; previously $09
 ; the maximum speed is slightly slower than the fastest coarse scroll
 ; speed (still, this is 60 FPS fine scroll which is faaast.)
 
-ANIMATION_FRAMES .by 10 9 8 7 6 5 4 3 2 1 0
-ANIMATION_INCR   .by 1  1 1 1 1 1 1 1 1 1 1
+; FYI -- SCROLLING RANGE
+; Boats Right ;   64
+; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
+; End   Scroll position = LMS + 0,              HSCROL 15
+; Boats Left ; + 64 
+; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
+; End   Scroll position = LMS + 12,            HSCROL 0
 
-MAX_FROG_SPEED=10
+BOAT_FRAMES     .by 10 9 8 7 6 5 4 3 2 1 0
+
+MAX_FROG_SPEED = 10
+
+; Offsets from LMS in display list for LMS low byte of boats.
+; For Right Boats this is offset from PF_LMS1.
+; For Left Boats thie is offset from PF_LMS2.
+BOAT_LMS_OFFSET .by 0 9 18 27 36 45 
+
+
+; Index into HSCROL table for each boat row.
+BOAT_HS_RIGHT .by 4 7 10 13 16 19
+BOAT_HS_LEFT  .by 5 8 11 14 17 20
+
+;Note, From Page Zero:
+;BoatLMSPointer .word 0 ; Address of the Display List LMS for the boat.
+;BoatHSCROL     .byte 0 ; index into HSCROL_TABLE for boats.
 
 
 ; Timer values.  PAL ?? guesses...
@@ -277,8 +298,8 @@ VBIResetDLIChain
 	ldy #0
 	lda (ThisDLIAddr),y      ; Grab 0 entry from this DLI chain
 	sta VDSLST               ; and restart the DLI routine.
-;	lda #>TITLE_DLI
-;	sta VDSLST+1
+	lda #>TITLE_DLI
+	sta VDSLST+1
 
 	iny                     ; !!! Start at 1, because 0 provided the entry point !!!
 	sty ThisDLI 
@@ -304,11 +325,11 @@ MyDeferredVBI
 
 ; Set Frog position per main directions.
 
+; ======== Manage Input Delay Counter ========
 	lda InputScanFrames      ; Is input delay already 0?
 	beq DoAnimateClock       ; Yes, do not decrement it again.
 	dec InputScanFrames      ; Minus 1.
 
-; ======== Manage AnimateFrames ========
 DoAnimateClock
 	lda AnimateFrames       ; Is animation countdown already 0?
 	beq ScrollTheCreditLine ; Yes, do not decrement now.
@@ -317,7 +338,7 @@ DoAnimateClock
 ; ======== Manage scrolling the current credit line ========
 ScrollTheCreditLine               ; scroll the text identifying the perpetrators
 	dec ScrollCounter             ; subtract from scroll delay counter
-	bne ManagePressAButtonPrompt  ; Not 0 yet, so no scrolling.
+	bne ManageBoatScrolling       ; Not 0 yet, so no scrolling.
 	lda #1                        ; Reset counter to original value.
 	sta ScrollCounter
 	; Yeah, ANTIC supports fine horizontal scrolling 16 color clocks or 
@@ -325,27 +346,94 @@ ScrollTheCreditLine               ; scroll the text identifying the perpetrators
 	; code if we scroll only one character per each coarse scroll.
 
 	dec CreditHSCROL             ; Subtract one color clock from the left (aka fine scroll).
-	beq ResetCreditScroll        ; If it is 0, then time for the next coarse scroll.
-	
-	lda CreditHSCROL             ; Not zero.  Get current value.
-	bne UpdateCreditHSCROL       ; And go update the hardware fine scroll register.
-	
+	bne ManageBoatScrolling      ; It is not yet 0.  Nothing else to do here.
+
 ResetCreditScroll                ; Fine Scroll reached 0, so coarse scroll the text.
 	inc SCROLL_CREDIT_LMS        ; Move text left one character position.
 	lda SCROLL_CREDIT_LMS
 	cmp #<END_OF_CREDITS         ; Did coarse scroll position reach the end of the text?
-	bne RestartCreditHSCROL      ; No.  We are donewith coarse scroll, now reset fine scroll. 
+	bne RestartCreditHSCROL      ; No.  We are done with coarse scroll, now reset fine scroll. 
 
 	lda #<SCROLLING_CREDIT        ; Yes, restart coarse scroll to the beginning position.
 	sta SCROLL_CREDIT_LMS
-	
+
 RestartCreditHSCROL               ; Reset the 
 	lda #4                        ; horizontal fine 
 	sta CreditHSCROL              ; scrolling.
 
-UpdateCreditHSCROL
-	sta HSCROL                    ; Update the hardware fine scroll register.
-	
+; ======== Manage Boat fine scrolling ========
+; Atari scrolling is such low overhead I'm so lazy, that  I'll 
+; just run the boat scrolling all the time on the game screen. 
+; Even if you don't see it.
+ManageBoatScrolling
+	lda BoatFrames
+	beq ResetBoatFrames           ; If BoatFrames is 0, time to make the donuts.
+	dec BoatFrames                ; Not zero, so decrement
+	jmp ManagePressAButtonPrompt  ; and skip to the next part to manage.
+
+ResetBoatFrames
+	ldx FrogsCrossed
+	cpx #MAX_FROG_SPEED+1 ; 0 to 10 OK.  11 not so much
+	bcs FrogsCrossedIsOK
+	ldx #MAX_FROG_SPEED
+
+FrogsCrossedIsOK
+	lda BOAT_FRAMES,x     ; Get Frame counter based on number of frogs saves.
+	sta BoatFrames
+
+; ==  Now manage boat scrolling. ==
+; RIGHT BOATS 
+; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
+; End   Scroll position = LMS + 0,              HSCROL 15
+	ldy #0
+
+RightBoatScroll
+	ldx BOAT_HS_RIGHT,y   ; Get the index into HSCROL table.
+	inc HSCROL_TABLE,x    ; Increment the HCROL.
+	lda HSCROL_TABLE,x    ; Get value of HSCROL.
+	and #$0F              ; Mask to limit to range 0 to 15.
+	sta HSCROL_TABLE,x    ; Save the updated HSCROL.
+	bne LeftBoatScroll  ; If it is non-zero, then nothing else to do.  Go do Left Boats. 
+	; HSCROL became 0.  Time to coarse scroll by subtracting 4 from LMS.
+	ldx BOAT_LMS_OFFSET,y ; Get the index to the LMS in the Display List for this line.
+	lda PF_LMS1,x         ; Get the actual LMS low byte.
+	sec
+	sbc #4                ; Subtract 4 from LMS in display list.
+	bpl SaveNewRightLMS   ; If still positive (0), then good to update LMS
+	lda #12               ; LMS went negative. Reset to start position.
+SaveNewRightLMS
+	sta PF_LMS1,x         ; Update LMS pointer.
+
+; LEFT BOATS 
+; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
+; End   Scroll position = LMS + 12,            HSCROL 0
+
+LeftBoatScroll
+	ldx BOAT_HS_LEFT,y    ; Get the index into HSCROL table.
+	dec HSCROL_TABLE,x    ; Increment the HCROL.
+	lda HSCROL_TABLE,x    ; Get value of HSCROL.
+	and #$0F              ; Mask to limit to range 0 to 15.
+	sta HSCROL_TABLE,x    ; Save the updated HSCROL.
+	cmp #$0F              ; Did it end up as 15?  then it wrapped around.
+	bne EndOfLeftScroll   ; Not 15, therefore branch to skip coarse scroll.
+	; HSCROL became 15.  Time to coarse scroll by Adding 4 from LMS.
+	ldx BOAT_LMS_OFFSET,y ; Get the index to the LMS in the Display List for this line.
+	lda PF_LMS2,x         ; Get the actual LMS low byte.
+	clc
+	adc #4                ; Add 4 to LMS in display list.
+	cmp #13               ; Is it greater than max (12)? 
+	bcc SaveNewLeftLMS    ; No.  Good to update LMS.
+	lda #0                ; LMS greater than 12. Reset to start position.
+SaveNewLeftLMS
+	sta PF_LMS2,x         ; Update LMS pointer.
+
+EndOfLeftScroll
+	iny 
+	cpy #6
+	bne RightBoatScroll
+
+
+
 ; ======== Manage the prompt flashing for Press A Button ========
 ManagePressAButtonPrompt
 	lda EnablePressAButton

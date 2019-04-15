@@ -673,16 +673,24 @@ EventDeadScreen
 SkipZeroDeadCycle
 	stx EventCounter            ; And save for next time.
 
-	ldy #0 ; Top 9 lines of screen...
+	ldy #1 ; Top 9 lines of screen...
 LoopTopDeadSine
 	jsr DeadFrogRedScroll       ; Increments and color stuffing.
-	cpy #9                      ; Reached the 9th line?
+	cpx #20
+	bne SkipZeroDeadCycle2
+	ldx #0
+SkipZeroDeadCycle2
+	cpy #21                      ; Reached the 21th line?
 	bne LoopTopDeadSine         ; No, continue looping.
 
-	ldy #14 ; Bottom 9 lines of screen (above prompt and credits.
+	ldy #28 ; Bottom 9 lines of screen (above prompt and credits.
 LoopBottomDeadSine
 	jsr DeadFrogRedScroll       ; Increments and color stuffing.
-	cpy #23                     ; Reached the 23rd line?
+	cpx #20
+	bne SkipZeroDeadCycle3
+	ldx #0
+SkipZeroDeadCycle3
+	cpy #47                     ; Reached the 23rd line?
 	bne LoopBottomDeadSine      ; No, continue looping.
 	beq EndDeadScreen           ; Yes.  Exit now. 
 
@@ -717,17 +725,12 @@ DeadFrogRedScroll
 	rts
 
 
-DEAD_COLOR_SINE_TABLE
-	.byte COLOR_RED_ORANGE+7, COLOR_RED_ORANGE+9, COLOR_RED_ORANGE+11,COLOR_RED_ORANGE+13
-	.byte COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+13
-	.byte COLOR_RED_ORANGE+11,COLOR_RED_ORANGE+9, COLOR_RED_ORANGE+7, COLOR_RED_ORANGE+5
-	.byte COLOR_RED_ORANGE+3, COLOR_RED_ORANGE+1, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0
-	.byte COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+1, COLOR_RED_ORANGE+3, COLOR_RED_ORANGE+5
-	.byte COLOR_RED_ORANGE+7, COLOR_RED_ORANGE+9, COLOR_RED_ORANGE+11,COLOR_RED_ORANGE+13
-	.byte COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+13
-	.byte COLOR_RED_ORANGE+11,COLOR_RED_ORANGE+9, COLOR_RED_ORANGE+7, COLOR_RED_ORANGE+5
-	.byte COLOR_RED_ORANGE+3, COLOR_RED_ORANGE+1, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0
-	.byte COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+1, COLOR_RED_ORANGE+3, COLOR_RED_ORANGE+5
+DEAD_COLOR_SINE_TABLE ; 20 entries.
+	.byte COLOR_RED_ORANGE+6, COLOR_RED_ORANGE+8, COLOR_RED_ORANGE+10,COLOR_RED_ORANGE+12
+	.byte COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+12
+	.byte COLOR_RED_ORANGE+10,COLOR_RED_ORANGE+8, COLOR_RED_ORANGE+6, COLOR_RED_ORANGE+4
+	.byte COLOR_RED_ORANGE+2, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0
+	.byte COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+2, COLOR_RED_ORANGE+4
 
 
 ; ==========================================================================

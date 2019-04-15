@@ -358,12 +358,7 @@ COLPF2Pointer   .word $0000
 COLPF1Pointer   .word $0000
 COLPF0Pointer   .word $0000
 
-; Scrolling offsets for LMS in the playfield.
-; All scroll data occupies page data from  0 to 79.
-; Left scroll moves from LMS offset 0 to 39
-; Right scroll moves from LMS offset 39 to 0
-CurrentRightOffset .byte $00
-CurrentLeftOffset  .byte $00 
+
 
 ; This is a 0, 1, toggle to remember the last state of
 ; something. For example, a blinking thing on screen.
@@ -374,9 +369,7 @@ EventCounter    .byte 0
 EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
 
 ; ======== V B I ======== TIMER FOR CODE
-; Frame counter set by main code events for delay/speed of activity.
-; In the case of boat movements the value is set from the ANIMATION_FRAMES
-; table based on the number of frogs that crossed the river (difficulty level).
+; Frame counter set by main code events for delay/speed of main activity.
 ; The VBI decrements this value until 0.
 ; Main code acts on value 0.
 AnimateFrames    .byte $00 ; = ANIMATION_FRAMES,X.
@@ -439,8 +432,25 @@ PressAButtonState  .byte 0   ; 0 means fading background down.   1 means fading 
 ; Timer value for Press A Button Prompt updating.
 PressAButtonFrames .byte BLINK_SPEED
 
-PressAButtonColor  .byte 0 ; The actual color of the promopt.
+PressAButtonColor  .byte 0 ; The actual color of the prompt.
 PressAButtonText   .byte 0 ; The text luminance.
+
+
+; ======== V B I ======== SCROLLING BOAT MANAGEMENT
+; Boat movements are managed bu the VBI now.
+; The frame count value comes from BOAT_FRAMES based on the number of 
+; frogs that crossed the river (FrogsCrossed) (0 to 10 difficulty level).
+BoatFrames       .byte 0
+; FYI -- SCROLLING RANGE
+; Boats Right ;   64
+; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
+; End   Scroll position = LMS + 0,              HSCROL 15
+; Boats Left ; + 64 
+; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
+; End   Scroll position = LMS + 12,            HSCROL 0
+; Keep Current Address for LMS, and index to HSCROL_TABLE
+BoatLMSPointer .word 0 ; Address of the Display List LMS for the boat.
+CurrentHSCROL  .byte 0 ; Fine Scroll Value.
 
 
 
