@@ -82,14 +82,16 @@ INPUTSCAN_FRAMES = $07 ; previously $09
 ; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
 ; End   Scroll position = LMS + 12,            HSCROL 0
 
-BOAT_FRAMES     .by 10 9 8 7 6 5 4 3 2 1 0
+BOAT_FRAMES   .by 10 7 5 3 2 1 0 0 0 0 0; number of frames to wait to move boat.
+BOAT_SHIFT_R  .by 1  1 1 1 1 1 1 2 2 3 3; number of times to scroll boat. (add or subtract)
+BOAT_SHIFT_L  .by 1  1 1 1 1 1 1 1 2 2 3; number of times to scroll boat. (add or subtract)
 
 MAX_FROG_SPEED = 10
 
 ; Offsets from LMS in display list for LMS low byte of boats.
 ; For Right Boats this is offset from PF_LMS1.
 ; For Left Boats thie is offset from PF_LMS2.
-BOAT_LMS_OFFSET .by 0 9 18 27 36 45 
+BOAT_LMS_OFFSET .by 0 12 24 36 48 60 
 
 
 ; Index into HSCROL table for each boat row.
@@ -339,7 +341,7 @@ DoAnimateClock
 ScrollTheCreditLine               ; scroll the text identifying the perpetrators
 	dec ScrollCounter             ; subtract from scroll delay counter
 	bne ManageBoatScrolling       ; Not 0 yet, so no scrolling.
-	lda #1                        ; Reset counter to original value.
+	lda #2                        ; Reset counter to original value.
 	sta ScrollCounter
 	; Yeah, ANTIC supports fine horizontal scrolling 16 color clocks or 
 	; 4 text characters at a time.  But, this is a little more simple 
@@ -374,13 +376,14 @@ ManageBoatScrolling
 ResetBoatFrames
 	ldx FrogsCrossed
 	cpx #MAX_FROG_SPEED+1 ; 0 to 10 OK.  11 not so much
-	bcs FrogsCrossedIsOK
+	bcc FrogsCrossedIsOK
 	ldx #MAX_FROG_SPEED
 
 FrogsCrossedIsOK
 	lda BOAT_FRAMES,x     ; Get Frame counter based on number of frogs saves.
 	sta BoatFrames
 
+	stx SAVEX
 ; ==  Now manage boat scrolling. ==
 ; RIGHT BOATS 
 ; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
@@ -388,35 +391,48 @@ FrogsCrossedIsOK
 	ldy #0
 
 RightBoatScroll
-	ldx BOAT_HS_RIGHT,y   ; Get the index into HSCROL table.
-	inc HSCROL_TABLE,x    ; Increment the HCROL.
-	lda HSCROL_TABLE,x    ; Get value of HSCROL.
-	and #$0F              ; Mask to limit to range 0 to 15.
-	sta HSCROL_TABLE,x    ; Save the updated HSCROL.
-	bne LeftBoatScroll  ; If it is non-zero, then nothing else to do.  Go do Left Boats. 
-	; HSCROL became 0.  Time to coarse scroll by subtracting 4 from LMS.
-	ldx BOAT_LMS_OFFSET,y ; Get the index to the LMS in the Display List for this line.
-	lda PF_LMS1,x         ; Get the actual LMS low byte.
+	ldx SAVEX               ; Get filtered FrogsCrossed
+	lda BOAT_SHIFT_R,x
+	ldx BOAT_HS_RIGHT,y     ; Get the index into HSCROL table.
+	clc
+	adc HSCROL_TABLE,x      ; Increment the HSCROL.
+	cmp #16                 ; Shift past scroll limit?
+	bcs DoRightCoarseScroll ; Yes.  Need to coarse scroll.
+	sta HSCROL_TABLE,x      ; No. Save the updated HSCROL.
+	bne LeftBoatScroll      ; This should always be non-zero. (hint: we were adding)
+	; HSCROL wrapped over 15.  Time to coarse scroll by subtracting 4 from LMS.
+DoRightCoarseScroll
+;	sec  ; Got here via bcs
+	sbc #16                 ; Fix the new HSCROL
+	sta HSCROL_TABLE,x      ; Save the updated HSCROL.
+	ldx BOAT_LMS_OFFSET,y   ; Get the index to the LMS in the Display List for this line.
+	lda PF_LMS1,x           ; Get the actual LMS low byte.
 	sec
-	sbc #4                ; Subtract 4 from LMS in display list.
-	bpl SaveNewRightLMS   ; If still positive (0), then good to update LMS
-	lda #12               ; LMS went negative. Reset to start position.
+	sbc #4                  ; Subtract 4 from LMS in display list.
+	bpl SaveNewRightLMS     ; If still positive (0), then good to update LMS
+	lda #12                 ; LMS went negative. Reset to start position.
 SaveNewRightLMS
-	sta PF_LMS1,x         ; Update LMS pointer.
+	sta PF_LMS1,x           ; Update LMS pointer.
 
 ; LEFT BOATS 
 ; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
 ; End   Scroll position = LMS + 12,            HSCROL 0
 
 LeftBoatScroll
-	ldx BOAT_HS_LEFT,y    ; Get the index into HSCROL table.
-	dec HSCROL_TABLE,x    ; Increment the HCROL.
-	lda HSCROL_TABLE,x    ; Get value of HSCROL.
-	and #$0F              ; Mask to limit to range 0 to 15.
+	ldx BOAT_HS_LEFT,y     ; Get the index into HSCROL table.
+	lda HSCROL_TABLE,x     ; Get value of HSCROL.
+	ldx SAVEX              ; Get filtered FrogsCrossed
+	sec
+	sbc BOAT_SHIFT_L,x     ; Decrement the HSCROL
+	bmi DoLeftCoarseScroll ; It went negative, must reset and coarse scroll
+	ldx BOAT_HS_LEFT,y     ; Get the index into HSCROL table.
+	sta HSCROL_TABLE,x     ; It's OK. Save the updated HSCROL.
+	bpl EndOfLeftScroll    ; This could be anything including 0. (But therefore positive)
+	; HSCROL wrapped below 0.  Time to coarse scroll by Adding 4 to LMS.
+DoLeftCoarseScroll
+	adc #16               ; Re-wrap over 0 into the positive.
+	ldx BOAT_HS_LEFT,y     ; Get the index into HSCROL table.
 	sta HSCROL_TABLE,x    ; Save the updated HSCROL.
-	cmp #$0F              ; Did it end up as 15?  then it wrapped around.
-	bne EndOfLeftScroll   ; Not 15, therefore branch to skip coarse scroll.
-	; HSCROL became 15.  Time to coarse scroll by Adding 4 from LMS.
 	ldx BOAT_LMS_OFFSET,y ; Get the index to the LMS in the Display List for this line.
 	lda PF_LMS2,x         ; Get the actual LMS low byte.
 	clc
@@ -594,7 +610,7 @@ ExitRunPrompt
 
 ; Save 3 bytes.  Use Score_DLI directly in the DLI address table.  duh.
 
-; TITLE_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
+TITLE_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
 ;	jmp Score_DLI
 
 

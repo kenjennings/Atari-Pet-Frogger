@@ -9,7 +9,7 @@
 ;
 ; Version 00, November 2018
 ; Version 01, December 2018
-; Version 02, February 2019
+; Version 02, February 2019 
 ; Version 03, April 2019
 ;
 ; --------------------------------------------------------------------------
@@ -329,7 +329,7 @@ FrogNewShape    .byte $00   ; = Image to use -- 0 = off, 1 = frog, 2 = splat, 3 
 
 FrogSafety      .byte 0     ; = 0 When Frog OK.  !0 == Yer Dead.
 
-FrogsCrossed    .byte 0     ; = Number Of Frogs crossed
+FrogsCrossed    .byte 0    ; = Number Of Frogs crossed
 ScoreToAdd      .byte 0     ; = Number To Be Added to Score
 
 NumberOfChars   .byte 0     ; = Number Of Characters across for score
@@ -449,8 +449,8 @@ BoatFrames       .byte 0
 ; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
 ; End   Scroll position = LMS + 12,            HSCROL 0
 ; Keep Current Address for LMS, and index to HSCROL_TABLE
-BoatLMSPointer .word 0 ; Address of the Display List LMS for the boat.
-CurrentHSCROL  .byte 0 ; Fine Scroll Value.
+;BoatLMSPointer .word 0 ; Address of the Display List LMS for the boat.
+;CurrentHSCROL  .byte 0 ; Fine Scroll Value.
 
 
 

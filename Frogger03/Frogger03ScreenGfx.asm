@@ -344,18 +344,18 @@ DisplayGameScreen
 AnimateBoats
 	; Update with working positions of the scrolling lines.
 
-	dec CurrentRightOffset ; subtract one to move screen contents right.
-	bpl IncLeftOffset      ; It did not go negative. Done. Go update screen.
-	lda #39                ; Fell off the end.  Restart.
-	sta CurrentRightOffset ; reset to scroll start.
+;	dec CurrentRightOffset ; subtract one to move screen contents right.
+;	bpl IncLeftOffset      ; It did not go negative. Done. Go update screen.
+;	lda #39                ; Fell off the end.  Restart.
+;	sta CurrentRightOffset ; reset to scroll start.
 
 IncLeftOffset
-	inc CurrentLeftOffset  ; subtract one to move screen contents left.
-	lda CurrentLeftOffset
-	cmp #40                ; 40th position is identical to 0th,
-	bne UpdatePlayfieldLMS ; Did not go off the deep end. Done. Go update screen.
-	lda #0                 ; Fell off the end.  Restart.
-	sta CurrentLeftOffset  ; reset to scroll start.
+;	inc CurrentLeftOffset  ; subtract one to move screen contents left.
+;	lda CurrentLeftOffset
+;	cmp #40                ; 40th position is identical to 0th,
+;	bne UpdatePlayfieldLMS ; Did not go off the deep end. Done. Go update screen.
+;	lda #0                 ; Fell off the end.  Restart.
+;	sta CurrentLeftOffset  ; reset to scroll start.
 
 UpdatePlayfieldLMS
 	; We could cleverly pull address for each LMS and update....
@@ -364,9 +364,9 @@ UpdatePlayfieldLMS
 	; cleverly looping through the LMS table.
 
 	; A already is Left offset. Make X the Right offset.
-	ldx CurrentRightOffset
+;	ldx CurrentRightOffset
 
-	jsr UpdateGamePlayfield ; Update all the LMS offsets.
+;	jsr UpdateGamePlayfield ; Update all the LMS offsets.
 
 	jsr CopyScoreToScreen   ; Finish up by updating score display.
 
@@ -387,28 +387,28 @@ UpdatePlayfieldLMS
 ; --------------------------------------------------------------------------
 UpdateGamePlayfield
 
-	stx PF_LMS1 ; Right
-	sta PF_LMS2 ; Left
+;	stx PF_LMS1 ; Right
+;	sta PF_LMS2 ; Left
 
-	stx PF_LMS4 ; and so on
-	sta PF_LMS5
+;	stx PF_LMS4 ; and so on
+;	sta PF_LMS5
 
-	stx PF_LMS7
-	sta PF_LMS8
+;	stx PF_LMS7
+;	sta PF_LMS8
 
-	stx PF_LMS10
-	sta PF_LMS11
+;	stx PF_LMS10
+;	sta PF_LMS11
 
-	stx PF_LMS13
-	sta PF_LMS14
+;	stx PF_LMS13
+;	sta PF_LMS14
 
-	stx PF_LMS16
-	sta PF_LMS17
+;	stx PF_LMS16
+;	sta PF_LMS17
 
-	stx CurrentRightOffset
-	sta CurrentLeftOffset
+;	stx CurrentRightOffset
+;	sta CurrentLeftOffset
 
-	rts
+;	rts
 
 
 ; ==========================================================================

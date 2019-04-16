@@ -357,17 +357,17 @@ MOVING_ROW_STATES
 ; --------------------------------------------------------------------------
 SetBoatSpeed
 
-	mRegSaveAX
+;	mRegSaveAX
 
-	ldx FrogsCrossed          ; How many frogs crossed?
-	cpx #MAX_FROG_SPEED+1     ; Limit this index from 0 to 14.
-	bcc GetSpeedByWayOfFrogs  ; Anything bigger than that
-	ldx #MAX_FROG_SPEED       ; must be truncated to the limit.
+;	ldx FrogsCrossed          ; How many frogs crossed?
+;	cpx #MAX_FROG_SPEED+1     ; Limit this index from 0 to 14.
+;	bcc GetSpeedByWayOfFrogs  ; Anything bigger than that
+;	ldx #MAX_FROG_SPEED       ; must be truncated to the limit.
 
 GetSpeedByWayOfFrogs
-	lda ANIMATION_FRAMES,x    ; Set timer for animation based on frogs.
-	jsr ResetTimers
+;	lda ANIMATION_FRAMES,x    ; Set timer for animation based on frogs.
+;	jsr ResetTimers
 
-	mRegRestoreAX
+;	mRegRestoreAX
 
 	rts
