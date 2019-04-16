@@ -101,7 +101,7 @@ Add another hazard/enemy object?
 
 - Use only one line of data for all the boats moving left, and one for all the boats moving right.  All lines going in the same direction display the same screen memory data.  This reduces memory by 800 bytes (10 lines * 80), close to 10% of the final size of Version 02. 
 
-- The splash screen for Saved Frog, Dead Frog, and Game Over have their color transitions made more dense by replacing most of the Mode 2 text lines with staight up blank line instructions, doubling the color transitions on the screen.   Blank lines also allow the color bars to go straght into the overscan area automatically.
+- The splash screens for Saved Frog, Dead Frog, and Game Over have their color transitions made more dense by replacing the Mode 2 text lines with staight up blank line instructions, doubling the color transitions on the screen.   Blank lines also allow the color bars to go straght into the overscan area automatically.
 
 - The mechanics of presenting all the screens with their DLIs is working correctly. (But  the frog as a Player/Missile object is not yet a thing.)  Boats are fine scrolled at variable speeds for left v right.   Artari fine scrolling has so little overhead that my lazy self just let it run all the time during the deferred vertical blank.
 
