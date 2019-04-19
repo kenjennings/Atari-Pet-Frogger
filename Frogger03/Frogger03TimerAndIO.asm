@@ -88,26 +88,30 @@ BOAT_SHIFT_L  .by 1  1 1 1 1 1 1 1 2 2 3; number of times to scroll boat. (add o
 
 MAX_FROG_SPEED = 10
 
-; Offsets from LMS in display list for LMS low byte of boats.
+; Offsets from LMS in display list for LMS low byte of boats. (VBI)
 ; For Right Boats this is offset from PF_LMS1.
 ; For Left Boats thie is offset from PF_LMS2.
 BOAT_LMS_OFFSET .by 0 12 24 36 48 60 
 
-
-; Index into HSCROL table for each boat row.
+; Index into HSCROL table for each boat row. (VBI)
 BOAT_HS_RIGHT .by 4 7 10 13 16 19
 BOAT_HS_LEFT  .by 5 8 11 14 17 20
 
-;Note, From Page Zero:
-;BoatLMSPointer .word 0 ; Address of the Display List LMS for the boat.
-;BoatHSCROL     .byte 0 ; index into HSCROL_TABLE for boats.
+
+MOVING_ROW_STATES
+	.rept 6                 ; 6 occurrences of
+		.BYTE 0, 1, $FF     ; Beach (0), Right (1), Left (FF) directions.
+	.endr
+		.BYTE 0             ; starting position on safe beach
 
 
-; Timer values.  PAL ?? guesses...
+; PAL Timer values.  PAL ?? guesses...
 ; About 7 keys per second.
 ; KEYSCAN_FRAMES = $07
 ; based on number of frogs, how many frames between boat movements...
 ;ANIMATION_FRAMES .byte 25,21,17,14,12,11,10,9,8,7,6,5
+; Not really sure what to do about the new model using the BOAT_SHIFT lists.
+
 
 
 ; ==========================================================================
@@ -295,6 +299,7 @@ VBISetupDisplay
 
 	lda #$FF                      ; Turn off the signal to change screens.
 	sta VBICurrentDL
+	stx CurrentDL                 ; Let everyone know what is the current screen.
 
 VBIResetDLIChain
 	ldy #0
@@ -323,11 +328,7 @@ ExitMyImmediateVBI
 ;==============================================================================
 
 MyDeferredVBI
-; ======== Manage InputScanFrames ========
-
-; Set Frog position per main directions.
-
-; ======== Manage Input Delay Counter ========
+; ======== Manage InputScanFrames Delay Counter ========
 	lda InputScanFrames      ; Is input delay already 0?
 	beq DoAnimateClock       ; Yes, do not decrement it again.
 	dec InputScanFrames      ; Minus 1.
@@ -368,22 +369,35 @@ RestartCreditHSCROL               ; Reset the
 ; just run the boat scrolling all the time on the game screen. 
 ; Even if you don't see it.
 ManageBoatScrolling
+	lda #0                        ; Zero the flags the say how far boats moved.
+	sta BoatsMoveLeft             ; These are used to involuntarily shift the Frog on boat lines.
+	sta BoatsMoveRight
 	lda BoatFrames
 	beq ResetBoatFrames           ; If BoatFrames is 0, time to make the donuts.
 	dec BoatFrames                ; Not zero, so decrement
 	jmp ManagePressAButtonPrompt  ; and skip to the next part to manage.
 
 ResetBoatFrames
-	ldx FrogsCrossed
-	cpx #MAX_FROG_SPEED+1 ; 0 to 10 OK.  11 not so much
-	bcc FrogsCrossedIsOK
-	ldx #MAX_FROG_SPEED
+	jsr SetBoatSpeed
+;	ldx FrogsCrossed
+;	cpx #MAX_FROG_SPEED+1         ; 0 to 10 OK.  11 not so much
+;	bcc FrogsCrossedIsOK
+;	ldx #MAX_FROG_SPEED
 
-FrogsCrossedIsOK
-	lda BOAT_FRAMES,x     ; Get Frame counter based on number of frogs saves.
-	sta BoatFrames
+;FrogsCrossedIsOK
+;	lda BOAT_FRAMES,x             ; Reset Frame counter based on number of frogs saves.
+;	sta BoatFrames
 
-	stx SAVEX
+;	stx FrogsLimited              ; Need to save temporarily. 
+
+	lda BOAT_SHIFT_R,x            ; Collect distance to move,
+	sta BoatsMoveRight            ; so scrolling and the forced frog  
+	lda BOAT_SHIFT_L,x            ; update can refer to a fixed
+	sta BoatsMoveLeft             ; location and not repeat the lookup.
+
+; At this point X = filtered number of frogs crossed.
+; Boats move left and boats move right values are set for scrolling.
+
 ; ==  Now manage boat scrolling. ==
 ; RIGHT BOATS 
 ; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
@@ -391,11 +405,10 @@ FrogsCrossedIsOK
 	ldy #0
 
 RightBoatScroll
-	ldx SAVEX               ; Get filtered FrogsCrossed
-	lda BOAT_SHIFT_R,x
 	ldx BOAT_HS_RIGHT,y     ; Get the index into HSCROL table.
+	lda HSCROL_TABLE,x      ; Get value of HSCROL.
 	clc
-	adc HSCROL_TABLE,x      ; Increment the HSCROL.
+	adc BoatsMoveRight      ; Increment the HSCROL.
 	cmp #16                 ; Shift past scroll limit?
 	bcs DoRightCoarseScroll ; Yes.  Need to coarse scroll.
 	sta HSCROL_TABLE,x      ; No. Save the updated HSCROL.
@@ -419,35 +432,129 @@ SaveNewRightLMS
 ; End   Scroll position = LMS + 12,            HSCROL 0
 
 LeftBoatScroll
-	ldx BOAT_HS_LEFT,y     ; Get the index into HSCROL table.
-	lda HSCROL_TABLE,x     ; Get value of HSCROL.
-	ldx SAVEX              ; Get filtered FrogsCrossed
+	ldx BOAT_HS_LEFT,y      ; Get the index into HSCROL table.
+	lda HSCROL_TABLE,x      ; Get value of HSCROL.
 	sec
-	sbc BOAT_SHIFT_L,x     ; Decrement the HSCROL
-	bmi DoLeftCoarseScroll ; It went negative, must reset and coarse scroll
-	ldx BOAT_HS_LEFT,y     ; Get the index into HSCROL table.
-	sta HSCROL_TABLE,x     ; It's OK. Save the updated HSCROL.
-	bpl EndOfLeftScroll    ; This could be anything including 0. (But therefore positive)
+	sbc BoatsMoveLeft       ; Decrement the HSCROL
+	bmi DoLeftCoarseScroll  ; It went negative, must reset and coarse scroll
+	sta HSCROL_TABLE,x      ; It's OK. Save the updated HSCROL.
+	bpl EndOfLeftScroll  ; This could be anything including 0. (But therefore positive)
 	; HSCROL wrapped below 0.  Time to coarse scroll by Adding 4 to LMS.
 DoLeftCoarseScroll
-	adc #16               ; Re-wrap over 0 into the positive.
-	ldx BOAT_HS_LEFT,y     ; Get the index into HSCROL table.
-	sta HSCROL_TABLE,x    ; Save the updated HSCROL.
-	ldx BOAT_LMS_OFFSET,y ; Get the index to the LMS in the Display List for this line.
-	lda PF_LMS2,x         ; Get the actual LMS low byte.
+	adc #16                 ; Re-wrap over 0 into the positive.
+	sta HSCROL_TABLE,x      ; Save the updated HSCROL.
+	ldx BOAT_LMS_OFFSET,y   ; Get the index to the LMS in the Display List for this line.
+	lda PF_LMS2,x           ; Get the actual LMS low byte.
 	clc
-	adc #4                ; Add 4 to LMS in display list.
-	cmp #13               ; Is it greater than max (12)? 
-	bcc SaveNewLeftLMS    ; No.  Good to update LMS.
-	lda #0                ; LMS greater than 12. Reset to start position.
+	adc #4                  ; Add 4 to LMS in display list.
+	cmp #13                 ; Is it greater than max (12)? 
+	bcc SaveNewLeftLMS      ; No.  Good to update LMS.
+	lda #0                  ; LMS greater than 12. Reset to start position.
 SaveNewLeftLMS
-	sta PF_LMS2,x         ; Update LMS pointer.
+	sta PF_LMS2,x           ; Update LMS pointer.
 
 EndOfLeftScroll
 	iny 
 	cpy #6
 	bne RightBoatScroll
 
+; ======== Move the Frog Horizontally if it is on a boat. ========
+	lda FrogShape                ; Get the current frog shape.
+	beq ManagePressAButtonPrompt ; 0 is off, so no movement there, skip all
+	cmp #SHAPE_TOMB              ; And the tombstone ...
+	beq SimplyUpdatePosition     ; ... does not move (automatically) either.
+
+	lda CurrentDL                ; What physical display is visible?
+	cmp #DISPLAY_GAME            ; Must be the game screen
+	bne SimplyUpdatePosition     ; No.  Therefore no frog gymnastics.
+
+;	ldx FrogRow                  ; What screen row is the frog currently on?
+;	beq SimplyUpdatePosition     ; 0 is not running or finished, so no movement there
+
+	lda MOVING_ROW_STATES,x      ; Is the frog due for possible involuntary movement?
+	beq SimplyUpdatePosition     ; No.  Therefore no frog gymnastics.
+
+	bmi ShoveFrogLeft            ; Yes.  The puppet master is here to move the frog.
+
+; SHOVE FROG RIGHT
+	lda BoatsMoveRight           ; Did Boats Move Right?
+	beq SimplyUpdatePosition     ; No. 
+
+	lda FrogShape                ; Splat needs no qualifier.
+	cmp #SHAPE_FROG              ; Frog need to be properly 
+	bne JustAddTheRightBoat      ; stuck to COLPF2 on the boat.
+
+	lda P0PF                     ; Get Player 0 collision with playfield
+	ora P1PF                     ; Add Player 1 collision 
+	and #COLPMF2_BIT             ; Is there collision with COLPF2 (Lines on the boats)
+	bne JustAddTheRightBoat
+
+	; Oops.   This frog is off a boat.  Frog should die here but still be dragged by the boats.
+	inc FrogSafety               ; It is MAIN's job to change the image.
+
+JustAddTheRightBoat
+	lda FrogNewPMX               ; Get the destination.
+	clc
+	adc BoatsMoveRight          ; Add the boat movement.
+	sta FrogNewPMX
+	bne SimplyUpdatePosition
+
+; SHOVE FROG LEFT
+ShoveFrogLeft
+	lda BoatsMoveLeft            ; Did Boats Move Left?
+	beq SimplyUpdatePosition     ; No. 
+
+	lda FrogShape                ; Splat needs no qualifier.
+	cmp #SHAPE_FROG              ; Frog need to be properly 
+	bne JustSubTheLeftBoat       ; stuck to COLPF2 on the boat.
+
+	lda P0PF                     ; Get Player 0 collision with playfield
+	ora P1PF                     ; Add Player 1 collision 
+	and #COLPMF2_BIT             ; Is there collision with COLPF2 (Lines on the boats)
+	bne JustSubTheLeftBoat
+
+	; Oops.   This frog is off a boat.  Frog should die here but still be dragged by the boats.
+	inc FrogSafety               ; It is MAIN's job to change the image.
+
+JustSubTheLeftBoat
+	lda FrogNewPMX               ; Get the destination.
+	sed
+	sbc BoatsMoveLeft            ; Subtract the boat movement.
+	sta FrogNewPMX
+
+; ==== Frog and boat position gyrations are done.  ==== Is there actual movement?
+SimplyUpdatePosition
+	lda FrogNewPMX               ; Is the new X different
+	cmp FrogPMX                  ; from the current X?
+	bne LimitFrogX               ; Yes.  Filter X result.
+
+	lda FrogNewPMY               ; (No.)  But is the new Y different
+	cmp FrogPMY                  ; from the current Y?
+	beq NoFrogUpdate             ; No. Nothing changed. Skip the Frog Update
+
+LimitFrogX
+	inc FrogUpdate               ; Yes.  Therefore we must call the update later.
+	cmp #MIN_FROGX               ; Is X smaller than the minimum?
+	bcs CheckHPOSMax             ; No.  
+
+	lda #MIN_FROGX               ; Yes.  Reset X
+	sta FrogNewPMX               ; to the minimum.
+	inc FrogSafety               ; Frog moved off screen.  this is dead.  It is MAIN's job to change the image.
+
+CheckHPOSMax
+	cmp #MAX_FROGX+1             ; Is X bigger than the maximum?
+	bcc SkipHPOSMaxReset         ; No.
+
+	lda #MAX_FROGX               ; Yes.  Reset X
+	sta FrogNewPMX               ; to the maximum.
+	inc FrogSafety               ; Frog moved off screen.  this is dead.  It is MAIN's job to change the image.
+
+
+UpdateTheFrog
+
+	jsr UpdateFrog 	; then FrogPMX == FrogNewPMX. FrogPMY == FrogNewPMY. FrogRow=FrogNewRow.
+
+NoFrogUpdate
 
 
 ; ======== Manage the prompt flashing for Press A Button ========
@@ -477,7 +584,8 @@ DoCheesySoundService         ; World's most inept sound sequencer.
 	jsr SoundService
 
 ExitMyDeferredVBI
-	jmp XITVBV  ; Return to OS.  SYSVBV for Immediate interrupt.
+	sta HITCLR               ; Clear collision bits for Players.
+	jmp XITVBV               ; Return to OS.  SYSVBV for Immediate interrupt.
 
 
 ; ==========================================================================
@@ -733,12 +841,6 @@ SetupAlmostAllColors_DLI
 	lda COLBK_TABLE,y   ; Get real background color again. (To repair the color for the Beach background)
 	sta WSYNC
 	sta COLBK
-
-	lda P0PF             ; Get Player 0 collision with playfield
-	ora P1PF             ; Add Player 1 collision 
-	sta PXPF_TABLE,y     ; Save for later reference
-
-	sta HITCLR           ; clear Player/Playfield collisions from here.
 
 	jmp Exit_DLI
 

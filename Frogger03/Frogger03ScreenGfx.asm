@@ -221,7 +221,7 @@
 ; ==========================================================================
 ; Set the splattered frog on the screen.
 ;
-; Write the splat frog character into screen memeory.
+; Write the splat frog character into screen memory.
 ; --------------------------------------------------------------------------
 SetSplatteredOnScreen
 ;	lda #I_SPLAT
@@ -230,7 +230,7 @@ SetSplatteredOnScreen
 ; ==========================================================================
 ; Set the frog on the screen.
 ;
-; Write the Frog character into screen memeory.
+; Write the Frog character into screen memory.
 ; --------------------------------------------------------------------------
 SetFrogOnScreen
 ;	lda #I_FROG
@@ -247,7 +247,7 @@ RemoveFrogOnScreen
 ;	lda LastCharacter  ; Get the last character (under the frog)
 
 ; ==========================================================================
-; Update the frog image in screen memeory.
+; Update the frog image in screen memory.
 ;
 ; Score/Lives, and the frog are the only place where screen memory
 ; is being changed.  The actual movements of boats does not move in
@@ -807,37 +807,27 @@ bLoopDF_DrawRemainder
 ; Update current position == new position.
 
 UpdateFrog
-	ldx FrogPMY            ; Old frog Y...
-	cpx FrogNewPMY         ; ...is different from new frog Y?
+	ldx FrogNewPMY         ; New frog Y...
+	cpx FrogPMY            ; ...is different from Old frog Y?
 	beq bUFSkipFrogRedraw  ; No.  Skip erase/redraw.
+
+	stx FrogPMY            ; Set current Frog Y == New Frog Y
 
 	; 1) Erase frog.
 	jsr EraseFrog
 
-	; Set current Frog Y == New Frog Y
-	ldx FrogNewPMY
-	stx FrogPMY
-
 	; 2) load new frog image
 	jsr DrawFrog
 
+	; 3) Check for horizontal positioning update
 bUFSkipFrogRedraw
-
-	; Set Player/Missile sizes
-	lda #PM_SIZE_NORMAL ; aka $00
-	sta SIZEP0 ; Frog parts 1
-	sta SIZEP1 ; Frog parts 2
-	sta SIZEP2 ; Frog colored iris
-	sta SIZEP3 ; Frog mouth
-	sta SIZEM  ; Eyeballs are Missile/P5 showing through the holes in head. (All need to be set 0)
-
 	ldx FrogNewPMX            ; New frog X...
-	cpx FrogPMX               ; ...is different from old frog X?
+	cpx FrogPMY               ; ...is different from Old frog X?
 	beq bUFSkipFrogReposition ; No.  Skip horizontal position update.
 
-	; Set current Frog X == New Frog X
-	stx FrogPMX
+	stx FrogPMX               ; Set current Frog X == New Frog X
 
+	; 4) Do horizontal repositioning.
 	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
 	stx HPOSP0 ; + 0 is frog parts 1
 	inx
@@ -854,6 +844,17 @@ bUFSkipFrogRedraw
 	inx
 	inx
 	stx HPOSM0 ; + 7 is p5 frog eyes
+
+	; Set Player/Missile sizes
+	lda #PM_SIZE_NORMAL ; aka $00
+	sta SIZEP0 ; Frog parts 1
+	sta SIZEP1 ; Frog parts 2
+	sta SIZEP2 ; Frog colored iris
+	sta SIZEP3 ; Frog mouth
+	sta SIZEM  ; Eyeballs are Missile/P5 showing through the holes in head. (All need to be set 0)
+
+	lda FrogNewRow
+	sta FrogRow
 
 bUFSkipFrogReposition
 

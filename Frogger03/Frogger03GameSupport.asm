@@ -339,11 +339,6 @@ ExitAutoMoveFrog
 	rts                       ; Done, successful move.
 
 
-MOVING_ROW_STATES
-	.rept 6                 ; 6 occurrences of
-		.BYTE 0, 1, $FF     ; Beach (0), Right (1), Left (FF) directions.
-	.endr
-		.BYTE 0             ; starting position on safe beach
 
 
 
@@ -359,13 +354,15 @@ SetBoatSpeed
 
 ;	mRegSaveAX
 
-;	ldx FrogsCrossed          ; How many frogs crossed?
-;	cpx #MAX_FROG_SPEED+1     ; Limit this index from 0 to 14.
-;	bcc GetSpeedByWayOfFrogs  ; Anything bigger than that
-;	ldx #MAX_FROG_SPEED       ; must be truncated to the limit.
+	ldx FrogsCrossed
+	cpx #MAX_FROG_SPEED+1         ; 0 to 10 OK.  11 not so much
+	bcc FrogsCrossedIsOK
+	ldx #MAX_FROG_SPEED
 
-GetSpeedByWayOfFrogs
-;	lda ANIMATION_FRAMES,x    ; Set timer for animation based on frogs.
+FrogsCrossedIsOK
+	lda BOAT_FRAMES,x             ; Reset Frame counter based on number of frogs saves.
+	sta BoatFrames
+
 ;	jsr ResetTimers
 
 ;	mRegRestoreAX

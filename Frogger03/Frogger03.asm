@@ -307,34 +307,42 @@
 ;FrogRealColumn1 .byte $00   ; = Frog physical offset into current row
 ;FrogRealColumn2 .byte $00   ; = Frog physical offset into current row (second at +40 for scrolling)
 
-FrogRow         .byte $00   ; = Frog Y row position (in the beach/boat playfield not counting score lines)
-
 ; VBI manages moving Frog around, so there's never any visible tearing.
 ; Also, its best to evaluate the P/M collisions when the display is not active.
 
-MIN_FROGX = PLAYFIELD_LEFT_EDGE_NORMAL    ; Left edge of frog movement
-MAX_FROGX = PLAYFIELD_RIGHT_EDGE_NORMAL-8 ; right edge of frog movement
-MID_FROGX = [MIN_FROGX+MAX_FROGX]/2       ; Middle of screen, starting position.
+; MIN_FROGX = PLAYFIELD_LEFT_EDGE_NORMAL    ; Left edge of frog movement
+; MAX_FROGX = PLAYFIELD_RIGHT_EDGE_NORMAL-8 ; right edge of frog movement
+; MID_FROGX = [MIN_FROGX+MAX_FROGX]/2       ; Middle of screen, starting position.
 
-MAX_FROGY = PM_1LINE_NORMAL_BOTTOM        ; starting position for frog at bottom of screen
+; MAX_FROGY = PM_1LINE_NORMAL_BOTTOM        ; starting position for frog at bottom of screen
 
-FrogPMY         .byte $00   ; = Frog's current Player/missile Y coordinate
-FrogPMX         .byte $00   ; = Frog's current Player/missile X coordinate
-FrogShape       .byte $00   ; = Image in use -- 0 = off, 1 = frog, 2 = splat, 3 = tombstone 
-FrogNewPMY      .byte $00   ; = Frog new/next Player/missile Y coordinate
-FrogNewPMX      .byte $00   ; = Frog new/next Player/missile X coordinate
-FrogNewShape    .byte $00   ; = Image to use -- 0 = off, 1 = frog, 2 = splat, 3 = tombstone 
+; SHAPE_OFF   = 0
+; SHAPE_FROG  = 1
+; SHAPE_SPLAT = 2
+; SHAPE_TOMB  = 3
 
-; LastCharacter   .byte 0     ; = Last Character Under Frog
+FrogRow         .byte $00       ; = Frog Y row position (in the beach/boat playfield not counting score lines)
+FrogPMY         .byte $00       ; = Frog's current Player/missile Y coordinate
+FrogPMX         .byte $00       ; = Frog's current Player/missile X coordinate
+FrogShape       .byte SHAPE_OFF ; = Image in use -- 0 = off, 1 = frog, 2 = splat, 3 = tombstone 
 
-FrogSafety      .byte 0     ; = 0 When Frog OK.  !0 == Yer Dead.
+FrogNewRow      .byte $00       ; = Main signals to VBI to move row.
+FrogNewPMY      .byte $00       ; = Frog new/next Player/missile Y coordinate
+FrogNewPMX      .byte $00       ; = Frog new/next Player/missile X coordinate
+FrogNewShape    .byte SHAPE_OFF ; = Image to use -- 0 = off, 1 = frog, 2 = splat, 3 = tombstone 
 
-FrogsCrossed    .byte 0    ; = Number Of Frogs crossed
-ScoreToAdd      .byte 0     ; = Number To Be Added to Score
+FrogUpdate      .byte 0         ; 0 = no movement.  1 = Any reason to change position...
 
-NumberOfChars   .byte 0     ; = Number Of Characters across for score
-FlaggedHiScore  .byte 0     ; = Flag For Hi Score.  0 = no high score.  $FF = High score.
-NumberOfLives   .byte 0     ; = Is the Number Of Lives
+FrogSafety      .byte 0         ; = 0 When Frog OK.  !0 == Yer Dead.  Can be set by VBI. Main must change shape.
+
+FrogsCrossed    .byte 0         ; = Number Of Frogs crossed
+;FrogsLimited    .byte 0        ; = Number of frogs crossed limited to the boat speed entries (VBI use)
+
+NumberOfLives   .byte 0         ; = Is the Number Of Lives
+
+ScoreToAdd      .byte 0         ; = Number To Be Added to Score
+NumberOfChars   .byte 0         ; = Number Of Characters across for score
+FlaggedHiScore  .byte 0         ; = Flag For Hi Score.  0 = no high score.  $FF = High score.
 
 ; Input, event control, and timers.
 ; FYI: Frame counters are decremented each frame (by the VBI).
@@ -353,34 +361,51 @@ CurrentScreen   .byte $00 ; = identity of current screen.
 
 ; Pointer to the current color table sources in use. (?)
 COLPBKPointer   .word $0000
-COLPF3Pounter   .word $0000
+;COLPF3Pounter   .word $0000 ; COLPF3 is always white.
 COLPF2Pointer   .word $0000
 COLPF1Pointer   .word $0000
 COLPF0Pointer   .word $0000
 
-
-
-; This is a 0, 1, toggle to remember the last state of
-; something. For example, a blinking thing on screen.
-;ToggleState     .byte 0   ; = 0, 1, flipper to drive a blinking thing.
-
-; Another event value.  Use for counting things for each pass of a screen/event.
-EventCounter    .byte 0
-EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
-
-; ======== V B I ======== TIMER FOR CODE
+; ======== V B I ======== TIMER FOR MAIN CODE
 ; Frame counter set by main code events for delay/speed of main activity.
 ; The VBI decrements this value until 0.
 ; Main code acts on value 0.
 AnimateFrames    .byte $00 ; = ANIMATION_FRAMES,X.
 
+; ======== M A I N ======== Remeber states from frame to frame...
+; Event values.  Use for counting things for each pass of a screen/event.
+EventCounter    .byte 0
+EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
+
 ; ======== V B I ======== MANAGE DISPLAY LISTS
+; DISPLAY_TITLE = 0
+; DISPLAY_GAME  = 1
+; DISPLAY_WIN   = 2
+; DISPLAY_DEAD  = 3
+; DISPLAY_OVER  = 4
 ; A display number written here by main code directs the VBI to update the
 ; screen pointers and the pointers to the color tables. Updated by VBI to
 ; $FF when update is completed.
 VBICurrentDL     .byte $FF ; = Direct VBI to change screens.
+CurrentDL        .byte 
 
-; ======== D L I ======== COLOR TABLES
+; ======== V B I ======== SCROLLING CREDITS MANAGEMENT
+; VBI's Animation counter for scrolling the credit line. when it reaches 0, then scroll.
+ScrollCounter   .byte 2
+CreditHSCROL    .byte 4  ; Fine scrolling the credits
+
+; When a prior version of this code gave each display list 
+; its own instructions to point to the credit text then there 
+; needed to be a table of addresses and another page 0 pointer,
+; so that the scrolling code could find and update the correct 
+; LMS instruction currently in use.
+ 
+; That is being replaced with evil here.  The display lists  
+; JMP to this little subset of a display list to finish the 
+; bottom of the screen.  Thus, there is now only one place to 
+; maintain the scrolling credits text LMS.
+
+; ======== D L I ======== DLI TABLES
 ; Pointer to current DLI address chain table.  (ThisDLIAddr),Y = DLI routine low byte.
 ThisDLIAddr     .word TITLE_DLI_CHAIN_TABLE  ; by default
 ; Index read by the Display List Interrupts to change the colors for each line.
@@ -389,21 +414,6 @@ ThisDLIAddr     .word TITLE_DLI_CHAIN_TABLE  ; by default
 ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
 ; Need a pointer for random uses.
 VBIPointer1      .word $0000
-
-; ======== V B I ======== SCROLLING CREDITS MANAGEMENT
-; VBI's Animation counter for scrolling the credit line. when it reaches 0, then scroll.
-ScrollCounter   .byte 2
-CreditHSCROL    .byte 4  ; Fine scrolling the credits
- 
-; We're doing something evil here. Most of the display lists will 
-; JMP to here to finish the bottom of the screen.  Thus, there 
-; is only one place to maintain the scrolling credits text.
-   
-; When a prior version of this code gave each display list 
-; its own instructions to point to the credit text then there 
-; needed to be a table of addresses and another page 0 pointer,
-; so that the scrolling code could find and update the correct 
-; LMS instruction currently in use.
 
 BOTTOM_OF_DISPLAY                                 ; Prior to this DLI SPC1/25 set colors and HSCROL
 	mDL_LMS DL_TEXT_2,ANYBUTTON_MEM               ; Prompt to start game.
@@ -421,7 +431,7 @@ SCROLL_CREDIT_LMS = [* + 1]
 ; ======== V B I ======== PRESS A BUTTON MANAGEMENT
 ; ON/Off status of the Press A Button Prompt. 
 ; Main code sets 0 to turn it off.
-; Main code sets 1 to turs it on. 
+; Main code sets 1 to turn it on. 
 ; Visibility actions performed by VBI.
 EnablePressAButton .byte 0
 
@@ -440,7 +450,9 @@ PressAButtonText   .byte 0 ; The text luminance.
 ; Boat movements are managed bu the VBI now.
 ; The frame count value comes from BOAT_FRAMES based on the number of 
 ; frogs that crossed the river (FrogsCrossed) (0 to 10 difficulty level).
-BoatFrames       .byte 0
+BoatFrames       .byte 0 ; Count frames until next boat movement. (Note that 0 correctly means move every frame).
+BoatsMoveLeft   .byte 0 ; How many color clocks did boats move on this frame (to move the frog accordingly)
+BoatsMoveRight  .byte 0 ; How many color clocks... etc, blah blah 
 ; FYI -- SCROLLING RANGE
 ; Boats Right ;   64
 ; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
@@ -449,13 +461,9 @@ BoatFrames       .byte 0
 ; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
 ; End   Scroll position = LMS + 12,            HSCROL 0
 ; Keep Current Address for LMS, and index to HSCROL_TABLE
-;BoatLMSPointer .word 0 ; Address of the Display List LMS for the boat.
-;CurrentHSCROL  .byte 0 ; Fine Scroll Value.
-
 
 
 ; ======== The world's most inept sound system. ========
-
 ; Index used by the VBI for the current sound.
 
 SOUND_POINTER .word $0000

@@ -986,6 +986,20 @@ COLOR_TEXT_HI_TABLE
 ; PLAYER/MISSILE GRAPHICS
 ;
 ; --------------------------------------------------------------------------
+; VBI manages moving Frog around, so there's never any visible tearing.
+; Also, its best to evaluate the P/M collisions when the display is not active.
+
+MIN_FROGX = PLAYFIELD_LEFT_EDGE_NORMAL    ; Left edge of frog movement
+MAX_FROGX = PLAYFIELD_RIGHT_EDGE_NORMAL-8 ; right edge of frog movement
+MID_FROGX = [MIN_FROGX+MAX_FROGX]/2       ; Middle of screen, starting position.
+
+MAX_FROGY = PM_1LINE_NORMAL_BOTTOM        ; starting position for frog at bottom of screen
+
+SHAPE_OFF   = 0
+SHAPE_FROG  = 1
+SHAPE_SPLAT = 2
+SHAPE_TOMB  = 3
+
 
 	.align $0800 ; single line P/M needs 2K boundary.
 
