@@ -269,7 +269,6 @@ bLoopWaitFrame
 
 MyImmediateVBI
 
-
 ; ======== Manage Changing Display List ========
 	lda VBICurrentDL            ; Main code signals to change screens?
 	bmi VBIResetDLIChain        ; -1, No, restore current DLI chain.
@@ -543,7 +542,7 @@ LimitFrogX
 
 CheckHPOSMax
 	cmp #MAX_FROGX+1             ; Is X bigger than the maximum?
-	bcc SkipHPOSMaxReset         ; No.
+	bcc UpdateTheFrog            ; No.
 
 	lda #MAX_FROGX               ; Yes.  Reset X
 	sta FrogNewPMX               ; to the maximum.

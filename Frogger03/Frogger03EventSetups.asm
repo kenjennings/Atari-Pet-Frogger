@@ -44,56 +44,8 @@ SetupTransitionToTitle
 	lda #1
 	sta EventCounter         ; Declare stage 1 behavior for scrolling.
 
-;	lda #<TITLE_MEM1         ; Initialize the
-;	sta SCROLL_TITLE_LMS0    ; Display List
-;	lda #<TITLE_MEM2         ; LMS
-;	sta SCROLL_TITLE_LMS1    ; Addresses
-;	lda #<TITLE_MEM3         ; for scrolling
-;	sta SCROLL_TITLE_LMS2    ; in the title.
-
-;DISPLAY_TITLE = 0
-;DISPLAY_GAME  = 1
-;DISPLAY_WIN   = 2
-;DISPLAY_DEAD  = 3
-;DISPLAY_OVER  = 4
-
-
-;	lda #DISPLAY_TITLE       ; Tell VBI to change screens.
-	lda #DISPLAY_GAME        ; Tell VBI to change screens.
-;	lda #DISPLAY_DEAD        ; Tell VBI to change screens.
-;	lda #DISPLAY_WIN         ; Tell VBI to change screens.
-;	lda #DISPLAY_OVER        ; Tell VBI to change screens.
+	lda #DISPLAY_TITLE       ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
-
-
-; 	ldx #25 ; Title
-	ldx #22 ; Game
-;	ldx #46 ; Dead, Win, Over
-
-TempLoopCopyToTitle
-;	lda TITLE_BACK_COLORS,x
-	lda GAME_BACK_COLORS,x
-;	lda DEAD_BACK_COLORS,x
-;	lda WIN_BACK_COLORS,x
-;	lda OVER_BACK_COLORS,x
-	sta COLBK_TABLE,x
-
-	lda GAME_COLPF0_COLORS,x
-;	lda DEAD_TEXT_COLORS,x
-;	lda WIN_TEXT_COLORS,x
-;	lda OVER_TEXT_COLORS,x
-	sta COLPF0_TABLE,x
-
-;	lda TITLE_TEXT_COLORS,x
-	lda GAME_TEXT_COLORS,x
-	sta COLPF1_TABLE,x
-;	sta COLPF0_TABLE,x ; Only for Title
-		
-	lda GAME_COLPF2_COLORS,x
-	sta COLPF2_TABLE,x
-
-	dex
-	bpl TempLoopCopyToTitle
 
 	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
 	sta CurrentScreen

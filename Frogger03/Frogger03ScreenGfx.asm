@@ -579,32 +579,116 @@ LoopChangeScreenWaitForVBI
 	; Display Win, Dead and Game Over are the same display lists.  
 	; The only difference is the LMS to point to the big text.
 	; So, reassign that here.
+	pha                            ; Save Display number for later.
 	tay
 	lda DISPLAYLIST_GFXLMS_TABLE,y
-	beq bCSSkipLMSUpdate
+	beq bCSSkipLMSUpdate           ; If it is 0 it is not 
 	sta GFX_LMS
 bCSSkipLMSUpdate
 
-	; Now update the color tables.
-
-;	lda #0               ; Always force prompt line to off, 0 color
-;	sta COLPF2_TABLE+23
-;	sta COLPF1_TABLE+23
-;	sta COLPF2_TABLE+24
-;	lda #$0C               ; And the credits on.
-;	sta COLPF1_TABLE+24
-
-
-	ldy #22
-LoopCopyColors
-	lda (COLPF2Pointer),y
-	sta COLPF2_TABLE,y
-	lda (COLPF1Pointer),y
-	sta COLPF1_TABLE,y
+	; Now update the DLI color tables.
+	; I'm so lazy.  Not bothering to be clever.
+	; Just this or that or that or that...
+	pla                  ; Get the display number back.
+	tay
+	beq CopyColors_Title ; 0 == DISPLAY_TITLE
 	dey
-	bpl LoopCopyColors
+	beq CopyColors_Game  ; 1 == DISPLAY_TITLE
+	dey
+	beq CopyColors_Win   ; 2 == DISPLAY_TITLE
+	dey
+	beq CopyColors_Dead  ; 3 == DISPLAY_TITLE
+	dey
+	beq CopyColors_Over  ; 4 == DISPLAY_TITLE
 
-	rts
+	rts                  ; Will never get here, but makes me feel better.
+
+
+CopyColors_Title
+ 	ldx #25 ; Title
+
+bLoopCopyColorsToTitle
+	lda TITLE_BACK_COLORS,x
+	sta COLBK_TABLE,x
+
+	lda TITLE_TEXT_COLORS,x
+	sta COLPF1_TABLE,x
+	sta COLPF0_TABLE,x ; Only for Title, the COLPF0 graphics colors are in the text colors list.
+
+	dex
+	bpl bLoopCopyColorsToTitle
+
+	rts  ; ChangeScreen is over.
+
+
+CopyColors_Game
+	ldx #22 ; Game
+
+bLoopCopyColorsToGame
+	lda GAME_BACK_COLORS,x
+	sta COLBK_TABLE,x
+
+	lda GAME_COLPF0_COLORS,x
+	sta COLPF0_TABLE,x
+
+	lda GAME_TEXT_COLORS,x
+	sta COLPF1_TABLE,x
+		
+	lda GAME_COLPF2_COLORS,x
+	sta COLPF2_TABLE,x
+
+	dex
+	bpl bLoopCopyColorsToGame
+
+	rts ; ChangeScreen is over.
+
+
+CopyColors_Win
+	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
+
+bLoopCopyColorsToWin
+	lda WIN_BACK_COLORS,x
+	sta COLBK_TABLE,x
+
+	lda WIN_TEXT_COLORS,x ; "TEXT" no longer means text.  Too lazy to change it.
+	sta COLPF0_TABLE,x
+
+	dex
+	bpl bLoopCopyColorsToWin
+
+	rts ; ChangeScreen is over.
+
+
+CopyColors_Dead
+	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
+
+bLoopCopyColorsToDead
+	lda DEAD_BACK_COLORS,x
+	sta COLBK_TABLE,x
+
+	lda DEAD_TEXT_COLORS,x
+	sta COLPF0_TABLE,x
+
+	dex
+	bpl bLoopCopyColorsToDead
+
+	rts ; ChangeScreen is over.
+
+
+CopyColors_Over
+	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
+
+bLoopCopyColorsTOver
+	lda OVER_BACK_COLORS,x
+	sta COLBK_TABLE,x
+
+	lda OVER_TEXT_COLORS,x
+	sta COLPF0_TABLE,x
+
+	dex
+	bpl bLoopCopyColorsTOver
+
+	rts ; ChangeScreen is over.
 
 
 ;==============================================================================
@@ -859,14 +943,5 @@ bUFSkipFrogRedraw
 bUFSkipFrogReposition
 
 	rts
-
-
-
-
-
-
-
-
-
 
 
