@@ -206,6 +206,31 @@ EndTitleScreen
 
 
 ; ==========================================================================
+; Support function. Decrement Title text colors.
+; Needed to reduce the size of EventTransitionToGame, because the start 
+; can't reach the branch to the end/exit point.
+;
+; BEQ state is immediate exit. (Text value has reached 0)
+; ==========================================================================
+; === STAGE 1 ===
+; Fade out text lines  from bottom to top.
+; Decrease COLPF1 brightness.
+; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
+; Decrement twice here, because once was not fast enough.
+; The fade and wipe was becoming boring.
+FadeColPf1ToBlack
+	ldx EventCounter2
+	lda COLPF1_TABLE,x
+	beq ExitFadeColPf1ToBlack  ; Safety check, because I am untrustworthy.
+	dec COLPF1_TABLE,x
+	beq ExitFadeColPf1ToBlack
+	dec COLPF1_TABLE,x         ; Dec twice to speed this up.
+
+ExitFadeColPf1ToBlack
+	rts
+
+
+; ==========================================================================
 ; Event Process TRANSITION TO GAME SCREEN
 ; The Activity in the transition area, based on timer.
 ; Stage 1) Fade out text lines  from bottom to top.
@@ -232,12 +257,7 @@ EventTransitionToGame
 	; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
 	; Decrement twice here, because once was not fast enough.
 	; The fade and wipe was becoming boring.
-	ldx EventCounter2
-;	lda COLPF1_TABLE,x
-;	beq ZeroCOLPF2          ; Safety check, because I am untrustworthy.
-;	dec COLPF1_TABLE,x
-;	beq ZeroCOLPF2
-;	dec COLPF1_TABLE,x
+	jsr FadeColPf1ToBlack
 	bne EndTransitionToGame
 ZeroCOLPF2
 	lda #0
@@ -268,7 +288,8 @@ TestTransGame2
 	lda #DISPLAY_GAME        ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
-	jsr ZeroCurrentColors    ; Insure the screen to start black.
+	lda #DISPLAY_GAME
+	jsr ZeroCurrentColors    ; Insure the screen starts black.
 
 	; Finished stage 2, now setup Stage 3
 	lda #3
@@ -300,6 +321,7 @@ TestTransGame3
 	lda COLPF1_TABLE,x 
 	cmp GAME_TEXT_COLORS,x   ; Is it at target brighness?
 	beq TransGameNextLine    ; Yes.  Go do next line.
+
 	bne EndTransitionToGame  ; No.  End  this pass.  be back later.
 
 TransGameNextLine

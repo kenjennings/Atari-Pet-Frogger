@@ -66,7 +66,7 @@ SetupTransitionToGame
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
 
-	lda #22
+	lda #24
 	sta EventCounter2       ; Prep the first transition loop.
 
 	lda #1                  ; First transition stage: Loop from bottom to top

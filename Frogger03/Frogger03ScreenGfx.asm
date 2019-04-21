@@ -517,15 +517,19 @@ WriteLives
 ; ==========================================================================
 ; ZERO CURRENT COLORS                                                 A  Y
 ; ==========================================================================
-; Force all the colors in the current table to black.
+; Force all the colors in the current tables to black.
 ;
 ; --------------------------------------------------------------------------
 ZeroCurrentColors
-	ldy #23
+	ldy #22
 	lda #0
+	
 LoopZeroColors
-	sta COLPF2_TABLE,y
+	sta COLBK_TABLE,y
+	sta COLPF0_TABLE,y
 	sta COLPF1_TABLE,y
+	sta COLPF2_TABLE,y
+
 	dey
 	bpl LoopZeroColors
 
