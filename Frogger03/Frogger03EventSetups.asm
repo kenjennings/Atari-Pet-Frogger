@@ -102,10 +102,12 @@ SetupGame
 	lda #18                 ; 18 (dec), number of screen rows of game field.
 	sta FrogRow
 
-	lda #MIN_FROGX          ; Set "old" position to trigger Update to redraw.  
+	lda #0          ; Set "old" position to trigger Update to redraw.  
 	sta FrogPMX             ; 
-	lda #20
-	sta FrogPMY             ; 
+	sta FrogPMY 
+
+	lda #MID_FROGX          ; Set new X position to middle of screen.
+	sta FrogNewPMX
 
 	lda #MAX_FROGY          ; Set new Y position to origin. (row 18)
 	sta FrogNewPMY
@@ -114,9 +116,6 @@ SetupGame
 ;	sty FrogColumn          ; Logical X coordinate
 ;	sty FrogRealColumn1     ; On a Beach row the physical locations are the same.
 ;	sty FrogRealColumn2     ; If on a scroll row then they are different.
-
-	lda #MID_FROGX          ; Set new X position to middle of screen.
-	sta FrogNewPMX
 
 ;	lda #I_FROG             ; We're using $7F as the frog shape.
 ;	sta (FrogLocation),y    ; PLAYFIELD_MEM18 (beach) + $13/19 (dec)

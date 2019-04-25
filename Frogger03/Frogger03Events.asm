@@ -221,7 +221,14 @@ EndTitleScreen
 FadeColPf1ToBlack
 	ldx EventCounter2
 	lda COLPF1_TABLE,x
-	beq ExitFadeColPf1ToBlack  ; Safety check, because I am untrustworthy.
+	beq TryCOLPF0  ; Safety check, because I am untrustworthy.
+	dec COLPF1_TABLE,x
+	beq TryCOLPF0
+	dec COLPF1_TABLE,x         ; Dec twice to speed this up.
+
+TryCOLPF0
+	lda COLPF1_TABLE,x
+	beq ExitFadeColPf1ToBlackh  ; Safety check, because I am untrustworthy.
 	dec COLPF1_TABLE,x
 	beq ExitFadeColPf1ToBlack
 	dec COLPF1_TABLE,x         ; Dec twice to speed this up.
@@ -262,9 +269,10 @@ EventTransitionToGame
 ZeroCOLPF2
 	lda #0
 	sta COLPF2_TABLE,x
-
+	sta COLBK_TABLE,x
+	
 	dec EventCounter2
-	bpl EndTransitionToGame
+	bne EndTransitionToGame ; 1 is the last entry. 0 is stop looping.
 
 	; Finished stage 1, now setup Stage 2
 	jsr CopyScoreToScreen   ; Make sure the score is updated in screen memory.
