@@ -217,7 +217,7 @@
 ;    +----------------------------------------+
 
 
-
+; N/A  -  No frog in screen memory
 ; ==========================================================================
 ; Set the splattered frog on the screen.
 ;
@@ -227,6 +227,7 @@ SetSplatteredOnScreen
 ;	lda #I_SPLAT
 	bne UpdateFrogInScreenMemory
 
+; N/A  -  No frog in screen memory
 ; ==========================================================================
 ; Set the frog on the screen.
 ;
@@ -236,6 +237,8 @@ SetFrogOnScreen
 ;	lda #I_FROG
 	bne UpdateFrogInScreenMemory
 
+
+; N/A  -  No frog in screen memory
 ; ==========================================================================
 ; Remove the frog from the screen.
 ;
@@ -246,6 +249,8 @@ SetFrogOnScreen
 RemoveFrogOnScreen
 ;	lda LastCharacter  ; Get the last character (under the frog)
 
+
+; N/A  ?  No frog in screen memory, but update P/M graphics?
 ; ==========================================================================
 ; Update the frog image in screen memory.
 ;
@@ -277,16 +282,17 @@ UpdateFrogInScreenMemory
 	rts
 
 
+; N/A  -  No frog in screen memory
 ; ==========================================================================
 ; Get the character from screen memory where the frog will reside.
 ; Save it to lastCharacter to restore as needed.
 ; --------------------------------------------------------------------------
-GetScreenMemoryUnderFrog
+;GetScreenMemoryUnderFrog
 ;	ldy FrogRealColumn1
 ;	lda (FrogLocation),y
 ;	sta lastCharacter
 
-	rts
+;	rts
 
 
 ; ==========================================================================
@@ -313,7 +319,7 @@ DisplayTitleScreen
 DisplayGameScreen
 	mRegSaveAYX             ; Save A and Y and X, so the caller doesn't need to.
 
-	jsr ResetGamePlayfield ; initialize all game playfield LMS values.
+;	jsr ResetGamePlayfield ; initialize all game playfield LMS values.
 
 	jsr SetBoatSpeed       ; Animation speed set by number of saved frogs
 
@@ -329,6 +335,7 @@ DisplayGameScreen
 	rts
 
 
+; N/A  -  VBI continuously scrolls boats
 ; ==========================================================================
 ; ANIMATE BOATS
 ; ==========================================================================
@@ -341,7 +348,7 @@ DisplayGameScreen
 ; a pattern where the code is updating a text line that is being
 ; displayed and we end up with tearing animation.
 ; --------------------------------------------------------------------------
-AnimateBoats
+;AnimateBoats
 	; Update with working positions of the scrolling lines.
 
 ;	dec CurrentRightOffset ; subtract one to move screen contents right.
@@ -349,7 +356,7 @@ AnimateBoats
 ;	lda #39                ; Fell off the end.  Restart.
 ;	sta CurrentRightOffset ; reset to scroll start.
 
-IncLeftOffset
+;IncLeftOffset
 ;	inc CurrentLeftOffset  ; subtract one to move screen contents left.
 ;	lda CurrentLeftOffset
 ;	cmp #40                ; 40th position is identical to 0th,
@@ -357,7 +364,7 @@ IncLeftOffset
 ;	lda #0                 ; Fell off the end.  Restart.
 ;	sta CurrentLeftOffset  ; reset to scroll start.
 
-UpdatePlayfieldLMS
+;UpdatePlayfieldLMS
 	; We could cleverly pull address for each LMS and update....
 	; Why?  The address are known and only low bytes need to be updated,
 	; So, then stuff them all directly.   This ends up being shorter than
@@ -368,11 +375,13 @@ UpdatePlayfieldLMS
 
 ;	jsr UpdateGamePlayfield ; Update all the LMS offsets.
 
+; CopyScoreToScreen MAY NEED TO BE SUBSTUITUTED FOR AnimateBoats
 	jsr CopyScoreToScreen   ; Finish up by updating score display.
 
 	rts
 
 
+; N/A  -  VBI continuously scrolls boats
 ; ==========================================================================
 ; UPDATE GAME PLAYFIELD
 ; Update Game screen LMS addresses and scrolling offset to specified
@@ -385,7 +394,7 @@ UpdatePlayfieldLMS
 ; A  is Left scroll position
 ; X  is Right scroll position.
 ; --------------------------------------------------------------------------
-UpdateGamePlayfield
+;UpdateGamePlayfield
 
 ;	stx PF_LMS1 ; Right
 ;	sta PF_LMS2 ; Left
@@ -411,6 +420,7 @@ UpdateGamePlayfield
 ;	rts
 
 
+; N/A  -  VBI continuously scrolls boats
 ; ==========================================================================
 ; RESET GAME PLAYFIELD
 ; ==========================================================================
@@ -420,14 +430,14 @@ UpdateGamePlayfield
 ;
 ; Used A, X and Y
 ; --------------------------------------------------------------------------
-ResetGamePlayfield
+;ResetGamePlayfield
 
-	lda #$00               ; Reset the actual position trackers.
-	ldx #$00
+;	lda #$00               ; Reset the actual position trackers.
+;	ldx #$00
 
-	jsr UpdateGamePlayfield
+;	jsr UpdateGamePlayfield
 
-	rts
+;	rts
 
 
 ; Game Score and High Score.
@@ -534,6 +544,7 @@ LoopZeroColors
 	bpl LoopZeroColors
 
 	jsr HideButtonPrompt
+
 	rts
 
 
@@ -588,13 +599,128 @@ LoopChangeScreenWaitForVBI
 	lda DISPLAYLIST_GFXLMS_TABLE,y
 	beq bCSSkipLMSUpdate           ; If it is 0 it is not 
 	sta GFX_LMS
-bCSSkipLMSUpdate
 
+bCSSkipLMSUpdate
 	; Now update the DLI color tables.
-	; I'm so lazy.  Not bothering to be clever.
-	; Just this or that or that or that...
 	pla                  ; Get the display number back.
 	tay
+	jsr CopyBaseColors
+
+	rts
+
+
+
+
+EverythingMatches .byte 0 ; Bits indicate all colors match, then this row is done.
+; Bits $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2
+
+TempSaveColor .byte 0
+
+; Such sloppiness....  gah!
+IncrementGameColor    ; A = current color.   Y = target color
+	and #$0F          ; Remove Color part (to be joined to target luminance)
+	sta TempSaveColor ; Keep luminance
+	tya               ; A = Target color.
+	and #$F0          ; Get target color (without luminance) 
+	ora TempSaveColor ; Join current luminance to target color for new current base color.
+	tay               ; Current color back to Y for increments
+	iny
+	iny
+	tya               ; A = current color.
+	rts
+
+FlipOffEverything
+	and EverythingMatches
+	sta EverythingMatches    ; Save the finished flag.  
+	lda #0                   ; So the caller can BEQ
+	rts
+
+; ==========================================================================
+; INCREMENT COLORS                                                A  Y  X
+; ==========================================================================
+; Increment color table luminance values until they reach target values.
+; Exit with 0 flag when all values are matching.
+;
+; X  is the index into the tables. 
+; --------------------------------------------------------------------------
+
+IncrementTableColors
+	lda #%00001111       ; Flags indicate nothing matches yet.
+	sta EverythingMatches
+
+bDoTestCOLBK
+	lda COLBK_TABLE,x        ; Get the current color. 
+	cmp GAME_BACK_COLORS,x   ; Is it the same as the Target color?
+	bne bDoIncCOLBK          ; No.  Go inc the luminance.
+	lda #00000111            ; Yes, turn off $08 .
+	jsr FlipOffEverything    
+	beq bDoTestCOLPF0        ; Do the next color.
+
+bDoIncCOLBK
+	tay                      ; Y = current color
+	lda GAME_BACK_COLORS,x   ; A = target color
+	jsr IncrementGameColor   ; Merge and increment color.
+	sta COLBK_TABLE,x        ; Save the result.
+
+bDoTestCOLPF0
+	lda COLPF0_TABLE,x       ; Get the current color. 
+	cmp GAME_COLPF0_COLORS,x ; Is it the same as the Target color?
+	bne bDoIncCOLPF0         ; No.  Go inc the luminance.
+	lda #00001011            ; Yes, turn off $04 .
+	jsr FlipOffEverything    
+	beq bDoTestCOLPF1        ; Do the next color.
+
+bDoIncCOLPF0
+	tay                      ; Y = current color
+	lda GAME_COLPF0_COLORS,x ; A = target color
+	jsr IncrementGameColor   ; Merge and increment color.
+	sta COLPF0_TABLE,x       ; Save the result.
+
+bDoTestCOLPF1
+	lda COLPF1_TABLE,x       ; Get the current color. 
+	cmp GAME_COLPF1_COLORS,x ; Is it the same as the Target color?
+	bne bDoIncCOLPF1         ; No.  Go inc the luminance.
+	lda #00001101            ; Yes, turn off $02.
+	jsr FlipOffEverything    
+	beq bDoTestCOLPF2        ; Do the next color.
+
+bDoIncCOLPF1
+	tay                      ; Y = current color
+	lda GAME_COLPF1_COLORS,x ; A = target color
+	jsr IncrementGameColor   ; Merge and increment color.
+	sta COLPF1_TABLE,x       ; Save the result.
+
+bDoTestCOLPF2
+	lda COLPF2_TABLE,x       ; Get the current color. 
+	cmp GAME_COLPF2_COLORS,x ; Is it the same as the Target color?
+	bne bDoIncCOLPF2         ; No.  Go inc the luminance.
+	lda #00001110            ; Yes, turn off $02.
+	jsr FlipOffEverything    
+	beq bDoneWithEverything  ; Done With Everything.
+
+bDoIncCOLPF2
+	tay                      ; Y = current color
+	lda GAME_COLPF2_COLORS,x ; A = target color
+	jsr IncrementGameColor   ; Merge and increment color.
+	sta COLPF2_TABLE,x       ; Save the result.
+
+bDoneWithEverything
+	lda EverythingMatches    ; If all flags are turned off the caller knows this row is done.
+
+	rts
+
+
+; ==========================================================================
+; COPY BASE COLORS                                                    A Y
+; ==========================================================================
+; Copy the base colors for the current display.
+;
+; Y  is the DISPLAY_* value (defined elsewhere) for the desired display.
+; --------------------------------------------------------------------------
+CopyBaseColors
+	; I'm so lazy.  Not bothering to be clever.
+	; Just this or that or that or that...
+	; Y was assigned the display number.
 	beq CopyColors_Title ; 0 == DISPLAY_TITLE
 	dey
 	beq CopyColors_Game  ; 1 == DISPLAY_TITLE
@@ -626,23 +752,25 @@ bLoopCopyColorsToTitle
 
 
 CopyColors_Game
-	ldx #22 ; Game
+	jsr ZeroCurrentColors ; "Game" starts at black screen and is faded up.
 
-bLoopCopyColorsToGame
-	lda GAME_BACK_COLORS,x
-	sta COLBK_TABLE,x
+;	ldx #22 ; Game
 
-	lda GAME_COLPF0_COLORS,x
-	sta COLPF0_TABLE,x
+;bLoopCopyColorsToGame
+;	lda GAME_BACK_COLORS,x
+;	sta COLBK_TABLE,x
 
-	lda GAME_TEXT_COLORS,x
-	sta COLPF1_TABLE,x
-		
-	lda GAME_COLPF2_COLORS,x
-	sta COLPF2_TABLE,x
+;	lda GAME_COLPF0_COLORS,x
+;	sta COLPF0_TABLE,x
 
-	dex
-	bpl bLoopCopyColorsToGame
+;	lda GAME_TEXT_COLORS,x
+;	sta COLPF1_TABLE,x
+
+;	lda GAME_COLPF2_COLORS,x
+;	sta COLPF2_TABLE,x
+
+;	dex
+;	bpl bLoopCopyColorsToGame
 
 	rts ; ChangeScreen is over.
 
@@ -823,7 +951,7 @@ libPmgSetColors
 ;==============================================================================
 ;											EraseFrog  A  X  Y
 ;==============================================================================
-; Erase old Frog at old position.
+; Erase Frog at current position.
 
 EraseFrog
 	lda #0
@@ -854,7 +982,7 @@ bLoopEF_EraseRemainder
 ;==============================================================================
 ;											DrawFrog  A  X  Y
 ;==============================================================================
-; Draw old Frog at new position.
+; Draw Frog at new position.
 
 DrawFrog
 	ldx FrogNewPMY            ; New frog Y
@@ -899,10 +1027,11 @@ UpdateFrog
 	cpx FrogPMY            ; ...is different from Old frog Y?
 	beq bUFSkipFrogRedraw  ; No.  Skip erase/redraw.
 
-	stx FrogPMY            ; Set current Frog Y == New Frog Y
-
 	; 1) Erase frog.
 	jsr EraseFrog
+
+	ldx FrogNewPMY         ; New frog Y...
+	stx FrogPMY            ; Set current Frog Y == New Frog Y
 
 	; 2) load new frog image
 	jsr DrawFrog

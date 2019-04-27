@@ -213,25 +213,73 @@ EndTitleScreen
 ; BEQ state is immediate exit. (Text value has reached 0)
 ; ==========================================================================
 ; === STAGE 1 ===
-; Fade out text lines  from bottom to top.
-; Decrease COLPF1 brightness.
-; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
-; Decrement twice here, because once was not fast enough.
-; The fade and wipe was becoming boring.
+; ; Fade out text lines  from bottom to top.
+; ; Decrease COLPF1 brightness.
+; ; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
+; ; Decrement twice here, because once was not fast enough.
+; ; The fade and wipe was becoming boring.
+; Modification:
+; Fade out COLPF0 and COLPF1 at the same time.
+; When luminance reaches 0, set color to 0. 
+; Return flags the OR value of the COLPF0 and COLPF1.
+
+SAVE_PF0 .byte 0
+SAVE_PF1 .byte 0
+
 FadeColPf1ToBlack
 	ldx EventCounter2
+
 	lda COLPF1_TABLE,x
-	beq TryCOLPF0  ; Safety check, because I am untrustworthy.
-	dec COLPF1_TABLE,x
+	beq TryCOLPF0       ; It is already 0, so skip this.
+	and #$F0            ; Save just the color.
+	sta SAVE_PF1
+
+	lda COLPF1_TABLE,x  
+	and #$0F            ; Now check just the luminance.
+	bne bDecLumaPF1     ; Non-zero, so go decrement.
+
+	sta COLPF1_TABLE,x  ;  A = luma = 0, so set the color to 0.
 	beq TryCOLPF0
-	dec COLPF1_TABLE,x         ; Dec twice to speed this up.
+
+bDecLumaPF1
+	tay
+	dey
+	beq Reassemble_PF1
+	dey                ; Dec twice to speed this up.
+
+Reassemble_PF1
+	tya                    ; Got the luma.
+	ora SAVE_PF1           ; join the color.
+	sta COLPF1_TABLE,x     ; re-save
+
 
 TryCOLPF0
-	lda COLPF1_TABLE,x
-	beq ExitFadeColPf1ToBlackh  ; Safety check, because I am untrustworthy.
-	dec COLPF1_TABLE,x
+	lda COLPF0_TABLE,x
+	beq ExitFadeColPf1ToBlack ; It is already 0, so skip this.
+	and #$F0                  ; Save just the color.
+	sta SAVE_PF0
+
+	lda COLPF0_TABLE,x  
+	and #$0F            ; Now check just the luminance.
+	bne bDecLumaPF0     ; Non-zero, so go decrement.
+
+	sta COLPF0_TABLE,x  ;  A = luma = 0, so set the color to 0.
 	beq ExitFadeColPf1ToBlack
-	dec COLPF1_TABLE,x         ; Dec twice to speed this up.
+
+bDecLumaPF0
+	tay
+	dey
+	beq Reassemble_PF0
+	dey                ; Dec twice to speed this up.
+
+Reassemble_PF0
+	tya                    ; Got the luma.
+	ora SAVE_PF0           ; join the color.
+	sta COLPF0_TABLE,x     ; re-save.
+
+ExitFadeColPf1ToBlack      ; Insure we're leaving with 0 for both colors 0.  Or !0 otherwise.
+	lda COLPF0_TABLE,x     ; Get current color 0
+	ora COLPF1_TABLE,x     ; ORA the value of color 0
 
 ExitFadeColPf1ToBlack
 	rts
@@ -264,20 +312,21 @@ EventTransitionToGame
 	; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
 	; Decrement twice here, because once was not fast enough.
 	; The fade and wipe was becoming boring.
-	jsr FadeColPf1ToBlack
-	bne EndTransitionToGame
-ZeroCOLPF2
-	lda #0
+	jsr FadeColPf1ToBlack    ; Returns color 0 or color 1
+	bne EndTransitionToGame  ; If either color is non-zero, done for this pass.
+
+ZeroCOLPF2                   ; FadeColPf1ToBlack returned 0, so the text (and pixel) is 0.  
+	lda #0                   ; Therefore, zero the background(s).
 	sta COLPF2_TABLE,x
 	sta COLBK_TABLE,x
-	
+
 	dec EventCounter2
 	bne EndTransitionToGame ; 1 is the last entry. 0 is stop looping.
 
 	; Finished stage 1, now setup Stage 2
-	jsr CopyScoreToScreen   ; Make sure the score is updated in screen memory.
-	jsr PrintFrogsAndLives
-	lda #2
+	jsr CopyScoreToScreen   ; Make sure the score is updated in Game screen memory.
+	jsr PrintFrogsAndLives  ; And the frog list.
+	lda #2                  ; Go to next phase TestTransGame2
 	sta EventCounter
 	lda #0
 	sta EventCounter2 ; return to 0.
@@ -291,58 +340,46 @@ TestTransGame2
 	bne TestTransGame3
 
 	; Reset the game screen positions, Scrolling LMS offsets
-	jsr ResetGamePlayfield
+;	jsr ResetGamePlayfield
 
 	lda #DISPLAY_GAME        ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
-	lda #DISPLAY_GAME
-	jsr ZeroCurrentColors    ; Insure the screen starts black.
+;	lda #DISPLAY_GAME
+;	jsr ZeroCurrentColors    ; But, insure the screen starts black.
 
 	; Finished stage 2, now setup Stage 3
 	lda #3
 	sta EventCounter
-	lda #0
+	lda #1
 	sta EventCounter2 ; return to 0.
 	beq EndTransitionToGame
 
 	; === STAGE 3 ===
 	; Fade in text lines from top to bottom.
-	; change COLPF2 to target color.
-	; Increase COLPF1 brightness.
-	; When COLPF1 reaches target move to next line.
-	; Increment twice here, because once was not fast enough.
-	; The fade and wipe was becoming boring.
+	; This looked so simple on paper. 
+	; Now that there are four colors per line the 
+	; fade up to the target values is much more complicated.
+	; Read the mess that is IncrementTableColors elsewhere.
 TestTransGame3
 	cmp #3
 	bne EndTransitionToGame
 
 	ldx EventCounter2
-	lda GAME_BACK_COLORS,x   ; copy the background color.
-	sta COLPF2_TABLE,x
+	jsr IncrementTableColors ; Complicate fade up of four color registers.
+	bne EndTransitionToGame  ; All colors do not match yet. Be back later to do more.
 
-	inc COLPF1_TABLE,x       ; Increase text brightness.
-	lda COLPF1_TABLE,x 
-	cmp GAME_TEXT_COLORS,x   ; Is it at target brighness?
-	beq TransGameNextLine    ; Yes.  Go do next line.
-	inc COLPF1_TABLE,x       ; Twice to speed this up.
-	lda COLPF1_TABLE,x 
-	cmp GAME_TEXT_COLORS,x   ; Is it at target brighness?
-	beq TransGameNextLine    ; Yes.  Go do next line.
-
-	bne EndTransitionToGame  ; No.  End  this pass.  be back later.
-
-TransGameNextLine
-	inc EventCounter2        ; next screen line.
+TransGameNextLine            ; All colors match on this line.  Do next line.
+	inc EventCounter2        ; Next screen line.
 	lda EventCounter2
-	cmp #23                  ; Reached the limit.  all  lines are done.
-	bne EndTransitionToGame
+	cmp #23                  ; Reached the limit?  
+	bne EndTransitionToGame  ; No.  Finish this pass.
 
 	; Finished stage 3, now go to the main event.
 	lda #SCREEN_START         ; Yes, change to event to start new game.
 	sta CurrentScreen
 
-	lda #BLINK_SPEED          ; Text Blinking speed for prompt on Title screen.
+	lda #BLINK_SPEED          ; Text Blinking speed for prompt ?
 	jsr ResetTimers
 
 	jsr SetupGame
