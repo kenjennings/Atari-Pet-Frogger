@@ -652,7 +652,7 @@ bDoTestCOLBK
 	lda COLBK_TABLE,x        ; Get the current color. 
 	cmp GAME_BACK_COLORS,x   ; Is it the same as the Target color?
 	bne bDoIncCOLBK          ; No.  Go inc the luminance.
-	lda #00000111            ; Yes, turn off $08 .
+	lda #%00000111            ; Yes, turn off $08 .
 	jsr FlipOffEverything    
 	beq bDoTestCOLPF0        ; Do the next color.
 
@@ -666,7 +666,7 @@ bDoTestCOLPF0
 	lda COLPF0_TABLE,x       ; Get the current color. 
 	cmp GAME_COLPF0_COLORS,x ; Is it the same as the Target color?
 	bne bDoIncCOLPF0         ; No.  Go inc the luminance.
-	lda #00001011            ; Yes, turn off $04 .
+	lda #%00001011            ; Yes, turn off $04 .
 	jsr FlipOffEverything    
 	beq bDoTestCOLPF1        ; Do the next color.
 
@@ -680,7 +680,7 @@ bDoTestCOLPF1
 	lda COLPF1_TABLE,x       ; Get the current color. 
 	cmp GAME_COLPF1_COLORS,x ; Is it the same as the Target color?
 	bne bDoIncCOLPF1         ; No.  Go inc the luminance.
-	lda #00001101            ; Yes, turn off $02.
+	lda #%00001101            ; Yes, turn off $02.
 	jsr FlipOffEverything    
 	beq bDoTestCOLPF2        ; Do the next color.
 
@@ -694,7 +694,7 @@ bDoTestCOLPF2
 	lda COLPF2_TABLE,x       ; Get the current color. 
 	cmp GAME_COLPF2_COLORS,x ; Is it the same as the Target color?
 	bne bDoIncCOLPF2         ; No.  Go inc the luminance.
-	lda #00001110            ; Yes, turn off $02.
+	lda #%00001110            ; Yes, turn off $02.
 	jsr FlipOffEverything    
 	beq bDoneWithEverything  ; Done With Everything.
 

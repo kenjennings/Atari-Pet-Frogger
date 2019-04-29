@@ -281,7 +281,6 @@ ExitFadeColPf1ToBlack      ; Insure we're leaving with 0 for both colors 0.  Or 
 	lda COLPF0_TABLE,x     ; Get current color 0
 	ora COLPF1_TABLE,x     ; ORA the value of color 0
 
-ExitFadeColPf1ToBlack
 	rts
 
 
@@ -521,7 +520,7 @@ CheckForAnim
 	jsr AnticipateFrogDeath  ; Will the frog die when the boat moves?
 	bne DoSetupForYerDead    ; Shrodinger says apparently so.  dead frog.
 
-	jsr AnimateBoats         ; Move the boats around.
+;	jsr AnimateBoats         ; Move the boats around.
 	jsr AutoMoveFrog         ; Move the frog relative to boats.
 
 	jsr ToReplayFXWaterOrNot ; Time to replay the water noises?

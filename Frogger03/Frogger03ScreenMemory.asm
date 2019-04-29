@@ -630,7 +630,7 @@ GAME_COLPF2_COLORS
 	.by COLOR_BLACK+$0E
 	.by COLOR_BLACK+$0E
 
-GAME_TEXT_COLORS ; COLPF1 Text luminance
+GAME_COLPF1_COLORS ; COLPF1 Text luminance -- was GAME_TEXT_COLORS
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by COLOR_BLACK+$e                        ; Scores, 
 	.by COLOR_BLACK+$a                        ; lives, saved frogs.
@@ -969,14 +969,14 @@ COLOR_BACK_HI_TABLE
 
 COLOR_TEXT_LO_TABLE
 	.byte <TITLE_TEXT_COLORS
-	.byte <GAME_TEXT_COLORS
+	.byte <GAME_COLPF1_COLORS
 	.byte <WIN_TEXT_COLORS
 	.byte <DEAD_TEXT_COLORS
 	.byte <OVER_TEXT_COLORS
 
 COLOR_TEXT_HI_TABLE
 	.byte >TITLE_TEXT_COLORS
-	.byte >GAME_TEXT_COLORS
+	.byte >GAME_COLPF1_COLORS
 	.byte >WIN_TEXT_COLORS
 	.byte >DEAD_TEXT_COLORS
 	.byte >OVER_TEXT_COLORS
