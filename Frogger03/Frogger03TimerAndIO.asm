@@ -10,7 +10,7 @@
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019
-; Version 03, April 2019
+; Version 03, May 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -344,9 +344,10 @@ ScrollTheCreditLine               ; scroll the text identifying the perpetrators
 	lda #2                        ; Reset counter to original value.
 	sta ScrollCounter
 	; Yeah, ANTIC supports fine horizontal scrolling 16 color clocks or 
-	; 4 text characters at a time.  But, this is a little more simple 
-	; code if we scroll only one character per each coarse scroll.
-
+	; 4 text characters at a time.  But, the actual credit length is 
+	; variable every time I change the string, so this is more simple to 
+	; code by fine scrolling only a character at a time.  It is not like 
+	; the Atari needs to rewrite the data to coarse scroll.
 	dec CreditHSCROL             ; Subtract one color clock from the left (aka fine scroll).
 	bne ManageBoatScrolling      ; It is not yet 0.  Nothing else to do here.
 
@@ -374,7 +375,7 @@ ManageBoatScrolling
 	lda BoatFrames
 	beq ResetBoatFrames           ; If BoatFrames is 0, time to make the donuts.
 	dec BoatFrames                ; Not zero, so decrement
-	jmp ManagePressAButtonPrompt  ; and skip to the next part to manage.
+	jmp ManageBoatAnimations      ; and skip to the next part to manage.
 
 ResetBoatFrames
 	jsr SetBoatSpeed
@@ -459,7 +460,7 @@ EndOfLeftScroll
 
 ; ======== Move the Frog Horizontally if it is on a boat. ========
 	lda FrogShape                ; Get the current frog shape.
-	beq ManagePressAButtonPrompt ; 0 is off, so no movement there, skip all
+	beq ManageBoatAnimations     ; 0 is off, so no movement there, skip all
 	cmp #SHAPE_TOMB              ; And the tombstone ...
 	beq SimplyUpdatePosition     ; ... does not move (automatically) either.
 
@@ -554,6 +555,40 @@ UpdateTheFrog
 	jsr UpdateFrog 	; then FrogPMX == FrogNewPMX. FrogPMY == FrogNewPMY. FrogRow=FrogNewRow.
 
 NoFrogUpdate
+
+
+; ======== Animate Boat Components ========
+; When BoatyMcBoatCounter is 0, then animate based on BoatyComponent
+; 0 = Right Boat Front
+; 1 = Right Boat Back
+; 2 = Left Boat Front
+; 3 = Left Boat Back
+;BoatyFrame         .byte 0  ; counts 0 to 7.
+;BoatyMcBoatCounter .byte 2  ; decrement.  On 0 animate a component.
+;BoatyComponent     .byte 0  ; 0, 1, 2, 3 one of the four boat parts.
+ManageBoatAnimations
+	dec BoatyMcBoatCounter        ; subtract from scroll delay counter
+	bne ManagePressAButtonPrompt  ; Not 0 yet, so no animation.
+	lda #2                        ; Reset counter to original value.
+	sta BoatyMcBoatCounter
+
+	lda BoatyComponent            ; Get the component to animate
+
+
+
+EndOfBoatness
+	inc BoatyComponent
+	lda BoatyComponent
+	and #$03 
+	sta BoatyComponent
+	bne SkipBoatFrameIncrement
+; Whenever the boat component returns to 0, then update the frame counter...
+	inc BoatyFrame
+	lda BoatyFrame
+	and #$07
+	sta BoatyFrame
+SkipBoatFrameIncrement
+
 
 
 ; ======== Manage the prompt flashing for Press A Button ========
@@ -754,8 +789,7 @@ TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to
 	jmp Exit_DLI
 
 
-TITLE_DLI_5 ; DLI sets only COLPF1 text luminance from the table. (e.g. for fading)
-GAME_DLI_1
+GAME_DLI_1 ; DLI sets only COLPF1 text luminance from the table. (e.g. for fading)
 	mStart_DLI
 
 	lda COLPF1_TABLE,y   ; Get text color (luminance)
@@ -810,7 +844,7 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for Beach.
 
 ; BOATS 1
 ; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has a whole 
-; blank scan line to finish everything else.  
+; blank scan line to finish everything else.
 ; Collect Player/Playfield collisions.
 ; Set Normal width screen for Boats.
 
@@ -836,6 +870,8 @@ SetupAlmostAllColors_DLI
 	sta COLPF1
 	lda COLPF2_TABLE,y   ; Get color Rocks 3 
 	sta COLPF2
+	lda COLPF3_TABLE,y   ; Get color water (needed for fade-in)
+	sta COLPF3
 
 	lda COLBK_TABLE,y   ; Get real background color again. (To repair the color for the Beach background)
 	sta WSYNC

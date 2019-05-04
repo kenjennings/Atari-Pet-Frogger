@@ -10,7 +10,7 @@
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019
-; Version 03, April 2019
+; Version 03, May 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -26,23 +26,22 @@
 ; flavor of the original's text-mode-based game.
 ; 
 ; However, Version 03 makes a few changes.  The chunky text used for the
-; title and the dead/saved/game-over screens was built from Atari 
+; title and the dead/saved/game-over screens in V02 was built from Atari 
 ; graphics control characters.   Version 03 changes this to a graphics 
 ; mode that provides the same chunky-pixel size, but at only half the 
 ; memory for the same screen geometry.  Two lines of graphics is 
-; vertically the same height as one line of text.  The block characters
-; patterns provide two apparent rows of pixels, so, everything is equal.  
+; vertically the same height as one line of text.  The V02 block 
+; character patterns provide two apparent rows of pixels, so, everything 
+; is equal.  
 ;
 ; Switching to a graphics mode for the big text allows:
-; ] Complete color expression for background into the overscan 
-;   area, and for the pixels if we so choose.  (Text mode 2 manages 
-;   playfield and border colors differently.) 
-; ] Six lines of graphics in place of three lines of text makes it 
+; * Complete color expression for background and pixels. 
+;   (Text mode 2 manages playfield and border colors differently.) 
+; * Six lines of graphics in place of three lines of text makes it 
 ;   trivial to double the number of color changes in the big text.
 ;   Just a DLI for each line.
-; ] Without a separate border vs text background an apparent wider 
-;   screen width can be faked using the background through the 
-;   overscan area. 
+; * The background colors extend through the overscan area making 
+;   a seemingly wider screen than the text mode with border. 
 ;  
 ; In Version 02 blank lines of mode 2 text were used and colored 
 ; to make animated prize displays.  Instead of using a text mode 
@@ -67,7 +66,7 @@
 ;       and must appear on every row.
 ;    b) But now, since the frog is a Player/Missile object there is no 
 ;       need to change the screen memory to draw the frog.   Therefore,
-;       all the boat rows could the the same screen memory.  Declaring 
+;       all the boat rows could be the same screen memory.  Declaring 
 ;       one row of left boats, and one row of right boats saves the 
 ;       contents of 10 more rows of the same.  This is actually a 
 ;       significant part of the entire executable. 
@@ -80,7 +79,7 @@
 ;    and then return the the original scroll position.  If the boats 
 ;    and waves between them are identical then the entire line of boats 
 ;    does not need to be duplicated.  There only need to be enough 
-;    data to scroll from one boat position to the next.
+;    data to scroll from one boat position to the next boat's position.
 ; 3) Organizing the boats row of graphics to sit within one page of data 
 ;    means scrolling updates and LMS math only need deal with the low
 ;    byte of addresses. 
@@ -143,7 +142,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
-; 3  |                                        | <-Grassy color
+; 3  |                                        | 
 ; 4  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
 ; 5  |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        | ; Boats Right
 ; 6  |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        | ; Boats Left
@@ -163,7 +162,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 20 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
 ; 21 |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        |
 ; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
-; 23 |                                        | <-Grassy color
+; 23 |                                        | 
 ; 24 |                                        |
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
@@ -327,7 +326,7 @@ BLANK_MEM ; Blank text also used for blanks in other places.
 
 	.sb "Original program for CBM PET 4032 written by John C. Dale.    " ; 62
 
-	.sb "Atari 8-bit computer port by Ken Jennings, V03, April 2019" ; 61
+	.sb "Atari 8-bit computer port by Ken Jennings, V03, May 2019" ; 61
 
 END_OF_CREDITS
 EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
@@ -505,8 +504,8 @@ SCREEN_SAVED
 ; COLOR_ORANGE_GREEN = $E0
 ; COLOR_LITE_ORANGE =  $F0
 
-TITLE_BACK_COLORS
-	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
+TITLE_BACK_COLORS ; 25 entries ; Mode 2, text background and border. Also the Gfx background.
+	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry. 
 	.by COLOR_BLACK              ; Scores, and blank line
 	.by COLOR_BLUE1        COLOR_PURPLE_BLUE+2      ; Title lines
 	.by COLOR_PURPLE+4     COLOR_PINK+6             ; Title lines
@@ -520,7 +519,7 @@ TITLE_BACK_COLORS
 	.by COLOR_BLACK                                 ; Space
 	.by COLOR_PINK COLOR_PINK                       ; Controls
 
-TITLE_TEXT_COLORS ; Text luminance
+TITLE_TEXT_COLORS ; 25 entries ; Mode 2 Text luminance.  Also the Gfx pixel colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by $0E                                     ; Scores, and blank line
 	.by COLOR_ORANGE_GREEN+$0C $DA $C8 $B6 $A4 $92 $C2                 ; title
@@ -533,10 +532,10 @@ TITLE_TEXT_COLORS ; Text luminance
 
 
 
-GAME_BACK_COLORS
+GAME_BACK_COLORS; 22 entries.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by COLOR_BLACK                    ; Scores, lives, saved frogs.
-	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
+	.by COLOR_BLACK                   ; Scores
+	.by COLOR_BLACK                   ; lives, saved frogs.
 	
 	.by COLOR_GREEN+6    
 	.by COLOR_AQUA+$2      
@@ -564,10 +563,11 @@ GAME_BACK_COLORS
 
 	.by COLOR_GREEN+6                                    ; one last Beach.
 
-GAME_COLPF0_COLORS
+	
+GAME_COLPF0_COLORS; 22 entries
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
-	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
+	.by COLOR_BLACK                   ; Scores
+	.by COLOR_BLACK                   ; lives, saved frogs.
 
 	.by COLOR_BLUE1     ; Beach sky
 	.by COLOR_AQUA+4    ; Water top 1 with boats
@@ -596,10 +596,42 @@ GAME_COLPF0_COLORS
 	.by COLOR_AQUA+6      ; Beach sky (water)
 ;	.by COLOR_ORANGE2+2                                      ; one last Beach.
 
-GAME_COLPF2_COLORS
+GAME_COLPF1_COLORS ; 22 entries
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
-	.by COLOR_BLACK                   ; Scores, lives, saved frogs.
+	.by COLOR_BLACK+$e                        ; Scores
+	.by COLOR_BLACK+$a                        ; lives, saved frogs.
+	
+	.by COLOR_ORANGE2+$8     ; beach
+	.by COLOR_PINK+$C
+	.by COLOR_PURPLE+$C
+	
+	.by COLOR_RED_ORANGE+$8 ; beach
+	.by COLOR_PURPLE_BLUE+$C
+	.by COLOR_BLUE_GREEN+$C
+	
+	.by COLOR_ORANGE2+$8 ; beach
+	.by COLOR_GREEN+$C
+	.by COLOR_YELLOW_GREEN+$C
+	
+	.by COLOR_RED_ORANGE+$8 ; beach
+	.by COLOR_YELLOW_GREEN+$C
+	.by COLOR_ORANGE_GREEN+$C
+	
+	.by COLOR_ORANGE2+$8 ; beach
+	.by COLOR_LITE_ORANGE+$C
+	.by COLOR_ORANGE1+$C
+	
+	.by COLOR_RED_ORANGE+$8 ; beach
+	.by COLOR_ORANGE2+$C
+	.by COLOR_RED_ORANGE+$C
+	
+	.by COLOR_RED_ORANGE+$8 ; Last beach
+
+
+GAME_COLPF2_COLORS ; 24 entries... ?????????????
+	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
+	.by COLOR_BLACK                   ; Scores
+	.by COLOR_BLACK                   ; lives, saved frogs.
 	
 	.by COLOR_GREEN+2
 	.by COLOR_YELLOW_GREEN
@@ -630,36 +662,38 @@ GAME_COLPF2_COLORS
 	.by COLOR_BLACK+$0E
 	.by COLOR_BLACK+$0E
 
-GAME_COLPF1_COLORS ; COLPF1 Text luminance -- was GAME_TEXT_COLORS
+
+GAME_COLPF3_COLORS ; 22 entries.  Arg!  Tried to avoid this, but it is needed in order to do the fade/wipe
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by COLOR_BLACK+$e                        ; Scores, 
-	.by COLOR_BLACK+$a                        ; lives, saved frogs.
+	.by COLOR_BLACK+$c                        ; Scores
+	.by COLOR_BLACK+$c                        ; lives, saved frogs.
 	
-	.by COLOR_ORANGE2+$8     ; beach
-	.by COLOR_PINK+$C
-	.by COLOR_PURPLE+$C
+	.by COLOR_BLACK+$c     ; beach
+	.by COLOR_BLACK+$c
+	.by COLOR_BLACK+$c
 	
-	.by COLOR_RED_ORANGE+$8 ; beach
-	.by COLOR_PURPLE_BLUE+$C
-	.by COLOR_BLUE_GREEN+$C
+	.by COLOR_BLACK+$c ; beach
+	.by COLOR_BLACK+$c
+	.by COLOR_BLACK+$c
 	
-	.by COLOR_ORANGE2+$8 ; beach
-	.by COLOR_GREEN+$C
-	.by COLOR_YELLOW_GREEN+$C
+	.by COLOR_BLACK+$c ; beach
+	.by COLOR_BLACK+$c
+	.by COLOR_BLACK+$c
 	
-	.by COLOR_RED_ORANGE+$8 ; beach
-	.by COLOR_YELLOW_GREEN+$C
-	.by COLOR_ORANGE_GREEN+$C
+	.by COLOR_BLACK+$c ; beach
+	.by COLOR_BLACK+$c
+	.by COLOR_BLACK+$c
 	
-	.by COLOR_ORANGE2+$8 ; beach
-	.by COLOR_LITE_ORANGE+$C
-	.by COLOR_ORANGE1+$C
+	.by COLOR_BLACK+$c ; beach
+	.by COLOR_BLACK+$c
+	.by COLOR_BLACK+$c
 	
-	.by COLOR_RED_ORANGE+$8 ; beach
-	.by COLOR_ORANGE2+$C
-	.by COLOR_RED_ORANGE+$C
+	.by COLOR_BLACK+$c ; beach
+	.by COLOR_BLACK+$c
+	.by COLOR_BLACK+$c
 	
-	.by COLOR_RED_ORANGE+$8 ; Last beach
+	.by COLOR_BLACK+$c ; Last beach
+
 
 ; COLOR_ORANGE1 =      $10
 ; COLOR_ORANGE2 =      $20
@@ -678,24 +712,23 @@ GAME_COLPF1_COLORS ; COLPF1 Text luminance -- was GAME_TEXT_COLORS
 ; COLOR_LITE_ORANGE =  $F0
 
 
-
-DEAD_BACK_COLORS ; Text luminance
+DEAD_BACK_COLORS ; 47 entries.  Gfx background colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
-	.by COLOR_PURPLE_BLUE+2  COLOR_PURPLE_BLUE+4  COLOR_PURPLE_BLUE+6  COLOR_PURPLE_BLUE+8
+	.by COLOR_PURPLE_BLUE+2 COLOR_PURPLE_BLUE+4 COLOR_PURPLE_BLUE+6 COLOR_PURPLE_BLUE+8
 	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
-	.by COLOR_PURPLE_BLUE+2  COLOR_PURPLE_BLUE+4  COLOR_PURPLE_BLUE+6  COLOR_PURPLE_BLUE+8
+	.by COLOR_PURPLE_BLUE+2 COLOR_PURPLE_BLUE+4 COLOR_PURPLE_BLUE+6 COLOR_PURPLE_BLUE+8
 	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
 
 	.by COLOR_PURPLE COLOR_PURPLE+2 COLOR_PURPLE+4 COLOR_PURPLE+6 COLOR_PURPLE+8 COLOR_PURPLE+10 
 
 	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
-	.by COLOR_PURPLE_BLUE+2  COLOR_PURPLE_BLUE+4  COLOR_PURPLE_BLUE+6  COLOR_PURPLE_BLUE+8
+	.by COLOR_PURPLE_BLUE+2 COLOR_PURPLE_BLUE+4 COLOR_PURPLE_BLUE+6 COLOR_PURPLE_BLUE+8
 	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
-	.by COLOR_PURPLE_BLUE+2  COLOR_PURPLE_BLUE+4  COLOR_PURPLE_BLUE+6  COLOR_PURPLE_BLUE+8
+	.by COLOR_PURPLE_BLUE+2 COLOR_PURPLE_BLUE+4 COLOR_PURPLE_BLUE+6 COLOR_PURPLE_BLUE+8
 	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8 
 
-DEAD_TEXT_COLORS ; Text luminance
+DEAD_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.rept 20
 		.by $00                                     ; Top Scroll.
@@ -708,7 +741,7 @@ DEAD_TEXT_COLORS ; Text luminance
 	.endr
 
 
-WIN_BACK_COLORS                                     ; The Win Screen will populate scrolling colors.
+WIN_BACK_COLORS ; 47 entries.  Gfx background colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by $14 $18 $1C $1E
 	.by $24 $28 $2C $2E
@@ -724,7 +757,7 @@ WIN_BACK_COLORS                                     ; The Win Screen will popula
 	.by $A4 $A8 $AC $AE
 	.by $B4 $B8 $BC $BE
 
-WIN_TEXT_COLORS
+WIN_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.rept 20
 		.by $00                                     ; Top Scroll.
@@ -737,9 +770,7 @@ WIN_TEXT_COLORS
 	.endr
 
 
-
-
-OVER_BACK_COLORS
+OVER_BACK_COLORS  ; 47 entries.  Gfx background colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.rept 20
 		.by $00                                     ; Top Scroll.
@@ -751,7 +782,7 @@ OVER_BACK_COLORS
 		.by $00                                     ; Bottom Scroll
 	.endr
 
-OVER_TEXT_COLORS
+OVER_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.rept 20
 		.by $00                                     ; Top Scroll.
@@ -818,52 +849,50 @@ TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 	.byte <COLPF0_COLBK_DLI ; DLI 7   Table - COLBK, Pixels - COLPF0
 	.byte <TITLE_DLI_3      ; DLI 8   Black - COLBK COLPF2
 	.byte <TITLE_DLI_4      ; DLI 9   Text - COLPF1, Table - COLBK COLPF2. - start instructions
-	.byte <TITLE_DLI_5      ; DLI 10  Text - COLPF1
-	.byte <TITLE_DLI_5      ; DLI 11  Text - COLPF1
-	.byte <TITLE_DLI_5      ; DLI 12  Text - COLPF1
-	.byte <TITLE_DLI_5      ; DLI 13  Text - COLPF1
-	.byte <TITLE_DLI_5      ; DLI 14  Text - COLPF1
-	.byte <TITLE_DLI_5      ; DLI 15  Text - COLPF1
-	.byte <TITLE_DLI_5      ; DLI 16  Text - COLPF1 - end instructions.
+	.byte <TITLE_DLI_4      ; DLI 10  Text - COLPF1
+	.byte <TITLE_DLI_4      ; DLI 11  Text - COLPF1
+	.byte <TITLE_DLI_4      ; DLI 12  Text - COLPF1
+	.byte <TITLE_DLI_4      ; DLI 13  Text - COLPF1
+	.byte <TITLE_DLI_4      ; DLI 14  Text - COLPF1
+	.byte <TITLE_DLI_4      ; DLI 15  Text - COLPF1
+	.byte <TITLE_DLI_4      ; DLI 16  Text - COLPF1 - end instructions.
 	.byte <TITLE_DLI_3      ; DLI 17  Black - COLBK COLPF2
 	.byte <TITLE_DLI_4      ; DLI 18  Text - COLPF1, Table - COLBK COLPF2. - start scoring
-	.byte <TITLE_DLI_5      ; DLI 19  Text - COLPF1
-	.byte <TITLE_DLI_5      ; DLI 20  Text - COLPF1 - end scoring
+	.byte <TITLE_DLI_4      ; DLI 19  Text - COLPF1
+	.byte <TITLE_DLI_4      ; DLI 20  Text - COLPF1 - end scoring
 	.byte <TITLE_DLI_3      ; DLI 21  Black - COLBK COLPF2
 	.byte <TITLE_DLI_4      ; DLI 22  Text - COLPF1, Table - COLBK COLPF2. - start controls
-	.byte <TITLE_DLI_5      ; DLI 23  Text - COLPF1 - end controls
+	.byte <TITLE_DLI_4      ; DLI 23  Text - COLPF1 - end controls
 	.byte <TITLE_DLI_3      ; DLI 24  Black - COLBK COLPF2
 	.byte <DLI_SPC1         ; DLI 25 Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.	
 ;	.byte <TITLE_DLI_SPC2   ; DLI 26 
 
 
-GAME_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte <Score_DLI   ; DLI (0) for scores
-	.byte <GAME_DLI_1  ; DLI (1) Text - COLPF1, for scores  (Same as TITLE_DLI_5)
-	.byte <GAME_DLI_2  ; DLI 2   Beach 18 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A).
+GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
+	.byte <Score_DLI    ; DLI (0) for scores
+	.byte <GAME_DLI_1   ; DLI (1) Text - COLPF1, for scores 
+	.byte <GAME_DLI_2   ; DLI 2   Beach 18 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A).
 	.byte <GAME_DLI_25  ; DLI 3   Boats 17 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-	.byte <GAME_DLI_3  ; DLI 4   Boats 16 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 17)
-	.byte <GAME_DLI_2  ; DLI 5   Beach 15 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 16).
+	.byte <GAME_DLI_3   ; DLI 4   Boats 16 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 17)
+	.byte <GAME_DLI_2   ; DLI 5   Beach 15 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 16).
 	.byte <GAME_DLI_25  ; DLI 6   Boats 14 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-	.byte <GAME_DLI_3  ; DLI 7   Boats 13 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 14)
-	.byte <GAME_DLI_2  ; DLI 8   Beach 12 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 13).
+	.byte <GAME_DLI_3   ; DLI 7   Boats 13 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 14)
+	.byte <GAME_DLI_2   ; DLI 8   Beach 12 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 13).
 	.byte <GAME_DLI_25  ; DLI 9   Boats 11 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-	.byte <GAME_DLI_3  ; DLI 10  Boats 10 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 11)
-	.byte <GAME_DLI_2  ; DLI 11  Beach 09 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 10).
+	.byte <GAME_DLI_3   ; DLI 10  Boats 10 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 11)
+	.byte <GAME_DLI_2   ; DLI 11  Beach 09 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 10).
 	.byte <GAME_DLI_25  ; DLI 12  Boats 08 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-	.byte <GAME_DLI_3  ; DLI 13  Boats 07 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 8)
-	.byte <GAME_DLI_2  ; DLI 14  Beach 06 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 7).
+	.byte <GAME_DLI_3   ; DLI 13  Boats 07 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 8)
+	.byte <GAME_DLI_2   ; DLI 14  Beach 06 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 7).
 	.byte <GAME_DLI_25  ; DLI 15  Boats 05 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-	.byte <GAME_DLI_3  ; DLI 16  Boats 04 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 5)
-	.byte <GAME_DLI_2  ; DLI 17  Beach 03 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 4).
+	.byte <GAME_DLI_3   ; DLI 16  Boats 04 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 5)
+	.byte <GAME_DLI_2   ; DLI 17  Beach 03 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 4).
 	.byte <GAME_DLI_25  ; DLI 18  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-	.byte <GAME_DLI_3  ; DLI 19  Boats 01 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 2)
-	.byte <GAME_DLI_2  ; DLI 20  Beach 00 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 1).
-
-	.byte <GAME_DLI_25  ; DLI 18  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-
-;	.byte <TITLE_DLI_25 ; DLI 21  Black - COLBK COLPF2
-	.byte <GAME_DLI_5  ; DLI 22  Calls SPC2 to set scrolling credits HSCROL and colors.
+	.byte <GAME_DLI_3   ; DLI 19  Boats 01 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 2)
+	.byte <GAME_DLI_2   ; DLI 20  Beach 00 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 1).
+	.byte <GAME_DLI_25  ; DLI 21  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
+	.byte <GAME_DLI_5   ; DLI 22  Calls SPC2 to set scrolling credits HSCROL and colors.
+	; FYI: GAME_DLI_5 goes directly to SPC2, not SPC1 because there is no Press The Button prompt on this screen.
 
 
 ; All three graphics screens use the same list.
@@ -919,7 +948,7 @@ SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 ;	.byte <GAME_DLI_SPC2    ; DLI 47 - Set black background and white text for scrolling credits
 
 
-; Color tables must be big enough to contain data up to the maximum index that
+; Color tables must be big enough to contain data up to the maximum DLI index that
 ; occurs of all the screens. 
 ; COLPF3 is white all the time.
 
@@ -935,7 +964,10 @@ COLPF1_TABLE ; Must be big enough to do Title screen.
 COLPF2_TABLE ; Must be big enough to do Title screen.
 	.ds 25
 
-HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row.
+COLPF3_TABLE ; Must be big enough to do Game screen.
+	.ds 22
+
+HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row. (21 entries)
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by 0 0 0 ; Top, scores, beach
 	.by 0 14
@@ -949,9 +981,9 @@ HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row.
 	.by 8 6
 	.by 0 ; beach
 	.by 10 4
-	
-PXPF_TABLE ; Big enough for game area for Frog.
-	.ds 22
+
+;PXPF_TABLE ; Big enough for game area for Frog.
+;	.ds 22
 
 COLOR_BACK_LO_TABLE
 	.byte <TITLE_BACK_COLORS
@@ -1317,9 +1349,9 @@ SPLAT_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_PINK+$6        ; P2, 
 	.by COLOR_PINK+$8        ; P3, 
 
-GRAVE_PMCOLORS_RABLE ; 0, 1, 2, 3
-	.by COLOR_BLACK+$4        ; P0, splat
-	.by COLOR_BLACK+$8        ; P1, splat
+GRAVE_PMCOLORS_TABLE ; 0, 1, 2, 3
+	.by COLOR_BLACK+$4        ; P0, 
+	.by COLOR_BLACK+$8        ; P1, 
 	.by COLOR_BLACK+$6        ; P2, 
 	.by COLOR_BLACK+$8        ; P3, 
 

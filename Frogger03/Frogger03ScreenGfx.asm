@@ -10,7 +10,7 @@
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019
-; Version 03, April 2019
+; Version 03, May 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -612,7 +612,7 @@ bCSSkipLMSUpdate
 
 
 EverythingMatches .byte 0 ; Bits indicate all colors match, then this row is done.
-; Bits $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2
+; Bits $10, $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2, COLPF3
 
 TempSaveColor .byte 0
 
@@ -645,14 +645,14 @@ FlipOffEverything
 ; --------------------------------------------------------------------------
 
 IncrementTableColors
-	lda #%00001111       ; Flags indicate nothing matches yet.
+	lda #%00011111       ; Flags indicate nothing matches yet.
 	sta EverythingMatches
 
 bDoTestCOLBK
 	lda COLBK_TABLE,x        ; Get the current color. 
 	cmp GAME_BACK_COLORS,x   ; Is it the same as the Target color?
 	bne bDoIncCOLBK          ; No.  Go inc the luminance.
-	lda #%00000111            ; Yes, turn off $08 .
+	lda #%00001111           ; Yes, turn off $10 .
 	jsr FlipOffEverything    
 	beq bDoTestCOLPF0        ; Do the next color.
 
@@ -666,7 +666,7 @@ bDoTestCOLPF0
 	lda COLPF0_TABLE,x       ; Get the current color. 
 	cmp GAME_COLPF0_COLORS,x ; Is it the same as the Target color?
 	bne bDoIncCOLPF0         ; No.  Go inc the luminance.
-	lda #%00001011            ; Yes, turn off $04 .
+	lda #%00010111           ; Yes, turn off $08 .
 	jsr FlipOffEverything    
 	beq bDoTestCOLPF1        ; Do the next color.
 
@@ -680,7 +680,7 @@ bDoTestCOLPF1
 	lda COLPF1_TABLE,x       ; Get the current color. 
 	cmp GAME_COLPF1_COLORS,x ; Is it the same as the Target color?
 	bne bDoIncCOLPF1         ; No.  Go inc the luminance.
-	lda #%00001101            ; Yes, turn off $02.
+	lda #%00011011           ; Yes, turn off $04.
 	jsr FlipOffEverything    
 	beq bDoTestCOLPF2        ; Do the next color.
 
@@ -694,15 +694,29 @@ bDoTestCOLPF2
 	lda COLPF2_TABLE,x       ; Get the current color. 
 	cmp GAME_COLPF2_COLORS,x ; Is it the same as the Target color?
 	bne bDoIncCOLPF2         ; No.  Go inc the luminance.
-	lda #%00001110            ; Yes, turn off $02.
+	lda #%00011101           ; Yes, turn off $02.
 	jsr FlipOffEverything    
-	beq bDoneWithEverything  ; Done With Everything.
+	beq bDoTestCOLPF3  ; Done With Everything.
 
 bDoIncCOLPF2
 	tay                      ; Y = current color
 	lda GAME_COLPF2_COLORS,x ; A = target color
 	jsr IncrementGameColor   ; Merge and increment color.
 	sta COLPF2_TABLE,x       ; Save the result.
+
+bDoTestCOLPF3
+	lda COLPF3_TABLE,x       ; Get the current color. 
+	cmp GAME_COLPF3_COLORS,x ; Is it the same as the Target color?
+	bne bDoIncCOLPF3         ; No.  Go inc the luminance.
+	lda #%00011110           ; Yes, turn off $01.
+	jsr FlipOffEverything    
+	beq bDoneWithEverything  ; Done With Everything.
+
+bDoIncCOLPF3
+	tay                      ; Y = current color
+	lda GAME_COLPF3_COLORS,x ; A = target color
+	jsr IncrementGameColor   ; Merge and increment color.
+	sta COLPF3_TABLE,x       ; Save the result.
 
 bDoneWithEverything
 	lda EverythingMatches    ; If all flags are turned off the caller knows this row is done.

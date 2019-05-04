@@ -10,7 +10,7 @@
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019 
-; Version 03, April 2019
+; Version 03, May 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -256,9 +256,11 @@
 ; * Joystick controls.  I hate the keyboard.  The joystick is free and
 ;   easy on the Atari. (IMPLEMENTED, V02) 
 ; * Sound..  Some simple splats, plops, beeps, water sloshings.
-;    (IMPLEMENTE,D V02) 
+;    (IMPLEMENTED, V02) 
 ; * Custom character set that looks more like beach, boats, water, and frog.
 ;    (IMPLEMENTED, V02) 
+; * Hardware coarse scrolling with LMS pointer updates rather than moving 
+;   the boats in memory.  (IMPLEMENTED, V02) 
 ; * Horizontal Fine scrolling text allows smoother movements for the boats.
 ;    (IMPLEMENTED, V03) 
 ; * Player Missile Frog. This would make frog placement v the boat
@@ -350,7 +352,7 @@ FlaggedHiScore  .byte 0         ; = Flag For Hi Score.  0 = no high score.  $FF 
 
 ; After processing input (from the joystick) this is the number of frames
 ; to count before new input is accepted.  This prevents moving the frog at
-; 60 fps and sort of compensates for any jitter/uneven toggling of the 
+; 60 fps and maybe-sort-of compensates for jitter/uneven debounce of the 
 ; joystick bits by flaky controllers.
 InputScanFrames   .byte $00 ; = INPUTSCAN_FRAMES
 InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits + trigger
@@ -359,6 +361,7 @@ InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits + trigge
 ; features are in effect.  Value is enumerated from SCREEN_LIST table.
 CurrentScreen   .byte $00 ; = identity of current screen.
 
+
 ; Pointer to the current color table sources in use. (?)
 COLPBKPointer   .word $0000
 ;COLPF3Pounter   .word $0000 ; COLPF3 is always white.
@@ -366,16 +369,50 @@ COLPF2Pointer   .word $0000
 COLPF1Pointer   .word $0000
 COLPF0Pointer   .word $0000
 
+
+; ======== M A I N ======== Remember states from frame to frame...
+; Event values.  Use for counting things for each pass of a screen/event.
+EventCounter    .byte 0
+EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
+
+
+; ======== DISPLAY LIST ======== EVILNESS
+; Each display list (except the game screen) ends with a JMP to here, BOTTOM_OF_DISPLAY.
+; These instructions provide the Press A Button prompt and the scrolling credit lines.
+; The GAME screen jumps to the DL_SCROLLING_CREDIT, because it does not need the prompt.
+; This "laziness" provides a constant, common DL section.  Only one set of code is needed
+; to manage the credit fine scrolling.  If each DL had its own instructions for the 
+; credit line, then there would need to be code using a lookup table to grab addresses  
+; for the credit line's LMS based on the current display list in use.
+BOTTOM_OF_DISPLAY                                 ; Prior to this DLI SPC1/25 set colors and HSCROL
+	mDL_LMS DL_TEXT_2,ANYBUTTON_MEM               ; Prompt to start game.
+	.by DL_BLANK_1|DL_DLI                         ; DLI SPC2/26, set COLBK/COLPF2/COLPF1 for scrolling text.
+DL_SCROLLING_CREDIT
+SCROLL_CREDIT_LMS = [* + 1]
+	mDL_LMS DL_TEXT_2|DL_HSCROLL,SCROLLING_CREDIT ; The perpetrators identified
+; Note that as long as the system VBI is functioning the address 
+; provided for JVB does not matter at all.  The system VBI will update
+; ANTIC after this using the address in the shadow registers (SDLST)
+	mDL_JVB TITLE_DISPLAYLIST   ; Restart display.
+
+
+; ======== D L I ======== DLI TABLES
+; Pointer to current DLI address chain table.  (ThisDLIAddr),Y = DLI routine low byte.
+ThisDLIAddr     .word TITLE_DLI_CHAIN_TABLE  ; by default (VBI corrects this)
+; Index read by the Display List Interrupts to change the colors for each line.
+; Note that since entry 0 in the DLI chain tables is for the first entry set
+; by the VBI, the VBI starts the counter for DLI operation at 1 instead of 0
+ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
+; Need a pointer for random uses?
+VBIPointer1      .word $0000
+
+
 ; ======== V B I ======== TIMER FOR MAIN CODE
 ; Frame counter set by main code events for delay/speed of main activity.
 ; The VBI decrements this value until 0.
 ; Main code acts on value 0.
 AnimateFrames    .byte $00 ; = ANIMATION_FRAMES,X.
 
-; ======== M A I N ======== Remeber states from frame to frame...
-; Event values.  Use for counting things for each pass of a screen/event.
-EventCounter    .byte 0
-EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
 
 ; ======== V B I ======== MANAGE DISPLAY LISTS
 ; DISPLAY_TITLE = 0
@@ -389,44 +426,24 @@ EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
 VBICurrentDL     .byte $FF ; = Direct VBI to change screens.
 CurrentDL        .byte 
 
+
 ; ======== V B I ======== SCROLLING CREDITS MANAGEMENT
 ; VBI's Animation counter for scrolling the credit line. when it reaches 0, then scroll.
 ScrollCounter   .byte 2
 CreditHSCROL    .byte 4  ; Fine scrolling the credits
 
-; When a prior version of this code gave each display list 
-; its own instructions to point to the credit text then there 
-; needed to be a table of addresses and another page 0 pointer,
-; so that the scrolling code could find and update the correct 
-; LMS instruction currently in use.
- 
-; That is being replaced with evil here.  The display lists  
-; JMP to this little subset of a display list to finish the 
-; bottom of the screen.  Thus, there is now only one place to 
-; maintain the scrolling credits text LMS.
 
-; ======== D L I ======== DLI TABLES
-; Pointer to current DLI address chain table.  (ThisDLIAddr),Y = DLI routine low byte.
-ThisDLIAddr     .word TITLE_DLI_CHAIN_TABLE  ; by default
-; Index read by the Display List Interrupts to change the colors for each line.
-; Note that since entry 0 in the DLI chain tables is for the first entry set
-; by the VBI, the VBI starts the counter for DLI operation at 1 instead of 0
-ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
-; Need a pointer for random uses.
-VBIPointer1      .word $0000
+; ======== V B I ======== BOAT ANIMATED COMPONENTS
+; VBI's Animation counter for changing one of the animation parts of the boats.
+; (Front water spray, back water spray, either left or right boats.)  
+; Every 2 frames one of these components are updated, and then at the next 
+; turn the next component is updated.  Therefore only one component may be 
+; updated in a VBI.
+; This would animate each component at 8 frames per image update. 
+BoatyMcBoatCounter .byte 2  ; decrement.  On 0 animate a component.
+BoatyComponent     .byte 0  ; 0, 1, 2, 3 one of the four boat parts.
+BoatyFrame         .byte 0  ; counts 0 to 7.
 
-BOTTOM_OF_DISPLAY                                 ; Prior to this DLI SPC1/25 set colors and HSCROL
-	mDL_LMS DL_TEXT_2,ANYBUTTON_MEM               ; Prompt to start game.
-	.by DL_BLANK_1|DL_DLI                         ; DLI SPC2/26, set COLBK/COLPF2/COLPF1 for scrolling text.
-DL_SCROLLING_CREDIT
-SCROLL_CREDIT_LMS = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_HSCROLL,SCROLLING_CREDIT ; The perpetrators identified
-
-; Note that as long as the system VBI is functioning the address 
-; provided for JVB does not matter at all.  The system VBI will update
-; ANTIC after this using the address in the shadow registers (SDLST)
-
-	mDL_JVB TITLE_DISPLAYLIST   ; Restart display.
 
 ; ======== V B I ======== PRESS A BUTTON MANAGEMENT
 ; ON/Off status of the Press A Button Prompt. 
@@ -434,23 +451,19 @@ SCROLL_CREDIT_LMS = [* + 1]
 ; Main code sets 1 to turn it on. 
 ; Visibility actions performed by VBI.
 EnablePressAButton .byte 0
-
 ; 0/1 toggle for light/dark state of Press a button prompt.
 ; 0 = Background fade up, text fades down/
 PressAButtonState  .byte 0   ; 0 means fading background down.   1 means fading up.
-
-; Timer value for Press A Button Prompt updating.
-PressAButtonFrames .byte BLINK_SPEED
-
-PressAButtonColor  .byte 0 ; The actual color of the prompt.
-PressAButtonText   .byte 0 ; The text luminance.
+PressAButtonFrames .byte BLINK_SPEED ; Timer value for Press A Button Prompt updating.
+PressAButtonColor  .byte 0           ; The actual color of the prompt.
+PressAButtonText   .byte 0           ; The text luminance.
 
 
 ; ======== V B I ======== SCROLLING BOAT MANAGEMENT
-; Boat movements are managed bu the VBI now.
+; Boat movements are managed by the VBI.
 ; The frame count value comes from BOAT_FRAMES based on the number of 
 ; frogs that crossed the river (FrogsCrossed) (0 to 10 difficulty level).
-BoatFrames       .byte 0 ; Count frames until next boat movement. (Note that 0 correctly means move every frame).
+BoatFrames      .byte 0 ; Count frames until next boat movement. (Note that 0 correctly means move every frame).
 BoatsMoveLeft   .byte 0 ; How many color clocks did boats move on this frame (to move the frog accordingly)
 BoatsMoveRight  .byte 0 ; How many color clocks... etc, blah blah 
 ; FYI -- SCROLLING RANGE
@@ -463,7 +476,7 @@ BoatsMoveRight  .byte 0 ; How many color clocks... etc, blah blah
 ; Keep Current Address for LMS, and index to HSCROL_TABLE
 
 
-; ======== The world's most inept sound system. ========
+; ======== V B I ======== The world's most inept sound system. 
 ; Index used by the VBI for the current sound.
 
 SOUND_POINTER .word $0000
@@ -510,7 +523,8 @@ SOUND_DURATION2 .byte $00
 SOUND_DURATION3 .byte $00
 
 
-; In the event things can't be saved on the stack, protect them here....
+; In the event stupid programming tricks means some things can't be saved on 
+; the stack, then protect them here....
 SAVEA = $FD
 SAVEX = $FE
 SAVEY = $FF
@@ -526,7 +540,7 @@ SAVEY = $FF
 	.by "** Thanks to the Word (John 1:1), Creator of heaven, and earth, and "
 	.by "semiconductor chemistry and physics which makes all this fun possible. "
 	.by "** Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. "
-	.by "** Atari port by Ken Jennings, April 2019, Version 03. "
+	.by "** Atari port by Ken Jennings, May 2019, Version 03. "
 	.by "** Improved graphics for the playfield and frog. "
 	.by "Customized Display Lists and DLIs. More logic moved to VBI. **"
 
