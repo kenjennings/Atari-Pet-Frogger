@@ -837,6 +837,188 @@ bLoopCopyColorsTOver
 	rts ; ChangeScreen is over.
 
 
+
+
+;==============================================================================
+;										DoBoatCharacterAnimation  A  X
+;==============================================================================
+; Based on the current frame value and the component value, copy 
+; the 8 bytes from the animation table to the character image.
+;
+; ManageBoatAnimations takes care of determing if it is time to animate, 
+; and the current component, and the frame counter.
+; This function just uses the current values and copies the indicated 
+; character image.
+;
+; When BoatyMcBoatCounter is 0, then animate based on BoatyComponent
+; 0 = Right Boat Front
+; 1 = Right Boat Back
+; 2 = Left Boat Front
+; 3 = Left Boat Back
+;BoatyFrame         .byte 0  ; counts 0 to 7.
+;BoatyMcBoatCounter .byte 2  ; decrement.  On 0 animate a component.
+;BoatyComponent     .byte 0  ; 0, 1, 2, 3 one of the four boat parts.
+; 
+; The Boat Front is two characters.   One of the characters changes
+; only on frame 2 and frame 6, so there is extra exception logic to 
+; copy those frames when they occur.
+;
+; X = frame counter
+; -----------------------------------------------------------------------------
+
+DoBoatCharacterAnimation
+; Zero is Right Front Boat.
+
+	lda BoatyComponent               ; Get the component to animate
+	bne TestBoaty1                   ; Non-zero means try 1, 2, 3
+
+	lda RIGHT_BOAT_WATER_LOW,x       ; Get pointer for the data for this frame 
+	sta VBPointer1
+	lda RIGHT_BOAT_WATER_HIGH,x
+	sta VBPointer1+1
+
+	lda #<CHARACTER_SET+I_BOAT_RFW*8 ; Get pointer to destination character.
+	sta VBPointer2
+	lda #<CHARACTER_SET+I_BOAT_RFW*8
+	sta VBPointer2+1
+	jsr BoatCsetCopy8                ; Copy the 8 bytes to the character set via the pointers set up.
+
+; Part 2 for Right Front Boat.
+
+	cpx #2                           ; Frame 2 and 6 have new images at front of boat.
+	beq bCopyRightFrontBoat          ; Yes, this is 2. Copy new image
+	cpx #6                           ; If not, then is it 6?
+	bne ExitBoatCharacterAnimation   ; Not 6, so done with the frame animation.
+
+bCopyRightFrontBoat
+	lda RIGHT_BOAT_FRONT_LOW,x       ; Get pointer for the data for this frame 
+	sta VBPointer1
+	lda RIGHT_BOAT_FRONT_HIGH,x
+	sta VBPointer1+1
+
+	lda #<CHARACTER_SET+I_BOAT_RF*8  ; Get pointer to destination character.
+	sta VBPointer2
+	lda #<CHARACTER_SET+I_BOAT_RF*8
+	sta VBPointer2+1
+	bne BoatCopy8                    ;  Go do the 8 byte copy to the character set via the pointers.
+
+; One is Right Back Boat.
+
+TestBoaty1
+	cmp #1
+	bne TestBoaty2                   ; Not 1.  So, not the Right back boat.
+
+	lda RIGHT_BOAT_WAKE_LOW,x        ; Get pointer for the data for this frame 
+	sta VBPointer1
+	lda RIGHT_BOAT_WAKE_HIGH,x
+	sta VBPointer1+1
+
+	lda #<CHARACTER_SET+I_BOAT_RBW*8 ; Get pointer to destination character.
+	sta VBPointer2
+	lda #<CHARACTER_SET+I_BOAT_RBW*8
+	sta VBPointer2+1
+	bne BoatCopy8                    ;  Go do the 8 byte copy to the character set via the pointers.
+
+; Two is Left Front Boat.
+
+TestBoaty2
+	cmp #2
+	bne TestBoaty3
+
+	lda LEFT_BOAT_WATER_LOW,x        ; Get pointer for the data for this frame 
+	sta VBPointer1
+	lda LEFT_BOAT_WATER_HIGH,x
+	sta VBPointer1+1
+
+	lda #<CHARACTER_SET+I_BOAT_LFW*8 ; Get pointer to destination character.
+	sta VBPointer2
+	lda #<CHARACTER_SET+I_BOAT_LFW*8
+	sta VBPointer2+1
+	jsr BoatCsetCopy8                ; Copy the 8 bytes to the character set via the pointers set up.
+
+; Part 2 for Left Front Boat.
+
+	cpx #2                           ; Frame 2 and 6 have new images at front of boat.
+	beq bCopyLeftFrontBoat           ; Yes, this is 2. Copy new image
+	cpx #6                           ; If not, then is it 6?
+	bne ExitBoatCharacterAnimation   ; Not 6, so done with the frame animation.
+
+bCopyLeftFrontBoat
+	lda LEFT_BOAT_FRONT_LOW,x        ; Get pointer for the data for this frame 
+	sta VBPointer1
+	lda LEFT_BOAT_FRONT_HIGH,x
+	sta VBPointer1+1
+
+	lda #<CHARACTER_SET+I_BOAT_LF*8  ; Get pointer to destination character.
+	sta VBPointer2
+	lda #<CHARACTER_SET+I_BOAT_LF*8
+	sta VBPointer2+1
+	bne BoatCopy8                    ;  Go do the 8 byte copy to the character set via the pointers.
+
+; Three is Left Back Boat.
+
+TestBoaty3
+;	cmp #3
+;	bne EndOfBoatness               ; Process of Elimination.  Only 3 should be possible. 
+
+	lda LEFT_BOAT_WAKE_LOW,x        ; Get pointer for the data for this frame 
+	sta VBPointer1
+	lda LEFT_BOAT_WAKE_HIGH,x
+	sta VBPointer1+1
+
+	lda #<CHARACTER_SET+I_BOAT_LBW*8 ; Get pointer to destination character.
+	sta VBPointer2
+	lda #<CHARACTER_SET+I_BOAT_LBW*8
+	sta VBPointer2+1
+
+; Done with frame setup.  Now copy the frame.
+
+BoatCopy8
+	jsr BoatCsetCopy8            ;  Copy the 8 bytes to the character set via the pointers set up.
+
+ExitBoatCharacterAnimation
+	rts
+
+
+;==============================================================================
+;										BoatCsetCopy8  A  Y
+;==============================================================================
+; DoBoatCharacterAnimation set up zero page VBPointer1 and VBPointer2.
+; Copy 8 bytes from pointer1 to pointer 2.
+;
+; Y = byte index.
+; -----------------------------------------------------------------------------
+
+BoatCsetCopy8
+	ldy #0
+
+	lda (VBPointer1),y
+	sta (VBPointer2),y
+	iny
+	lda (VBPointer1),y
+	sta (VBPointer2),y
+	iny
+	lda (VBPointer1),y
+	sta (VBPointer2),y
+	iny
+	lda (VBPointer1),y
+	sta (VBPointer2),y
+	iny
+	lda (VBPointer1),y
+	sta (VBPointer2),y
+	iny
+	lda (VBPointer1),y
+	sta (VBPointer2),y
+	iny
+	lda (VBPointer1),y
+	sta (VBPointer2),y
+	iny
+	lda (VBPointer1),y
+	sta (VBPointer2),y
+
+	rts
+
+
 ;==============================================================================
 ;												PmgInit  A  X  Y
 ;==============================================================================

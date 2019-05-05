@@ -1410,6 +1410,7 @@ CHARACTER_SET
 ;; $E7: # # # . . # # #
 
 
+;==================================================================================================
 
 ; Here we reached the end of the 1K for the Character set, so the rest of this is a new page...
 
@@ -1520,7 +1521,7 @@ LEFT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat. (64 bytes
 
 
 
-LEFT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (frame 2 == frame 6) (56 bytes)
+LEFT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (64 bytes)
 ; Char $41: ctrl-A 
   .BYTE $00,$00,$00,$00,$00,$00,$CC,$F5
 ; $00: .. .. .. .. 
@@ -1707,7 +1708,7 @@ RIGHT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat. (64 byte
 ; $AF: OO OO XX XX 
 ; $BF: OO XX XX XX 
 
-RIGHT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (frame 2 == frame 6) (56 bytes)
+RIGHT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (64 bytes)
 ; Char $61:   a    
   .BYTE $00,$00,$00,$00,$00,$00,$33,$5F
 ; $00: .. .. .. .. 

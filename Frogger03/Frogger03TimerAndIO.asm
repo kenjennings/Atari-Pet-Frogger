@@ -364,10 +364,11 @@ RestartCreditHSCROL               ; Reset the
 	lda #4                        ; horizontal fine 
 	sta CreditHSCROL              ; scrolling.
 
+
 ; ======== Manage Boat fine scrolling ========
 ; Atari scrolling is such low overhead I'm so lazy, that  I'll 
-; just run the boat scrolling all the time on the game screen. 
-; Even if you don't see it.
+; just run the boat scrolling all the time on the game screen 
+; even if you don't see it.
 ManageBoatScrolling
 	lda #0                        ; Zero the flags the say how far boats moved.
 	sta BoatsMoveLeft             ; These are used to involuntarily shift the Frog on boat lines.
@@ -375,20 +376,10 @@ ManageBoatScrolling
 	lda BoatFrames
 	beq ResetBoatFrames           ; If BoatFrames is 0, time to make the donuts.
 	dec BoatFrames                ; Not zero, so decrement
-	jmp ManageBoatAnimations      ; and skip to the next part to manage.
+	jmp SimplyUpdatePositions     ; and skip to the player input frog movement. 
 
 ResetBoatFrames
 	jsr SetBoatSpeed
-;	ldx FrogsCrossed
-;	cpx #MAX_FROG_SPEED+1         ; 0 to 10 OK.  11 not so much
-;	bcc FrogsCrossedIsOK
-;	ldx #MAX_FROG_SPEED
-
-;FrogsCrossedIsOK
-;	lda BOAT_FRAMES,x             ; Reset Frame counter based on number of frogs saves.
-;	sta BoatFrames
-
-;	stx FrogsLimited              ; Need to save temporarily. 
 
 	lda BOAT_SHIFT_R,x            ; Collect distance to move,
 	sta BoatsMoveRight            ; so scrolling and the forced frog  
@@ -460,7 +451,7 @@ EndOfLeftScroll
 
 ; ======== Move the Frog Horizontally if it is on a boat. ========
 	lda FrogShape                ; Get the current frog shape.
-	beq ManageBoatAnimations     ; 0 is off, so no movement there, skip all
+	beq EndOfFrogPilates         ; 0 is off, so no movement there, skip all
 	cmp #SHAPE_TOMB              ; And the tombstone ...
 	beq SimplyUpdatePosition     ; ... does not move (automatically) either.
 
@@ -522,6 +513,7 @@ JustSubTheLeftBoat
 	sbc BoatsMoveLeft            ; Subtract the boat movement.
 	sta FrogNewPMX
 
+
 ; ==== Frog and boat position gyrations are done.  ==== Is there actual movement?
 SimplyUpdatePosition
 	lda FrogNewPMX               ; Is the new X different
@@ -556,6 +548,8 @@ UpdateTheFrog
 
 NoFrogUpdate
 
+EndOfFrogPilates
+
 
 ; ======== Animate Boat Components ========
 ; When BoatyMcBoatCounter is 0, then animate based on BoatyComponent
@@ -567,28 +561,28 @@ NoFrogUpdate
 ;BoatyMcBoatCounter .byte 2  ; decrement.  On 0 animate a component.
 ;BoatyComponent     .byte 0  ; 0, 1, 2, 3 one of the four boat parts.
 ManageBoatAnimations
-	dec BoatyMcBoatCounter        ; subtract from scroll delay counter
-	bne ManagePressAButtonPrompt  ; Not 0 yet, so no animation.
-	lda #2                        ; Reset counter to original value.
+	dec BoatyMcBoatCounter           ; subtract from scroll delay counter
+	bne ExitBoatyness                ; Not 0 yet, so no animation.
+	lda #2                           ; Reset counter to original value.
 	sta BoatyMcBoatCounter
 
-	lda BoatyComponent            ; Get the component to animate
+	ldx BoatyFrame                   ; going to load a frame, which one?
+	jsr DoBoatCharacterAnimation     ; load the frame for the current component.
 
+; Finish by setting up for next frame/compomnent.
 
-
-EndOfBoatness
-	inc BoatyComponent
-	lda BoatyComponent
-	and #$03 
-	sta BoatyComponent
-	bne SkipBoatFrameIncrement
+	inc BoatyComponent           ; increment to next visual component for next time.
+	lda BoatyComponent           ; get it to mask it 
+	and #$03                     ; mask it to value 0 to 3
+	sta BoatyComponent           ; Save it.
+	bne SkipBoatFrameIncrement   ; it is non-zero, so no new frame counter.
 ; Whenever the boat component returns to 0, then update the frame counter...
-	inc BoatyFrame
-	lda BoatyFrame
-	and #$07
-	sta BoatyFrame
-SkipBoatFrameIncrement
+	inc BoatyFrame               ; next frame.
+	lda BoatyFrame               ; get it to mask it.
+	and #$07                     ; mask it to 0 to 7
+	sta BoatyFrame               ; save it.
 
+ExitBoatyness
 
 
 ; ======== Manage the prompt flashing for Press A Button ========

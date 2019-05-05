@@ -403,8 +403,6 @@ ThisDLIAddr     .word TITLE_DLI_CHAIN_TABLE  ; by default (VBI corrects this)
 ; Note that since entry 0 in the DLI chain tables is for the first entry set
 ; by the VBI, the VBI starts the counter for DLI operation at 1 instead of 0
 ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
-; Need a pointer for random uses?
-VBIPointer1      .word $0000
 
 
 ; ======== V B I ======== TIMER FOR MAIN CODE
@@ -444,20 +442,9 @@ BoatyMcBoatCounter .byte 2  ; decrement.  On 0 animate a component.
 BoatyComponent     .byte 0  ; 0, 1, 2, 3 one of the four boat parts.
 BoatyFrame         .byte 0  ; counts 0 to 7.
 
-
-; ======== V B I ======== PRESS A BUTTON MANAGEMENT
-; ON/Off status of the Press A Button Prompt. 
-; Main code sets 0 to turn it off.
-; Main code sets 1 to turn it on. 
-; Visibility actions performed by VBI.
-EnablePressAButton .byte 0
-; 0/1 toggle for light/dark state of Press a button prompt.
-; 0 = Background fade up, text fades down/
-PressAButtonState  .byte 0   ; 0 means fading background down.   1 means fading up.
-PressAButtonFrames .byte BLINK_SPEED ; Timer value for Press A Button Prompt updating.
-PressAButtonColor  .byte 0           ; The actual color of the prompt.
-PressAButtonText   .byte 0           ; The text luminance.
-
+; Need a pointer for random uses?
+VBIPointer1      .word $0000
+VBIPointer2      .word $0000
 
 ; ======== V B I ======== SCROLLING BOAT MANAGEMENT
 ; Boat movements are managed by the VBI.
@@ -474,6 +461,20 @@ BoatsMoveRight  .byte 0 ; How many color clocks... etc, blah blah
 ; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
 ; End   Scroll position = LMS + 12,            HSCROL 0
 ; Keep Current Address for LMS, and index to HSCROL_TABLE
+
+
+; ======== V B I ======== PRESS A BUTTON MANAGEMENT
+; ON/Off status of the Press A Button Prompt. 
+; Main code sets 0 to turn it off.
+; Main code sets 1 to turn it on. 
+; Visibility actions performed by VBI.
+EnablePressAButton .byte 0
+; 0/1 toggle for light/dark state of Press a button prompt.
+; 0 = Background fade up, text fades down/
+PressAButtonState  .byte 0   ; 0 means fading background down.   1 means fading up.
+PressAButtonFrames .byte BLINK_SPEED ; Timer value for Press A Button Prompt updating.
+PressAButtonColor  .byte 0           ; The actual color of the prompt.
+PressAButtonText   .byte 0           ; The text luminance.
 
 
 ; ======== V B I ======== The world's most inept sound system. 
