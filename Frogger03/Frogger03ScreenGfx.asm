@@ -796,7 +796,7 @@ bLoopCopyColorsToWin
 	lda WIN_BACK_COLORS,x
 	sta COLBK_TABLE,x
 
-	lda WIN_TEXT_COLORS,x ; "TEXT" no longer means text.  Too lazy to change it.
+	lda WIN_COLPF0_COLORS,x ; "TEXT" no longer means text.  Too lazy to change it.
 	sta COLPF0_TABLE,x
 
 	dex
@@ -812,7 +812,7 @@ bLoopCopyColorsToDead
 	lda DEAD_BACK_COLORS,x
 	sta COLBK_TABLE,x
 
-	lda DEAD_TEXT_COLORS,x
+	lda DEAD_COLPF0_COLORS,x
 	sta COLPF0_TABLE,x
 
 	dex
@@ -828,7 +828,7 @@ bLoopCopyColorsTOver
 	lda OVER_BACK_COLORS,x
 	sta COLBK_TABLE,x
 
-	lda OVER_TEXT_COLORS,x
+	lda OVER_COLPF0_COLORS,x
 	sta COLPF0_TABLE,x
 
 	dex
@@ -873,14 +873,14 @@ DoBoatCharacterAnimation
 	bne TestBoaty1                   ; Non-zero means try 1, 2, 3
 
 	lda RIGHT_BOAT_WATER_LOW,x       ; Get pointer for the data for this frame 
-	sta VBPointer1
+	sta VBIPointer1
 	lda RIGHT_BOAT_WATER_HIGH,x
-	sta VBPointer1+1
+	sta VBIPointer1+1
 
-	lda #<CHARACTER_SET+I_BOAT_RFW*8 ; Get pointer to destination character.
-	sta VBPointer2
-	lda #<CHARACTER_SET+I_BOAT_RFW*8
-	sta VBPointer2+1
+	lda #<[CHARACTER_SET+I_BOAT_RFW*8] ; Get pointer to destination character.
+	sta VBIPointer2
+	lda #>[CHARACTER_SET+I_BOAT_RFW*8]
+	sta VBIPointer2+1
 	jsr BoatCsetCopy8                ; Copy the 8 bytes to the character set via the pointers set up.
 
 ; Part 2 for Right Front Boat.
@@ -892,14 +892,14 @@ DoBoatCharacterAnimation
 
 bCopyRightFrontBoat
 	lda RIGHT_BOAT_FRONT_LOW,x       ; Get pointer for the data for this frame 
-	sta VBPointer1
+	sta VBIPointer1
 	lda RIGHT_BOAT_FRONT_HIGH,x
-	sta VBPointer1+1
+	sta VBIPointer1+1
 
-	lda #<CHARACTER_SET+I_BOAT_RF*8  ; Get pointer to destination character.
-	sta VBPointer2
-	lda #<CHARACTER_SET+I_BOAT_RF*8
-	sta VBPointer2+1
+	lda #<[CHARACTER_SET+I_BOAT_RF*8]  ; Get pointer to destination character.
+	sta VBIPointer2
+	lda #>[CHARACTER_SET+I_BOAT_RF*8]
+	sta VBIPointer2+1
 	bne BoatCopy8                    ;  Go do the 8 byte copy to the character set via the pointers.
 
 ; One is Right Back Boat.
@@ -909,14 +909,14 @@ TestBoaty1
 	bne TestBoaty2                   ; Not 1.  So, not the Right back boat.
 
 	lda RIGHT_BOAT_WAKE_LOW,x        ; Get pointer for the data for this frame 
-	sta VBPointer1
+	sta VBIPointer1
 	lda RIGHT_BOAT_WAKE_HIGH,x
-	sta VBPointer1+1
+	sta VBIPointer1+1
 
-	lda #<CHARACTER_SET+I_BOAT_RBW*8 ; Get pointer to destination character.
-	sta VBPointer2
-	lda #<CHARACTER_SET+I_BOAT_RBW*8
-	sta VBPointer2+1
+	lda #<[CHARACTER_SET+I_BOAT_RBW*8] ; Get pointer to destination character.
+	sta VBIPointer2
+	lda #>[CHARACTER_SET+I_BOAT_RBW*8]
+	sta VBIPointer2+1
 	bne BoatCopy8                    ;  Go do the 8 byte copy to the character set via the pointers.
 
 ; Two is Left Front Boat.
@@ -926,14 +926,14 @@ TestBoaty2
 	bne TestBoaty3
 
 	lda LEFT_BOAT_WATER_LOW,x        ; Get pointer for the data for this frame 
-	sta VBPointer1
+	sta VBIPointer1
 	lda LEFT_BOAT_WATER_HIGH,x
-	sta VBPointer1+1
+	sta VBIPointer1+1
 
-	lda #<CHARACTER_SET+I_BOAT_LFW*8 ; Get pointer to destination character.
-	sta VBPointer2
-	lda #<CHARACTER_SET+I_BOAT_LFW*8
-	sta VBPointer2+1
+	lda #<[CHARACTER_SET+I_BOAT_LFW*8] ; Get pointer to destination character.
+	sta VBIPointer2
+	lda #>[CHARACTER_SET+I_BOAT_LFW*8]
+	sta VBIPointer2+1
 	jsr BoatCsetCopy8                ; Copy the 8 bytes to the character set via the pointers set up.
 
 ; Part 2 for Left Front Boat.
@@ -945,14 +945,14 @@ TestBoaty2
 
 bCopyLeftFrontBoat
 	lda LEFT_BOAT_FRONT_LOW,x        ; Get pointer for the data for this frame 
-	sta VBPointer1
+	sta VBIPointer1
 	lda LEFT_BOAT_FRONT_HIGH,x
-	sta VBPointer1+1
+	sta VBIPointer1+1
 
-	lda #<CHARACTER_SET+I_BOAT_LF*8  ; Get pointer to destination character.
-	sta VBPointer2
-	lda #<CHARACTER_SET+I_BOAT_LF*8
-	sta VBPointer2+1
+	lda #<[CHARACTER_SET+I_BOAT_LF*8]  ; Get pointer to destination character.
+	sta VBIPointer2
+	lda #>[CHARACTER_SET+I_BOAT_LF*8]
+	sta VBIPointer2+1
 	bne BoatCopy8                    ;  Go do the 8 byte copy to the character set via the pointers.
 
 ; Three is Left Back Boat.
@@ -962,14 +962,14 @@ TestBoaty3
 ;	bne EndOfBoatness               ; Process of Elimination.  Only 3 should be possible. 
 
 	lda LEFT_BOAT_WAKE_LOW,x        ; Get pointer for the data for this frame 
-	sta VBPointer1
+	sta VBIPointer1
 	lda LEFT_BOAT_WAKE_HIGH,x
-	sta VBPointer1+1
+	sta VBIPointer1+1
 
-	lda #<CHARACTER_SET+I_BOAT_LBW*8 ; Get pointer to destination character.
-	sta VBPointer2
-	lda #<CHARACTER_SET+I_BOAT_LBW*8
-	sta VBPointer2+1
+	lda #<[CHARACTER_SET+I_BOAT_LBW*8] ; Get pointer to destination character.
+	sta VBIPointer2
+	lda #>[CHARACTER_SET+I_BOAT_LBW*8]
+	sta VBIPointer2+1
 
 ; Done with frame setup.  Now copy the frame.
 
@@ -983,7 +983,7 @@ ExitBoatCharacterAnimation
 ;==============================================================================
 ;										BoatCsetCopy8  A  Y
 ;==============================================================================
-; DoBoatCharacterAnimation set up zero page VBPointer1 and VBPointer2.
+; DoBoatCharacterAnimation set up zero page VBIPointer1 and VBIPointer2.
 ; Copy 8 bytes from pointer1 to pointer 2.
 ;
 ; Y = byte index.
@@ -992,29 +992,29 @@ ExitBoatCharacterAnimation
 BoatCsetCopy8
 	ldy #0
 
-	lda (VBPointer1),y
-	sta (VBPointer2),y
+	lda (VBIPointer1),y
+	sta (VBIPointer2),y
 	iny
-	lda (VBPointer1),y
-	sta (VBPointer2),y
+	lda (VBIPointer1),y
+	sta (VBIPointer2),y
 	iny
-	lda (VBPointer1),y
-	sta (VBPointer2),y
+	lda (VBIPointer1),y
+	sta (VBIPointer2),y
 	iny
-	lda (VBPointer1),y
-	sta (VBPointer2),y
+	lda (VBIPointer1),y
+	sta (VBIPointer2),y
 	iny
-	lda (VBPointer1),y
-	sta (VBPointer2),y
+	lda (VBIPointer1),y
+	sta (VBIPointer2),y
 	iny
-	lda (VBPointer1),y
-	sta (VBPointer2),y
+	lda (VBIPointer1),y
+	sta (VBIPointer2),y
 	iny
-	lda (VBPointer1),y
-	sta (VBPointer2),y
+	lda (VBIPointer1),y
+	sta (VBIPointer2),y
 	iny
-	lda (VBPointer1),y
-	sta (VBPointer2),y
+	lda (VBIPointer1),y
+	sta (VBIPointer2),y
 
 	rts
 

@@ -376,7 +376,7 @@ ManageBoatScrolling
 	lda BoatFrames
 	beq ResetBoatFrames           ; If BoatFrames is 0, time to make the donuts.
 	dec BoatFrames                ; Not zero, so decrement
-	jmp SimplyUpdatePositions     ; and skip to the player input frog movement. 
+	jmp SimplyUpdatePosition      ; and skip to the player input frog movement. 
 
 ResetBoatFrames
 	jsr SetBoatSpeed
@@ -575,7 +575,7 @@ ManageBoatAnimations
 	lda BoatyComponent           ; get it to mask it 
 	and #$03                     ; mask it to value 0 to 3
 	sta BoatyComponent           ; Save it.
-	bne SkipBoatFrameIncrement   ; it is non-zero, so no new frame counter.
+	bne ExitBoatyness            ; it is non-zero, so no new frame counter.
 ; Whenever the boat component returns to 0, then update the frame counter...
 	inc BoatyFrame               ; next frame.
 	lda BoatyFrame               ; get it to mask it.

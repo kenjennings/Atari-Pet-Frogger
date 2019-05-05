@@ -866,7 +866,7 @@ TestTransOver2
 	ldx #22
 DoFadeUpOverText
 	lda COLPF1_TABLE,x
-	cmp OVER_TEXT_COLORS,x
+	cmp OVER_COLPF0_COLORS,x
 	beq DoNextLineFadeUp
 	inc COLPF1_TABLE,x
 DoNextLineFadeUp
