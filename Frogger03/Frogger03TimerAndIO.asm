@@ -286,16 +286,6 @@ VBISetupDisplay
 	lda DLI_HI_TABLE,x          ; Display List Interrupt chain table starting address
 	sta ThisDLIAddr+1
 
-;	lda COLOR_BACK_LO_TABLE,x   ; Get pointer to the source color table
-;	sta COLPF2POINTER
-;	lda COLOR_BACK_HI_TABLE,x
-;	sta COLPF2POINTER+1
-
-;	lda COLOR_TEXT_LO_TABLE,x   ; Get pointer to the source text table
-;	sta COLPF1POINTER
-;	lda COLOR_TEXT_HI_TABLE,x
-;	sta COLPF1POINTER+1
-
 	lda #$FF                      ; Turn off the signal to change screens.
 	sta VBICurrentDL
 	stx CurrentDL                 ; Let everyone know what is the current screen.
@@ -382,7 +372,7 @@ ResetBoatFrames
 	jsr SetBoatSpeed
 
 	lda BOAT_SHIFT_R,x            ; Collect distance to move,
-	sta BoatsMoveRight            ; so scrolling and the forced frog  
+	sta BoatsMoveRight            ; so the scrolling, and the forced frog
 	lda BOAT_SHIFT_L,x            ; update can refer to a fixed
 	sta BoatsMoveLeft             ; location and not repeat the lookup.
 
@@ -451,7 +441,7 @@ EndOfLeftScroll
 
 ; ======== Move the Frog Horizontally if it is on a boat. ========
 	lda FrogShape                ; Get the current frog shape.
-	beq EndOfFrogPilates         ; 0 is off, so no movement there, skip all
+	beq NoFrogUpdate             ; 0 is off, so no movement there at all, so skip all
 	cmp #SHAPE_TOMB              ; And the tombstone ...
 	beq SimplyUpdatePosition     ; ... does not move (automatically) either.
 
@@ -459,9 +449,8 @@ EndOfLeftScroll
 	cmp #DISPLAY_GAME            ; Must be the game screen
 	bne SimplyUpdatePosition     ; No.  Therefore no frog gymnastics.
 
-;	ldx FrogRow                  ; What screen row is the frog currently on?
-;	beq SimplyUpdatePosition     ; 0 is not running or finished, so no movement there
-
+	ldx FrogRow                  ; What screen row is the frog currently on?
+	beq SimplyUpdatePosition     ; 0 is not running or finished, so no movement there
 	lda MOVING_ROW_STATES,x      ; Is the frog due for possible involuntary movement?
 	beq SimplyUpdatePosition     ; No.  Therefore no frog gymnastics.
 
@@ -541,14 +530,10 @@ CheckHPOSMax
 	sta FrogNewPMX               ; to the maximum.
 	inc FrogSafety               ; Frog moved off screen.  this is dead.  It is MAIN's job to change the image.
 
-
 UpdateTheFrog
-
 	jsr UpdateFrog 	; then FrogPMX == FrogNewPMX. FrogPMY == FrogNewPMY. FrogRow=FrogNewRow.
 
 NoFrogUpdate
-
-EndOfFrogPilates
 
 
 ; ======== Animate Boat Components ========
@@ -570,7 +555,6 @@ ManageBoatAnimations
 	jsr DoBoatCharacterAnimation     ; load the frame for the current component.
 
 ; Finish by setting up for next frame/compomnent.
-
 	inc BoatyComponent           ; increment to next visual component for next time.
 	lda BoatyComponent           ; get it to mask it 
 	and #$03                     ; mask it to value 0 to 3

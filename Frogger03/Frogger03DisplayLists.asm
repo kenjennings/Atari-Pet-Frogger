@@ -263,7 +263,7 @@ PF_LMS17 = [* + 1]
 PF_LMS18 = [* + 1]
 	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM18 ; (180-187) Frog first Beach.  DLI 4/21 sets COLPF2/COLBK Black
 
-	.byte DL_BLANK_3|DL_DLI                  ; (188-192) Some scan lines. DLI 5/22 sets HSCROL for credit, calls SPC2
+	.byte DL_BLANK_4|DL_DLI                  ; (188-192) Some scan lines. DLI 5/22 sets HSCROL for credit, calls SPC2
 
 	mDL_JMP DL_SCROLLING_CREDIT              ; (193-200) End of display. No prompt for button. See Page 0 for the evil.
 

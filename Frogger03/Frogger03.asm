@@ -363,11 +363,11 @@ CurrentScreen   .byte $00 ; = identity of current screen.
 
 
 ; Pointer to the current color table sources in use. (?)
-COLPBKPointer   .word $0000
+;COLPBKPointer   .word $0000
 ;COLPF3Pounter   .word $0000 ; COLPF3 is always white.
-COLPF2Pointer   .word $0000
-COLPF1Pointer   .word $0000
-COLPF0Pointer   .word $0000
+;COLPF2Pointer   .word $0000
+;COLPF1Pointer   .word $0000
+;COLPF0Pointer   .word $0000
 
 
 ; ======== M A I N ======== Remember states from frame to frame...

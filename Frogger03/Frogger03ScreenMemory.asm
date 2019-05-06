@@ -602,28 +602,28 @@ GAME_COLPF1_COLORS ; 22 entries
 	.by COLOR_BLACK+$a                        ; lives, saved frogs.
 	
 	.by COLOR_ORANGE2+$8     ; beach
-	.by COLOR_PINK+$C
-	.by COLOR_PURPLE+$C
+	.by COLOR_PINK+$a
+	.by COLOR_PURPLE+$a
 	
 	.by COLOR_RED_ORANGE+$8 ; beach
-	.by COLOR_PURPLE_BLUE+$C
-	.by COLOR_BLUE_GREEN+$C
+	.by COLOR_PURPLE_BLUE+$a
+	.by COLOR_BLUE_GREEN+$a
 	
 	.by COLOR_ORANGE2+$8 ; beach
-	.by COLOR_GREEN+$C
-	.by COLOR_YELLOW_GREEN+$C
+	.by COLOR_GREEN+$a
+	.by COLOR_YELLOW_GREEN+$a
 	
 	.by COLOR_RED_ORANGE+$8 ; beach
-	.by COLOR_YELLOW_GREEN+$C
-	.by COLOR_ORANGE_GREEN+$C
+	.by COLOR_YELLOW_GREEN+$a
+	.by COLOR_ORANGE_GREEN+$a
 	
 	.by COLOR_ORANGE2+$8 ; beach
-	.by COLOR_LITE_ORANGE+$C
-	.by COLOR_ORANGE1+$C
+	.by COLOR_LITE_ORANGE+$a
+	.by COLOR_ORANGE1+$a
 	
 	.by COLOR_RED_ORANGE+$8 ; beach
-	.by COLOR_ORANGE2+$C
-	.by COLOR_RED_ORANGE+$C
+	.by COLOR_ORANGE2+$a
+	.by COLOR_RED_ORANGE+$a
 	
 	.by COLOR_RED_ORANGE+$8 ; Last beach
 
@@ -665,34 +665,34 @@ GAME_COLPF2_COLORS ; 24 entries... ?????????????
 
 GAME_COLPF3_COLORS ; 22 entries.  Arg!  Tried to avoid this, but it is needed in order to do the fade/wipe
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by COLOR_BLACK+$c                        ; Scores
-	.by COLOR_BLACK+$c                        ; lives, saved frogs.
+	.by COLOR_BLACK+$E                        ; Scores
+	.by COLOR_BLACK+$a                        ; lives, saved frogs.
 	
-	.by COLOR_BLACK+$c     ; beach
-	.by COLOR_BLACK+$c
-	.by COLOR_BLACK+$c
+	.by COLOR_BLACK+$E ; beach
+	.by COLOR_BLACK+$E
+	.by COLOR_BLACK+$E
 	
-	.by COLOR_BLACK+$c ; beach
-	.by COLOR_BLACK+$c
-	.by COLOR_BLACK+$c
+	.by COLOR_BLACK+$E ; beach
+	.by COLOR_BLACK+$E
+	.by COLOR_BLACK+$E
 	
-	.by COLOR_BLACK+$c ; beach
-	.by COLOR_BLACK+$c
-	.by COLOR_BLACK+$c
+	.by COLOR_BLACK+$E ; beach
+	.by COLOR_BLACK+$E
+	.by COLOR_BLACK+$E
 	
-	.by COLOR_BLACK+$c ; beach
-	.by COLOR_BLACK+$c
-	.by COLOR_BLACK+$c
+	.by COLOR_BLACK+$E ; beach
+	.by COLOR_BLACK+$E
+	.by COLOR_BLACK+$E
 	
-	.by COLOR_BLACK+$c ; beach
-	.by COLOR_BLACK+$c
-	.by COLOR_BLACK+$c
+	.by COLOR_BLACK+$E ; beach
+	.by COLOR_BLACK+$E
+	.by COLOR_BLACK+$E
 	
-	.by COLOR_BLACK+$c ; beach
-	.by COLOR_BLACK+$c
-	.by COLOR_BLACK+$c
+	.by COLOR_BLACK+$E ; beach
+	.by COLOR_BLACK+$E
+	.by COLOR_BLACK+$E
 	
-	.by COLOR_BLACK+$c ; Last beach
+	.by COLOR_BLACK+$E ; Last beach
 
 
 ; COLOR_ORANGE1 =      $10
@@ -965,7 +965,11 @@ COLPF2_TABLE ; Must be big enough to do Title screen.
 	.ds 25
 
 COLPF3_TABLE ; Must be big enough to do Game screen.
-	.ds 22
+	.by $0E $0E $0E $0E $0E
+	.by $0E $0E $0E $0E $0E
+	.by $0E $0E $0E $0E $0E
+	.by $0E $0E $0E $0E $0E
+	.by $0E $0E
 
 HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row. (21 entries)
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
@@ -1152,7 +1156,7 @@ MIN_FROGX = PLAYFIELD_LEFT_EDGE_NORMAL    ; Left edge of frog movement
 MAX_FROGX = PLAYFIELD_RIGHT_EDGE_NORMAL-8 ; right edge of frog movement
 MID_FROGX = [MIN_FROGX+MAX_FROGX]/2       ; Middle of screen, starting position.
 
-MAX_FROGY = PM_1LINE_NORMAL_BOTTOM        ; starting position for frog at bottom of screen
+MAX_FROGY = PM_1LINE_NORMAL_BOTTOM-14     ; starting position for frog at bottom of screen
 
 SHAPE_OFF   = 0
 SHAPE_FROG  = 1
@@ -1465,10 +1469,11 @@ BASE_PMCOLORS_TABLE ; When "off", and so multiplication for frog = 1 works.
 	.by 0 0 0 0
 	
 FROG_PMCOLORS_TABLE ; 0, 1, 2, 3
-	.by COLOR_PURPLE_BLUE+$6 ; P2, Colored eye irises
-	.by COLOR_PINK+$8        ; P3, frog 
 	.by COLOR_GREEN+$4       ; P0, frog
 	.by COLOR_GREEN+$8       ; P1, frog
+	.by COLOR_PURPLE_BLUE+$6 ; P2, Colored eye irises
+	.by COLOR_PINK+$8        ; P3, frog 
+
 
 SPLAT_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_PINK+$4        ; P0, splat

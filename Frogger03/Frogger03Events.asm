@@ -227,7 +227,7 @@ SAVE_PF0 .byte 0
 SAVE_PF1 .byte 0
 
 FadeColPf1ToBlack
-	ldx EventCounter2
+	ldx EventCounter2  ; Row counter decrementing.
 
 	lda COLPF1_TABLE,x
 	beq TryCOLPF0       ; It is already 0, so skip this.

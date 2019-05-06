@@ -484,6 +484,7 @@ RemoveFroggies
 	bne RemoveFroggies  ; then go back and display the next frog counter.
 
 	sta FrogsCrossed    ; reset count to 0.
+	jsr SetBoatSpeed    ; just in case
 
 	rts
 
@@ -528,7 +529,7 @@ WriteLives
 ; ZERO CURRENT COLORS                                                 A  Y
 ; ==========================================================================
 ; Force all the colors in the current tables to black.
-;
+; Used before Fade up to game screen.
 ; --------------------------------------------------------------------------
 ZeroCurrentColors
 	ldy #22
@@ -539,6 +540,7 @@ LoopZeroColors
 	sta COLPF0_TABLE,y
 	sta COLPF1_TABLE,y
 	sta COLPF2_TABLE,y
+	sta COLPF3_TABLE,y
 
 	dey
 	bpl LoopZeroColors
@@ -614,19 +616,24 @@ bCSSkipLMSUpdate
 EverythingMatches .byte 0 ; Bits indicate all colors match, then this row is done.
 ; Bits $10, $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2, COLPF3
 
-TempSaveColor .byte 0
+TempSaveColor   .byte 0
+TempTargetColor .byte 0
 
 ; Such sloppiness....  gah!
-IncrementGameColor    ; A = current color.   Y = target color
-	and #$0F          ; Remove Color part (to be joined to target luminance)
-	sta TempSaveColor ; Keep luminance
-	tya               ; A = Target color.
-	and #$F0          ; Get target color (without luminance) 
-	ora TempSaveColor ; Join current luminance to target color for new current base color.
-	tay               ; Current color back to Y for increments
+IncrementGameColor      ; Y = current color.   A = target color
+	sta TempTargetColor
+	and #$F0            ; Extract target color part (to be joined to current luminance)
+	sta TempSaveColor   ; Keep color
+	tya                 ; A = Current color.
+	and #$0F            ; Extract current luminance.
+	ora TempSaveColor   ; Join current luminance to target color for new current base color.
+	cmp TempTargetColor ; Is the new save color already the same as the target?
+	beq SkipIncCurrent  ; Do not change the value. 
+	tay                 ; Current color back to Y for increments
+;	iny
 	iny
-	iny
-	tya               ; A = current color.
+	tya               ; A = new current color.
+SkipIncCurrent
 	rts
 
 FlipOffEverything
@@ -900,7 +907,7 @@ bCopyRightFrontBoat
 	sta VBIPointer2
 	lda #>[CHARACTER_SET+I_BOAT_RF*8]
 	sta VBIPointer2+1
-	bne BoatCopy8                    ;  Go do the 8 byte copy to the character set via the pointers.
+	jmp BoatCopy8                    ;  Go do the 8 byte copy to the character set via the pointers.
 
 ; One is Right Back Boat.
 
@@ -917,7 +924,7 @@ TestBoaty1
 	sta VBIPointer2
 	lda #>[CHARACTER_SET+I_BOAT_RBW*8]
 	sta VBIPointer2+1
-	bne BoatCopy8                    ;  Go do the 8 byte copy to the character set via the pointers.
+	jmp BoatCopy8                    ;  Go do the 8 byte copy to the character set via the pointers.
 
 ; Two is Left Front Boat.
 
@@ -953,7 +960,7 @@ bCopyLeftFrontBoat
 	sta VBIPointer2
 	lda #>[CHARACTER_SET+I_BOAT_LF*8]
 	sta VBIPointer2+1
-	bne BoatCopy8                    ;  Go do the 8 byte copy to the character set via the pointers.
+	jmp BoatCopy8                    ;  Go do the 8 byte copy to the character set via the pointers.
 
 ; Three is Left Back Boat.
 
