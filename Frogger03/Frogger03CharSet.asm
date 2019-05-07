@@ -131,7 +131,7 @@ CHARACTER_SET
 ; $18: . . . # # . . .
 ; $00: . . . . . . . .
 
-; Char $02:   "    
+; Char $02:   " ======================= I_BOAT_LF animated (2 images)
   .BYTE $A0,$AA,$2A,$2A,$0A,$03,$17,$55
 ; $A0: OO OO .. .. 
 ; $AA: OO OO OO OO 
@@ -141,7 +141,7 @@ CHARACTER_SET
 ; $03: .. .. .. XX 
 ; $17: .. ## ## XX 
 ; $55: ## ## ## ## 
-; Char $03:   #    
+; Char $03:   # ======================= I_BOAT_LFW animated (8 images)
   .BYTE $00,$A0,$AA,$AA,$EA,$FA,$FE,$FF
 ; $00: .. .. .. .. 
 ; $A0: OO OO .. .. 
@@ -151,7 +151,7 @@ CHARACTER_SET
 ; $FA: XX XX OO OO 
 ; $FE: XX XX XX OO 
 ; $FF: XX XX XX XX 
-; Char $04:   $    
+; Char $04:   $ ======================= I_SEATS_L1
   .BYTE $00,$00,$AA,$FF,$AA,$BF,$AA,$AA
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
@@ -161,7 +161,7 @@ CHARACTER_SET
 ; $BF: OO XX XX XX 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
-; Char $05:   %    
+; Char $05:   % ======================= I_SEATS_L2
   .BYTE $00,$00,$A8,$AA,$FF,$AA,$FF,$AA
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
@@ -171,7 +171,7 @@ CHARACTER_SET
 ; $AA: OO OO OO OO 
 ; $FF: XX XX XX XX 
 ; $AA: OO OO OO OO 
-; Char $06:   &    
+; Char $06:   & ======================= I_SEATS_L3
   .BYTE $00,$00,$00,$AA,$FF,$AA,$FE,$AA
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
@@ -183,35 +183,35 @@ CHARACTER_SET
 ; $AA: OO OO OO OO 
 ; Char $07:   '    
   .BYTE $00,$18,$18,$18,$00,$00,$00,$00
-; $00: .. .. .. .. 
-; $18: .. ## OO .. 
-; $18: .. ## OO .. 
-; $18: .. ## OO .. 
-; $00: .. .. .. .. 
-; $00: .. .. .. .. 
-; $00: .. .. .. .. 
-; $00: .. .. .. .. 
+; $00: . . . . . . . . 
+; $18: . . . # # . . . 
+; $18: . . . # # . . . 
+; $18: . . . # # . . . 
+; $00: . . . . . . . . 
+; $00: . . . . . . . . 
+; $00: . . . . . . . . 
+; $00: . . . . . . . . 
 ; Char $08:   (    
   .BYTE $00,$0E,$18,$18,$18,$18,$0E,$00
-; $00: .. .. .. .. 
-; $0E: .. .. XX OO 
-; $18: .. ## OO .. 
-; $18: .. ## OO .. 
-; $18: .. ## OO .. 
-; $18: .. ## OO .. 
-; $0E: .. .. XX OO 
-; $00: .. .. .. .. 
+; $00: . . . . . . . . 
+; $0E: . . . . # # # . 
+; $18: . . . # # . . . 
+; $18: . . . # # . . . 
+; $18: . . . # # . . . 
+; $18: . . . # # . . . 
+; $0E: . . . . # # # . 
+; $00: . . . . . . . . 
 ; Char $09:   )    
   .BYTE $00,$70,$18,$18,$18,$18,$70,$00
-; $00: .. .. .. .. 
-; $70: ## XX .. .. 
-; $18: .. ## OO .. 
-; $18: .. ## OO .. 
-; $18: .. ## OO .. 
-; $18: .. ## OO .. 
-; $70: ## XX .. .. 
-; $00: .. .. .. .. 
-; Char $0A:   *    
+; $00: . . . . . . . . 
+; $70: . # # # . . . . 
+; $18: . . . # # . . . 
+; $18: . . . # # . . . 
+; $18: . . . # # . . . 
+; $18: . . . # # . . . 
+; $70: . # # # . . . . 
+; $00: . . . . . . . . 
+; Char $0A:   * ======================= I_BOAT_EMPTY
   .BYTE $00,$00,$00,$AA,$AA,$AA,$AA,$AA
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
@@ -221,7 +221,7 @@ CHARACTER_SET
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
-; Char $0B:   +    
+; Char $0B:   + ======================= I_BOAT_LB
   .BYTE $28,$2A,$2A,$8A,$8A,$88,$8C,$FF
 ; $28: .. OO OO .. 
 ; $2A: .. OO OO OO 
@@ -262,7 +262,7 @@ CHARACTER_SET
 ; $18: . . . # # . . .
 ; $18: . . . # # . . .
 ; $00: . . . . . . . .
-; Char $0F:   /    
+; Char $0F:   / ======================= I_BOAT_LBW animated (8 images)
   .BYTE $00,$00,$00,$00,$00,$00,$CC,$F5
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
@@ -382,7 +382,7 @@ CHARACTER_SET
 ; $10: . . . # # . . .
 ; $10: . . . # # . . .
 ; $00: . . . . . . . .
-; Char $1B:   ;    
+; Char $1B:   ; ======================= I_BOAT_RBW animated (8 images)
   .BYTE $00,$00,$00,$00,$00,$00,$33,$5F
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
@@ -392,7 +392,7 @@ CHARACTER_SET
 ; $00: .. .. .. .. 
 ; $33: .. XX .. XX 
 ; $5F: ## ## XX XX 
-; Char $1C:   <    
+; Char $1C:   < ======================= I_BOAT_RB
   .BYTE $28,$A8,$A8,$A2,$A2,$22,$32,$FF
 ; $28: .. OO OO .. 
 ; $A8: OO OO OO .. 
@@ -414,7 +414,7 @@ CHARACTER_SET
 ; $00: . . . . . . . .
 ; $00: . . . . . . . .
 
-; Char $1E:   >    
+; Char $1E:   > ======================= I_SEATS_R3
   .BYTE $00,$00,$00,$AA,$FF,$AA,$BF,$AA
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
@@ -817,7 +817,7 @@ CHARACTER_SET
 ; $22: .. OO .. OO 
 ; $22: .. OO .. OO 
 ; $00: .. .. .. .. 
-; Char $46: ctrl-F 
+; Char $46: ctrl-F ==================== I_SEATS_R2
   .BYTE $00,$00,$2A,$AA,$FF,$AA,$FF,$AA
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
@@ -827,7 +827,7 @@ CHARACTER_SET
 ; $AA: OO OO OO OO 
 ; $FF: XX XX XX XX 
 ; $AA: OO OO OO OO 
-; Char $47: ctrl-G 
+; Char $47: ctrl-G ==================== I_SEATS_R1
   .BYTE $00,$00,$AA,$FF,$AA,$FE,$AA,$AA
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
@@ -847,7 +847,7 @@ CHARACTER_SET
 ; $22: .. OO .. OO 
 ; $08: .. .. OO .. 
 ; $00: .. .. .. .. 
-; Char $49: ctrl-I 
+; Char $49: ctrl-I ==================== I_BOAT_RFW animated (8 images)
   .BYTE $00,$0A,$AA,$AA,$AB,$AF,$BF,$FF
 ; $00: .. .. .. .. 
 ; $0A: .. .. OO OO 
@@ -867,7 +867,7 @@ CHARACTER_SET
 ; $22: .. OO .. OO 
 ; $28: .. OO OO .. 
 ; $00: .. .. .. .. 
-; Char $4B: ctrl-K 
+; Char $4B: ctrl-K ==================== I_BOAT_RF animated (2 images)
   .BYTE $0A,$AA,$A8,$A8,$A0,$C0,$D4,$55
 ; $0A: .. .. OO OO 
 ; $AA: OO OO OO OO 
@@ -877,7 +877,7 @@ CHARACTER_SET
 ; $C0: XX .. .. .. 
 ; $D4: XX ## ## .. 
 ; $55: ## ## ## ## 
-; Char $4C: ctrl-L 
+; Char $4C: ctrl-L ==================== I_BEACH1
   .BYTE $57,$5F,$FF,$FF,$FF,$F0,$00,$00
 ; $57: ## ## ## XX 
 ; $5F: ## ## XX XX 
@@ -887,7 +887,7 @@ CHARACTER_SET
 ; $F0: XX XX .. .. 
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
-; Char $4D: ctrl-M 
+; Char $4D: ctrl-M ==================== I_BEACH2
   .BYTE $F5,$FF,$FF,$FF,$C0,$00,$00,$00
 ; $F5: XX XX ## ## 
 ; $FF: XX XX XX XX 
@@ -897,7 +897,7 @@ CHARACTER_SET
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
-; Char $4E: ctrl-N 
+; Char $4E: ctrl-N ==================== I_BEACH3
   .BYTE $55,$5F,$FF,$FF,$0F,$00,$00,$00
 ; $55: ## ## ## ## 
 ; $5F: ## ## XX XX 
@@ -907,7 +907,7 @@ CHARACTER_SET
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
-; Char $4F: ctrl-O 
+; Char $4F: ctrl-O ==================== I_BEACH4
   .BYTE $FD,$FF,$FF,$FF,$FF,$0F,$00,$00
 ; $FD: XX XX XX ## 
 ; $FF: XX XX XX XX 
@@ -927,7 +927,7 @@ CHARACTER_SET
 ; $02: .. .. .. OO 
 ; $2A: .. OO OO OO 
 ; $00: .. .. .. .. 
-; Char $51: ctrl-Q 
+; Char $51: ctrl-Q ==================== I_BEACH5
   .BYTE $55,$55,$F5,$FF,$F0,$00,$00,$00
 ; $55: ## ## ## ## 
 ; $55: ## ## ## ## 
@@ -937,7 +937,7 @@ CHARACTER_SET
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
-; Char $52: ctrl-R 
+; Char $52: ctrl-R ==================== I_BEACH6
   .BYTE $55,$55,$50,$00,$00,$00,$00,$00
 ; $55: ## ## ## ## 
 ; $55: ## ## ## ## 
@@ -947,7 +947,7 @@ CHARACTER_SET
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
-; Char $53: ctrl-S 
+; Char $53: ctrl-S ==================== I_BEACH7
   .BYTE $55,$55,$05,$00,$00,$00,$00,$00
 ; $55: ## ## ## ## 
 ; $55: ## ## ## ## 
@@ -957,7 +957,7 @@ CHARACTER_SET
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
-; Char $54: ctrl-T 
+; Char $54: ctrl-T ==================== I_BEACH8
   .BYTE $55,$55,$57,$3F,$00,$00,$00,$00
 ; $55: ## ## ## ## 
 ; $55: ## ## ## ## 
@@ -967,7 +967,7 @@ CHARACTER_SET
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
-; Char $55: ctrl-U 
+; Char $55: ctrl-U ==================== I_ROCKS1L
   .BYTE $55,$55,$50,$00,$0F,$3A,$3A,$3A
 ; $55: ## ## ## ## 
 ; $55: ## ## ## ## 
@@ -977,7 +977,7 @@ CHARACTER_SET
 ; $3A: .. XX OO OO 
 ; $3A: .. XX OO OO 
 ; $3A: .. XX OO OO 
-; Char $56: ctrl-V 
+; Char $56: ctrl-V ==================== I_ROCKS1R
   .BYTE $55,$55,$05,$00,$00,$00,$80,$A0
 ; $55: ## ## ## ## 
 ; $55: ## ## ## ## 
@@ -987,7 +987,7 @@ CHARACTER_SET
 ; $00: .. .. .. .. 
 ; $80: OO .. .. .. 
 ; $A0: OO OO .. .. 
-; Char $57: ctrl-W 
+; Char $57: ctrl-W ==================== I_ROCKS2
   .BYTE $55,$55,$05,$00,$00,$03,$C0,$C0
 ; $55: ## ## ## ## 
 ; $55: ## ## ## ## 
@@ -997,7 +997,7 @@ CHARACTER_SET
 ; $03: .. .. .. XX 
 ; $C0: XX .. .. .. 
 ; $C0: XX .. .. .. 
-; Char $58: ctrl-X 
+; Char $58: ctrl-X ==================== I_ROCKS3
   .BYTE $55,$55,$05,$00,$00,$02,$82,$00
 ; $55: ## ## ## ## 
 ; $55: ## ## ## ## 
@@ -1007,7 +1007,7 @@ CHARACTER_SET
 ; $02: .. .. .. OO 
 ; $82: OO .. .. OO 
 ; $00: .. .. .. .. 
-; Char $59: ctrl-Y 
+; Char $59: ctrl-Y ==================== I_ROCKS4
   .BYTE $55,$55,$50,$00,$0C,$38,$EA,$00
 ; $55: ## ## ## ## 
 ; $55: ## ## ## ## 
@@ -1017,7 +1017,7 @@ CHARACTER_SET
 ; $38: .. XX OO .. 
 ; $EA: XX OO OO OO 
 ; $00: .. .. .. .. 
-; Char $5A: ctrl-Z 
+; Char $5A: ctrl-Z ==================== I_WATER1
   .BYTE $00,$00,$00,$00,$00,$00,$05,$55
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
@@ -1027,7 +1027,7 @@ CHARACTER_SET
 ; $00: .. .. .. .. 
 ; $05: .. .. ## ## 
 ; $55: ## ## ## ## 
-; Char $5B: ESCAPE 
+; Char $5B: ESCAPE ==================== I_WATER2
   .BYTE $00,$00,$00,$00,$05,$55,$55,$55
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
@@ -1037,7 +1037,7 @@ CHARACTER_SET
 ; $55: ## ## ## ## 
 ; $55: ## ## ## ## 
 ; $55: ## ## ## ## 
-; Char $5C: UP     
+; Char $5C: UP     ==================== I_WATER3
   .BYTE $00,$00,$00,$00,$50,$55,$55,$55
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
@@ -1047,7 +1047,7 @@ CHARACTER_SET
 ; $55: ## ## ## ## 
 ; $55: ## ## ## ## 
 ; $55: ## ## ## ## 
-; Char $5D: DOWN   
+; Char $5D: DOWN   ==================== I_WATER4
   .BYTE $00,$00,$00,$00,$00,$00,$50,$55
 ; $00: .. .. .. .. 
 ; $00: .. .. .. .. 
@@ -1439,80 +1439,80 @@ LEFT_BOAT_FRONT_ANIM ; 2 images, each used 4 times with one frame from LEFT_BOAT
 
 LEFT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat. (64 bytes)
 ; Char $4A: ctrl-J 
-  .BYTE $00,$00,$A0,$AA,$EA,$FA,$FE,$FF
-; $00: .. .. .. .. 
+  .BYTE $00,$A0,$AA,$AA,$EA,$FA,$FE,$FF
 ; $00: .. .. .. .. 
 ; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $EA: XX OO OO OO 
 ; $FA: XX XX OO OO 
 ; $FE: XX XX XX OO 
 ; $FF: XX XX XX XX 
 ; Char $4B: ctrl-K 
-  .BYTE $00,$00,$A0,$AA,$AA,$EA,$FE,$FF
-; $00: .. .. .. .. 
+  .BYTE $00,$A0,$AA,$AA,$AA,$EA,$FE,$FF
 ; $00: .. .. .. .. 
 ; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $EA: XX OO OO OO 
 ; $FE: XX XX XX OO 
 ; $FF: XX XX XX XX 
 ; Char $4C: ctrl-L 
-  .BYTE $00,$00,$A0,$AA,$AA,$FA,$FE,$FF
-; $00: .. .. .. .. 
+  .BYTE $00,$A0,$AA,$AA,$AA,$FA,$FE,$FF
 ; $00: .. .. .. .. 
 ; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $FA: XX XX OO OO 
 ; $FE: XX XX XX OO 
 ; $FF: XX XX XX XX 
 ; Char $4D: ctrl-M 
-  .BYTE $00,$00,$A0,$AA,$AA,$AA,$BE,$FF
-; $00: .. .. .. .. 
+  .BYTE $00,$A0,$AA,$AA,$AA,$AA,$BE,$FF
 ; $00: .. .. .. .. 
 ; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $BE: OO XX XX OO 
 ; $FF: XX XX XX XX 
 ; Char $4E: ctrl-N 
-  .BYTE $00,$00,$A0,$AA,$AA,$AA,$AA,$FF
-; $00: .. .. .. .. 
+  .BYTE $00,$A0,$AA,$AA,$AA,$AA,$AA,$FF
 ; $00: .. .. .. .. 
 ; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $FF: XX XX XX XX 
 ; Char $4F: ctrl-O 
-  .BYTE $00,$00,$A0,$AA,$AA,$AA,$AA,$FA
-; $00: .. .. .. .. 
+  .BYTE $00,$A0,$AA,$AA,$AA,$AA,$AA,$FA
 ; $00: .. .. .. .. 
 ; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $FA: XX XX OO OO 
 ; Char $50: ctrl-P 
-  .BYTE $00,$00,$A0,$AA,$AA,$AA,$EA,$FA
-; $00: .. .. .. .. 
+  .BYTE $00,$A0,$AA,$AA,$AA,$AA,$EA,$FA
 ; $00: .. .. .. .. 
 ; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $EA: XX OO OO OO 
 ; $FA: XX XX OO OO 
 ; Char $51: ctrl-Q 
-  .BYTE $00,$00,$A0,$AA,$AA,$EA,$FA,$FE
-; $00: .. .. .. .. 
+  .BYTE $00,$A0,$AA,$AA,$AA,$EA,$FA,$FE
 ; $00: .. .. .. .. 
 ; $A0: OO OO .. .. 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $EA: XX OO OO OO 
@@ -1628,80 +1628,80 @@ RIGHT_BOAT_FRONT_ANIM ; 2 images, each used 4 times with one frame from RIGHT_BO
 
 RIGHT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat. (64 bytes)
 ; Char $6A:   j    
-  .BYTE $00,$00,$0A,$AA,$AB,$AF,$BF,$FF
-; $00: .. .. .. .. 
+  .BYTE $00,$0A,$AA,$AA,$AB,$AF,$BF,$FF
 ; $00: .. .. .. .. 
 ; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AB: OO OO OO XX 
 ; $AF: OO OO XX XX 
 ; $BF: OO XX XX XX 
 ; $FF: XX XX XX XX 
 ; Char $6B:   k    
-  .BYTE $00,$00,$0A,$AA,$AA,$AB,$BF,$FF
-; $00: .. .. .. .. 
+  .BYTE $00,$0A,$AA,$AA,$AA,$AB,$BF,$FF
 ; $00: .. .. .. .. 
 ; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AB: OO OO OO XX 
 ; $BF: OO XX XX XX 
 ; $FF: XX XX XX XX 
 ; Char $6C:   l    
-  .BYTE $00,$00,$0A,$AA,$AA,$AF,$BF,$FF
-; $00: .. .. .. .. 
+  .BYTE $00,$0A,$AA,$AA,$AA,$AF,$BF,$FF
 ; $00: .. .. .. .. 
 ; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AF: OO OO XX XX 
 ; $BF: OO XX XX XX 
 ; $FF: XX XX XX XX 
 ; Char $6D:   m    
-  .BYTE $00,$00,$0A,$AA,$AA,$AA,$BE,$FF
-; $00: .. .. .. .. 
+  .BYTE $00,$0A,$AA,$AA,$AA,$AA,$BE,$FF
 ; $00: .. .. .. .. 
 ; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $BE: OO XX XX OO 
 ; $FF: XX XX XX XX 
 ; Char $6E:   n    
-  .BYTE $00,$00,$0A,$AA,$AA,$AA,$AA,$FF
-; $00: .. .. .. .. 
+  .BYTE $00,$0A,$AA,$AA,$AA,$AA,$AA,$FF
 ; $00: .. .. .. .. 
 ; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $FF: XX XX XX XX 
 ; Char $6F:   o    
-  .BYTE $00,$00,$0A,$AA,$AA,$AA,$AA,$AF
-; $00: .. .. .. .. 
+  .BYTE $00,$0A,$AA,$AA,$AA,$AA,$AA,$AF
 ; $00: .. .. .. .. 
 ; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AF: OO OO XX XX 
 ; Char $70:   p    
-  .BYTE $00,$00,$0A,$AA,$AA,$AA,$AB,$AF
-; $00: .. .. .. .. 
+  .BYTE $00,$0A,$AA,$AA,$AA,$AA,$AB,$AF
 ; $00: .. .. .. .. 
 ; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AB: OO OO OO XX 
 ; $AF: OO OO XX XX 
 ; Char $71:   q    
-  .BYTE $00,$00,$0A,$AA,$AA,$AB,$AF,$BF
-; $00: .. .. .. .. 
+  .BYTE $00,$0A,$AA,$AA,$AA,$AB,$AF,$BF
 ; $00: .. .. .. .. 
 ; $0A: .. .. OO OO 
+; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AA: OO OO OO OO 
 ; $AB: OO OO OO XX 

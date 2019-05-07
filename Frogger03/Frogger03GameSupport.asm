@@ -220,42 +220,42 @@ FrogMoveUp
 ; If the first calculation produces a number less than 40, then the 
 ; second position is +40.   Otherwise the second position is -40
 ; --------------------------------------------------------------------------
-WhereIsThePhysicalFrog
-;	clc
-;;	lda FrogColumn          ; Logical position (where visible on screen)
-;	ldx FrogRow             ; Get the current row number.
-;	ldy MOVING_ROW_STATES,x ; Get the movement flag for the row.
-;	beq FrogOnTheBeach      ; Zero is no scrolling, so no math.
-;	bpl FrogOnBoatRight     ; +1 is boats going right
+;WhereIsThePhysicalFrog
+;;	clc
+;;;	lda FrogColumn          ; Logical position (where visible on screen)
+;;	ldx FrogRow             ; Get the current row number.
+;;	ldy MOVING_ROW_STATES,x ; Get the movement flag for the row.
+;;	beq FrogOnTheBeach      ; Zero is no scrolling, so no math.
+;;	bpl FrogOnBoatRight     ; +1 is boats going right
 
-;	; Determine frog on boats going left.
-;	adc CurrentLeftOffset      ; Add scroll position to the logical column
-;	bcc NormalizeFrogPositions ; Calculate second frog position
+;;	; Determine frog on boats going left.
+;;	adc CurrentLeftOffset      ; Add scroll position to the logical column
+;;	bcc NormalizeFrogPositions ; Calculate second frog position
 
-FrogOnBoatRight
-;	adc CurrentRightOffset
+;FrogOnBoatRight
+;;;	adc CurrentRightOffset
 
-NormalizeFrogPositions
-;;	sta FrogRealColumn1
-;	cmp #40                   ; Where is the first calculated position
-;	bcs PhysicalFrogMinus40   ; Greater than, equal to 40, so subtract 40 
+;NormalizeFrogPositions
+;;;	sta FrogRealColumn1
+;;	cmp #40                   ; Where is the first calculated position
+;;	bcs PhysicalFrogMinus40   ; Greater than, equal to 40, so subtract 40 
 
-;	; BCC == Less than 40, so add 40. 
-;	adc #40
-;	bpl SaveSecondPosition    ; We know the maximum value is 79
+;;	; BCC == Less than 40, so add 40. 
+;;	adc #40
+;;	bpl SaveSecondPosition    ; We know the maximum value is 79
 
-PhysicalFrogMinus40           ; Got here due to BCS, so no SEC needed.
-;	sbc #40 
-;	bpl SaveSecondPosition
+;PhysicalFrogMinus40           ; Got here due to BCS, so no SEC needed.
+;;	sbc #40 
+;;	bpl SaveSecondPosition
 
-FrogOnTheBeach                ; No alternate position for beach rows.  Trick the
-;;	sta FrogRealColumn1       ; future use by keeping the same value for both...
+;FrogOnTheBeach                ; No alternate position for beach rows.  Trick the
+;;;	sta FrogRealColumn1       ; future use by keeping the same value for both...
 
-SaveSecondPosition
-;;	sta FrogRealColumn2       ; 
+;SaveSecondPosition
+;;;	sta FrogRealColumn2       ; 
 
-ExitWhereIsThePhysicalFrog
-;	jsr GetScreenMemoryUnderFrog ; Update the cached character where the frog resides.
+;ExitWhereIsThePhysicalFrog
+;;	jsr GetScreenMemoryUnderFrog ; Update the cached character where the frog resides.
 
 	rts
 
@@ -337,9 +337,6 @@ AutoFrogRight
 
 ExitAutoMoveFrog
 	rts                       ; Done, successful move.
-
-
-
 
 
 ; ==========================================================================

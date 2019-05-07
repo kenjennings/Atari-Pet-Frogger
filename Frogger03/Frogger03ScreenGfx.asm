@@ -534,7 +534,7 @@ WriteLives
 ZeroCurrentColors
 	ldy #22
 	lda #0
-	
+
 LoopZeroColors
 	sta COLBK_TABLE,y
 	sta COLPF0_TABLE,y

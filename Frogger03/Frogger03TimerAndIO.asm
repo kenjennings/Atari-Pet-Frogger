@@ -88,9 +88,10 @@ BOAT_SHIFT_L  .by 1  1 1 1 1 1 1 1 2 2 3; number of times to scroll boat. (add o
 
 MAX_FROG_SPEED = 10
 
-; Offsets from LMS in display list for LMS low byte of boats. (VBI)
-; For Right Boats this is offset from PF_LMS1.
-; For Left Boats thie is offset from PF_LMS2.
+; Offsets from first LMS low byte in Display List to 
+; the subsequent LMS low byte of each boat line. (VBI)
+; For the Right Boats this is the offset from PF_LMS1.
+; For the Left Boats this is the offset from PF_LMS2.
 BOAT_LMS_OFFSET .by 0 12 24 36 48 60 
 
 ; Index into HSCROL table for each boat row. (VBI)
@@ -104,14 +105,12 @@ MOVING_ROW_STATES
 	.endr
 		.BYTE 0             ; starting position on safe beach
 
-
 ; PAL Timer values.  PAL ?? guesses...
 ; About 7 keys per second.
 ; KEYSCAN_FRAMES = $07
 ; based on number of frogs, how many frames between boat movements...
 ;ANIMATION_FRAMES .byte 25,21,17,14,12,11,10,9,8,7,6,5
 ; Not really sure what to do about the new model using the BOAT_SHIFT lists.
-
 
 
 ; ==========================================================================

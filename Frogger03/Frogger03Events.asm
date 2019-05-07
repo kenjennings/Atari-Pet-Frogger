@@ -479,7 +479,9 @@ FrogHasMoved
 
 ; Row greater than 0.  Evaluate good/bad jump.
 SaveNewFrogLocation
-	jsr WhereIsThePhysicalFrog ; Update Frog Real Positions and the LastCharacter found there.
+	clc
+	bcc ReplaceFrogOnScreen
+;	jsr WhereIsThePhysicalFrog ; Update Frog Real Positions and the LastCharacter found there.
 
 ; Will the Pet Frog land on the Beach or a seat in the boat?
 ;	cmp #I_SPACE             ; = $00 ; space, also safe beach spot.
@@ -510,12 +512,17 @@ ReplaceFrogOnScreen
 
 ; ==========================================================================
 ; GAME SCREEN - Screen Animation Section
+; 
+; Many of these things have become non-events for the main line code.
+; VBI scrolls boats.
+; VBI moves frog if frog is on a boat row.
+; VBI will flag frog death if frog location is bad for frog.
 ; --------------------------------------------------------------------------
 CheckForAnim
-	lda AnimateFrames        ; Does the timer allow the boats to move?
-	bne EndGameScreen        ; Nothing at this time. Exit.
+;	lda AnimateFrames        ; Does the timer allow the boats to move?
+;	bne EndGameScreen        ; Nothing at this time. Exit.
 
-	jsr SetBoatSpeed         ; Reset timer for animation based on number of saved frogs.
+;	jsr SetBoatSpeed         ; Reset timer for animation based on number of saved frogs.
 
 	jsr AnticipateFrogDeath  ; Will the frog die when the boat moves?
 	bne DoSetupForYerDead    ; Shrodinger says apparently so.  dead frog.
