@@ -1126,7 +1126,7 @@ bCBloop
 
 	rts
 
-	
+
 ;==============================================================================
 ;											PmgSetColors  A  X
 ;==============================================================================
@@ -1150,11 +1150,11 @@ libPmgSetColors
 	rts
 
 
-
 ;==============================================================================
 ;											EraseFrog  A  X  Y
 ;==============================================================================
 ; Erase Frog at current position.
+; -----------------------------------------------------------------------------
 
 EraseFrog
 	lda #0
@@ -1183,6 +1183,30 @@ bLoopEF_EraseRemainder
 
 
 ;==============================================================================
+;											DrawSplatFrog  A  X  Y
+;==============================================================================
+; Draw SplatteredFrog at new position.
+; -----------------------------------------------------------------------------
+
+DrawSplatFrog
+	ldx FrogNewPMY               
+	ldy #10
+
+bLoopDF_DrawSplatFrog
+	lda PLAYER0_SPLATTER_DATA,y
+	sta PLAYERADR0+10,x
+
+	lda PLAYER1_SPLATTER_DATA,y
+	sta PLAYERADR1+10,x
+
+	dex
+	dey
+	bpl bLoopDF_DrawSplatFrog
+
+	rts
+
+
+;==============================================================================
 ;											DrawFrog  A  X  Y
 ;==============================================================================
 ; Draw Frog at new position.
@@ -1194,12 +1218,15 @@ DrawFrog
 bLoopDF_DrawCommon
 	lda PLAYER0_FROG_DATA,y
 	sta PLAYERADR0+2,x
+
 	lda PLAYER1_FROG_DATA,y
 	sta PLAYERADR1+2,x
+
 	lda PLAYER2_FROG_DATA,y
-	sta PLAYERADR2+3,x
+	sta PLAYERADR2+4,x
+
 	lda PLAYER3_FROG_DATA,y
-	sta PLAYERADR2+8,x
+	sta PLAYERADR3+9,x
 	dex
 	dey
 	bpl bLoopDF_DrawCommon
@@ -1219,35 +1246,22 @@ bLoopDF_DrawRemainder
 
 
 ;==============================================================================
-;											UpdateFrog  A  X  Y
+;											UpdateFrogX  A  X  Y
 ;==============================================================================
-; Erase old Frog position if needed.
-; Load frog into PM Memory at the new position.
-; Update current position == new position.
-
-UpdateFrog
-	ldx FrogNewPMY         ; New frog Y...
-	cpx FrogPMY            ; ...is different from Old frog Y?
-	beq bUFSkipFrogRedraw  ; No.  Skip erase/redraw.
-
-	; 1) Erase frog.
-	jsr EraseFrog
-
-	ldx FrogNewPMY         ; New frog Y...
-	stx FrogPMY            ; Set current Frog Y == New Frog Y
-
-	; 2) load new frog image
-	jsr DrawFrog
-
-	; 3) Check for horizontal positioning update
-bUFSkipFrogRedraw
+; Move X position if needed.
+; FYI: Removing a frog from display requires setting FrogShape == SHAPE_OFF,
+; because re-analysis of position by the VBI will move the frog back into 
+; the display.
+; Update current X position == new position.
+; -----------------------------------------------------------------------------
+UpdateFrogX
 	ldx FrogNewPMX            ; New frog X...
-	cpx FrogPMY               ; ...is different from Old frog X?
+	cpx FrogPMX               ; ...is different from Old frog X?
 	beq bUFSkipFrogReposition ; No.  Skip horizontal position update.
 
 	stx FrogPMX               ; Set current Frog X == New Frog X
 
-	; 4) Do horizontal repositioning.
+	; Do horizontal repositioning.
 	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
 	stx HPOSP0 ; + 0 is frog parts 1
 	inx
@@ -1265,18 +1279,48 @@ bUFSkipFrogRedraw
 	inx
 	stx HPOSM0 ; + 7 is p5 frog eyes
 
-	; Set Player/Missile sizes
+bUFSkipFrogReposition
+	rts
+
+
+;==============================================================================
+;											UpdateFrog  A  X  Y
+;==============================================================================
+; Complete redisplay of the frog.  
+; Erase old Frog position if needed.
+; Load frog into PM Memory at the new position.
+; Update current position == new position.
+; Y positioning different from X positioning, since it must reload memory.
+; -----------------------------------------------------------------------------
+UpdateFrog
+	ldx FrogNewPMY         ; New frog Y...
+	cpx FrogPMY            ; ...is different from Old frog Y?
+	beq bUFSkipFrogRedraw  ; No.  Skip erase/redraw.
+
+	; 1) Erase frog from memory at current (old) position.
+	jsr EraseFrog
+
+	; 2) Current position = new position
+	ldx FrogNewRow
+	stx FrogRow
+
+	ldx FrogNewPMY         ; New frog Y...
+	stx FrogPMY            ; Set current Frog Y == New Frog Y
+
+	; 3) load new frog image in the current (new) position
+	jsr DrawFrog
+
+	; 4) Check for horizontal positioning update
+bUFSkipFrogRedraw
+	
+	; Bonus extra...  
+	; Force set  Player/Missile sizes
 	lda #PM_SIZE_NORMAL ; aka $00
 	sta SIZEP0 ; Frog parts 1
 	sta SIZEP1 ; Frog parts 2
 	sta SIZEP2 ; Frog colored iris
 	sta SIZEP3 ; Frog mouth
 	sta SIZEM  ; Eyeballs are Missile/P5 showing through the holes in head. (All need to be set 0)
-
-	lda FrogNewRow
-	sta FrogRow
-
-bUFSkipFrogReposition
 
 	rts
 

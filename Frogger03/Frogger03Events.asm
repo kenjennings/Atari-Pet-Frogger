@@ -412,7 +412,8 @@ EventGameScreen
 	jsr CheckInput           ; Get cooked stick or trigger if timer permits.
 	beq CheckForAnim         ; Nothing pressed, Skip the input section.
 
-	jsr RemoveFrogOnScreen   ; Remove the frog from the screen (duh)
+; P/M graphics do not need "removal" 
+;	jsr RemoveFrogOnScreen   ; Remove the frog from the screen (duh)
 
 ProcessJoystickInput         ; Reminder: Input Bits: "0 0 0 Trigger Right Left 0 Up"
 	lda InputStick           ; Get the cooked joystick state... 
@@ -443,7 +444,7 @@ LeftStickTest
 	dey                      ; - minus 2 color clocks.
 	dey 
 
-	cmp #MIN_FROGX           ; Did it go less than minimum?
+	cpy #MIN_FROGX           ; Did it go less than minimum?
 	bcs FrogHasMoved         ; No.  Do not reset.
 
 	ldy #MIN_FROGX
@@ -467,7 +468,7 @@ RightStickTest
 	iny                      ; - minus 2 color clocks.
 	iny 
 
-	cmp #MAX_FROGX+1         ; Did it go greater than maximum?
+	cpy #MAX_FROGX+1         ; Did it go greater than maximum?
 	bcs FrogHasMoved         ; No.  Do not reset.
 
 	ldy #MAX_FROGX

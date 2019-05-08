@@ -1156,7 +1156,7 @@ MIN_FROGX = PLAYFIELD_LEFT_EDGE_NORMAL    ; Left edge of frog movement
 MAX_FROGX = PLAYFIELD_RIGHT_EDGE_NORMAL-8 ; right edge of frog movement
 MID_FROGX = [MIN_FROGX+MAX_FROGX]/2       ; Middle of screen, starting position.
 
-MAX_FROGY = PM_1LINE_NORMAL_BOTTOM-14     ; starting position for frog at bottom of screen
+MAX_FROGY = PM_1LINE_NORMAL_BOTTOM-15     ; starting position for frog at bottom of screen
 
 SHAPE_OFF   = 0
 SHAPE_FROG  = 1
@@ -1185,32 +1185,36 @@ PLAYERADR3 = PMADR+$700
 ; M0 == X+1
 
 ; . - ] + . - ] + .
+; . - ] ] ] ] ] + .
 ; - W W W ] W W W +
 ; - W B W ] W B W +
 ; - W W W ] W W W +
 ; - ] ] ] ] ] ] ] +
 ; . - ] ] ] ] ] + .
 ; . - B ] ] ] B + .
+; . - B B ] B B + .
 ; . . - B B B + . .
 ; . . . - ] + . . .
 
 ; Players 0, 1 Are the greens of the Frog.
 ; P0                 P1
-; . 0 0 . . 0 0 .    . 1 1 . . 1 1 .  - 0
-; 0 . . . 0 . . .    . . . 1 . . . 1  - 1
-; 0 . . . 0 . . .    . . . 1 . . . 1  - 2
-; 0 . . . 0 . . .    . . . 1 . . . 1  - 3 
-; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1  - 4
-; . 0 0 0 0 0 0 .    . 1 1 1 1 1 1 .  - 5
-; . 0 . 0 0 0 . .    . . 1 1 1 . 1 .  - 6
-; . . 0 . . . . .    . . . . . 1 . .  - 7
-; . . . 0 0 . . .    . . . 1 1 . . .  - 8
+; . 0 0 . . 0 0 .    . 1 1 . . 1 1 .  - 0  
+; . 0 0 0 0 0 0 .    . 1 1 1 1 1 1 .  - 1  
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 2  
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 3  
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 4  
+; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1  - 5  
+; . 0 0 0 0 0 0 .    . 1 1 1 1 1 1 .  - 6  
+; . 0 . 0 0 0 . .    . . 1 1 1 . 1 .  - 7  
+; . 0 . . 0 0 . .    . . 1 1 . . 1 .  - 8  
+; . . 0 . . . . .    . . . . . 1 . .  - 9  
+; . . . 0 0 . . .    . . . 1 1 . . .  - 10 
 
 PLAYER0_FROG_DATA 
-	.by $66 $88 $88 $88 $FE $7E $5C $20 $18
+	.by $66 $7E $88 $88 $88 $FE $7E $5C $46 $20 $18
 
 PLAYER1_FROG_DATA
-	.by $66 $11 $11 $11 $7F $7E $3A $04 $18
+	.by $66 $7E $11 $11 $11 $7F $7E $3A $32 $04 $18
 
 ; The small frog parts are padded to minimum 3 bytes so they 
 ; can be redrawn in a common loop.
@@ -1219,14 +1223,15 @@ PLAYER1_FROG_DATA
 ; 2 . . . 2 . . . 
 
 PLAYER2_FROG_DATA  ; at Y +1, +2, or +3
-	.by $88 $00 $00
+	.by $00 $88 $00
 
 ; Player 3 is the mouth.
 ; 3 . . . 3 . . .
+; 3 3 . 3 3 . . .
 ; . 3 3 3 . . . .
 
 PLAYER3_FROG_DATA
-	.by $88 $70 $00
+	.by $88 $D8 $70
 
 ; Player 5 (the Missile, M3) is COLPF3, White. +1 
 ; 1 1 . . . . . .  ; 
@@ -1252,21 +1257,23 @@ PLAYER5_FROG_DATA
 
 ; Splatty Frog
 ; P0                 P1
-; . 0 0 .  . . 0 0    . 1 1 .  . . 1 1
-; 0 0 0 0  . 0 0 0    1 1 1 1  . 1 1 1
-; . 0 0 0  . 0 0 .    . 1 1 1  . 1 1 .
-; . . . 0  0 0 . .    . . . 1  1 1 . .
-; 0 0 . 0  0 0 0 0    1 1 . 1  1 1 1 1 
-; . 0 0 0  0 0 . .    . 1 1 1  1 1 . .
-; 0 0 0 .  . 0 0 .    1 1 1 .  . 1 1 .
-; 0 0 0 .  . 0 0 0    1 1 1 .  . 1 1 1
-; . . . .  . 0 0 .    . . . .  . 1 1 .
+; . 0 0 .  . . 0 0    . 1 1 .  . . 1 1  - 0
+; 0 0 0 0  . 0 0 0    1 1 1 1  . 1 1 1  - 1
+; 0 0 0 0  . 0 0 0    1 1 1 1  . 1 1 1  - 2
+; . 0 0 0  . 0 0 .    . 1 1 1  . 1 1 .  - 3
+; . . . 0  0 0 . .    . . . 1  1 1 . .  - 4
+; 0 0 . 0  0 0 0 0    1 1 . 1  1 1 1 1  - 5
+; . 0 0 0  0 0 . .    . 1 1 1  1 1 . .  - 6
+; . 0 0 0  0 0 . .    . 1 1 1  1 1 . .  - 7
+; 0 0 0 .  . 0 0 .    1 1 1 .  . 1 1 .  - 8 
+; 0 0 0 .  . 0 0 0    1 1 1 .  . 1 1 1  - 9 
+; . . . .  . 0 0 .    . . . .  . 1 1 .  - 10
 
 PLAYER0_SPLATTER_DATA
-	.by $63 $F7 $76 $1C $DF $7C $E6 $E7 06
+	.by $63 $F7 $F7 $76 $1C $DF $7C $7C $E6 $E7 06
 
 PLAYER1_SPLATTER_DATA
-	.by $63 $F7 $76 $1C $DF $7C $E6 $E7 06
+	.by $63 $F7 $F7 $76 $1C $DF $7C $7C $E6 $E7 06
 
 
 ; HPOS changes:
