@@ -94,15 +94,10 @@ SetupGame
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
 
-;	lda #<PLAYFIELD_MEM18   ; Low Byte, Frog position.
-;	sta FrogLocation
-;	lda #>PLAYFIELD_MEM18   ; Hi Byte, Frog position.
-;	sta FrogLocation + 1
-
 	lda #18                 ; 18 (dec), number of screen rows of game field.
 	sta FrogRow
 
-	lda #0          ; Set "old" position to trigger Update to redraw.  
+	lda #0                  ; Zero "old" position to trigger Update to redraw.  
 	sta FrogPMX             ; 
 	sta FrogPMY 
 
@@ -111,17 +106,6 @@ SetupGame
 
 	lda #MAX_FROGY          ; Set new Y position to origin. (row 18)
 	sta FrogNewPMY
-
-;	ldy #19                 ; Frog horizontal coordinate, Y = 19 (dec)
-;	sty FrogColumn          ; Logical X coordinate
-;	sty FrogRealColumn1     ; On a Beach row the physical locations are the same.
-;	sty FrogRealColumn2     ; If on a scroll row then they are different.
-
-;	lda #I_FROG             ; We're using $7F as the frog shape.
-;	sta (FrogLocation),y    ; PLAYFIELD_MEM18 (beach) + $13/19 (dec)
-
-;	lda #I_SPACE            ; the character at the default position.
-;	sta LastCharacter       ; Preset the character under the frog.
 
 	jsr PlayWaterFX         ; Start water noises.  Now.
 

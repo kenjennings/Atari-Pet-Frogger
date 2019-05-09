@@ -630,7 +630,7 @@ IncrementGameColor      ; Y = current color.   A = target color
 	cmp TempTargetColor ; Is the new save color already the same as the target?
 	beq SkipIncCurrent  ; Do not change the value. 
 	tay                 ; Current color back to Y for increments
-;	iny
+	iny
 	iny
 	tya               ; A = new current color.
 SkipIncCurrent
@@ -1293,39 +1293,19 @@ UpdateFrogX
 	; Do horizontal repositioning.
 	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
 	stx HPOSP0 ; + 0 is frog parts 1
+	stx HPOSP2 ; + 0 is frog eye iris
+	stx HPOSP3 ; + 0 is frog mouth
+	stx HPOSM3 ; + 0 is p5 frog eye balls
 	inx
 	stx HPOSP1 ; + 1 is frog parts 2
-	.rept 8
 	inx
-	.endr
-	
-	stx HPOSM3 ; + 1 is p5 frog eyes
-	inx
-	.rept 8
-	inx
-	.endr
-	stx HPOSP2 ; + 2 is frog eye iris
-	.rept 8
-	inx
-	.endr
-	stx HPOSP3 ; + 2 is frog mouth
-	inx
-	.rept 8
-	inx
-	.endr
-	stx HPOSM2 ; + 3 is p5 frog eyes
+	stx HPOSM2 ; + 2 is p5 frog eye balls
 	inx
 	inx
-		.rept 8
-	inx
-	.endr
-	stx HPOSM1 ; + 5 is p5 frog eyes
+	stx HPOSM1 ; + 4 is p5 frog eye balls
 	inx
 	inx
-		.rept 8
-	inx
-	.endr
-	stx HPOSM0 ; + 7 is p5 frog eyes
+	stx HPOSM0 ; + 5 is p5 frog eye balls
 
 	rts
 

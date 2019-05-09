@@ -1156,9 +1156,7 @@ MIN_FROGX = PLAYFIELD_LEFT_EDGE_NORMAL    ; Left edge of frog movement
 MAX_FROGX = PLAYFIELD_RIGHT_EDGE_NORMAL-8 ; right edge of frog movement
 MID_FROGX = [MIN_FROGX+MAX_FROGX]/2       ; Middle of screen, starting position.
 
-;MAX_FROGY = PM_1LINE_NORMAL_BOTTOM-15     ; starting position for frog at bottom of screen
-
-MAX_FROGY = PM_1LINE_NORMAL_BOTTOM   
+MAX_FROGY = PM_1LINE_NORMAL_BOTTOM-15     ; starting position for frog at bottom of screen
 
 SHAPE_OFF   = 0
 SHAPE_FROG  = 1
@@ -1182,9 +1180,13 @@ PLAYERADR3 = PMADR+$700
 ; HPOS changes:
 ; P0 == X
 ; P1 == X+1
-; P2 == X+1 (+2, +3)
-; P3 == X+2
-; M0 == X+1
+; P2 == X (-1, +0, +1)
+; P3 == X
+; M3 == X
+; M2 == X+2
+; M1 == X+4
+; M0 == X+6
+; 
 
 ; . - ] + . - ] + .
 ; . - ] ] ] ] ] + .
@@ -1213,10 +1215,10 @@ PLAYERADR3 = PMADR+$700
 ; . . . 0 0 . . .    . . . 1 1 . . .  - 10  18  18
 
 PLAYER0_FROG_DATA 
-	.by $66 $FE $88 $88 $88 $FE $7E $5C $4C $20 $18
+	.by $66 $FE $88 $88 $88 $FF $FF $9C $C0 $60 $3C
 
 PLAYER1_FROG_DATA
-	.by $66 $7F $11 $11 $11 $7F $7E $3A $32 $04 $18
+	.by $66 $7F $11 $11 $11 $FF $FF $39 $03 $06 $3C
 
 ; The small frog parts are padded to minimum 3 bytes so they 
 ; can be redrawn in a common loop.
@@ -1225,7 +1227,7 @@ PLAYER1_FROG_DATA
 ; 2 . . . 2 . . . 
 
 PLAYER2_FROG_DATA  ; at Y +1, +2, or +3
-	.by $00 $00 $00 $88 $00 $00 $00 $00 $00 $00 $00
+	.by $00 $00 $00 $22 $00 $00 $00 $00 $00 $00 $00
 
 ; Player 3 is the mouth.
 ; 3 . . . 3 . . .
@@ -1233,7 +1235,7 @@ PLAYER2_FROG_DATA  ; at Y +1, +2, or +3
 ; . 3 3 3 . . . .
 
 PLAYER3_FROG_DATA
-	.by $00 $00 $00 $00 $00 $00 $00 $88 $D8 $70 $00
+	.by $00 $00 $00 $00 $00 $00 $00 $63 $3E $1C $00
 
 ; Player 5 (the Missile, M3) is COLPF3, White. +1 
 ; 1 1 . . . . . .  ; 
@@ -1253,7 +1255,7 @@ PLAYER3_FROG_DATA
 ; . . . . . . 1 .  ; 
 
 PLAYER5_FROG_DATA 
-	.by $00 $00 $EE $EE $EE $00 $00 $00 $00 $00 $00
+	.by $00 $00 $77 $55 $77 $00 $00 $00 $00 $00 $00
 
 
 
@@ -1478,9 +1480,9 @@ BASE_PMCOLORS_TABLE ; When "off", and so multiplication for frog = 1 works.
 	.by 0 0 0 0
 	
 FROG_PMCOLORS_TABLE ; 0, 1, 2, 3
-	.by COLOR_GREEN+$4       ; P0, frog
-	.by COLOR_GREEN+$8       ; P1, frog
-	.by COLOR_PURPLE_BLUE+$6 ; P2, Colored eye irises
+	.by COLOR_GREEN+$2       ; P0, frog
+	.by COLOR_GREEN+$4       ; P1, frog
+	.by COLOR_PURPLE_BLUE+$2 ; P2, Colored eye irises
 	.by COLOR_PINK+$8        ; P3, frog 
 
 
