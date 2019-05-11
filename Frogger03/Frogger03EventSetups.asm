@@ -131,6 +131,8 @@ SetupTransitionToWin
 	lda #DISPLAY_WIN        ; Tell VBI to change screens.
 	jsr ChangeScreen        ; Then copy the color tables.
 
+	jsr libPmgClearBitmaps  ; Get rid of frog.
+
 	ldx #3                  ; Setup channel 3 to play Ode To Joy for saving the frog.
 	ldy #SOUND_JOY
 	jsr SetSound 
@@ -213,7 +215,9 @@ SetupDead
 	lda #DISPLAY_DEAD        ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
-	jsr RemoveFrogOnScreen   ; Remove the frog (corpse) from the screen
+	jsr libPmgClearBitmaps   ; Scrape splattered frog off screen.
+
+;	jsr RemoveFrogOnScreen   ; Remove the frog (corpse) from the screen
 
 	lda #0                   ; Color cycling index for dead.
 	sta EventCounter
