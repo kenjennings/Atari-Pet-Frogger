@@ -511,23 +511,24 @@ SimplyUpdatePosition
 	lda FrogNewPMY               ; (No.)  But is the new Y different
 	cmp FrogPMY                  ; from the current Y?
 	beq NoFrogUpdate             ; No. Nothing changed. Skip the Frog Update
+	bne UpdateTheFrog
 
 LimitFrogX
 	inc FrogUpdate               ; Yes.  Therefore we must call the update later.
-	cmp #MIN_FROGX               ; Is X smaller than the minimum?
+	cmp #MIN_FROGX               ; Is PM X smaller than the minimum?
 	bcs CheckHPOSMax             ; No.  
 
 	lda #MIN_FROGX               ; Yes.  Reset X
 	sta FrogNewPMX               ; to the minimum.
-	inc FrogSafety               ; Frog moved off screen.  this is dead.  It is MAIN's job to change the image.
+;	inc FrogSafety               ; Frog moved off screen.  this is dead.  It is MAIN's job to change the image.
 
 CheckHPOSMax
-	cmp #MAX_FROGX+1             ; Is X bigger than the maximum?
+	cmp #MAX_FROGX+1             ; Is PM X bigger than the maximum?
 	bcc UpdateTheFrog            ; No.
 
 	lda #MAX_FROGX               ; Yes.  Reset X
 	sta FrogNewPMX               ; to the maximum.
-	inc FrogSafety               ; Frog moved off screen.  this is dead.  It is MAIN's job to change the image.
+;	inc FrogSafety               ; Frog moved off screen.  this is dead.  It is MAIN's job to change the image.
 
 UpdateTheFrog
 	jsr UpdateFrog 	; then FrogPMX == FrogNewPMX. FrogPMY == FrogNewPMY. FrogRow=FrogNewRow.

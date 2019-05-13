@@ -424,8 +424,8 @@ UpStickTest
 
 	jsr FrogMoveUp           ; Yes, go do UP. Subtract from FrogRow and PM Y position.
 	beq DoSetupForFrogWins   ; Returned 0.  No more rows to cross. Update to frog Wins!
-	jsr PlayThump            ; Sound for when frog moves.
-	jmp EndOfJoystickMoves  ; Row greater than 0.  Done with this..
+	bne FrogHasMoved         ; Row greater than 0.  Done with this..
+
 
 LeftStickTest
 	ror                      ; Roll out empty bit. DOWN (it is unused)
@@ -435,11 +435,8 @@ LeftStickTest
 	ldy FrogPMX              ; Get current Frog position
 	dey                      ; - minus 2 color clocks is 1/2 character.
 	dey
-	cpy #MIN_FROGX+1         ; Is it at minimum now?  (or worse)
-	bcs FrogHasMoved         ; No, skip reset.
 
-	ldy #MIN_FROGX
-	sty FrogNewPMX
+	sty FrogNewPMX           ; Save as new suggested location.
 	bne FrogHasMoved         ; Done here.  Frog moved.  Always branches.
 
 
@@ -448,13 +445,9 @@ RightStickTest
 	bcc EndOfJoystickMoves  ; No bit.  Replace Frog on screen.  Try boat animation.
 
 	ldy FrogPMX              ; Get current Frog position
-	iny                      ; - minus 2 color clocks. is 1/2 character.
+	iny                      ; - plus 2 color clocks. is 1/2 character.
 	iny 
-	cpy #MAX_FROGX+1         ; Did it go greater than maximum?
-	bcc FrogHasMoved         ; No.  Do not reset.
-
-	ldy #MAX_FROGX
-	sty FrogNewPMX
+	sty FrogNewPMX           ; Save as new suggested location.
 	bne FrogHasMoved         ; Done here.  Frog moved.  Always branches.
 
 

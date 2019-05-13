@@ -775,24 +775,6 @@ bLoopCopyColorsToTitle
 CopyColors_Game
 	jsr ZeroCurrentColors ; "Game" starts at black screen and is faded up.
 
-;	ldx #22 ; Game
-
-;bLoopCopyColorsToGame
-;	lda GAME_BACK_COLORS,x
-;	sta COLBK_TABLE,x
-
-;	lda GAME_COLPF0_COLORS,x
-;	sta COLPF0_TABLE,x
-
-;	lda GAME_TEXT_COLORS,x
-;	sta COLPF1_TABLE,x
-
-;	lda GAME_COLPF2_COLORS,x
-;	sta COLPF2_TABLE,x
-
-;	dex
-;	bpl bLoopCopyColorsToGame
-
 	rts ; ChangeScreen is over.
 
 
@@ -803,7 +785,7 @@ bLoopCopyColorsToWin
 	lda WIN_BACK_COLORS,x
 	sta COLBK_TABLE,x
 
-	lda WIN_COLPF0_COLORS,x ; "TEXT" no longer means text.  Too lazy to change it.
+	lda WIN_COLPF0_COLORS,x ; 
 	sta COLPF0_TABLE,x
 
 	dex
@@ -1131,21 +1113,81 @@ bCBloop
 ;											PmgSetColors  A  X
 ;==============================================================================
 ; Load the P0-P3 colors based on shape identity.
+; 
+; X == SHAPE Identify  0 (off), 1, 2, 3...
 ; -----------------------------------------------------------------------------
 libPmgSetColors
-	txa
-	asl
-	asl
-	tax
+	txa   ; Object number
+	asl   ; Times 2
+	asl   ; Times 4
+	tax   ; Back into index for referencing from table.
 
-	lda BASE_PMCOLORS_TABLE,x
-	sta PCOLOR0
+	lda BASE_PMCOLORS_TABLE,x       ; Get color(s) associated to object
+	sta PCOLOR0                     ; Stuff in the Player color registers.
 	lda BASE_PMCOLORS_TABLE+1,x
 	sta PCOLOR1
 	lda BASE_PMCOLORS_TABLE+2,x
 	sta PCOLOR2
 	lda BASE_PMCOLORS_TABLE+3,x
 	sta PCOLOR3
+                                 ; FYI, P5 color/COLPF3 is set by DLI 
+	rts
+
+
+; Game-specific Shapes:
+;SHAPE_OFF   = 0
+;SHAPE_FROG  = 1
+;SHAPE_SPLAT = 2
+;SHAPE_TOMB  = 3
+
+
+;==============================================================================
+;											EraseShape  A  X  Y
+;==============================================================================
+; Erase current Shape at current position.
+; -----------------------------------------------------------------------------
+
+EraseShape
+	lda FrogShape
+	beq ExitEraseShape  ; 0 is off.
+
+	cmp #SHAPE_FROG
+	bne bes_Test2
+	jsr EraseFrog
+	jmp ExitEraseShape
+	
+bes_Test2
+	cmp #SHAPE_SPLAT
+	bne bes_Test3
+	jsr EraseSplat
+	jmp ExitEraseShape
+
+bes_Test3
+
+; Do not change FrogShape to FrogNewShape.   
+; Drawing a new shape will transition New to Current.
+ExitEraseShape
+	rts
+
+
+
+;==============================================================================
+;											EraseSplat  A  X  Y
+;==============================================================================
+; Erase Splat at current position.
+; -----------------------------------------------------------------------------
+
+EraseSplat
+	lda #0
+	ldx FrogPMY            ; Old frog Y
+	ldy #10
+	
+bLoopEF_EraseCommon
+	sta PLAYERADR0,x   ; splat 1
+	sta PLAYERADR1,x   ; splat 2
+	inx
+	dey
+	bpl bLoopEF_EraseCommon
 
 	rts
 
@@ -1159,10 +1201,9 @@ libPmgSetColors
 EraseFrog
 	lda #0
 	ldx FrogPMY            ; Old frog Y
-;	ldy #2
 	ldy #10
 	
-bLoopEF_EraseCommon
+bLoopEF_Erase
 	sta PLAYERADR0,x   ; main frog 1
 	sta PLAYERADR1,x   ; main frog 2
 	sta PLAYERADR2,x ; iris
@@ -1170,15 +1211,7 @@ bLoopEF_EraseCommon
 	sta MISSILEADR,x ; eyeballs
 	inx
 	dey
-	bpl bLoopEF_EraseCommon
-;
-;	ldy #5
-;bLoopEF_EraseRemainder
-;	sta PLAYERADR0,x   ; main frog 1
-;	sta PLAYERADR1,x   ; main frog 2
-;	inx
-;	dey
-;	bpl bLoopEF_EraseRemainder
+	bpl bLoopEF_Erase
 
 	rts
 
