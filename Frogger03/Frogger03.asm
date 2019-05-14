@@ -339,6 +339,8 @@ FrogSafety      .byte 0         ; = 0 When Frog OK.  !0 == Yer Dead.  Can be set
 
 FrogsCrossed    .byte 0         ; = Number Of Frogs crossed
 ;FrogsLimited    .byte 0        ; = Number of frogs crossed limited to the boat speed entries (VBI use)
+FrogsCrossedIndex .byte 0       ; FrogsCrossed, limit to range of 0 to 13 difficulty, then times 18.  
+                                ; FrogsCrossedIndex + FrogRow = Index to read from master lookups. 
 
 NumberOfLives   .byte 0         ; = Is the Number Of Lives
 
@@ -446,10 +448,12 @@ BoatyFrame         .byte 0  ; counts 0 to 7.
 VBIPointer1      .word $0000
 VBIPointer2      .word $0000
 
+
 ; ======== V B I ======== SCROLLING BOAT MANAGEMENT
 ; Boat movements are managed by the VBI.
 ; The frame count value comes from BOAT_FRAMES based on the number of 
 ; frogs that crossed the river (FrogsCrossed) (0 to 10 difficulty level).
+CurrentRowLoop  .byte 0 ; Count from 0 to 18 in VBI
 BoatFrames      .byte 0 ; Count frames until next boat movement. (Note that 0 correctly means move every frame).
 BoatsMoveLeft   .byte 0 ; How many color clocks did boats move on this frame (to move the frog accordingly)
 BoatsMoveRight  .byte 0 ; How many color clocks... etc, blah blah 
@@ -461,6 +465,10 @@ BoatsMoveRight  .byte 0 ; How many color clocks... etc, blah blah
 ; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
 ; End   Scroll position = LMS + 12,            HSCROL 0
 ; Keep Current Address for LMS, and index to HSCROL_TABLE
+BoatFramesPointer .word BOAT_FRAMES
+CurrentBoatFrames .ds 19  ; How many frames does each row wait?
+BoatMovePointer   .word BOAT_SHIFT
+;CurrentBoatsMove  .ds 19  ; How far does each boat move, left or right?
 
 
 ; ======== V B I ======== PRESS A BUTTON MANAGEMENT

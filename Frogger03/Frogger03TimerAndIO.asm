@@ -82,28 +82,77 @@ INPUTSCAN_FRAMES = $07 ; previously $09
 ; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
 ; End   Scroll position = LMS + 12,            HSCROL 0
 
-BOAT_FRAMES   .by 10 7 5 3 2 1 0 0 0 0 0; number of frames to wait to move boat.
-BOAT_SHIFT_R  .by 1  1 1 1 1 1 1 2 2 3 3; number of times to scroll boat. (add or subtract)
-BOAT_SHIFT_L  .by 1  1 1 1 1 1 1 1 2 2 3; number of times to scroll boat. (add or subtract)
+; Difficulty Progression Enhancement.... Each row can have its own frame 
+; counter and scroll distance. 
+; (and by making rows closer to the bottom run faster it produces a 
+; kind of parallax effect. almost).
 
-MAX_FROG_SPEED = 10
+MAX_FROG_SPEED = 13 ; Number of difficulty levels
+
+; About the arrays below.  18 bytes per row instead of 19:
+; FrogRow ranges from 0 to 18 which is 19 rows.  The first and
+; last rows are always have values 0.  When reading a row from the array,
+; the index will overshoot the end of a row (18th entry) and read the 
+; beginning of the next row as the 19th entry.  Since both always 
+; use values 0, they are logically overlapped.  Therefore, each array 
+; row needs only 18 bytes instead of 19.  Only the last row needs 
+; the trailing 19th 0 added.
+
+BOAT_FRAMES ; Number of frames to wait to move boat. (top to bottom) (Difficulty 0 to 13)
+	.by 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7   ; Difficulty 0 
+	.by 0 7 7 0 7 7 0 7 7 0 5 5 0 5 5 0 5 5   ; Difficulty 1 
+	.by 0 7 7 0 7 7 0 5 5 0 5 5 0 3 3 0 3 3   ; Difficulty 2
+	.by 0 7 7 0 7 5 0 5 5 0 3 3 0 3 2 0 2 2   ; Difficulty 3 
+	.by 0 5 5 0 5 3 0 3 3 0 2 2 0 2 2 0 1 1   ; Difficulty 4 
+	.by 0 5 5 0 3 3 0 3 2 0 2 2 0 1 1 0 1 1   ; Difficulty 5 
+	.by 0 5 3 0 3 3 0 2 2 0 2 1 0 1 1 0 1 0   ; Difficulty 6 
+	.by 0 3 3 0 3 2 0 2 2 0 1 1 0 1 0 0 0 0   ; Difficulty 7
+	.by 0 3 3 0 2 2 0 1 1 0 1 1 0 0 0 0 0 0   ; Difficulty 8
+	.by 0 3 2 0 2 1 0 1 1 0 0 0 0 0 0 0 0 0   ; Difficulty 9
+	.by 0 2 2 0 1 1 0 1 0 0 0 0 0 0 0 0 0 0   ; Difficulty 10
+	.by 0 2 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
+	.by 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 12
+	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 13
+
+BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 0
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 1
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 2
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 3
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 4
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 5
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 6
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 7
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 8
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 2 0 2 2   ; Difficulty 9
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 2 2 0 2 2   ; Difficulty 10
+	.by 0 1 1 0 1 1 0 1 1 0 2 2 0 2 2 0 2 2   ; Difficulty 11
+	.by 0 1 1 0 1 1 0 2 2 0 2 2 0 2 2 0 2 2   ; Difficulty 12
+	.by 0 1 1 0 2 2 0 2 2 0 2 3 0 2 3 0 3 3 0 ; Difficulty 13
+
+MOVING_ROW_STATES ; 19 entries describing boat directions. Beach (0), Right (1), Left (FF) directions.
+	.by 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0
+
+;BOAT_FRAMES   .by 10 7 5 3 2 1 0 0 0 0 0
+;BOAT_SHIFT_R  .by 1  1 1 1 1 1 1 2 2 3 3
+;BOAT_SHIFT_L  .by 1  1 1 1 1 1 1 1 2 2 3; number of times to scroll boat. (add or subtract)
 
 ; Offsets from first LMS low byte in Display List to 
 ; the subsequent LMS low byte of each boat line. (VBI)
 ; For the Right Boats this is the offset from PF_LMS1.
 ; For the Left Boats this is the offset from PF_LMS2.
-BOAT_LMS_OFFSET .by 0 12 24 36 48 60 
+BOAT_LMS_OFFSET 
+	.by 0 0 0 0 12 12 0 24 24 0 36 36 0 48 48 0 60 60 
 
-; Index into HSCROL table for each boat row. (VBI)
-BOAT_HS_RIGHT .by 4 7 10 13 16 19
-BOAT_HS_LEFT  .by 5 8 11 14 17 20
+; Index into DLI's HSCROL table for each boat row. (needed by VBI)
+BOAT_HS_TABLE
+	.by 0 4 5 0 7 8 0 10 11 0 13 14 0 16 17 0 19 20
+	
+;BOAT_HS_RIGHT .by 4 7 10 13 16 19
+;BOAT_HS_LEFT  .by 5 8 11 14 17 20
 
 
-MOVING_ROW_STATES
-	.rept 6                 ; 6 occurrences of
-		.BYTE 0, 1, $FF     ; Beach (0), Right (1), Left (FF) directions.
-	.endr
-		.BYTE 0             ; starting position on safe beach
+
 
 ; PAL Timer values.  PAL ?? guesses...
 ; About 7 keys per second.
@@ -359,40 +408,66 @@ RestartCreditHSCROL               ; Reset the
 ; just run the boat scrolling all the time on the game screen 
 ; even if you don't see it.
 ManageBoatScrolling
+	lda CurrentDL
+	cmp #DISPLAY_GAME
+	beq DoLoopBoatScrolling
+	jmp MaintainFrogliness
+
+DoLoopBoatScrolling
 	lda #0                        ; Zero the flags the say how far boats moved.
-	sta BoatsMoveLeft             ; These are used to involuntarily shift the Frog on boat lines.
-	sta BoatsMoveRight
-	lda BoatFrames
+;	sta BoatsMoveLeft             ; These are used to involuntarily shift the Frog on boat lines.
+;	sta BoatsMoveRight
+	sta CurrentRowLoop            ; Row = 0
+
+	tax                           ; X = 0, CurrentRowLoop
+	tay                           ; Y = 0, CurrentRowLoop
+
+LoopBoatScrolling
+	lda MOVING_ROW_STATES,y       ; Get the current Row State
+	beq EndOfScrollLoop           ; Not a scrolling row.  Go to next row.
+
+	lda CurrentBoatFrames,x       ; Get the row's frame delay value.
 	beq ResetBoatFrames           ; If BoatFrames is 0, time to make the donuts.
-	dec BoatFrames                ; Not zero, so decrement
-	jmp SimplyUpdatePosition      ; and skip to the player input frog movement. 
+	dec CurrentBoatFrames,x       ; Not zero, so decrement
+;	jmp SimplyUpdatePosition      ; and skip to the player input frog movement. 
+	jmp EndOfScrollLoop
 
 ResetBoatFrames
-	jsr SetBoatSpeed
+	lda (BoatFramesPointer),y     ; Get master value
+	sta CurrentBoatFrames,x       ; Save to reset delay.
+	;jsr SetBoatSpeed
 
-	lda BOAT_SHIFT_R,x            ; Collect distance to move,
-	sta BoatsMoveRight            ; so the scrolling, and the forced frog
-	lda BOAT_SHIFT_L,x            ; update can refer to a fixed
-	sta BoatsMoveLeft             ; location and not repeat the lookup.
-
-; At this point X = filtered number of frogs crossed.
-; Boats move left and boats move right values are set for scrolling.
+	lda MOVING_ROW_STATES,y       ; Get the current Row State (again.)
+	bmi LeftBoatScroll            ; 0 already bypassed.  1 = Right, -1 (FF) = Left.
 
 ; ==  Now manage boat scrolling. ==
 ; RIGHT BOATS 
 ; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
 ; End   Scroll position = LMS + 0,              HSCROL 15
-	ldy #0
 
 RightBoatScroll
-	ldx BOAT_HS_RIGHT,y     ; Get the index into HSCROL table.
+;	lda (BoatMovePointer),y  ; Get master value for scroll distance.
+;	sta BoatsMoveRight            ; so the scrolling, and the forced frog
+	; Easier to push the frog first.
+	cpy FrogRow             ; Are we on the frog row?
+	bne SkipShoveRight      ; No.  Continue with boat scroll.
+	clc
+	lda FrogNewPMX
+	adc (BoatMovePointer),y ; Increment the position same as HSCROL distance.
+	sta FrogNewPMX
+	
+SkipShoveRight
+	ldx BOAT_HS_TABLE,y     ; Get the index into HSCROL table.
 	lda HSCROL_TABLE,x      ; Get value of HSCROL.
 	clc
-	adc BoatsMoveRight      ; Increment the HSCROL.
+;	adc BoatsMoveRight      ; Increment the HSCROL.
+	adc (BoatMovePointer),y ; Increment the HSCROL.
 	cmp #16                 ; Shift past scroll limit?
 	bcs DoRightCoarseScroll ; Yes.  Need to coarse scroll.
 	sta HSCROL_TABLE,x      ; No. Save the updated HSCROL.
-	bne LeftBoatScroll      ; This should always be non-zero. (hint: we were adding)
+;	bne LeftBoatScroll      ; This should always be non-zero. (hint: we were adding)
+	bne EndOfScrollLoop      ; This should always be non-zero. (hint: we were adding)
+	
 	; HSCROL wrapped over 15.  Time to coarse scroll by subtracting 4 from LMS.
 DoRightCoarseScroll
 ;	sec  ; Got here via bcs
@@ -406,19 +481,32 @@ DoRightCoarseScroll
 	lda #12                 ; LMS went negative. Reset to start position.
 SaveNewRightLMS
 	sta PF_LMS1,x           ; Update LMS pointer.
-
+	jmp EndOfScrollLoop
+	
 ; LEFT BOATS 
 ; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
 ; End   Scroll position = LMS + 12,            HSCROL 0
 
 LeftBoatScroll
-	ldx BOAT_HS_LEFT,y      ; Get the index into HSCROL table.
+;	lda (BoatMovePointer),y  ; Get master value for scroll distance.
+;	sta BoatsMoveLeft            ; so the scrolling, and the forced frog
+	; Easier to push the frog first.
+	cpy FrogRow             ; Are we on the frog row?
+	bne SkipShoveLeft       ; No.  Continue with boat scroll.
+	sec
+	lda FrogNewPMX
+	sbc (BoatMovePointer),y ; Increment the position same as HSCROL distance.
+	sta FrogNewPMX
+
+SkipShoveLeft
+	ldx BOAT_HS_TABLE,y     ; Get the index into HSCROL table.
 	lda HSCROL_TABLE,x      ; Get value of HSCROL.
 	sec
-	sbc BoatsMoveLeft       ; Decrement the HSCROL
+;	sbc BoatsMoveLeft       ; Decrement the HSCROL	
+	sbc (BoatMovePointer),y ; Decrement the HSCROL
 	bmi DoLeftCoarseScroll  ; It went negative, must reset and coarse scroll
 	sta HSCROL_TABLE,x      ; It's OK. Save the updated HSCROL.
-	bpl EndOfLeftScroll  ; This could be anything including 0. (But therefore positive)
+	bpl EndOfScrollLoop  ; This could be anything including 0. (But therefore positive)
 	; HSCROL wrapped below 0.  Time to coarse scroll by Adding 4 to LMS.
 DoLeftCoarseScroll
 	adc #16                 ; Re-wrap over 0 into the positive.
@@ -433,12 +521,25 @@ DoLeftCoarseScroll
 SaveNewLeftLMS
 	sta PF_LMS2,x           ; Update LMS pointer.
 
-EndOfLeftScroll
-	iny 
-	cpy #6
-	bne RightBoatScroll
+
+EndOfScrollLoop
+	inc CurrentRowLoop
+	ldx CurrentRowLoop
+	ldy CurrentRowLoop
+	cpx #18  ; Last entry is beach.  Do not bother to go further.
+	beq MaintainFrogliness
+	jmp LoopBoatScrolling
+
+
+;	iny 
+;	cpy #6
+
+;	bne RightBoatScroll
+
+
 
 ; ======== Move the Frog Horizontally if it is on a boat. ========
+MaintainFrogliness
 	lda FrogShape                ; Get the current frog shape.
 	beq NoFrogUpdate             ; 0 is off, so no movement there at all, so skip all
 	cmp #SHAPE_TOMB              ; And the tombstone ...

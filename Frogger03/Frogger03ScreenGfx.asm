@@ -483,8 +483,9 @@ RemoveFroggies
 	dex                 ; Decrement number of frogs.
 	bne RemoveFroggies  ; then go back and display the next frog counter.
 
-	sta FrogsCrossed    ; reset count to 0.
-	jsr SetBoatSpeed    ; just in case
+	sta FrogsCrossed      ; reset count to 0.
+	sta FrogsCrossedIndex ; and the base index into difficulty arrays
+	jsr SetBoatSpeed      ; just in case
 
 	rts
 

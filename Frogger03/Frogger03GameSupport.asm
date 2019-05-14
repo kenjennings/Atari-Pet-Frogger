@@ -27,7 +27,7 @@
 ; Set boat speed based on number of frogs saved.
 ;
 ; --------------------------------------------------------------------------
- 
+
 
 ; ==========================================================================
 ; Clear the score digits to zeros.
@@ -55,8 +55,8 @@ NextScoreDigit
 	sta NumberOfLives   ; lives to 3.
 
 	lda #0
-	sta FrogsCrossed    ; Zero the number of successful crossings.
-
+	sta FrogsCrossed      ; Zero the number of successful crossings.
+	sta FrogsCrossedIndex ; And the index lookup for the boat/row settings.
 	rts
 
 
@@ -74,7 +74,69 @@ Add500ToScore
 	stx NumberOfChars ; Position offset in score.
 	jsr AddToScore    ; Deal with score update.
 
-	inc FrogsCrossed  ; Add to frogs successfully crossed the rivers.
+	inc FrogsCrossed         ; Add to frogs successfully crossed the rivers.
+	jsr MultiplyFrogsCrossed ; Multiply by 18 to get the new index base.
+
+	rts
+
+
+; ==========================================================================
+; MULTIPLY FROGS CROSSED
+;
+; Multiply FroggsCrossed times 18 and save to FrogsCrossesIndex, to 
+; determine the base entry in the difficulty arrays that control each 
+; boat's speed on screen.
+;
+; Uses A
+; -------------------------------------------------------------------------- 
+MultiplyFrogsCrossed
+	lda FrogsCrossed
+	cmp #MAX_FROG_SPEED+1         ; Number of difficulty levels. 0 to 10 OK.  11 not so much
+	bcc SkipLimitCrossed
+	lda #MAX_FROG_SPEED
+
+SkipLimitCrossed
+	asl              ; Times 2
+	sta FrogsCrossedIndex
+	asl              ; Times 4
+	asl              ; Times 8
+	asl              ; Times 16
+	clc
+	adc FrogsCrossedIndex ; Add to self (*2) + (*16) == (*18)
+	sta FrogsCrossedIndex ; And Save Times 18
+
+	jsr MakeDifficultyPointers ; Set pointers to the array row for the difficulty values.
+
+	rts
+
+
+; ==========================================================================
+; MAKE DIFFICULTY POINTERS
+;
+; Get the Address of the start of the current difficulty data.
+; These are the BOAT_FRAMES and BOAT_SHIFT base addresses plus the 
+; FrogsCrossedIndex. 
+; From Here the code can use the FrogRow as Y index and reference the 
+; master data by (ZeroPage),Y.
+;
+; Uses A
+; -------------------------------------------------------------------------- 
+MakeDifficultyPointers
+	lda #<BOAT_FRAMES
+	clc
+	adc FrogsCrossedIndex
+	sta BoatFramesPointer
+	lda #>BOAT_FRAMES
+	adc #0
+	sta BoatFramesPointer+1
+
+	lda #<BOAT_SHIFT
+	clc
+	adc FrogsCrossedIndex
+	sta BoatMovePointer
+	lda #>BOAT_SHIFT
+	adc #0
+	sta BoatMovePointer+1
 
 	rts
 
