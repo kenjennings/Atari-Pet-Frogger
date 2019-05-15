@@ -1471,7 +1471,7 @@ PLAYER3_GRAVE_DATA
 ; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 22 $03
 ; . . ~ ~ ~ ~ ~ ~ ~ ~ . . . . .  - 23 $03
 
-MISSILE0
+PLAYER5_GRAVE_DATA; Missile 0
 	.by $00 $00 $00 $00 $00 $01 $03 $03
 	.by $03 $03 $03 $03 $03 $03 $03 $03
 	.by $03 $03 $03 $03 $03 $03 $03
@@ -1493,8 +1493,8 @@ SPLAT_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_PINK+$8        ; P3, 
 
 GRAVE_PMCOLORS_TABLE ; 0, 1, 2, 3
-	.by COLOR_BLACK+$4        ; P0, 
-	.by COLOR_BLACK+$8        ; P1, 
-	.by COLOR_BLACK+$6        ; P2, 
-	.by COLOR_BLACK+$8        ; P3, 
+	.by COLOR_BLACK+$C        ; P0, 
+	.by COLOR_BLACK+$C        ; P1, 
+	.by COLOR_BLACK+$2        ; P2, 
+	.by COLOR_BLACK+$2        ; P3, 
 

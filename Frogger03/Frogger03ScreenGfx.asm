@@ -827,6 +827,130 @@ bLoopCopyColorsTOver
 	rts ; ChangeScreen is over.
 
 
+; ==========================================================================
+; Redundant code section used for two separate loops in the Game Over event.
+;
+; --------------------------------------------------------------------------
+GameOverGreyScroll
+	sta COLBK_TABLE,y          ; Set line on screen
+	tax                         ; X = A
+	dex                         ; X = X + 1
+	dex                         ; X = X + 1
+	txa                         ; A = X
+	and #$0F                    ; Keep this truncated to grey (black) $0 to $F
+	iny                         ; Next line on screen.
+
+	rts
+
+
+; ==========================================================================
+; Redundant code section used for two separate loops in the Dead Frog event.
+;
+; --------------------------------------------------------------------------
+DeadFrogRedScroll
+	lda DEAD_COLOR_SINE_TABLE,x ; Get another color
+	sta COLBK_TABLE,y          ; Set line on screen
+	inx                         ; Next color entry
+	iny                         ; Next line on screen.
+
+	rts
+
+DEAD_COLOR_SINE_TABLE ; 20 entries.
+	.byte COLOR_RED_ORANGE+6, COLOR_RED_ORANGE+8, COLOR_RED_ORANGE+10,COLOR_RED_ORANGE+12
+	.byte COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+12
+	.byte COLOR_RED_ORANGE+10,COLOR_RED_ORANGE+8, COLOR_RED_ORANGE+6, COLOR_RED_ORANGE+4
+	.byte COLOR_RED_ORANGE+2, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0
+	.byte COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+2, COLOR_RED_ORANGE+4
+
+
+; ==========================================================================
+; Support function.
+; Redundant code section used for two separate places in the Win event.
+; Subtract 4 from the current color.
+; Reset to 238 if the limit 14 is reached.
+;
+; A  is the current color.   
+; --------------------------------------------------------------------------
+WinColorScroll
+	sec
+	sbc #4                      ; Subtract 4
+ 	cmp #14                     ; Did it pass the limit (minimum 18, minus 4 == 14)
+	bne ExitWinColorScroll      ; No. We're done here.
+	lda #238                    ; Yes.  Reset back to start.
+
+ExitWinColorScroll
+	rts
+
+
+; ==========================================================================
+; Supporting the support function. Decrement Title text colors.
+;
+; Separate luminance from color. 
+; If luminance is already 0, then return color as 0.
+; Decrement the luminance.
+; Recombine with original color.
+; 
+; A = color value to adjust
+; --------------------------------------------------------------------------
+SAVE_PF  .byte 0
+SAVE_PFC .byte 0
+
+SliceColorAndLuma
+	sta SAVE_PF               ; Save the incoming value
+	and #$F0                  ; Mask out the luminance.
+	sta SAVE_PFC              ; Save just the color part.
+
+	lda SAVE_PF               ; Get the original value again.
+	and #$0F                  ; Now check keep the luminance.
+	beq ExitSliceColorAndLuma ; If it is 0, we can exit with A as color/lum 0.
+
+	tay                       ; Y = A = Luminance
+	dey                       ; Dec
+	beq Reassemble_PF         ; If 0, then we're done.
+	dey                       ; Dec twice to speed the transition.
+
+Reassemble_PF
+	tya                       ; A = Y = Luminance
+	ora SAVE_PFC              ; join the color.
+
+ExitSliceColorAndLuma
+	rts
+
+
+; ==========================================================================
+; Support function. Decrement Title text colors.
+; 
+; Cut out of the EventTransitionToGame, it makes that shorter and more 
+; readable, and allows the start to branch to the end/exit point.
+;
+; BEQ state is exit immediate exit. (Text value has reached 0)
+; --------------------------------------------------------------------------
+; === STAGE 1 ===
+; ; Fade out text lines  from bottom to top.
+; Fade out COLPF0 and COLPF1 at the same time.
+; When luminance reaches 0, set color to 0. 
+; Return flags the OR value of the COLPF0 and COLPF1.
+
+FadeColPfToBlack
+	ldx EventCounter2         ; Row counter decrementing.
+
+	lda COLPF1_TABLE,x
+	beq TryCOLPF0             ; It is already 0, so skip this.
+	jsr SliceColorAndLuma
+	sta COLPF1_TABLE,x
+
+TryCOLPF0
+	lda COLPF0_TABLE,x
+	beq ExitFadeColPfToBlack  ; It is already 0, so skip this.
+	jsr SliceColorAndLuma
+	sta COLPF0_TABLE,x
+
+ExitFadeColPfToBlack          ; Insure we're leaving with 0 for both colors 0.  Or !0 otherwise.
+	lda COLPF0_TABLE,x        ; Get current color 0
+	ora COLPF1_TABLE,x        ; ORA the value of color 0
+
+	rts
+
 
 
 ;==============================================================================
@@ -1156,7 +1280,7 @@ EraseShape
 	bne bes_Test2
 	jsr EraseFrog
 	jmp ExitEraseShape
-	
+
 bes_Test2
 	cmp #SHAPE_SPLAT
 	bne bes_Test3
@@ -1164,12 +1288,39 @@ bes_Test2
 	jmp ExitEraseShape
 
 bes_Test3
+	cmp #SHAPE_TOMB
+	bne ExitEraseShape
+	jsr EraseTomb
 
 ; Do not change FrogShape to FrogNewShape.   
 ; Drawing a new shape will transition New to Current.
 ExitEraseShape
+	lda FrogShape  ; return with value for caller.
 	rts
 
+
+;==============================================================================
+;											EraseTomb  A  X  Y
+;==============================================================================
+; Erase Tomb at current position.
+; -----------------------------------------------------------------------------
+
+EraseTomb
+	lda #0
+	ldx FrogPMY            ; Old  Y
+	ldy #22
+	
+bLoopET_Erase
+	sta PLAYERADR0,x   ; main  1
+	sta PLAYERADR1,x   ; main  2
+	sta PLAYERADR2,x ; 
+	sta PLAYERADR3,x ; 
+	sta MISSILEADR,x ; 
+	inx
+	dey
+	bpl bLoopEF_Erase
+
+	rts
 
 
 ;==============================================================================
@@ -1183,12 +1334,12 @@ EraseSplat
 	ldx FrogPMY            ; Old frog Y
 	ldy #10
 	
-bLoopEF_EraseCommon
+bLoopES_Erase
 	sta PLAYERADR0,x   ; splat 1
 	sta PLAYERADR1,x   ; splat 2
 	inx
 	dey
-	bpl bLoopEF_EraseCommon
+	bpl bLoopES_Erase
 
 	rts
 
@@ -1218,16 +1369,79 @@ bLoopEF_Erase
 
 
 ;==============================================================================
-;											DrawSplatFrog  A  X  Y
+;											DrawShape  A  X  Y
+;==============================================================================
+; Draw current Shape at current position.
+; -----------------------------------------------------------------------------
+
+DrawShape
+	lda FrogNewShape
+	beq ExitDrawShape  ; 0 is off.
+
+	cmp #SHAPE_FROG
+	bne bds_Test2
+	jsr DrawFrog
+	jmp ExitDrawShape
+
+bds_Test2
+	cmp #SHAPE_SPLAT
+	bne bds_Test3
+	jsr DrawSplat
+	jmp ExitDrawShape
+
+bds_Test3
+	cmp #SHAPE_SPLAT
+	bne ExitDrawShape
+	jsr DrawTomb
+
+ExitDrawShape
+	lda FrogNewShape ; return value to caller.
+	rts
+
+
+;==============================================================================
+;											DrawTomb   A  X  Y
+;==============================================================================
+; Draw Tomb at new position.
+; -----------------------------------------------------------------------------
+DrawTomb
+	ldx FrogNewPMY            ; New frog Y
+	ldy #22
+
+bLoopDT_DrawTomb
+	lda PLAYER0_GRAVE_DATA,y
+	sta PLAYERADR0+22,x
+
+	lda PLAYER1_GRAVE_DATA,y
+	sta PLAYERADR1+22,x
+
+	lda PLAYER2_GRAVE_DATA,y
+	sta PLAYERADR2+22,x
+
+	lda PLAYER3_GRAVE_DATA,y
+	sta PLAYERADR3+22,x
+
+	lda PLAYER5_GRAVE_DATA,y
+	sta MISSILEADR+22,x
+
+	dex
+	dey
+	bpl bLoopDT_DrawTomb
+
+	rts
+
+
+;==============================================================================
+;											DrawSplat   A  X  Y
 ;==============================================================================
 ; Draw SplatteredFrog at new position.
 ; -----------------------------------------------------------------------------
 
-DrawSplatFrog
+DrawSplat
 	ldx FrogNewPMY               
 	ldy #10
 
-bLoopDF_DrawSplatFrog
+bLoopDS_DrawSplatFrog
 	lda PLAYER0_SPLATTER_DATA,y
 	sta PLAYERADR0+10,x
 
@@ -1236,7 +1450,7 @@ bLoopDF_DrawSplatFrog
 
 	dex
 	dey
-	bpl bLoopDF_DrawSplatFrog
+	bpl bLoopDS_DrawSplatFrog
 
 	rts
 
@@ -1245,13 +1459,13 @@ bLoopDF_DrawSplatFrog
 ;											DrawFrog  A  X  Y
 ;==============================================================================
 ; Draw Frog at new position.
+; -----------------------------------------------------------------------------
 
 DrawFrog
 	ldx FrogNewPMY            ; New frog Y
-;	ldy #2
 	ldy #10
 
-bLoopDF_DrawCommon
+bLoopDF_DrawFrog
 	lda PLAYER0_FROG_DATA,y
 	sta PLAYERADR0+10,x
 
@@ -1263,24 +1477,13 @@ bLoopDF_DrawCommon
 
 	lda PLAYER3_FROG_DATA,y
 	sta PLAYERADR3+10,x
-	
+
 	lda PLAYER5_FROG_DATA,y
 	sta MISSILEADR+10,x
-	
+
 	dex
 	dey
-	bpl bLoopDF_DrawCommon
-
-	; Note, have subtracted 3 from frog Y, so compensate in offsets
-;	ldy #5
-;bLoopDF_DrawRemainder
-;	lda PLAYER0_FROG_DATA+3,y 
-;	sta PLAYERADR0+9,x
-;	lda PLAYER1_FROG_DATA+3,y 
-;	sta PLAYERADR1+9,x
-;	dex
-;	dey
-;	bpl bLoopDF_DrawRemainder
+	bpl bLoopDF_DrawFrog
 
 	rts
 
@@ -1294,35 +1497,137 @@ bLoopDF_DrawCommon
 ; the display.
 ; Update current Y position == new position.
 ; -----------------------------------------------------------------------------
-UpdateFrogY
-	ldx FrogPMY            ; Get current (old) position
+; UpdateFrogY
+	; ldx FrogPMY            ; Get current (old) position
 
-	; Do new vertical repositioning.
+	; ; Do new vertical repositioning.
 	
-	; 1) Erase frog from memory at current (old) position.
-	jsr EraseFrog
+	; ; 1) Erase frog from memory at current (old) position.
+	; jsr EraseFrog
 
-	; 2) Current position = new position
-	ldx FrogNewPMY         ; New frog Y...
-	stx FrogPMY            ; Set current Frog Y == New Frog Y
+	; ; 2) Current position = new position
+	; ldx FrogNewPMY         ; New frog Y...
+	; stx FrogPMY            ; Set current Frog Y == New Frog Y
 
-	; 3) load new frog image in the current (new) position
-	jsr DrawFrog
+	; ; 3) load new frog image in the current (new) position
+	; jsr DrawFrog
+
+	; rts
+
+	
+;==============================================================================
+;											PositionShape  A  X  Y
+;==============================================================================
+; Set HPOS coords of the shape parts. 
+; -----------------------------------------------------------------------------
+
+PositionShape
+	lda FrogNewShape
+	beq ExitPositionShape  ; 0 is off.
+
+	cmp #SHAPE_FROG
+	bne bps_Test2
+	jsr PositionFrog
+	jmp ExitPositionShape
+
+bps_Test2
+	cmp #SHAPE_SPLAT
+	bne bps_Test3
+	jsr PositionSplat
+	jmp ExitPositionShape
+
+bps_Test3
+	cmp #SHAPE_TOMB
+	bne ExitPositionShape
+	jsr PositionTomb
+
+ExitPositionShape
+	lda FrogNewShape ; return value to caller.
+	rts
+
+
+;==============================================================================
+;											PositionTomb  A  X  Y
+;==============================================================================
+; Move X position.
+; Set sizes of parts.
+; -----------------------------------------------------------------------------
+PositionTomb
+	ldx FrogNewPMX            ; New frog X...
+
+	; Do horizontal repositioning.
+	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
+	stx HPOSP0 ; + 0 is shadow on left
+	inx
+	inx
+	stx HPOSM0 ; + 2 is p5 left part of tombstone
+	inx
+	inx
+	stx HPOSP2 ; + 4 is part of RIP
+	inx
+	stx HPOSP3 ; + 5 is rest of the RIP
+	inx
+	inx
+	stx HPOSP1 ; + 7 right side of tombstone
+
+	ldx #0     ; Remove these other parts from visible display
+	stx HPOSM3 ;  0 is p5 off 
+	stx HPOSM2 ;  2 is p5 off 
+	stx HPOSM1 ;  4 is p5 off 
+
+	; Bonus extra...  
+	; Force set  Player/Missile sizes
+	ldx #PM_SIZE_NORMAL ; aka $00
+	stx SIZEP0 ; Tombstone shadow
+	stx SIZEP1 ; Frog parts 2
+	stx SIZEP2 ; Frog colored iris
+	stx SIZEP3 ; Frog mouth
+	ldx #PM_SIZE_QUAD
+	stx SIZEM  ; Missile 0 is left size of tombstone
 
 	rts
 
+
 ;==============================================================================
-;											UpdateFrogX  A  X  Y
+;											PositionSplat  A  X  Y
 ;==============================================================================
 ; Move X position.
-; FYI: Removing a frog from display requires setting FrogShape == SHAPE_OFF,
-; because re-analysis of position by the VBI will move the frog back into 
-; the display.
-; Update current X position == new position.
+; Set sizes of parts.
 ; -----------------------------------------------------------------------------
-UpdateFrogX
+PositionSplat
 	ldx FrogNewPMX            ; New frog X...
-	stx FrogPMX               ; Set current Frog X == New Frog X
+
+	; Do horizontal repositioning.
+	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
+	stx HPOSP0 ; + 0 is splat parts 1
+	inx
+	stx HPOSP1 ; + 1 is splat parts 2
+
+	ldx #0     ; Remove these other parts from visible display
+	stx HPOSP2 ;  0 is off
+	stx HPOSP3 ;  0 is off
+	stx HPOSM3 ;  0 is p5 off
+	stx HPOSM2 ;  0 is p5 off
+	stx HPOSM1 ;  0 is p5 off
+	stx HPOSM0 ;  0 is p5 off
+
+	; Bonus extra...  
+	; Force set  Player/Missile sizes
+	ldx #PM_SIZE_NORMAL ; aka $00
+	stx SIZEP0 ; Splat parts 1
+	stx SIZEP1 ; Splat parts 2
+
+	rts
+
+
+;==============================================================================
+;											PositionFrog  A  X  Y
+;==============================================================================
+; Move X position.
+; Set sizes of parts.
+; -----------------------------------------------------------------------------
+PositionFrog
+	ldx FrogNewPMX            ; New frog X...
 
 	; Do horizontal repositioning.
 	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
@@ -1341,6 +1646,15 @@ UpdateFrogX
 	inx
 	stx HPOSM0 ; + 5 is p5 frog eye balls
 
+	; Bonus extra...  
+	; Force set  Player/Missile sizes
+	lda #PM_SIZE_NORMAL ; aka $00
+	sta SIZEP0 ; Frog parts 1
+	sta SIZEP1 ; Frog parts 2
+	sta SIZEP2 ; Frog colored iris
+	sta SIZEP3 ; Frog mouth
+	sta SIZEM  ; Eyeballs are Missile/P5 showing through the holes in head. (All need to be set 0)
+
 	rts
 
 
@@ -1353,30 +1667,62 @@ UpdateFrogX
 ; Update current position == new position.
 ; Y positioning different from X positioning, since it must reload memory.
 ; -----------------------------------------------------------------------------
-UpdateFrog
-	ldx FrogNewPMY         ; New frog Y...
-	cpx FrogPMY            ; ...is different from Old frog Y?
-	beq bUFSkipFrogRedraw  ; No.  Skip erase/redraw.
+; UpdateFrog
+	; ldx FrogNewPMY         ; New frog Y...
+	; cpx FrogPMY            ; ...is different from Old frog Y?
+	; beq bUFSkipFrogRedraw  ; No.  Skip erase/redraw.
 
-	jsr UpdateFrogY
+	; jsr UpdateFrogY
 
-bUFSkipFrogRedraw
-	ldx FrogNewPMX            ; New frog X...
-	cpx FrogPMX               ; ...is different from Old frog X?
-	beq bUFSkipFrogReposition ; No.  Skip horizontal position update.
+; bUFSkipFrogRedraw
+	; ldx FrogNewPMX            ; New frog X...
+	; cpx FrogPMX               ; ...is different from Old frog X?
+	; beq bUFSkipFrogReposition ; No.  Skip horizontal position update.
 
-	jsr UpdateFrogX
+	; jsr UpdateFrogX
 
-	; Bonus extra...  
-	; Force set  Player/Missile sizes
-	lda #PM_SIZE_NORMAL ; aka $00
-	sta SIZEP0 ; Frog parts 1
-	sta SIZEP1 ; Frog parts 2
-	sta SIZEP2 ; Frog colored iris
-	sta SIZEP3 ; Frog mouth
-	sta SIZEM  ; Eyeballs are Missile/P5 showing through the holes in head. (All need to be set 0)
 
-bUFSkipFrogReposition
+; bUFSkipFrogReposition
+	; rts
+
+; Game-specific Shapes:
+;SHAPE_OFF   = 0
+;SHAPE_FROG  = 1
+;SHAPE_SPLAT = 2
+;SHAPE_TOMB  = 3
+
+;==============================================================================
+;											UpdateShape  A  X  Y
+;==============================================================================
+; Complete redisplay of the object/shape.  
+; Erase old object/shape position if needed.
+; Load new object/shape into PM Memory at the new position.
+; Update current position == new position.
+; Y positioning different from X positioning, since it must reload memory.
+; Update current shape = new shape.
+; -----------------------------------------------------------------------------
+UpdateShape
+	; ==================== Part I. Erase old shape at old Y position.
+	jsr EraseShape
+
+bus_PartII ; ============= Part II. Draw NEW shape at new Y position.
+	jsr DrawShape
+	jsr PositionShape
+
+bus_PartIII ; ============ Remember new shape.  Update colors.  Remember new coords.
+	ldx FrogNewShape
+	stx FrogShape
+	jsr libPmgSetColors  ; Depends on X = Shape.
+
+	lda FrogNewPMX       ; New Y coord.
+	sta FrogPMX
+
+	lda FrogNewPMY       ; New X coord.
+	sta FrogPMY 
+
+	lda FrogNewRow       ; Also new Frog Row.
+	sta FrogRow
+
+ExitUpdateShape
 	rts
-
 

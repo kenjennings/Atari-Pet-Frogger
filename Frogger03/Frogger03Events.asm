@@ -158,7 +158,6 @@ EndTransitionToTitle
 	rts
 
 
-
 ; ==========================================================================
 ; Event process SCREEN START/NEW GAME
 ; Clear the Game Scores and get ready for the Press A Button prompt.
@@ -206,85 +205,6 @@ EndTitleScreen
 
 
 ; ==========================================================================
-; Support function. Decrement Title text colors.
-; Needed to reduce the size of EventTransitionToGame, because the start 
-; can't reach the branch to the end/exit point.
-;
-; BEQ state is immediate exit. (Text value has reached 0)
-; ==========================================================================
-; === STAGE 1 ===
-; ; Fade out text lines  from bottom to top.
-; ; Decrease COLPF1 brightness.
-; ; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
-; ; Decrement twice here, because once was not fast enough.
-; ; The fade and wipe was becoming boring.
-; Modification:
-; Fade out COLPF0 and COLPF1 at the same time.
-; When luminance reaches 0, set color to 0. 
-; Return flags the OR value of the COLPF0 and COLPF1.
-
-SAVE_PF0 .byte 0
-SAVE_PF1 .byte 0
-
-FadeColPf1ToBlack
-	ldx EventCounter2  ; Row counter decrementing.
-
-	lda COLPF1_TABLE,x
-	beq TryCOLPF0       ; It is already 0, so skip this.
-	and #$F0            ; Save just the color.
-	sta SAVE_PF1
-
-	lda COLPF1_TABLE,x  
-	and #$0F            ; Now check just the luminance.
-	bne bDecLumaPF1     ; Non-zero, so go decrement.
-
-	sta COLPF1_TABLE,x  ;  A = luma = 0, so set the color to 0.
-	beq TryCOLPF0
-
-bDecLumaPF1
-	tay
-	dey
-	beq Reassemble_PF1
-	dey                ; Dec twice to speed this up.
-
-Reassemble_PF1
-	tya                    ; Got the luma.
-	ora SAVE_PF1           ; join the color.
-	sta COLPF1_TABLE,x     ; re-save
-
-
-TryCOLPF0
-	lda COLPF0_TABLE,x
-	beq ExitFadeColPf1ToBlack ; It is already 0, so skip this.
-	and #$F0                  ; Save just the color.
-	sta SAVE_PF0
-
-	lda COLPF0_TABLE,x  
-	and #$0F            ; Now check just the luminance.
-	bne bDecLumaPF0     ; Non-zero, so go decrement.
-
-	sta COLPF0_TABLE,x  ;  A = luma = 0, so set the color to 0.
-	beq ExitFadeColPf1ToBlack
-
-bDecLumaPF0
-	tay
-	dey
-	beq Reassemble_PF0
-	dey                ; Dec twice to speed this up.
-
-Reassemble_PF0
-	tya                    ; Got the luma.
-	ora SAVE_PF0           ; join the color.
-	sta COLPF0_TABLE,x     ; re-save.
-
-ExitFadeColPf1ToBlack      ; Insure we're leaving with 0 for both colors 0.  Or !0 otherwise.
-	lda COLPF0_TABLE,x     ; Get current color 0
-	ora COLPF1_TABLE,x     ; ORA the value of color 0
-
-	rts
-
-
-; ==========================================================================
 ; Event Process TRANSITION TO GAME SCREEN
 ; The Activity in the transition area, based on timer.
 ; Stage 1) Fade out text lines  from bottom to top.
@@ -307,14 +227,13 @@ EventTransitionToGame
 
 	; === STAGE 1 ===
 	; Fade out text lines  from bottom to top.
-	; Decrease COLPF1 brightness.
-	; When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
-	; Decrement twice here, because once was not fast enough.
-	; The fade and wipe was becoming boring.
-	jsr FadeColPf1ToBlack    ; Returns color 0 or color 1
-	bne EndTransitionToGame  ; If either color is non-zero, done for this pass.
+	; Fade out COLPF0 and COLPF1 at the same time.
+	; When luminance reaches 0, set color to 0. 
+	; When COLPF0/COLPF1 reach 0 then change COLPF2/COLBK to COLOR_BLACK.
+	jsr FadeColPfToBlack     ; Returns color 0 | color 1, then ....
+	bne EndTransitionToGame  ; ... If either color is non-zero, done for this pass.
 
-ZeroCOLPF2                   ; FadeColPf1ToBlack returned 0, so the text (and pixel) is 0.  
+ZeroCOLPF2                   ; FadeColPfToBlack returned 0, so the text (and pixel) is 0.  
 	lda #0                   ; Therefore, zero the background(s).
 	sta COLPF2_TABLE,x
 	sta COLBK_TABLE,x
@@ -388,29 +307,23 @@ EndTransitionToGame
 
 	rts
 
-
 ; ==========================================================================
 ; Event Process GAME SCREEN
 ; Play the game.
-; 1) When the input timer allows, get controller input.
-; 2) Evaluate frog Movement
-; 2.a) Determine exit to Win screen
-; 2.b) Determine exit to Dead screen.
-; 3) When the animation timer expires, shift the boat rows.
-; 3.a) Determine if frog hits screen border to go to Dead screen.
-; As a timer based pattern the controller input is first.
-; Joystick input updates the frog's logical and physical position
-; and updates screen memory.
-; The animation update forces an automatic logical movement of the
-; frog as the frog moves with the boats and remains static relative
-; to the boats.
+; 
+; Many of the things in Version 02 have become non-events 
+; in Version 03 for the main line code.  The game logic is 
+; now very simple in the main code...
+; VBI scrolls boats.
+; VBI moves frog if frog is on a boat row.
+; VBI will flag frog death if frog location is bad for frog.
 ; --------------------------------------------------------------------------
 EventGameScreen
 ; ==========================================================================
-; GAME SCREEN - Keyboard Input Section
+; GAME SCREEN - Joystick Input Section
 ; --------------------------------------------------------------------------
 	jsr CheckInput           ; Get cooked stick or trigger if timer permits.
-	beq CheckForAnim         ; Nothing pressed, Skip the input section.
+	beq EndOfJoystickMoves   ; Nothing pressed, Skip the input section.
 
 ; P/M graphics do not need "removal" 
 ;	jsr RemoveFrogOnScreen   ; Remove the frog from the screen (duh)
@@ -468,24 +381,24 @@ EndOfJoystickMoves
 ;	jsr SetFrogOnScreen ; redraw the frog where it belongs
 
 ; ==========================================================================
-; GAME SCREEN - Screen Animation Section
-; 
-; Many of these things have become non-events for the main line code.
-; VBI scrolls boats.
-; VBI moves frog if frog is on a boat row.
-; VBI will flag frog death if frog location is bad for frog.
+; GAME SCREEN - Everything else....
 ; --------------------------------------------------------------------------
-CheckForAnim
+;CheckForAnim
 ;	lda AnimateFrames        ; Does the timer allow the boats to move?
 ;	bne EndGameScreen        ; Nothing at this time. Exit.
 
 ;	jsr SetBoatSpeed         ; Reset timer for animation based on number of saved frogs.
 
-	jsr AnticipateFrogDeath  ; Will the frog die when the boat moves?
-	beq PlaySoundEffects     ; Shrodinger says apparently not.  live frog.
+;	jsr AnticipateFrogDeath  ; Will the frog die when the boat moves?
+;	beq PlaySoundEffects     ; Shrodinger says apparently not.  live frog.
 ;	bne DoSetupForYerDead    ; Shrodinger says apparently so.  dead frog.
 
 ; Wherever the Frog will land now, it is Baaaaad.
+
+	; VBI manages frog falling off the boats.
+	lda FrogSafety ; Is the frog still alive?
+	beq PlaySoundEffects ; 0 == Not Dead. So, just play sounds. 
+
 DoSetupForYerDead
 	jsr SetupTransitionToDead
 	bne EndGameScreen        ; last action in function is lda/sta a non-zero value.
@@ -580,23 +493,6 @@ EndWinScreen
 
 	rts
 
-
-; ==========================================================================
-; Redundant code section used for two separate places in the Win event.
-; Subtract 4 from the current color.
-; Reset to 238 if the limit 14 is reached.
-;
-; A  is the current color.   
-; --------------------------------------------------------------------------
-WinColorScroll
-	sec
-	sbc #4                      ; Subtract 4
- 	cmp #14                     ; Did it pass the limit (minimum 18, minus 4 == 14)
-	bne ExitWinColorScroll      ; No. We're done here.
-	lda #238                    ; Yes.  Reset back to start.
-
-ExitWinColorScroll
-	rts
 
 
 ; ==========================================================================
@@ -747,27 +643,6 @@ EndDeadScreen
 	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
 
 	rts
-
-
-; ==========================================================================
-; Redundant code section used for two separate loops in the Dead Frog event.
-;
-; --------------------------------------------------------------------------
-DeadFrogRedScroll
-	lda DEAD_COLOR_SINE_TABLE,x ; Get another color
-	sta COLPF2_TABLE,y          ; Set line on screen
-	inx                         ; Next color entry
-	iny                         ; Next line on screen.
-
-	rts
-
-
-DEAD_COLOR_SINE_TABLE ; 20 entries.
-	.byte COLOR_RED_ORANGE+6, COLOR_RED_ORANGE+8, COLOR_RED_ORANGE+10,COLOR_RED_ORANGE+12
-	.byte COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+14,COLOR_RED_ORANGE+12
-	.byte COLOR_RED_ORANGE+10,COLOR_RED_ORANGE+8, COLOR_RED_ORANGE+6, COLOR_RED_ORANGE+4
-	.byte COLOR_RED_ORANGE+2, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0
-	.byte COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+0, COLOR_RED_ORANGE+2, COLOR_RED_ORANGE+4
 
 
 ; ==========================================================================
@@ -955,17 +830,3 @@ EndGameOverScreen
 
 	rts
 
-; ==========================================================================
-; Redundant code section used for two separate loops in the Game Over event.
-;
-; --------------------------------------------------------------------------
-GameOverGreyScroll
-	sta COLPF2_TABLE,y          ; Set line on screen
-	tax                         ; X = A
-	dex                         ; X = X + 1
-	dex                         ; X = X + 1
-	txa                         ; A = X
-	and #$0F                    ; Keep this truncated to grey (black) $0 to $F
-	iny                         ; Next line on screen.
-
-	rts

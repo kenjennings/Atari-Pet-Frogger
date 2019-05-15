@@ -48,7 +48,7 @@ GAMESTART
 	lda #0
 	sta ThisDLI
 
-	lda #<Score_DLI; TITLE_DLI            ; Set DLI vector. (will be reset by VBI on screen setup)
+	lda #<Score_DLI; TITLE_DLI ; Set DLI vector. (will be reset by VBI on screen setup)
 	sta VDSLST
 	lda #>Score_DLI; TITLE_DLI
 	sta VDSLST+1

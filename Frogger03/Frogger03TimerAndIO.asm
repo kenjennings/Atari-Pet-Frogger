@@ -49,30 +49,33 @@ GAME_OVER_SPEED  = 12  ; Speed of Game over Res in animation
 ; About 9-ish Inputs per second.
 ; After processing input (from the joystick) this is the number of frames
 ; to count before new input is accepted.  This prevents moving the frog at
-; 60 fps and compensates for any jitter/uneven toggling of the joystick
+; 60 fps and maybe compensates for any jitter/uneven toggling of the joystick
 ; bits by flaky controllers.
 ; At 9 events per second the frog moves horizontally 18 color clocks, max. 
 INPUTSCAN_FRAMES = $07 ; previously $09
 
+; Originally, this was coarse scroll movement and the frog moved the 
+; width of a character.  
 ; Based on number of frogs, how many frames between the boats' 
 ; character-based coarse scroll movement:
 ; ANIMATION_FRAMES .byte 30,25,20,18,15,13,11,10,9,8,7,6,5,4,3
 ;
-; Fine scroll increments 4 times faster to equal one character 
-; movement per timer above. 
+; Fine scroll increments 4 times to equal one character 
+; movement per timer above. Frog movement is two color clocks,
+; or half a character per horizontal movement.
 ;
-; Minimum coarse scroll speed was 2 character per second, or 8 
+; Minimum coarse scroll speed was 2 characters per second, or 8 
 ; color clocks per second, or between 7 and 8 frames per color clock.
-; The fine scroll will start at 10 frames per color clock.
+; The fine scroll will start at 7 frames per color clock.
 ;
 ; Maximum coarse scroll speed (3 frames == 20 character movements 
 ; per second) was the equivalent of 4 color clocks in 3 frames.
-; The fine scroll speed will max out at 1 color clock per frame.
+; The fine scroll speed will max out at 3 color clockw per frame.
 ;
 ; The Starting speed is slower than the coarse scrolling version.
 ; It ramps up to maximum speed in fewer levels/rescued frogs, and 
-; the maximum speed is slightly slower than the fastest coarse scroll
-; speed (still, this is 60 FPS fine scroll which is faaast.)
+; the maximum speed is faster than the fastest coarse scroll
+; speed (60 FPS fine scroll is faaast.)
 
 ; FYI -- SCROLLING RANGE
 ; Boats Right ;   64
@@ -97,6 +100,10 @@ MAX_FROG_SPEED = 13 ; Number of difficulty levels
 ; use values 0, they are logically overlapped.  Therefore, each array 
 ; row needs only 18 bytes instead of 19.  Only the last row needs 
 ; the trailing 19th 0 added.
+; 14 difficulty levels is the max, because of 6502 indexing.
+; 18 bytes per row * 14 levels is 252 bytes.
+; More levels would require more pointer expression to reach each row
+; rather than simply (BOAT_FRAMES),Y.
 
 BOAT_FRAMES ; Number of frames to wait to move boat. (top to bottom) (Difficulty 0 to 13)
 	.by 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7   ; Difficulty 0 
@@ -133,10 +140,6 @@ BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 MOVING_ROW_STATES ; 19 entries describing boat directions. Beach (0), Right (1), Left (FF) directions.
 	.by 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0
 
-;BOAT_FRAMES   .by 10 7 5 3 2 1 0 0 0 0 0
-;BOAT_SHIFT_R  .by 1  1 1 1 1 1 1 2 2 3 3
-;BOAT_SHIFT_L  .by 1  1 1 1 1 1 1 1 2 2 3; number of times to scroll boat. (add or subtract)
-
 ; Offsets from first LMS low byte in Display List to 
 ; the subsequent LMS low byte of each boat line. (VBI)
 ; For the Right Boats this is the offset from PF_LMS1.
@@ -147,11 +150,6 @@ BOAT_LMS_OFFSET
 ; Index into DLI's HSCROL table for each boat row. (needed by VBI)
 BOAT_HS_TABLE
 	.by 0 4 5 0 7 8 0 10 11 0 13 14 0 16 17 0 19 20
-	
-;BOAT_HS_RIGHT .by 4 7 10 13 16 19
-;BOAT_HS_LEFT  .by 5 8 11 14 17 20
-
-
 
 
 ; PAL Timer values.  PAL ?? guesses...
@@ -160,6 +158,7 @@ BOAT_HS_TABLE
 ; based on number of frogs, how many frames between boat movements...
 ;ANIMATION_FRAMES .byte 25,21,17,14,12,11,10,9,8,7,6,5
 ; Not really sure what to do about the new model using the BOAT_SHIFT lists.
+; PAL would definitely be different speeds.
 
 
 ; ==========================================================================
@@ -223,7 +222,7 @@ CheckInput
 	jsr SetNoInput            ; Make sure the official stick read starts with no input.
 	lda STICK0                ; The OS nicely separates PIA nybbles for us
 
-ChefOfJoystickBits  ; Cook STICK0 into the safe stick directions.  Flip input bits.
+ChefOfJoystickBits            ; Cook STICK0 into the safe stick directions.  Flip input bits.
 	eor #%00001111            ; Reverse direction bits.
 	and #%00001101            ; Mask out the Down.
 	sta InputStick            ; Save it.
@@ -366,20 +365,22 @@ ExitMyImmediateVBI
 
 MyDeferredVBI
 ; ======== Manage InputScanFrames Delay Counter ========
-	lda InputScanFrames      ; Is input delay already 0?
-	beq DoAnimateClock       ; Yes, do not decrement it again.
-	dec InputScanFrames      ; Minus 1.
+	lda InputScanFrames          ; Is input delay already 0?
+	beq DoAnimateClock           ; Yes, do not decrement it again.
+	dec InputScanFrames          ; Minus 1.
 
 DoAnimateClock
-	lda AnimateFrames       ; Is animation countdown already 0?
-	beq ScrollTheCreditLine ; Yes, do not decrement now.
-	dec AnimateFrames       ; Minus 1
+	lda AnimateFrames            ; Is animation countdown already 0?
+	beq EndOfClockChecks         ; Yes, do not decrement now.
+	dec AnimateFrames            ; Minus 1
+
+EndOfClockChecks
 
 ; ======== Manage scrolling the current credit line ========
-ScrollTheCreditLine               ; scroll the text identifying the perpetrators
-	dec ScrollCounter             ; subtract from scroll delay counter
-	bne ManageBoatScrolling       ; Not 0 yet, so no scrolling.
-	lda #2                        ; Reset counter to original value.
+ScrollTheCreditLine              ; scroll the text identifying the perpetrators
+	dec ScrollCounter            ; subtract from scroll delay counter
+	bne EndOfScrollTheCredits    ; Not 0 yet, so no scrolling.
+	lda #2                       ; Reset counter to original value.
 	sta ScrollCounter
 	; Yeah, ANTIC supports fine horizontal scrolling 16 color clocks or 
 	; 4 text characters at a time.  But, the actual credit length is 
@@ -387,7 +388,7 @@ ScrollTheCreditLine               ; scroll the text identifying the perpetrators
 	; code by fine scrolling only a character at a time.  It is not like 
 	; the Atari needs to rewrite the data to coarse scroll.
 	dec CreditHSCROL             ; Subtract one color clock from the left (aka fine scroll).
-	bne ManageBoatScrolling      ; It is not yet 0.  Nothing else to do here.
+	bne EndOfScrollTheCredits    ; It is not yet 0.  Nothing else to do here.
 
 ResetCreditScroll                ; Fine Scroll reached 0, so coarse scroll the text.
 	inc SCROLL_CREDIT_LMS        ; Move text left one character position.
@@ -395,233 +396,104 @@ ResetCreditScroll                ; Fine Scroll reached 0, so coarse scroll the t
 	cmp #<END_OF_CREDITS         ; Did coarse scroll position reach the end of the text?
 	bne RestartCreditHSCROL      ; No.  We are done with coarse scroll, now reset fine scroll. 
 
-	lda #<SCROLLING_CREDIT        ; Yes, restart coarse scroll to the beginning position.
+	lda #<SCROLLING_CREDIT       ; Yes, restart coarse scroll to the beginning position.
 	sta SCROLL_CREDIT_LMS
 
-RestartCreditHSCROL               ; Reset the 
-	lda #4                        ; horizontal fine 
-	sta CreditHSCROL              ; scrolling.
+RestartCreditHSCROL              ; Reset the 
+	lda #4                       ; horizontal fine 
+	sta CreditHSCROL             ; scrolling.
+
+EndOfScrollTheCredits
 
 
 ; ======== Manage Boat fine scrolling ========
-; Atari scrolling is such low overhead I'm so lazy, that  I'll 
-; just run the boat scrolling all the time on the game screen 
-; even if you don't see it.
+; Atari scrolling is such low overhead. 
+; (Evaluate frog shift if it is on a boat row).
+; On a boat row...
+; Update a fine scroll register.
+; Update a coarse scroll register sometimes.
+; Done.   
+; Scrolling is practically free.  
+; It may be easier only on an Amiga.
 ManageBoatScrolling
-	lda CurrentDL
-	cmp #DISPLAY_GAME
-	beq DoLoopBoatScrolling
-	jmp MaintainFrogliness
+	lda CurrentDL                 ; Get current display list
+	cmp #DISPLAY_GAME             ; Is this the Game display?
+	bne EndOfBoatScrolling        ; No.  Skip the scrolling logic.
 
-DoLoopBoatScrolling
-	lda #0                        ; Zero the flags the say how far boats moved.
-;	sta BoatsMoveLeft             ; These are used to involuntarily shift the Frog on boat lines.
-;	sta BoatsMoveRight
-	sta CurrentRowLoop            ; Row = 0
+	ldy #1                        ; Current Row.  Row 0 is the safe zone, no scrolling happens there.
 
-	tax                           ; X = 0, CurrentRowLoop
-	tay                           ; Y = 0, CurrentRowLoop
-
+; Loop through rows.
+; If is is a moving row, then check the row's timer/frame counter.
+; If the timer is over, then reset the timer and fine scroll the row (moving the frog with it as needed.)
 LoopBoatScrolling
+	; Need row in X and Y due to different 6502 addressing modes in the timer and scroll functions.
+	tya                           ; A = Y, Current Row 
+	tax                           ; X = A, Current Row.  dec zeropage,x, darn you cpu.
+
 	lda MOVING_ROW_STATES,y       ; Get the current Row State
 	beq EndOfScrollLoop           ; Not a scrolling row.  Go to next row.
 
 	lda CurrentBoatFrames,x       ; Get the row's frame delay value.
 	beq ResetBoatFrames           ; If BoatFrames is 0, time to make the donuts.
 	dec CurrentBoatFrames,x       ; Not zero, so decrement
-;	jmp SimplyUpdatePosition      ; and skip to the player input frog movement. 
-	jmp EndOfScrollLoop
+	jmp EndOfScrollLoop           
 
 ResetBoatFrames
-	lda (BoatFramesPointer),y     ; Get master value
-	sta CurrentBoatFrames,x       ; Save to reset delay.
-	;jsr SetBoatSpeed
+	lda (BoatFramesPointer),y     ; Get master value for row's frame delay
+	sta CurrentBoatFrames,x       ; Restart the row's frame speed delay.
 
 	lda MOVING_ROW_STATES,y       ; Get the current Row State (again.)
 	bmi LeftBoatScroll            ; 0 already bypassed.  1 = Right, -1 (FF) = Left.
 
-; ==  Now manage boat scrolling. ==
-; RIGHT BOATS 
-; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
-; End   Scroll position = LMS + 0,              HSCROL 15
-
-RightBoatScroll
-;	lda (BoatMovePointer),y  ; Get master value for scroll distance.
-;	sta BoatsMoveRight            ; so the scrolling, and the forced frog
-	; Easier to push the frog first.
-	cpy FrogRow             ; Are we on the frog row?
-	bne SkipShoveRight      ; No.  Continue with boat scroll.
-	clc
-	lda FrogNewPMX
-	adc (BoatMovePointer),y ; Increment the position same as HSCROL distance.
-	sta FrogNewPMX
-	
-SkipShoveRight
-	ldx BOAT_HS_TABLE,y     ; Get the index into HSCROL table.
-	lda HSCROL_TABLE,x      ; Get value of HSCROL.
-	clc
-;	adc BoatsMoveRight      ; Increment the HSCROL.
-	adc (BoatMovePointer),y ; Increment the HSCROL.
-	cmp #16                 ; Shift past scroll limit?
-	bcs DoRightCoarseScroll ; Yes.  Need to coarse scroll.
-	sta HSCROL_TABLE,x      ; No. Save the updated HSCROL.
-;	bne LeftBoatScroll      ; This should always be non-zero. (hint: we were adding)
-	bne EndOfScrollLoop      ; This should always be non-zero. (hint: we were adding)
-	
-	; HSCROL wrapped over 15.  Time to coarse scroll by subtracting 4 from LMS.
-DoRightCoarseScroll
-;	sec  ; Got here via bcs
-	sbc #16                 ; Fix the new HSCROL
-	sta HSCROL_TABLE,x      ; Save the updated HSCROL.
-	ldx BOAT_LMS_OFFSET,y   ; Get the index to the LMS in the Display List for this line.
-	lda PF_LMS1,x           ; Get the actual LMS low byte.
-	sec
-	sbc #4                  ; Subtract 4 from LMS in display list.
-	bpl SaveNewRightLMS     ; If still positive (0), then good to update LMS
-	lda #12                 ; LMS went negative. Reset to start position.
-SaveNewRightLMS
-	sta PF_LMS1,x           ; Update LMS pointer.
-	jmp EndOfScrollLoop
-	
-; LEFT BOATS 
-; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
-; End   Scroll position = LMS + 12,            HSCROL 0
+	jsr RightBoatFineScrolling    ; Do Right Boat Fine Scrolling.  (and frog X update) 
+	jmp EndOfScrollLoop           ; end of this row.  go to the next one.
 
 LeftBoatScroll
-;	lda (BoatMovePointer),y  ; Get master value for scroll distance.
-;	sta BoatsMoveLeft            ; so the scrolling, and the forced frog
-	; Easier to push the frog first.
-	cpy FrogRow             ; Are we on the frog row?
-	bne SkipShoveLeft       ; No.  Continue with boat scroll.
-	sec
-	lda FrogNewPMX
-	sbc (BoatMovePointer),y ; Increment the position same as HSCROL distance.
-	sta FrogNewPMX
+	jsr LeftBoatFineScrolling     ; Do Left Boat Fine Scrolling.  (and frog X update) 
 
-SkipShoveLeft
-	ldx BOAT_HS_TABLE,y     ; Get the index into HSCROL table.
-	lda HSCROL_TABLE,x      ; Get value of HSCROL.
-	sec
-;	sbc BoatsMoveLeft       ; Decrement the HSCROL	
-	sbc (BoatMovePointer),y ; Decrement the HSCROL
-	bmi DoLeftCoarseScroll  ; It went negative, must reset and coarse scroll
-	sta HSCROL_TABLE,x      ; It's OK. Save the updated HSCROL.
-	bpl EndOfScrollLoop  ; This could be anything including 0. (But therefore positive)
-	; HSCROL wrapped below 0.  Time to coarse scroll by Adding 4 to LMS.
-DoLeftCoarseScroll
-	adc #16                 ; Re-wrap over 0 into the positive.
-	sta HSCROL_TABLE,x      ; Save the updated HSCROL.
-	ldx BOAT_LMS_OFFSET,y   ; Get the index to the LMS in the Display List for this line.
-	lda PF_LMS2,x           ; Get the actual LMS low byte.
-	clc
-	adc #4                  ; Add 4 to LMS in display list.
-	cmp #13                 ; Is it greater than max (12)? 
-	bcc SaveNewLeftLMS      ; No.  Good to update LMS.
-	lda #0                  ; LMS greater than 12. Reset to start position.
-SaveNewLeftLMS
-	sta PF_LMS2,x           ; Update LMS pointer.
+EndOfScrollLoop                   ; end of this row.  go to the next one.
+;	inc CurrentRowLoop      ; Next Row.
+;	ldx CurrentRowLoop      ; Get row
+;	cpx #18                 ; Last entry is beach.  Do not bother to go further.
+;	beq MaintainFrogliness  ; Done.  Go do frog positioning.
+;	ldy CurrentRowLoop      ; Get row in Y too, due to needing different 6502 addressing modes.
+
+	iny                          ; Y reliably has Row.  X was changed.
+	cpy #18                      ; Last entry is beach.  Do not bother to go further.
+	bne LoopBoatScrolling        ; Not 18.  Process the next row.
+
+EndOfBoatScrolling
 
 
-EndOfScrollLoop
-	inc CurrentRowLoop
-	ldx CurrentRowLoop
-	ldy CurrentRowLoop
-	cpx #18  ; Last entry is beach.  Do not bother to go further.
-	beq MaintainFrogliness
-	jmp LoopBoatScrolling
-
-
-;	iny 
-;	cpy #6
-
-;	bne RightBoatScroll
-
-
-
-; ======== Move the Frog Horizontally if it is on a boat. ========
+; ======== Reposition the Frog (or Splat). ========
+; At this point everyone and their cousin have been giving their advice 
+; about the frog position.  The main code changed position based on joystick
+; input.  The VBI change position if the frog was on a scrolling boat row.
+; Here, finally apply the position and move the frog image.
 MaintainFrogliness
 	lda FrogShape                ; Get the current frog shape.
-	beq NoFrogUpdate             ; 0 is off, so no movement there at all, so skip all
-	cmp #SHAPE_TOMB              ; And the tombstone ...
-	beq SimplyUpdatePosition     ; ... does not move (automatically) either.
-
-	lda CurrentDL                ; What physical display is visible?
-	cmp #DISPLAY_GAME            ; Must be the game screen
-	bne SimplyUpdatePosition     ; No.  Therefore no frog gymnastics.
+	beq NoFrogliness             ; 0 is off, so no movement there at all, so skip all
 
 	ldx FrogRow                  ; What screen row is the frog currently on?
-	beq SimplyUpdatePosition     ; 0 is not running or finished, so no movement there
-	lda MOVING_ROW_STATES,x      ; Is the frog due for possible involuntary movement?
-	beq SimplyUpdatePosition     ; No.  Therefore no frog gymnastics.
-
-	bmi ShoveFrogLeft            ; Yes.  The puppet master is here to move the frog.
-
-; SHOVE FROG RIGHT
-	lda BoatsMoveRight           ; Did Boats Move Right?
-	beq SimplyUpdatePosition     ; No. 
-
-	lda FrogShape                ; Splat needs no qualifier.
-	cmp #SHAPE_FROG              ; Frog need to be properly 
-	bne JustAddTheRightBoat      ; stuck to COLPF2 on the boat.
+	lda MOVING_ROW_STATES,x      ; Is the current Row  a boat row?
+	beq SimplyUpdatePosition     ; No. So no collision processing. 
 
 	lda P0PF                     ; Get Player 0 collision with playfield
 	ora P1PF                     ; Add Player 1 collision 
 	and #COLPMF2_BIT             ; Is there collision with COLPF2 (Lines on the boats)
-	bne JustAddTheRightBoat
+	bne SimplyUpdatePosition     ; Yes.  Frog is safe.
 
 	; Oops.   This frog is off a boat.  Frog should die here but still be dragged by the boats.
 	inc FrogSafety               ; It is MAIN's job to change the image.
-
-JustAddTheRightBoat
-	lda FrogNewPMX               ; Get the destination.
-	clc
-	adc BoatsMoveRight          ; Add the boat movement.
-	sta FrogNewPMX
-	bne SimplyUpdatePosition
-
-; SHOVE FROG LEFT
-ShoveFrogLeft
-	lda BoatsMoveLeft            ; Did Boats Move Left?
-	beq SimplyUpdatePosition     ; No. 
-
-	lda FrogShape                ; Splat needs no qualifier.
-	cmp #SHAPE_FROG              ; Frog need to be properly 
-	bne JustSubTheLeftBoat       ; stuck to COLPF2 on the boat.
-
-	lda P0PF                     ; Get Player 0 collision with playfield
-	ora P1PF                     ; Add Player 1 collision 
-	and #COLPMF2_BIT             ; Is there collision with COLPF2 (Lines on the boats)
-	bne JustSubTheLeftBoat
-
-	; Oops.   This frog is off a boat.  Frog should die here but still be dragged by the boats.
-	inc FrogSafety               ; It is MAIN's job to change the image.
-
-JustSubTheLeftBoat
-	lda FrogNewPMX               ; Get the destination.
-	sed
-	sbc BoatsMoveLeft            ; Subtract the boat movement.
-	sta FrogNewPMX
-
 
 ; ==== Frog and boat position gyrations are done.  ==== Is there actual movement?
 SimplyUpdatePosition
 	lda FrogNewPMX               ; Is the new X different
-	cmp FrogPMX                  ; from the current X?
-	bne LimitFrogX               ; Yes.  Filter X result.
-
-	lda FrogNewPMY               ; (No.)  But is the new Y different
-	cmp FrogPMY                  ; from the current Y?
-	beq NoFrogUpdate             ; No. Nothing changed. Skip the Frog Update
-	bne UpdateTheFrog
-
-LimitFrogX
-	inc FrogUpdate               ; Yes.  Therefore we must call the update later.
 	cmp #MIN_FROGX               ; Is PM X smaller than the minimum?
 	bcs CheckHPOSMax             ; No.  
 
 	lda #MIN_FROGX               ; Yes.  Reset X
 	sta FrogNewPMX               ; to the minimum.
-;	inc FrogSafety               ; Frog moved off screen.  this is dead.  It is MAIN's job to change the image.
 
 CheckHPOSMax
 	cmp #MAX_FROGX+1             ; Is PM X bigger than the maximum?
@@ -629,10 +501,9 @@ CheckHPOSMax
 
 	lda #MAX_FROGX               ; Yes.  Reset X
 	sta FrogNewPMX               ; to the maximum.
-;	inc FrogSafety               ; Frog moved off screen.  this is dead.  It is MAIN's job to change the image.
 
 UpdateTheFrog
-	jsr UpdateFrog 	; then FrogPMX == FrogNewPMX. FrogPMY == FrogNewPMY. FrogRow=FrogNewRow.
+	jsr UpdateShape 	; then FrogPMX == FrogNewPMX. FrogPMY == FrogNewPMY. FrogRow=FrogNewRow.
 
 NoFrogUpdate
 
@@ -655,12 +526,13 @@ ManageBoatAnimations
 	ldx BoatyFrame                   ; going to load a frame, which one?
 	jsr DoBoatCharacterAnimation     ; load the frame for the current component.
 
-; Finish by setting up for next frame/compomnent.
+; Finish by setting up for next frame/component.
 	inc BoatyComponent           ; increment to next visual component for next time.
 	lda BoatyComponent           ; get it to mask it 
 	and #$03                     ; mask it to value 0 to 3
 	sta BoatyComponent           ; Save it.
 	bne ExitBoatyness            ; it is non-zero, so no new frame counter.
+
 ; Whenever the boat component returns to 0, then update the frame counter...
 	inc BoatyFrame               ; next frame.
 	lda BoatyFrame               ; get it to mask it.
@@ -701,6 +573,96 @@ ExitMyDeferredVBI
 	jmp XITVBV               ; Return to OS.  SYSVBV for Immediate interrupt.
 
 
+
+; ==========================================================================
+; RIGHT BOAT FINE SCROLLING
+; 
+; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
+; End   Scroll position = LMS + 0,              HSCROL 15
+;
+; X and Y are current row to analyze.
+; --------------------------------------------------------------------------
+RightBoatFineScrolling
+	; Easier to push the frog first before the actual fine scrolling.
+	cpy FrogRow             ; Are we on the frog's row?
+	bne DoFineScrollRight   ; No.  Continue with boat scroll.
+	clc
+	lda FrogNewPMX
+	adc (BoatMovePointer),y ; Increment the position same as HSCROL distance.
+	sta FrogNewPMX
+
+DoFineScrollRight
+	ldx BOAT_HS_TABLE,y     ; X = Get the index into HSCROL table.
+	lda HSCROL_TABLE,x      ; Get value of HSCROL.
+	clc
+	adc (BoatMovePointer),y ; Increment the HSCROL.
+	cmp #16                 ; Shift past scroll limit?
+	bcs DoCoarseScrollRight ; Yes.  Need to coarse scroll.
+	sta HSCROL_TABLE,x      ; No. Save the updated HSCROL.
+	rts                     ; Done.  No coarse scroll this time.
+
+	; HSCROL wrapped over 15.  Time to coarse scroll by subtracting 4 from LMS.
+DoCoarseScrollRight
+;	sec  ; Got here via bcs
+	sbc #16                 ; Fix the new HSCROL
+	sta HSCROL_TABLE,x      ; Save the updated HSCROL.
+	ldx BOAT_LMS_OFFSET,y   ; X = Get the index to the LMS in the Display List for this line.
+	lda PF_LMS1,x           ; Get the actual LMS low byte.
+	sec
+	sbc #4                  ; Subtract 4 from LMS in display list.
+	bpl SaveNewRightLMS     ; If still positive (0), then good to update LMS
+	lda #12                 ; LMS went negative. Reset to start position.
+SaveNewRightLMS
+	sta PF_LMS1,x           ; Update LMS pointer.
+
+EndOfRightBoat
+	rts
+
+
+; ==========================================================================
+; LEFT BOAT FINE SCROLLING
+; 
+; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
+; End   Scroll position = LMS + 12,            HSCROL 0
+;
+; X and Y are current row to analyze/scroll.
+; --------------------------------------------------------------------------
+LeftBoatFineScrolling
+	; Easier to push the frog first before the actual fine scrolling.
+	cpy FrogRow             ; Are we on the frog's row?
+	bne DoFineScrollLeft    ; No.  Continue with boat scroll.
+	sec
+	lda FrogNewPMX
+	sbc (BoatMovePointer),y ; Increment the position same as HSCROL distance.
+	sta FrogNewPMX
+
+DoFineScrollLeft
+	ldx BOAT_HS_TABLE,y     ; X = Get the index into HSCROL table.
+	lda HSCROL_TABLE,x      ; Get value of HSCROL.
+	sec
+	sbc (BoatMovePointer),y ; Decrement the HSCROL
+	bmi DoCoarseScrollLeft  ; It went negative, must reset and coarse scroll
+	sta HSCROL_TABLE,x      ; It's OK. Save the updated HSCROL.
+	rts                     ; Done.  No coarse scroll this time.
+
+	; HSCROL wrapped below 0.  Time to coarse scroll by Adding 4 to LMS.
+DoCoarseScrollLeft
+	adc #16                 ; Re-wrap over 0 into the positive.
+	sta HSCROL_TABLE,x      ; Save the updated HSCROL.
+	ldx BOAT_LMS_OFFSET,y   ; X = Get the index to the LMS in the Display List for this line.
+	lda PF_LMS2,x           ; Get the actual LMS low byte.
+	clc
+	adc #4                  ; Add 4 to LMS in display list.
+	cmp #13                 ; Is it greater than max (12)? 
+	bcc SaveNewLeftLMS      ; No.  Good to update LMS.
+	lda #0                  ; LMS greater than 12. Reset to start position.
+SaveNewLeftLMS
+	sta PF_LMS2,x           ; Update LMS pointer.
+
+EndOfLeftBoat
+	rts
+
+
 ; ==========================================================================
 ; TOGGLE PressAButtonState 
 ; --------------------------------------------------------------------------
@@ -715,7 +677,7 @@ TogglePressAButtonState
 
 ; ==========================================================================
 ; TOGGLE BUTTON PROMPT
-; Fade the prompt up and down. 
+; Fade the prompt colors up and down. 
 ;
 ; PressAButtonState...
 ; If  0, then fading background down to dark.  (and text light)  
@@ -803,8 +765,7 @@ ExitRunPrompt
 	rts
 
 
-	.align $0100
-
+	.align $0100 ; Get the DLIs to start in the same page to simplify chaining.
 
 ;==============================================================================
 ;                                                           MyDLI

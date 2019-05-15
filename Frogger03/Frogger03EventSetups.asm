@@ -95,11 +95,12 @@ SetupGame
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
 
 	lda #18                 ; 18 (dec), number of screen rows of game field.
+	sta FrogNewRow
 	sta FrogRow
 
-	lda #0                  ; Zero "old" position to trigger Update to redraw.  
-	sta FrogPMX             ; 
-	sta FrogPMY 
+	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
+	sta FrogPMX
+	sta FrogPMY
 
 	lda #MID_FROGX          ; Set new X position to middle of screen.
 	sta FrogNewPMX
