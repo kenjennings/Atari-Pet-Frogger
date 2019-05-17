@@ -102,6 +102,191 @@ SIZEOF_LINE    = 39  ; That is, 40 - 1
 SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 
+; Display layouts and associated text blocks:
+
+; Original V00 Title Screen and Instructions:
+;    +----------------------------------------+
+; 1  |              PET FROGGER               | INSTXT_1
+; 2  |              --- -------               | INSTXT_1
+; 3  |     (c) November 1983 by DalesOft      | INSTXT_1
+; 4  |                                        |
+; 5  |All you have to do is to get as many of | INSTXT_2
+; 6  |the frogs across the river without      | INSTXT_2
+; 7  |drowning them. You have to leap onto a  | INSTXT_2
+; 8  |boat like this :- <QQQ] and land on the | INSTXT_2
+; 9  |seats ('Q'). You get 10 points for every| INSTXT_2
+; 10 |jump forward and 500 points every time  | INSTXT_2
+; 11 |you get a frog across the river.        | INSTXT_2
+; 12 |                                        |
+; 13 |                                        |
+; 14 |                                        |
+; 15 |The controls are :-                     | INSTXT_3
+; 16 |                 S = Up                 | INSTXT_3
+; 17 |  4 = left                   6 = right  | INSTXT_3
+; 18 |                                        |
+; 19 |                                        |
+; 20 |     Hit any key to start the game.     | INSTXT_4
+; 21 |                                        |
+; 22 |                                        |
+; 23 |                                        |
+; 24 |                                        |
+; 25 |Atari V00 port by Ken Jennings, Nov 2018| PORTBYTEXT
+;    +----------------------------------------+
+
+;  Original V00 Main Game Play Screen:
+;    +----------------------------------------+
+; 1  |Successful Crossings =                  | SCORE_TXT
+; 2  |Score = 00000000     Hi = 00000000  Lv:3| SCORE_TXT
+; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
+; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
+; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
+; 6  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
+; 7  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
+; 8  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
+; 9  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
+; 10 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3
+; 11 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3
+; 12 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
+; 13 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4
+; 14 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4
+; 15 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
+; 16 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5
+; 17 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5
+; 18 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
+; 29 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
+; 20 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
+; 21 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
+; 22 |     (c) November 1983 by DalesOft      | TEXT2
+; 23 |        Written by John C Dale          | TEXT2
+; 24 |                                        |
+; 25 |Atari V00 port by Ken Jennings, Nov 2018| PORTBYTEXT
+;    +----------------------------------------+
+
+
+
+; Revised V01 Title Screen and Instructions:
+;    +----------------------------------------+
+; 1  |              PET FROGGER               | TITLE
+; 2  |              --- -------               | TITLE
+; 3  |     (c) November 1983 by DalesOft      | CREDIT
+; 4  |        Written by John C Dale          | CREDIT
+; 5  |Atari V01 port by Ken Jennings, Dec 2018| CREDIT
+; 6  |                                        |
+; 7  |Help the frogs escape from Doc Hopper's | INSTXT_1
+; 8  |frog legs fast food franchise! But, the | INSTXT_1
+; 9  |frogs must cross piranha-infested rivers| INSTXT_1
+; 10 |to reach freedom. You have three chances| INSTXT_1
+; 11 |to prove your frog management skills by | INSTXT_1
+; 12 |directing frogs to jump on boats in the | INSTXT_1
+; 13 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
+; 14 |the seats in the boats ('Q').           | INSTXT_1
+; 15 |                                        |
+; 16 |Scoring:                                | INSTXT_2
+; 17 |    10 points for each jump forward.    | INSTXT_2
+; 18 |   500 points for each rescued frog.    | INSTXT_2
+; 19 |                                        |
+; 20 |Game controls:                          | INSTXT_3
+; 21 |                 S = Up                 | INSTXT_3
+; 22 |      left = 4           6 = right      | INSTXT_3
+; 23 |                                        |
+; 24 |     Hit any key to start the game.     | INSTXT_4
+; 25 |                                        |
+;    +----------------------------------------+
+
+; Transition Title screen to Game Screen.
+; Animate Credit lines down from Line 3 to Line 23.
+
+; Revised V01 Main Game Play Screen:
+;    +----------------------------------------+
+; 1  |Score:00000000               00000000:Hi| SCORE_TXT
+; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
+; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
+; 4  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
+; 5  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
+; 6  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
+; 7  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
+; 8  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
+; 9  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
+; 10 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3
+; 11 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3
+; 12 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
+; 13 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4
+; 14 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4
+; 15 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
+; 16 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5
+; 17 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5
+; 18 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
+; 19 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
+; 20 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
+; 21 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
+; 22 |                                        |
+; 23 |     (c) November 1983 by DalesOft      | CREDIT
+; 24 |        Written by John C Dale          | CREDIT
+; 25 |Atari V01 port by Ken Jennings, Dec 2018| CREDIT
+;    +----------------------------------------+
+
+
+
+; Revised V02 Title Screen and Instructions:
+;    +----------------------------------------+
+; 1  |Score:00000000               00000000:Hi| SCORE_TXT
+; 2  |                                        |
+; 3  |              PET FROGGER               | TITLE
+; 4  |              PET FROGGER               | TITLE
+; 5  |              PET FROGGER               | TITLE
+; 6  |              --- -------               | TITLE
+; 7  |                                        |
+; 8  |Help the frogs escape from Doc Hopper's | INSTXT_1
+; 9  |frog legs fast food franchise! But, the | INSTXT_1
+; 10 |frogs must cross piranha-infested rivers| INSTXT_1
+; 11 |to reach freedom. You have three chances| INSTXT_1
+; 12 |to prove your frog management skills by | INSTXT_1
+; 13 |directing frogs to jump on boats in the | INSTXT_1
+; 14 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
+; 15 |the seats in the boats ('Q').           | INSTXT_1
+; 16 |                                        |
+; 17 |Scoring:                                | INSTXT_2
+; 18 |    10 points for each jump forward.    | INSTXT_2
+; 19 |   500 points for each rescued frog.    | INSTXT_2
+; 20 |                                        |
+; 21 |Use joystick control to jump forward,   | INSTXT_3
+; 22 |left, and right.                        | INSTXT_3
+; 23 |                                        |
+; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
+; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
+;    +----------------------------------------+
+
+; Revised V02 Main Game Play Screen:
+;    +----------------------------------------+
+; 1  |Score:00000000               00000000:Hi| SCORE_TXT
+; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
+; 3  |                                        |
+; 4  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
+; 5  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_1
+; 6  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_1
+; 7  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
+; 8  | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_2
+; 9  |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_2
+; 10 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
+; 11 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_3
+; 12 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_3
+; 13 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
+; 14 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_4
+; 15 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_4
+; 16 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
+; 17 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_5
+; 18 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_5
+; 19 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
+; 20 | [QQQQ>        [QQQQ>       [QQQQ>      | TEXT1_6
+; 21 |      <QQQQ]        <QQQQ]    <QQQQ]    | TEXT1_6
+; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
+; 23 |                                        |
+; 24 |                                        |
+; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
+;    +----------------------------------------+
+
+
+
 ; Revised V03 Title Screen and Instructions:
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
@@ -138,29 +323,32 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; New boats are larger to provide more safe surface for the larger 
 ; frog and to provide some additional graphics enhancement for 
 ; the boats.  Illustration below shows the entire memory needed 
-; for scrolling.
+; for scrolling.   Since boats on each row are identical, and 
+; they are spaced equally, then scrolling only need move the 
+; distance between two boats (16 chars), and then reset
+; to the starting position. 
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; 3  |                                        | 
 ; 4  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
 ; 5  |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        | ; Boats Right
-; 6  |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        | ; Boats Left
+; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left
 ; 7  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
 ; 8  |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
-; 9  |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        |
+; 9  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 10 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
 ; 11 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
-; 12 |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        |
+; 12 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 13 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
 ; 14 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
-; 15 |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        |
+; 15 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 16 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
 ; 17 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
-; 18 |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        |
+; 18 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 19 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
 ; 20 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
-; 21 |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        |
+; 21 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
 ; 23 |                                        | 
 ; 24 |                                        |
@@ -183,7 +371,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 	.endm
 
 
-; 6  |<QQQQQ00        <QQQQQ00        <QQQQQ00        <QQQQQ00        | ; Boats Left
+; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left
 	.macro mBoatGoLeft
 		.by I_BOAT_LF+$80 I_BOAT_LFW+$80 I_SEATS_L1 I_SEATS_L2 I_SEATS_L3 I_BOAT_EMPTY I_BOAT_LB+$80 I_BOAT_LBW+$80 ;   8
 		.by I_WATER1 I_WATER2 I_WATER3 I_WATER4 I_WATER1 I_WATER2 I_WATER3 I_WATER4                         ; + 8 = 16

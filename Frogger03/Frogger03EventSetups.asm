@@ -101,12 +101,16 @@ SetupGame
 	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
 	sta FrogPMX
 	sta FrogPMY
+	sta FrogShape           ; 0 is "off"
 
 	lda #MID_FROGX          ; Set new X position to middle of screen.
 	sta FrogNewPMX
 
 	lda #MAX_FROGY          ; Set new Y position to origin. (row 18)
 	sta FrogNewPMY
+
+	lda #SHAPE_FROG         ; Set new frog shape.
+	sta FrogNewShape
 
 	jsr PlayWaterFX         ; Start water noises.  Now.
 
@@ -181,7 +185,7 @@ SetupTransitionToDead
 	jsr PrintFrogsAndLives
 
 	inc FrogSafety          ; Schrodinger knows the frog is dead.
-	lda #FROG_WAKE_SPEED    ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
+	lda #FROG_WAKE_SPEED    ; Initial delay 1.5 sec for frog corpse viewing/mourning
 	jsr ResetTimers
 
 	lda #1                  ; Set Stage 1 in the fading control.

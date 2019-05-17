@@ -829,16 +829,6 @@ TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to
 	jmp Exit_DLI
 
 
-GAME_DLI_1 ; DLI sets only COLPF1 text luminance from the table. (e.g. for fading)
-	mStart_DLI
-
-	lda COLPF1_TABLE,y   ; Get text color (luminance)
-	sta WSYNC
-	sta COLPF1           ; write new text luminance.
-
-	jmp Exit_DLI
-
-
 ; Save 3 bytes.  Use DLI_SPC1 directly in the DLI address table.  duh.
 
 ;TITLE_DLI_SPC1 ; How to solve getting from point A to point B with only a low byte address update
@@ -846,7 +836,9 @@ GAME_DLI_1 ; DLI sets only COLPF1 text luminance from the table. (e.g. for fadin
 
 
 
+;==============================================================================
 ; GAME DLIs
+;==============================================================================
 
 ; This is called on a blank line and the background should already be black.  
 ; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
@@ -861,6 +853,19 @@ GAME_DLI_1 ; DLI sets only COLPF1 text luminance from the table. (e.g. for fadin
 ;	jmp TITLE_DLI_5
 
 
+; A tiny version of TITLE_DLI_4.
+; DLI sets only COLPF1 text luminance from the table. (e.g. for fading)
+GAME_DLI_1 
+	mStart_DLI
+
+	lda COLPF1_TABLE,y   ; Get text color (luminance)
+	sta WSYNC
+	sta COLPF1           ; write new text luminance.
+
+	jmp Exit_DLI
+
+
+
 ; BEACH
 ; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has a whole 
 ; blank scan line to finish everything else.  
@@ -873,13 +878,15 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for Beach.
 	lda COLPF0_TABLE,y   ; for the extra line Get color Rocks (or water color) instead of COLBK
 	sta WSYNC
 	; Top of the line is sky or blue water from row above.   
-	; Make background temporarily match the playfield drawing this on the next line.
+	; Make background temporarily match the playfield drawn this on the next line.
 	sta COLBK
 	sta COLPF0
-	
+
+	; Make Beach lines full horizontal overscan.  Looks more interesting-er.
+
 	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_WIDE
 	sta DMACTL
-		
+
 	jmp SetupAlmostAllColors_DLI
 
 ; BOATS 1
@@ -887,20 +894,20 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for Beach.
 ; blank scan line to finish everything else.
 ; Collect Player/Playfield collisions.
 ; Set Normal width screen for Boats.
-
 GAME_DLI_25 ; DLI 2 sets COLPF0,1,2,3,BK for first line of boats.
 	mStart_DLI
 
 	lda COLBK_TABLE,y   ; Get color Rocks 1   
 	sta WSYNC
 	sta COLBK
-	
+
+	; Reset the scrolling water line to normal width. 
 	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_NORMAL
 	sta DMACTL
-	
+
 	lda HSCROL_TABLE,y   ; Get boat fine scroll.
 	sta HSCROL
-	
+
 SetupAllColors_DLI
 	lda COLPF0_TABLE,y   ; Get color Rocks 1   
 	sta COLPF0
@@ -942,7 +949,6 @@ GAME_DLI_3 ; DLI 3 sets COLPF0,1,2,3,BK and HSCROL for Boats.
 ;	jmp TITLE_DLI_3 ; re-use what is done already....
 
 
-
 GAME_DLI_5 ; Needs to set HSCROL for credits, then call to set text color.  LAST DLI on screen.
 	mRegSaveAY
 
@@ -952,9 +958,13 @@ GAME_DLI_5 ; Needs to set HSCROL for credits, then call to set text color.  LAST
 	jmp DLI_SPC2_SetCredits ; Finish by setting text luminance.
 
 
-
+;==============================================================================
 ; SPLASH DLIs
+;==============================================================================
 
+;==============================================================================
+; COLPF0_COLBK_DLI                                                     A
+;==============================================================================
 ; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
 ; same display list structure and DLIs.  
 ; Sets background color and the COLPF0 pixel color.  
@@ -962,6 +972,7 @@ GAME_DLI_5 ; Needs to set HSCROL for credits, then call to set text color.  LAST
 ; Perfectly re-usable for anywhere Map Mode 9 or Blank instructions are 
 ; being managed.  In the case of blank lines you just don't see the pixel 
 ; color change, so it does not matter what is in the COLPF0 color table. 
+; -----------------------------------------------------------------------------
 
 COLPF0_COLBK_DLI
 	mStart_DLI
@@ -977,11 +988,16 @@ COLPF0_COLBK_DLI
 	jmp Exit_DLI
 
 
-
+;==============================================================================
+; SCORE DLI                                                            A 
+;==============================================================================
 ; Used on multiple screens.  JMP here.
 ; This is called on a blank line and the background should already be black.  
-; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
+; Since there is no text here (in blank line), it does not matter that 
+; COLPF1 is written before WSYNC.
 ; Since the game fades the screen COLPF1 must pull from the table.
+; -----------------------------------------------------------------------------
+
 Score_DLI
 	mStart_DLI
 
@@ -993,9 +1009,19 @@ SetBlack_DLI
 	sta WSYNC            ; sync to end of scan line
 	sta COLBK            ; Write new border color.
 	sta COLPF2           ; Write new background color
+	; Fall through to Exit_DLI. . .
 
-; Exit DLI.
+
+;==============================================================================
+; EXIT DLI.
+;==============================================================================
+; Common code called/jumped to by most DLIs.
 ; JMP here is 3 byte instruction to execute 11 bytes of common DLI closure.
+; Update the interrupt pointer to the address of the next DLI.
+; Increment the DLI counter used to index the various tables.
+; Restore registers and exit.
+; -----------------------------------------------------------------------------
+
 Exit_DLI
 	lda (ThisDLIAddr), y ; update low byte for next chained DLI.
 	sta VDSLST
@@ -1004,23 +1030,27 @@ Exit_DLI
 
 	mRegRestoreAY
 
-DoNothing_DLI ; We can jump here to not do anything or to stop the DLI chain.
+DoNothing_DLI ; In testing mode jump here to not do anything or to stop the DLI chain.
 	rti
 
 
-
+;==============================================================================
+; DLI_SPC1                                                            A 
+;==============================================================================
 ; DLI to set colors for the Prompt line.  
 ; And while we're here do the HSCROLL for the scrolling credits.
 ; Then link to DLI_SPC2 to set colors for the scrolling line.
-; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
+; Since there is no text here (in blank line), it does not matter 
+; that COLPF1 is written before WSYNC.
+; -----------------------------------------------------------------------------
 
 DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text. 
-	pha ; aka pha
+	pha                   ; aka pha
 
 	lda PressAButtonText  ; Get text color (luminance)
 	sta COLPF1            ; write new text luminance.
-	
-	lda PressAButtonColor ; Black for background and text background.
+
+	lda PressAButtonColor ; For background and text background.
 	sta WSYNC             ; sync to end of scan line
 	sta COLBK             ; Write new border color.
 	sta COLPF2            ; Write new background color
@@ -1033,14 +1063,18 @@ DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text.
 	sta VDSLST
 	lda #>DLI_SPC2        ; Update the DLI vector for the last routine for credit color.
 	sta VDSLST+1
-	
-	pla ; aka pla
+
+	pla                   ; aka pla
 
 	rti
 
 
-
-; DLI to set colors for the Scrolling credits.   ALWAYS the last DLI on screen.
+;==============================================================================
+; DLI_SPC2                                                            A  Y
+;==============================================================================
+; DLI to set colors for the Scrolling credits.   
+; ALWAYS the last DLI on screen.
+; -----------------------------------------------------------------------------
 
 DLI_SPC2  ; DLI just sets black for background COLBK, COLPF2, and text luminance for scrolling text.
 	mRegSaveAY

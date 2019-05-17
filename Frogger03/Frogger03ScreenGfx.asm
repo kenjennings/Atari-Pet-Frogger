@@ -62,7 +62,7 @@
 ; 22 |                                        |
 ; 23 |                                        |
 ; 24 |                                        |
-; 25 |Atari V01 port by Ken Jennings, Nov 2018| PORTBYTEXT
+; 25 |Atari V00 port by Ken Jennings, Nov 2018| PORTBYTEXT
 ;    +----------------------------------------+
 
 ;  Original V00 Main Game Play Screen:
@@ -91,8 +91,9 @@
 ; 22 |     (c) November 1983 by DalesOft      | TEXT2
 ; 23 |        Written by John C Dale          | TEXT2
 ; 24 |                                        |
-; 25 |Atari V01 port by Ken Jennings, Nov 2018| PORTBYTEXT
+; 25 |Atari V00 port by Ken Jennings, Nov 2018| PORTBYTEXT
 ;    +----------------------------------------+
+
 
 
 ; Revised V01 Title Screen and Instructions:
@@ -217,28 +218,114 @@
 ;    +----------------------------------------+
 
 
-; N/A  -  No frog in screen memory
+
+; Revised V03 Title Screen and Instructions:
+;    +----------------------------------------+
+; 1  |Score:00000000               00000000:Hi| SCORE_TXT
+; 2  |                                        |
+; 3  |              PET FROGGER               | TITLE
+; 4  |              PET FROGGER               | TITLE
+; 5  |              PET FROGGER               | TITLE
+; 6  |              --- -------               | TITLE
+; 7  |                                        |
+; 8  |Help the frogs escape from Doc Hopper's | INSTXT_1
+; 9  |frog legs fast food franchise! But, the | INSTXT_1
+; 10 |frogs must cross piranha-infested rivers| INSTXT_1
+; 11 |to reach freedom. You have three chances| INSTXT_1
+; 12 |to prove your frog management skills by | INSTXT_1
+; 13 |directing frogs to jump on boats in the | INSTXT_1
+; 14 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
+; 15 |the seats in the boats ('Q').           | INSTXT_1
+; 16 |                                        |
+; 17 |Scoring:                                | INSTXT_2
+; 18 |    10 points for each jump forward.    | INSTXT_2
+; 19 |   500 points for each rescued frog.    | INSTXT_2
+; 20 |                                        |
+; 21 |Use joystick control to jump forward,   | INSTXT_3
+; 22 |left, and right.                        | INSTXT_3
+; 23 |                                        |
+; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
+; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
+;    +----------------------------------------+
+
+; Revised V03 Main Game Play Screen:
+; FYI: Old boats.
+; 8  | [QQQQ1        [QQQQ1       [QQQQ1      | TEXT1_2
+; 9  |      <QQQQ0        <QQQQ0    <QQQQ0    | TEXT1_2
+; New boats are larger to provide more safe surface for the larger 
+; frog and to provide some additional graphics enhancement for 
+; the boats.  Illustration below shows the entire memory needed 
+; for scrolling.  Since boats on each row are identical, and 
+; they are spaced equally, then scrolling only need move the 
+; distance between two boats (16 chars), and then reset
+; to the starting position. 
+;    +----------------------------------------+
+; 1  |Score:00000000               00000000:Hi| SCORE_TXT
+; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
+; 3  |                                        | 
+; 4  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
+; 5  |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        | ; Boats Right
+; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left
+; 7  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
+; 8  |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 9  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
+; 10 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
+; 11 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 12 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
+; 13 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
+; 14 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 15 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
+; 16 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
+; 17 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 18 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
+; 19 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
+; 20 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 21 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
+; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
+; 23 |                                        | 
+; 24 |                                        |
+; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
+;    +----------------------------------------+
+
+
+
+; Game-specific Shapes:
+;SHAPE_OFF   = 0
+;SHAPE_FROG  = 1
+;SHAPE_SPLAT = 2
+;SHAPE_TOMB  = 3
+
+
 ; ==========================================================================
 ; Set the splattered frog on the screen.
 ;
 ; Write the splat frog character into screen memory.
 ; --------------------------------------------------------------------------
+
 SetSplatteredOnScreen
 ;	lda #I_SPLAT
-	bne UpdateFrogInScreenMemory
+	lda #SHAPE_SPLAT
+	sta FrogNewShape
+;	bne UpdateFrogInScreenMemory
 
-; N/A  -  No frog in screen memory
+	rts
+
+
 ; ==========================================================================
 ; Set the frog on the screen.
 ;
 ; Write the Frog character into screen memory.
 ; --------------------------------------------------------------------------
+
 SetFrogOnScreen
 ;	lda #I_FROG
-	bne UpdateFrogInScreenMemory
+	lda #SHAPE_SPLAT
+	sta FrogNewShape
+;	bne UpdateFrogInScreenMemory
+
+	rts
 
 
-; N/A  -  No frog in screen memory
 ; ==========================================================================
 ; Remove the frog from the screen.
 ;
@@ -246,8 +333,13 @@ SetFrogOnScreen
 ;
 ; Note this falls right into UpdateFrogInMemory.
 ; --------------------------------------------------------------------------
+
 RemoveFrogOnScreen
 ;	lda LastCharacter  ; Get the last character (under the frog)
+	lda #0
+	sta FrogNewShape
+
+	rts
 
 
 ; N/A  ?  No frog in screen memory, but update P/M graphics?
@@ -273,6 +365,7 @@ RemoveFrogOnScreen
 ; A  is the byte value to store.
 ; It could be the frog, splattered frog, or the character under the frog.
 ; --------------------------------------------------------------------------
+
 UpdateFrogInScreenMemory
 ;	ldy FrogRealColumn1  ; Current X coordinate
 ;	sta (FrogLocation),y ; Erase the frog with the last character.
@@ -299,13 +392,12 @@ UpdateFrogInScreenMemory
 ; Print the instruction/title screen text.
 ; Set state of the text line that is blinking.
 ; --------------------------------------------------------------------------
-DisplayTitleScreen
 
+DisplayTitleScreen
 	lda #DISPLAY_TITLE   ; Tell VBI to change screens.
 	jsr ChangeScreen     ; Then copy the color tables.
 
 	rts
-
 
 
 ; ==========================================================================
@@ -316,6 +408,7 @@ DisplayTitleScreen
 ; screen.  But from the Win and Dead frog screens the credits
 ; are overdrawn.
 ; --------------------------------------------------------------------------
+
 DisplayGameScreen
 	mRegSaveAYX             ; Save A and Y and X, so the caller doesn't need to.
 
@@ -375,10 +468,10 @@ DisplayGameScreen
 
 ;	jsr UpdateGamePlayfield ; Update all the LMS offsets.
 
-; CopyScoreToScreen MAY NEED TO BE SUBSTUITUTED FOR AnimateBoats
-	jsr CopyScoreToScreen   ; Finish up by updating score display.
+; CopyScoreToScreen MAY NEED TO BE SUBSTUITUTED FOR AnimateBoats in V03
+;	jsr CopyScoreToScreen   ; Finish up by updating score display.
 
-	rts
+;	rts
 
 
 ; N/A  -  VBI continuously scrolls boats
@@ -440,19 +533,22 @@ DisplayGameScreen
 ;	rts
 
 
+; ==========================================================================
+; COPY SCORE TO SCREEN
+; ==========================================================================
+; Copy the score from memory to screen positions.
+; --------------------------------------------------------------------------
+; 1  |Score:00000000               00000000:Hi| SCORE_TXT
+; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
+; --------------------------------------------------------------------------
 ; Game Score and High Score.
 ; This stays here and is copied to screen memory, because the math could
 ; temporarily generate a non-numeric character when there is carry, and I
 ; don't want that (possibly) visible on the screen however short it may be.
+
 MyScore .sb "00000000"
 HiScore .sb "00000000"
 
-; ==========================================================================
-; Copy the score from memory to screen positions.
-; ==========================================================================
-; 1  |Score:00000000               00000000:Hi| SCORE_TXT
-; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
-; --------------------------------------------------------------------------
 CopyScoreToScreen
 	ldx #7
 
@@ -474,6 +570,7 @@ DoUpdateScreenScore
 ; 1  |0000000:Score                 Hi:0000000| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; --------------------------------------------------------------------------
+
 ClearSavedFrogs
 	lda #INTERNAL_SPACE ; Blank space (zero)
 	ldx #17
@@ -493,13 +590,16 @@ RemoveFroggies
 ; ==========================================================================
 ; PRINT FROGS AND LIVES
 ; Display the number of frogs that crossed the river and lives.
+; There are two different character patterns that represent a frog 
+; head used to indicate number of saved frogs. del/$7e and tab/$7f.
+; These are alternated in the line, to make the 8-bit wide image 
+; patterns discernible.  (The same image repeated looks a mess.)
 ; ==========================================================================
 ; 1  |0000000:Score                 Hi:0000000| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; --------------------------------------------------------------------------
 
 PrintFrogsAndLives
-
 	ldx FrogsCrossed    ; Number of times successfully crossed the rivers.
 	beq WriteLives      ; then nothing to display. Skip to do lives.
 
@@ -508,11 +608,11 @@ PrintFrogsAndLives
 	ldx #17
 
 SavedFroggies ; Write an alternating pattern of Frog1, Frog2 characters.
-	lda #I_FROG1        ; On Atari we're using tab/$7f as the frog shape.
+	lda #I_FROG1        ; On Atari we're using tab/$7f as a frog shape.
 	sta SCREEN_SAVED,x  ; Write to screen. 
 	dex                 ; Decrement number of frogs.
-	beq WriteLives
-	lda #I_FROG2        ; On Atari we're using del/$7e as the frog shape.
+	beq WriteLives      ; Reached 0, stop adding frogs.
+	lda #I_FROG2        ; On Atari we're using del/$7e as a frog shape.
 	sta SCREEN_SAVED,x  ; Write to screen. 
 	dex                 ; Decrement number of frogs.
 	bne SavedFroggies   ; then go back and display the next frog counter.
@@ -532,6 +632,7 @@ WriteLives
 ; Force all the colors in the current tables to black.
 ; Used before Fade up to game screen.
 ; --------------------------------------------------------------------------
+
 ZeroCurrentColors
 	ldy #22
 	lda #0
@@ -554,16 +655,20 @@ LoopZeroColors
 ; ==========================================================================
 ; HIDE BUTTON PROMPT                                                   A
 ; ==========================================================================
-; In case of sloppy programmer, tell the VBI to shut off the prompt.
+; Tell the VBI to shut off the prompt.
 ;
-; Uses A
+; Uses A.   Preserves original value, so caller is not affected.
 ; --------------------------------------------------------------------------
 
 HideButtonPrompt
-	lda #0 
-	sta EnablePressAButton  
+	pha                     ; Save whatever is here.
 
-	rts
+	lda #0                  ; 0 == off
+	sta EnablePressAButton  ; Tell VBI this is off.
+
+	pla                     ; Get A back.
+
+	rts                     ; bye.  Are there enough comments here?
 
 
 ; ==========================================================================
@@ -583,39 +688,70 @@ HideButtonPrompt
 ; --------------------------------------------------------------------------
 
 ChangeScreen
-	ldy #0
-	sty EnablePressAButton         ; Always tell the VBI to stop the prompt.
+	jsr HideButtonPrompt           ; Always tell the VBI to stop the prompt.
 
-	sta VBICurrentDL               ; Tell VBI to change to new mode.
+	sta VBICurrentDL               ; Tell VBI to change to new display mode.
 
-LoopChangeScreenWaitForVBI
-	cmp VBICurrentDL               ; Is the value unchanged?
-	beq LoopChangeScreenWaitForVBI ; Yes.
-
-	; The VBI has changed the display and loaded page zero pointers.
-
-	; Display Win, Dead and Game Over are the same display lists.  
+	; While waiting for the DLI to do its part, lets do something useful.
+	; Display Win, Display Dead and Display Game Over are the same display lists.  
 	; The only difference is the LMS to point to the big text.
 	; So, reassign that here.
 	pha                            ; Save Display number for later.
 	tay
-	lda DISPLAYLIST_GFXLMS_TABLE,y
-	beq bCSSkipLMSUpdate           ; If it is 0 it is not 
-	sta GFX_LMS
+	lda DISPLAYLIST_GFXLMS_TABLE,y ; Get the new address.
+	beq bCSSkipLMSUpdate           ; If it is 0 it is not for the update.  Skip this.
+	sta GFX_LMS                    ; Save in the Win/Dead/Over display list.
 
 bCSSkipLMSUpdate
+	pla                            ; Get the display number back.
+
+LoopChangeScreenWaitForVBI         ; Wait for VBI to signal the values changed.
+	cmp VBICurrentDL               ; Is the DISPLAY value the same?
+	beq LoopChangeScreenWaitForVBI ; Yes. Keep looping.
+
+	; The VBI has changed the display and loaded page zero pointers.
 	; Now update the DLI color tables.
-	pla                  ; Get the display number back.
 	tay
 	jsr CopyBaseColors
 
 	rts
 
 
+; ==========================================================================
+; FLIP OFF EVERYTHING (MATCHING)                                   A  Y  X
+; ==========================================================================
+; Turn off a bit in the value keeping track of multiple bits 
+; indicating which values match or do not match.
+;
+; Exit with 0 flag.
+;
+; A  is the mask to apply to the tracking bits.
+; --------------------------------------------------------------------------
+
+EverythingMatches 
+	.byte 0 ; Bits indicate all colors match, then this row is done.
+		    ; Bits $10, $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2, COLPF3
+
+FlipOffEverything
+	and EverythingMatches
+	sta EverythingMatches    ; Save the finished flag.  
+	lda #0                   ; So the caller can BEQ
+	rts
 
 
-EverythingMatches .byte 0 ; Bits indicate all colors match, then this row is done.
-; Bits $10, $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2, COLPF3
+; ==========================================================================
+; INCREMENT GAME COLOR                                            A  Y  X
+; ==========================================================================
+; Merge the current luminance to the target color.
+; Increment the current luminance.
+;
+; Inputs:
+; A = target color
+; Y = current color.
+;
+; Output:
+; A = New current color.
+; --------------------------------------------------------------------------
 
 TempSaveColor   .byte 0
 TempTargetColor .byte 0
@@ -625,7 +761,7 @@ IncrementGameColor      ; Y = current color.   A = target color
 	sta TempTargetColor
 	and #$F0            ; Extract target color part (to be joined to current luminance)
 	sta TempSaveColor   ; Keep color
-	tya                 ; A = Current color.
+	tya                 ; A = Current color from Y.
 	and #$0F            ; Extract current luminance.
 	ora TempSaveColor   ; Join current luminance to target color for new current base color.
 	cmp TempTargetColor ; Is the new save color already the same as the target?
@@ -633,18 +769,13 @@ IncrementGameColor      ; Y = current color.   A = target color
 	tay                 ; Current color back to Y for increments
 	iny
 	iny
-	tya               ; A = new current color.
+	tya                 ; A = new current color.
 SkipIncCurrent
 	rts
 
-FlipOffEverything
-	and EverythingMatches
-	sta EverythingMatches    ; Save the finished flag.  
-	lda #0                   ; So the caller can BEQ
-	rts
 
 ; ==========================================================================
-; INCREMENT COLORS                                                A  Y  X
+; INCREMENT TABLE COLORS                                          A  Y  X
 ; ==========================================================================
 ; Increment color table luminance values until they reach target values.
 ; Exit with 0 flag when all values are matching.
@@ -739,23 +870,25 @@ bDoneWithEverything
 ;
 ; Y  is the DISPLAY_* value (defined elsewhere) for the desired display.
 ; --------------------------------------------------------------------------
+
 CopyBaseColors
 	; I'm so lazy.  Not bothering to be clever.
 	; Just this or that or that or that...
 	; Y was assigned the display number.
 	beq CopyColors_Title ; 0 == DISPLAY_TITLE
 	dey
-	beq CopyColors_Game  ; 1 == DISPLAY_TITLE
+	beq CopyColors_Game  ; 1 == DISPLAY_GAME
 	dey
-	beq CopyColors_Win   ; 2 == DISPLAY_TITLE
+	beq CopyColors_Win   ; 2 == DISPLAY_WIN
 	dey
-	beq CopyColors_Dead  ; 3 == DISPLAY_TITLE
+	beq CopyColors_Dead  ; 3 == DISPLAY_DEAD
 	dey
-	beq CopyColors_Over  ; 4 == DISPLAY_TITLE
+	beq CopyColors_Over  ; 4 == DISPLAY_OVER
 
 	rts                  ; Will never get here, but makes me feel better.
 
 
+; ==========================================================================
 CopyColors_Title
  	ldx #25 ; Title
 
@@ -773,6 +906,7 @@ bLoopCopyColorsToTitle
 	rts  ; ChangeScreen is over.
 
 
+; ==========================================================================
 CopyColors_Game
 	jsr ZeroCurrentColors ; "Game" starts at black screen and is faded up.
 
@@ -795,6 +929,7 @@ bLoopCopyColorsToWin
 	rts ; ChangeScreen is over.
 
 
+; ==========================================================================
 CopyColors_Dead
 	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
 
@@ -811,6 +946,7 @@ bLoopCopyColorsToDead
 	rts ; ChangeScreen is over.
 
 
+; ==========================================================================
 CopyColors_Over
 	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
 
@@ -831,6 +967,7 @@ bLoopCopyColorsTOver
 ; Redundant code section used for two separate loops in the Game Over event.
 ;
 ; --------------------------------------------------------------------------
+
 GameOverGreyScroll
 	sta COLBK_TABLE,y          ; Set line on screen
 	tax                         ; X = A
@@ -847,9 +984,10 @@ GameOverGreyScroll
 ; Redundant code section used for two separate loops in the Dead Frog event.
 ;
 ; --------------------------------------------------------------------------
+
 DeadFrogRedScroll
 	lda DEAD_COLOR_SINE_TABLE,x ; Get another color
-	sta COLBK_TABLE,y          ; Set line on screen
+	sta COLBK_TABLE,y           ; Set line on screen
 	inx                         ; Next color entry
 	iny                         ; Next line on screen.
 
@@ -959,7 +1097,7 @@ ExitFadeColPfToBlack          ; Insure we're leaving with 0 for both colors 0.  
 ; Based on the current frame value and the component value, copy 
 ; the 8 bytes from the animation table to the character image.
 ;
-; ManageBoatAnimations takes care of determing if it is time to animate, 
+; ManageBoatAnimations takes care of determining if it is time to animate, 
 ; and the current component, and the frame counter.
 ; This function just uses the current values and copies the indicated 
 ; character image.
@@ -1140,7 +1278,6 @@ BoatCsetCopy8
 ; -----------------------------------------------------------------------------
 
 libPmgInit
-
 	; get all Players/Missiles off screen.
 	jsr libPmgMoveAllZero
 
@@ -1161,11 +1298,11 @@ libPmgInit
 
 	; Tell GTIA the various Player/Missile options and color controls
 	; Turn on 5th Player (Missiles COLPF3), Multicolor players, and 
-	; Priority bits put 5th Player below regular Players. 
-	lda #FIFTH_PLAYER|MULTICOLOR_PM|%0001 
+	; Priority bits %0001 put 5th Player below regular Players. 
+	lda #FIFTH_PLAYER|MULTICOLOR_PM|%0001
 	sta GPRIOR
 
-	ldx #1 ; Frog Shape
+	ldx #SHAPE_FROG ; Frog Shape
 	jsr libPmgSetColors
 
 	; Player 5 (the Missiles) is COLPF3, White.
@@ -1188,7 +1325,6 @@ libPmgInit
 ; -----------------------------------------------------------------------------
 
 libPmgMoveAllZero
-
 	lda #$00     ; 0 position
 	ldx #$03     ; four objects, 3 to 0
 
@@ -1218,7 +1354,6 @@ bPMAZClearCoords ; Clear coordinates, and shape index.
 ; -----------------------------------------------------------------------------
 
 libPmgClearBitmaps
-
 	lda #$00
 	tax      ; count 0 to 255.
 
@@ -1241,6 +1376,7 @@ bCBloop
 ; 
 ; X == SHAPE Identify  0 (off), 1, 2, 3...
 ; -----------------------------------------------------------------------------
+
 libPmgSetColors
 	txa   ; Object number
 	asl   ; Times 2
@@ -1404,6 +1540,7 @@ ExitDrawShape
 ;==============================================================================
 ; Draw Tomb at new position.
 ; -----------------------------------------------------------------------------
+
 DrawTomb
 	ldx FrogNewPMY            ; New frog Y
 	ldy #22
@@ -1552,6 +1689,7 @@ ExitPositionShape
 ; Move X position.
 ; Set sizes of parts.
 ; -----------------------------------------------------------------------------
+
 PositionTomb
 	ldx FrogNewPMX            ; New frog X...
 
@@ -1594,6 +1732,7 @@ PositionTomb
 ; Move X position.
 ; Set sizes of parts.
 ; -----------------------------------------------------------------------------
+
 PositionSplat
 	ldx FrogNewPMX            ; New frog X...
 
@@ -1626,6 +1765,7 @@ PositionSplat
 ; Move X position.
 ; Set sizes of parts.
 ; -----------------------------------------------------------------------------
+
 PositionFrog
 	ldx FrogNewPMX            ; New frog X...
 
@@ -1685,11 +1825,32 @@ PositionFrog
 ; bUFSkipFrogReposition
 	; rts
 
-; Game-specific Shapes:
-;SHAPE_OFF   = 0
-;SHAPE_FROG  = 1
-;SHAPE_SPLAT = 2
-;SHAPE_TOMB  = 3
+
+
+
+;==============================================================================
+; UPDATE SHAPE SPECS                                           A  X  Y
+;==============================================================================
+; Set all Current values to the New values.
+; 
+; On Exit X is the new shape. Useful if someone wants to call the color update.
+; -----------------------------------------------------------------------------
+
+UpdateShapeSpecs
+	lda FrogNewPMX       ; New Y coord.
+	sta FrogPMX
+
+	lda FrogNewPMY       ; New X coord.
+	sta FrogPMY 
+
+	lda FrogNewRow       ; Also new Frog Row.
+	sta FrogRow
+
+	ldx FrogNewShape    ; And the shape is last.
+	stx FrogShape
+
+	rts
+
 
 ;==============================================================================
 ;											UpdateShape  A  X  Y
@@ -1701,27 +1862,16 @@ PositionFrog
 ; Y positioning different from X positioning, since it must reload memory.
 ; Update current shape = new shape.
 ; -----------------------------------------------------------------------------
+
 UpdateShape
-	; ==================== Part I. Erase old shape at old Y position.
-	jsr EraseShape
+	jsr EraseShape       ; Remove old shape at the old vertical Y position.
 
-bus_PartII ; ============= Part II. Draw NEW shape at new Y position.
-	jsr DrawShape
-	jsr PositionShape
+	jsr DrawShape        ; Draw NEW shape at new vertical Y position.
+	jsr PositionShape    ; Move shape to new horizontal X position. (and set sizes).
 
-bus_PartIII ; ============ Remember new shape.  Update colors.  Remember new coords.
-	ldx FrogNewShape
-	stx FrogShape
-	jsr libPmgSetColors  ; Depends on X = Shape.
-
-	lda FrogNewPMX       ; New Y coord.
-	sta FrogPMX
-
-	lda FrogNewPMY       ; New X coord.
-	sta FrogPMY 
-
-	lda FrogNewRow       ; Also new Frog Row.
-	sta FrogRow
+	jsr UpdateShapeSpecs ; Commit the new shape and the new X and Y coords.
+	;  UpdateShapeSpecs returns the new shape number in X.
+	jsr libPmgSetColors  ; Set colors for this object.  Depends on X = Shape number.
 
 ExitUpdateShape
 	rts

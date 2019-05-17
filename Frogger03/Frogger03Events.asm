@@ -406,6 +406,8 @@ DoSetupForYerDead
 ; VBI does these now.
 ;	jsr AnimateBoats         ; Move the boats around.
 ;	jsr AutoMoveFrog         ; Move the frog relative to boats.
+	jsr CopyScoreToScreen    ; Was in AnimateBoats.  The only thing needed from there.
+
 PlaySoundEffects
 	jsr ToReplayFXWaterOrNot ; Time to replay the water noises?
 
