@@ -133,10 +133,10 @@ MakeDifficultyPointers
 	lda #<BOAT_SHIFT
 	clc
 	adc FrogsCrossedIndex
-	sta BoatMovesPointer
+	sta BoatMovePointer
 	lda #>BOAT_SHIFT
 	adc #0
-	sta BoatMovesPointer+1
+	sta BoatMovePointer+1
 
 	rts
 

@@ -17,8 +17,6 @@
 ; ==========================================================================
 ; The Entry Point.
 ; Called once on program start.
-; Use this to setup Atari display settings to imitate the
-; PET 4032's 40x25 display.
 ; --------------------------------------------------------------------------
 GAMESTART
 	; Atari initialization stuff...

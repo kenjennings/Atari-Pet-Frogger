@@ -472,7 +472,7 @@ EndOfBoatScrolling
 ; Here, finally apply the position and move the frog image.
 MaintainFrogliness
 	lda FrogShape                ; Get the current frog shape.
-	beq NoFrogliness             ; 0 is off, so no movement there at all, so skip all
+	beq NoFrogUpdate             ; 0 is off, so no movement there at all, so skip all
 
 	ldx FrogRow                  ; What screen row is the frog currently on?
 	lda MOVING_ROW_STATES,x      ; Is the current Row  a boat row?
