@@ -17,8 +17,12 @@
 ; ==========================================================================
 ; SCREEN GRAPHICS
 ;
-; All "printed" items declared.  All screen data and various lookups
-; related to real "printed' data.
+; This should contain everything that pertains to changes in visible screen 
+; components.  
+; Managing the score/status lines.
+; Managing scrolling boats/display lists.
+; Maintaining the Player/missile objects, and moving the objects around. 
+; Updating color table contents for each of the displays.
 
 ; The original Pet version mixed printing to the screen with direct
 ; writes to screen memory.  The printing required adjustments, because
@@ -319,7 +323,7 @@ SetSplatteredOnScreen
 
 SetFrogOnScreen
 ;	lda #I_FROG
-	lda #SHAPE_SPLAT
+	lda #SHAPE_FROG
 	sta FrogNewShape
 ;	bne UpdateFrogInScreenMemory
 
@@ -336,13 +340,17 @@ SetFrogOnScreen
 
 RemoveFrogOnScreen
 ;	lda LastCharacter  ; Get the last character (under the frog)
-	lda #0
+	lda #SHAPE_OFF
 	sta FrogNewShape
+	                   ; VBI will stop frog updates with Shape_off.   
+	jsr UpdateShape    ; So, call the update directly.
 
 	rts
 
 
-; N/A  ?  No frog in screen memory, but update P/M graphics?
+; N/A  ?  
+; No frog in screen memory, but update P/M graphics?
+; VBI should be taking care of this at all times.
 ; ==========================================================================
 ; Update the frog image in screen memory.
 ;
@@ -366,13 +374,13 @@ RemoveFrogOnScreen
 ; It could be the frog, splattered frog, or the character under the frog.
 ; --------------------------------------------------------------------------
 
-UpdateFrogInScreenMemory
+;UpdateFrogInScreenMemory
 ;	ldy FrogRealColumn1  ; Current X coordinate
 ;	sta (FrogLocation),y ; Erase the frog with the last character.
 ;	ldy FrogRealColumn2  ; Current X coordinate of alternate scroll location
 ;	sta (FrogLocation),y ; Erase the frog with the last character.
 
-	rts
+;	rts
 
 
 ; N/A  -  No frog in screen memory
@@ -398,6 +406,14 @@ DisplayTitleScreen
 	jsr ChangeScreen     ; Then copy the color tables.
 
 	rts
+
+
+; ==========================================================================
+; Frog Gymnastics.
+; On the title screen the frog moves in a sine path from  +88 to +160.
+; This value is centered at 128, the middle of the screen.
+; Xcoords and Ycoords will be used  
+; --------------------------------------------------------------------------
 
 
 ; ==========================================================================
@@ -1272,6 +1288,250 @@ BoatCsetCopy8
 
 
 ;==============================================================================
+; F I N E   S C R O L L I N G
+;==============================================================================
+
+; ==========================================================================
+; Perpetually Scrolling Credits
+; 
+; The credits appear at the bottom line of the screen and continue 
+; scrolling forever.
+; 
+; Yeah, not entirely the most efficient fine scroll.
+; ANTIC supports fine horizontal scrolling 16 color clocks or 4 text
+; characters at a time.  But, the actual credit text length is variable
+; every time I change the string, so it is more simple code to fine scroll
+; only one character at a time before a coarse scroll.  Still, the way the 
+; Atari coarse scrolls makes this a mind-bogglingly, low-overhead activity
+; compared to any other 8-bit.  Only update one pointer instead of rewriting 
+; the screen data to coarse scroll.
+; --------------------------------------------------------------------------
+FineScrollTheCreditLine          ; scroll the text identifying the perpetrators
+	dec CreditHSCROL             ; Subtract one color clock from the left (aka fine scroll).
+	bne ExitScrollTheCredits     ; It is not yet 0.  Nothing else to do here.
+
+ResetCreditScroll                ; Fine Scroll reached 0, so coarse scroll the text.
+	inc SCROLL_CREDIT_LMS        ; Move text left one character position.
+	lda SCROLL_CREDIT_LMS
+	cmp #<END_OF_CREDITS         ; Did coarse scroll position reach the end of the text?
+	bne RestartCreditHSCROL      ; No.  We are done with coarse scroll, now reset fine scroll. 
+
+	lda #<SCROLLING_CREDIT       ; Yes, restart coarse scroll to the beginning position.
+	sta SCROLL_CREDIT_LMS
+
+RestartCreditHSCROL              ; Reset the 
+	lda #4                       ; horizontal fine 
+	sta CreditHSCROL             ; scrolling.
+
+ExitScrollTheCredits
+	rts
+
+
+; ==========================================================================
+; RIGHT BOAT FINE SCROLLING
+; 
+; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
+; End   Scroll position = LMS + 0,              HSCROL 15
+;
+; X and Y are current row to analyze.
+; --------------------------------------------------------------------------
+RightBoatFineScrolling
+	; Easier to push the frog first before the actual fine scrolling.
+	cpy FrogRow             ; Are we on the frog's row?
+	bne DoFineScrollRight   ; No.  Continue with boat scroll.
+	clc
+	lda FrogNewPMX
+	adc (BoatMovePointer),y ; Increment the position same as HSCROL distance.
+	sta FrogNewPMX
+
+DoFineScrollRight
+	ldx BOAT_HS_TABLE,y     ; X = Get the index into HSCROL table.
+	lda HSCROL_TABLE,x      ; Get value of HSCROL.
+	clc
+	adc (BoatMovePointer),y ; Increment the HSCROL.
+	cmp #16                 ; Shift past scroll limit?
+	bcs DoCoarseScrollRight ; Yes.  Need to coarse scroll.
+	sta HSCROL_TABLE,x      ; No. Save the updated HSCROL.
+	rts                     ; Done.  No coarse scroll this time.
+
+	; HSCROL wrapped over 15.  Time to coarse scroll by subtracting 4 from LMS.
+DoCoarseScrollRight
+;	sec  ; Got here via bcs
+	sbc #16                 ; Fix the new HSCROL
+	sta HSCROL_TABLE,x      ; Save the updated HSCROL.
+	ldx BOAT_LMS_OFFSET,y   ; X = Get the index to the LMS in the Display List for this line.
+	lda PF_LMS1,x           ; Get the actual LMS low byte.
+	sec
+	sbc #4                  ; Subtract 4 from LMS in display list.
+	bpl SaveNewRightLMS     ; If still positive (0), then good to update LMS
+	lda #12                 ; LMS went negative. Reset to start position.
+SaveNewRightLMS
+	sta PF_LMS1,x           ; Update LMS pointer.
+
+EndOfRightBoat
+	rts
+
+
+; ==========================================================================
+; LEFT BOAT FINE SCROLLING
+; 
+; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
+; End   Scroll position = LMS + 12,            HSCROL 0
+;
+; X and Y are current row to analyze/scroll.
+; --------------------------------------------------------------------------
+LeftBoatFineScrolling
+	; Easier to push the frog first before the actual fine scrolling.
+	cpy FrogRow             ; Are we on the frog's row?
+	bne DoFineScrollLeft    ; No.  Continue with boat scroll.
+	sec
+	lda FrogNewPMX
+	sbc (BoatMovePointer),y ; Increment the position same as HSCROL distance.
+	sta FrogNewPMX
+
+DoFineScrollLeft
+	ldx BOAT_HS_TABLE,y     ; X = Get the index into HSCROL table.
+	lda HSCROL_TABLE,x      ; Get value of HSCROL.
+	sec
+	sbc (BoatMovePointer),y ; Decrement the HSCROL
+	bmi DoCoarseScrollLeft  ; It went negative, must reset and coarse scroll
+	sta HSCROL_TABLE,x      ; It's OK. Save the updated HSCROL.
+	rts                     ; Done.  No coarse scroll this time.
+
+	; HSCROL wrapped below 0.  Time to coarse scroll by Adding 4 to LMS.
+DoCoarseScrollLeft
+	adc #16                 ; Re-wrap over 0 into the positive.
+	sta HSCROL_TABLE,x      ; Save the updated HSCROL.
+	ldx BOAT_LMS_OFFSET,y   ; X = Get the index to the LMS in the Display List for this line.
+	lda PF_LMS2,x           ; Get the actual LMS low byte.
+	clc
+	adc #4                  ; Add 4 to LMS in display list.
+	cmp #13                 ; Is it greater than max (12)? 
+	bcc SaveNewLeftLMS      ; No.  Good to update LMS.
+	lda #0                  ; LMS greater than 12. Reset to start position.
+SaveNewLeftLMS
+	sta PF_LMS2,x           ; Update LMS pointer.
+
+EndOfLeftBoat
+	rts
+
+
+;==============================================================================
+; P R E S S   J O Y S T I C K   B U T T O N
+;==============================================================================
+
+; ==========================================================================
+; TOGGLE PressAButtonState 
+; --------------------------------------------------------------------------
+TogglePressAButtonState
+	inc PressAButtonState    ; Add 1.  (says Capt Obvious)
+	lda PressAButtonState
+	and #1                   ; Keep only lowest bit -- 0, 1, 0, 1, 0, 1...
+	sta PressAButtonState
+
+	rts
+
+
+; ==========================================================================
+; TOGGLE BUTTON PROMPT
+; Fade the prompt colors up and down. 
+;
+; PressAButtonState...
+; If  0, then fading background down to dark.  (and text light)  
+; If  1, then fading background up to light  (and text dark) 
+; When background reaches 0 luminance change the color.
+;
+; On entry, the first choice may end up being black/white.  
+; The code generally tries to exclude black/white, but on 
+; entry this may occur depending on prior state. (fadeouts, etc.)
+;
+; A  is used for background color
+; X  is used for text color.
+; --------------------------------------------------------------------------
+ToggleButtonPrompt
+	lda #BLINK_SPEED            ; Text Fading speed for prompt
+	sta PressAButtonFrames      ; Reset the frame counter.
+
+	lda PressAButtonState       ; Up or down?
+	bne PromptFadeUp            ; 1 == up.
+
+	; Prompt Fading the background down.
+	lda PressAButtonColor         ; Get the current background color.
+	AND #$0F                    ; Look at only the luminance.
+	bne RegularPromptFadeDown   ; Not 0 yet, do a normal job on it.
+
+SetNewPromptColor
+	lda RANDOM                  ; A random color and then prevent same 
+	eor PressAButtonColor         ; value by chewing on it with the original color.
+	and #$F0                    ; Mask out the luminance for Dark.
+	beq SetNewPromptColor       ; Do again if black/color 0 turned up
+	sta PressAButtonColor         ; Set background.
+	jsr TogglePressAButtonState ; Change fading mode to up (1)
+	bne SetTextAsInverse        ; Text Brightness inverse from the background
+
+RegularPromptFadeDown
+	dec PressAButtonColor         ; Subtract 1 from the color (which is the luminance)
+	jmp SetTextAsInverse        ; And reset the text to accordingly.
+
+PromptFadeUp
+	lda PressAButtonColor
+	AND #$0F                    ; Look at only the luminance.
+	cmp #$0F                    ; Is it is at max luminance now?
+	bne RegularPromptFadeUp     ; No, do the usual fade.
+
+	jsr TogglePressAButtonState ; Change fading mode to down.
+	rts
+
+RegularPromptFadeUp
+	inc PressAButtonColor         ; Add 1 to the color (which is the luminance)
+	; and fall into setting the text luminance setup....
+
+SetTextAsInverse  ; Make the text luminance the opposite of the background.
+	lda PressAButtonColor         ; Background color...
+	eor #$0F                    ; Not (!) the background color's luminance.
+	sta PressAButtonText         ; Use as the text's luminance.
+	rts
+
+
+; ==========================================================================
+; RUN PROMPT FOR BUTTON
+; Maintain blinking timer.
+; Update/blink text on line 23.
+; Return 0/BEQ when the any key is not pressed.
+; Return !0/BNE when the any key is pressed.
+;
+; On Exit:
+; A  contains key press.
+; CPU flags are comparison of key value to $FF which means no key press.
+; --------------------------------------------------------------------------
+RunPromptForButton
+	lda #1
+	sta EnablePressAButton   ; Tell VBI to the prompt flashing is enabled.
+
+	jsr CheckInput           ; Get input. Non Zero means there is input.
+	and #%00010000           ; Strip it down to only the joystick button.
+	beq ExitRunPrompt        ; If 0, then do not play sound.
+
+	ldx #2                   ; Button pressed. Set Pokey channel 2 to tink sound.
+	ldy #SOUND_TINK
+	jsr SetSound 
+
+	lda #%00010000       ; Set the button is pressed.
+
+ExitRunPrompt
+	rts
+
+
+;==============================================================================
+; P L A Y E R / M I S S I L E   G R A P H I C S
+;==============================================================================
+; Game-specific Shapes:
+; SHAPE_OFF   = 0
+; SHAPE_FROG  = 1
+; SHAPE_SPLAT = 2
+; SHAPE_TOMB  = 3
+
+;==============================================================================
 ;												PmgInit  A  X  Y
 ;==============================================================================
 ; One-time setup tasks to do Player/Missile graphics.
@@ -1395,11 +1655,27 @@ libPmgSetColors
 	rts
 
 
-; Game-specific Shapes:
-;SHAPE_OFF   = 0
-;SHAPE_FROG  = 1
-;SHAPE_SPLAT = 2
-;SHAPE_TOMB  = 3
+;==============================================================================
+;											CheckRidetheBoat
+;==============================================================================
+; Remarkably, collision processing the prior frame is utterly trivial.
+; If frog parts 1 or part 2 (Player 0 or 1) are touching the colored 
+; lines on the boat, then the frog is safe.  
+; -----------------------------------------------------------------------------
+CheckRideTheBoat
+	lda FrogSafety               ; Is the frog already dead ?
+	bne ExitCheckRideTheBoat     ; Yes.   No need to check.
+
+	lda P0PF                     ; Get Player 0 collision with playfield
+	ora P1PF                     ; Add Player 1 collision 
+	and #COLPMF2_BIT             ; Is there collision with COLPF2 (Lines on the boats)
+	bne ExitCheckRideTheBoat     ; Yes.  Frog is safe.
+
+	; Oops.   This frog is off a boat.  Frog should die here but still be dragged by the boats.
+	inc FrogSafety               ; It is MAIN's job to change the image.
+
+ExitCheckRideTheBoat
+	rts
 
 
 ;==============================================================================
@@ -1411,6 +1687,14 @@ libPmgSetColors
 EraseShape
 	lda FrogShape
 	beq ExitEraseShape  ; 0 is off.
+
+	; Note that if there is animation here is where the frame change 
+	; would be evaluated to be followed by the position check if the 
+	; frame does not change.
+
+	ldy FrogNewPMY      ; Get new position.
+	cpy FrogPMY         ; Is the the same as the old position?
+	beq ExitEraseShape  ; Yes.  Nothing to erase here.
 
 	cmp #SHAPE_FROG
 	bne bes_Test2
@@ -1514,6 +1798,14 @@ DrawShape
 	lda FrogNewShape
 	beq ExitDrawShape  ; 0 is off.
 
+	; Note that if there is animation here is where the frame change 
+	; would be evaluated to be followed by the position check if the 
+	; frame does not change.
+
+	ldy FrogNewPMY      ; Get new position.
+	cpy FrogPMY         ; Is the the same as the old position?
+	beq ExitDrawShape   ; Yes.  Nothing to draw here.
+
 	cmp #SHAPE_FROG
 	bne bds_Test2
 	jsr DrawFrog
@@ -1526,7 +1818,7 @@ bds_Test2
 	jmp ExitDrawShape
 
 bds_Test3
-	cmp #SHAPE_SPLAT
+	cmp #SHAPE_TOMB
 	bne ExitDrawShape
 	jsr DrawTomb
 
@@ -1661,6 +1953,14 @@ bLoopDF_DrawFrog
 PositionShape
 	lda FrogNewShape
 	beq ExitPositionShape  ; 0 is off.
+
+	; Note that if there is animation here is where the frame change 
+	; would be evaluated to be followed by the position check if the 
+	; frame does not change.
+
+	ldy FrogNewPMX         ; Get new position.
+	cpy FrogPMX            ; Is the the same as the old position?
+	beq ExitPositionShape  ; Yes.  Nothing to draw here.
 
 	cmp #SHAPE_FROG
 	bne bps_Test2
@@ -1874,5 +2174,34 @@ UpdateShape
 	jsr libPmgSetColors  ; Set colors for this object.  Depends on X = Shape number.
 
 ExitUpdateShape
+	rts
+
+
+;==============================================================================
+;											ProcessNewShapePosition
+;==============================================================================
+; Limit new positions to the game playfield area.
+; Call the main routine to redraw the object.
+; -----------------------------------------------------------------------------
+
+ProcessNewShapePosition
+	lda FrogNewPMX               ; Is the new X different
+	cmp #MIN_FROGX               ; Is PM X smaller than the minimum?
+	bcs CheckHPOSMax             ; No.  
+
+	lda #MIN_FROGX               ; Yes.  Reset X
+	sta FrogNewPMX               ; to the minimum.
+	bne UpdateTheFrog            ; render it.
+
+CheckHPOSMax
+	cmp #MAX_FROGX+1             ; Is PM X bigger than the maximum?
+	bcc UpdateTheFrog            ; No.
+
+	lda #MAX_FROGX               ; Yes.  Reset X
+	sta FrogNewPMX               ; to the maximum.
+
+UpdateTheFrog
+	jsr UpdateShape 	; then FrogPMX == FrogNewPMX. FrogPMY == FrogNewPMY. FrogRow=FrogNewRow.
+
 	rts
 

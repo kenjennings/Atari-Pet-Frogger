@@ -255,7 +255,7 @@ FrogMoveUp
 	sbc #9         ; 9 scan lines per row.
 	sta FrogNewPMY ; New location is one row higher.
 
-	dec FrogRow
+	dec FrogNewRow
 ;	ldx FrogRow
 
 ;;	lda PLAYFIELD_MEM_LO_TABLE,x
@@ -263,7 +263,7 @@ FrogMoveUp
 ;;	lda PLAYFIELD_MEM_HI_TABLE,x
 ;	sta FrogLocation+1
 
-	ldx FrogRow ; Make sure CPU flags reflect X = 0 or !0
+	ldx FrogNewRow ; Make sure CPU flags reflect X = 0 or !0
 
 	rts
 
@@ -322,13 +322,15 @@ FrogMoveUp
 	rts
 
 
-	; This does not have direct purpose.
-	; Frog Death occurs when 
-	; 1) Frog is on a boat row, and there is no collision with 
-	;    the special boat color.
-	; 2) Frog is on a boat row, and the automatic movement would move
-	;    the frog past the minimum or maximum screen position.
-
+; This does not have direct purpose.
+; VBI detects the conditions for Frog Death: 
+; 1) Frog is on a boat row, and there is no collision with 
+;    the special boat color.
+; 2) Frog is on a boat row, and the automatic movement would move
+;    the frog past the minimum or maximum screen position.
+; When these occur the VBI sets FrogSafety.
+; Main is expected to observe FrogSafety and engage the Frog Death.
+; 
 ; ==========================================================================
 ; ANTICIPATE FROG DEATH
 ; If the boat moves will the frog die?
@@ -348,28 +350,31 @@ FrogMoveUp
 ; --------------------------------------------------------------------------
 AnticipateFrogDeath
 ;	ldy FrogColumn          ; Logical position (where visible on screen)
-	ldx FrogRow             ; Get the current row number.
-	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
-	beq ExitFrogNowAlive    ; Is it 0?  Beach. Nothing to do.  Bail.
-	bpl CheckFrogGoRight    ; is it $1?  then check right move.
+;	ldx FrogRow             ; Get the current row number.
+;	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
+;	beq ExitFrogNowAlive    ; Is it 0?  Beach. Nothing to do.  Bail.
+;	bpl CheckFrogGoRight    ; is it $1?  then check right move.
 
 ; Check Frog Go Left
-	cpy #0
-	bne ExitFrogNowAlive      ; Not at limit means frog is still alive.
-	beq FrogDemiseByWallSplat ; At zero means frog will leave screen.
+;	cpy #0
+;	bne ExitFrogNowAlive      ; Not at limit means frog is still alive.
+;	beq FrogDemiseByWallSplat ; At zero means frog will leave screen.
 
-CheckFrogGoRight
-	cpy #39                   ; 39 is limit or frog would leave screen
-	bne ExitFrogNowAlive      ; Not at limit means frog is still alive.
+;CheckFrogGoRight
+;	cpy #39                   ; 39 is limit or frog would leave screen
+;	bne ExitFrogNowAlive      ; Not at limit means frog is still alive.
 
-FrogDemiseByWallSplat
-	inc FrogSafety            ; Schrodinger's frog is known to be dead.
+;FrogDemiseByWallSplat
+;	inc FrogSafety            ; Schrodinger's frog is known to be dead.
 
-ExitFrogNowAlive
+;ExitFrogNowAlive
 	lda FrogSafety            ; branching here is no change, so we assume frog is alive.
 	rts
 
 
+; This is N/A for the game.
+; The VBI now moves the frog with the boats.
+; Main only need wait for FrogSafety to be flagged.
 ; ==========================================================================
 ; AUTO MOVE FROG
 ; Process automagical movement on the frog in the moving boat lines
@@ -385,22 +390,25 @@ ExitFrogNowAlive
 ; --------------------------------------------------------------------------
 AutoMoveFrog
 ;	ldy FrogColumn          ; Logical position (where visible on screen)
-	ldx FrogRow             ; Get the current row number
-	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
-	beq ExitAutoMoveFrog    ; Is it 0?  Nothing to do.  Bail.
-	bpl AutoFrogRight       ; is it $1?  then automatic right move.
+;	ldx FrogRow             ; Get the current row number
+;	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
+;	beq ExitAutoMoveFrog    ; Is it 0?  Nothing to do.  Bail.
+;	bpl AutoFrogRight       ; is it $1?  then automatic right move.
 
 ; Auto Frog Left
 ;	dec FrogColumn            ; It is not 0, so move Frog left one character
-	rts                       ; Done, successful move.
+;	rts                       ; Done, successful move.
 
-AutoFrogRight
+;AutoFrogRight
 ;	inc FrogColumn            ; Move Frog right one character
 
-ExitAutoMoveFrog
+;ExitAutoMoveFrog
 	rts                       ; Done, successful move.
 
 
+; This is managed by the VBI moving the boats.
+; Whatever the value of Frogs crossed is sets the boat movement
+; speed when the next frame counter is acquired for the boat row.
 ; ==========================================================================
 ; SET BOAT SPEED
 ; Set the animation timer for the game screen based on the
@@ -413,14 +421,14 @@ SetBoatSpeed
 
 ;	mRegSaveAX
 
-	ldx FrogsCrossed
-	cpx #MAX_FROG_SPEED+1         ; 0 to 10 OK.  11 not so much
-	bcc FrogsCrossedIsOK
-	ldx #MAX_FROG_SPEED
+;	ldx FrogsCrossed
+;	cpx #MAX_FROG_SPEED+1         ; 0 to 10 OK.  11 not so much
+;	bcc FrogsCrossedIsOK
+;	ldx #MAX_FROG_SPEED
 
 FrogsCrossedIsOK
-	lda BOAT_FRAMES,x             ; Reset Frame counter based on number of frogs saves.
-	sta BoatFrames
+;	lda BOAT_FRAMES,x             ; Reset Frame counter based on number of frogs saves.
+;	sta BoatFrames
 
 ;	jsr ResetTimers
 

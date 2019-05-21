@@ -369,6 +369,7 @@ MyDeferredVBI
 	beq DoAnimateClock           ; Yes, do not decrement it again.
 	dec InputScanFrames          ; Minus 1.
 
+; ======== Manage Main code's timer.  Decrement while non-zero. ========
 DoAnimateClock
 	lda AnimateFrames            ; Is animation countdown already 0?
 	beq EndOfClockChecks         ; Yes, do not decrement now.
@@ -376,32 +377,14 @@ DoAnimateClock
 
 EndOfClockChecks
 
-; ======== Manage scrolling the current credit line ========
-ScrollTheCreditLine              ; scroll the text identifying the perpetrators
+; ======== Manage scrolling the Credits text ========
+ScrollTheCreditLine              ; Scroll the text identifying the perpetrators
 	dec ScrollCounter            ; subtract from scroll delay counter
 	bne EndOfScrollTheCredits    ; Not 0 yet, so no scrolling.
 	lda #2                       ; Reset counter to original value.
 	sta ScrollCounter
-	; Yeah, ANTIC supports fine horizontal scrolling 16 color clocks or 
-	; 4 text characters at a time.  But, the actual credit length is 
-	; variable every time I change the string, so this is more simple to 
-	; code by fine scrolling only a character at a time.  It is not like 
-	; the Atari needs to rewrite the data to coarse scroll.
-	dec CreditHSCROL             ; Subtract one color clock from the left (aka fine scroll).
-	bne EndOfScrollTheCredits    ; It is not yet 0.  Nothing else to do here.
 
-ResetCreditScroll                ; Fine Scroll reached 0, so coarse scroll the text.
-	inc SCROLL_CREDIT_LMS        ; Move text left one character position.
-	lda SCROLL_CREDIT_LMS
-	cmp #<END_OF_CREDITS         ; Did coarse scroll position reach the end of the text?
-	bne RestartCreditHSCROL      ; No.  We are done with coarse scroll, now reset fine scroll. 
-
-	lda #<SCROLLING_CREDIT       ; Yes, restart coarse scroll to the beginning position.
-	sta SCROLL_CREDIT_LMS
-
-RestartCreditHSCROL              ; Reset the 
-	lda #4                       ; horizontal fine 
-	sta CreditHSCROL             ; scrolling.
+	jsr FineScrollTheCreditLine  ; Do the business.
 
 EndOfScrollTheCredits
 
@@ -422,6 +405,7 @@ ManageBoatScrolling
 
 	ldy #1                        ; Current Row.  Row 0 is the safe zone, no scrolling happens there.
 
+; Common code to each row. 
 ; Loop through rows.
 ; If is is a moving row, then check the row's timer/frame counter.
 ; If the timer is over, then reset the timer and fine scroll the row (moving the frog with it as needed.)
@@ -432,17 +416,20 @@ LoopBoatScrolling
 
 	lda MOVING_ROW_STATES,y       ; Get the current Row State
 	beq EndOfScrollLoop           ; Not a scrolling row.  Go to next row.
-
+	php                           ; Save the + or - status until later.
+	; We know this is either left or right, so this block is common code
+	; to update the row's speed counter based on the row entry.
 	lda CurrentBoatFrames,x       ; Get the row's frame delay value.
 	beq ResetBoatFrames           ; If BoatFrames is 0, time to make the donuts.
 	dec CurrentBoatFrames,x       ; Not zero, so decrement
+	plp                           ; oops.  got to dispose of that.
 	jmp EndOfScrollLoop           
 
 ResetBoatFrames
 	lda (BoatFramesPointer),y     ; Get master value for row's frame delay
 	sta CurrentBoatFrames,x       ; Restart the row's frame speed delay.
 
-	lda MOVING_ROW_STATES,y       ; Get the current Row State (again.)
+	plp                           ; Get the current Row State (again.)
 	bmi LeftBoatScroll            ; 0 already bypassed.  1 = Right, -1 (FF) = Left.
 
 	jsr RightBoatFineScrolling    ; Do Right Boat Fine Scrolling.  (and frog X update) 
@@ -451,13 +438,7 @@ ResetBoatFrames
 LeftBoatScroll
 	jsr LeftBoatFineScrolling     ; Do Left Boat Fine Scrolling.  (and frog X update) 
 
-EndOfScrollLoop                   ; end of this row.  go to the next one.
-;	inc CurrentRowLoop      ; Next Row.
-;	ldx CurrentRowLoop      ; Get row
-;	cpx #18                 ; Last entry is beach.  Do not bother to go further.
-;	beq MaintainFrogliness  ; Done.  Go do frog positioning.
-;	ldy CurrentRowLoop      ; Get row in Y too, due to needing different 6502 addressing modes.
-
+EndOfScrollLoop                  ; end of this row.  go to the next one.
 	iny                          ; Y reliably has Row.  X was changed.
 	cpy #18                      ; Last entry is beach.  Do not bother to go further.
 	bne LoopBoatScrolling        ; Not 18.  Process the next row.
@@ -471,44 +452,25 @@ EndOfBoatScrolling
 ; input.  The VBI change position if the frog was on a scrolling boat row.
 ; Here, finally apply the position and move the frog image.
 MaintainFrogliness
-	lda FrogShape                ; Get the current frog shape.
+	lda FrogNewShape             ; Get the new frog shape.
 	beq NoFrogUpdate             ; 0 is off, so no movement there at all, so skip all
 
 	ldx FrogRow                  ; What screen row is the frog currently on?
-	lda MOVING_ROW_STATES,x      ; Is the current Row  a boat row?
+	lda MOVING_ROW_STATES,x      ; Is the current Row a boat row?
 	beq SimplyUpdatePosition     ; No. So no collision processing. 
 
-	lda P0PF                     ; Get Player 0 collision with playfield
-	ora P1PF                     ; Add Player 1 collision 
-	and #COLPMF2_BIT             ; Is there collision with COLPF2 (Lines on the boats)
-	bne SimplyUpdatePosition     ; Yes.  Frog is safe.
-
-	; Oops.   This frog is off a boat.  Frog should die here but still be dragged by the boats.
-	inc FrogSafety               ; It is MAIN's job to change the image.
+	jsr CheckRideTheBoat         ; Make sure the frog is riding the boat.  Otherwise it dies.
 
 ; ==== Frog and boat position gyrations are done.  ==== Is there actual movement?
 SimplyUpdatePosition
-	lda FrogNewPMX               ; Is the new X different
-	cmp #MIN_FROGX               ; Is PM X smaller than the minimum?
-	bcs CheckHPOSMax             ; No.  
-
-	lda #MIN_FROGX               ; Yes.  Reset X
-	sta FrogNewPMX               ; to the minimum.
-
-CheckHPOSMax
-	cmp #MAX_FROGX+1             ; Is PM X bigger than the maximum?
-	bcc UpdateTheFrog            ; No.
-
-	lda #MAX_FROGX               ; Yes.  Reset X
-	sta FrogNewPMX               ; to the maximum.
-
-UpdateTheFrog
-	jsr UpdateShape 	; then FrogPMX == FrogNewPMX. FrogPMY == FrogNewPMY. FrogRow=FrogNewRow.
+	jsr ProcessNewShapePosition ; limit object to screen.  redraw the object.
 
 NoFrogUpdate
 
 
 ; ======== Animate Boat Components ========
+; Parts of the boats are animated to look like they're moving 
+; through the water.
 ; When BoatyMcBoatCounter is 0, then animate based on BoatyComponent
 ; 0 = Right Boat Front
 ; 1 = Right Boat Back
@@ -520,6 +482,8 @@ NoFrogUpdate
 ManageBoatAnimations
 	dec BoatyMcBoatCounter           ; subtract from scroll delay counter
 	bne ExitBoatyness                ; Not 0 yet, so no animation.
+
+	; One of the boat components will be animated. 
 	lda #2                           ; Reset counter to original value.
 	sta BoatyMcBoatCounter
 
@@ -574,198 +538,7 @@ ExitMyDeferredVBI
 
 
 
-; ==========================================================================
-; RIGHT BOAT FINE SCROLLING
-; 
-; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
-; End   Scroll position = LMS + 0,              HSCROL 15
-;
-; X and Y are current row to analyze.
-; --------------------------------------------------------------------------
-RightBoatFineScrolling
-	; Easier to push the frog first before the actual fine scrolling.
-	cpy FrogRow             ; Are we on the frog's row?
-	bne DoFineScrollRight   ; No.  Continue with boat scroll.
-	clc
-	lda FrogNewPMX
-	adc (BoatMovePointer),y ; Increment the position same as HSCROL distance.
-	sta FrogNewPMX
-
-DoFineScrollRight
-	ldx BOAT_HS_TABLE,y     ; X = Get the index into HSCROL table.
-	lda HSCROL_TABLE,x      ; Get value of HSCROL.
-	clc
-	adc (BoatMovePointer),y ; Increment the HSCROL.
-	cmp #16                 ; Shift past scroll limit?
-	bcs DoCoarseScrollRight ; Yes.  Need to coarse scroll.
-	sta HSCROL_TABLE,x      ; No. Save the updated HSCROL.
-	rts                     ; Done.  No coarse scroll this time.
-
-	; HSCROL wrapped over 15.  Time to coarse scroll by subtracting 4 from LMS.
-DoCoarseScrollRight
-;	sec  ; Got here via bcs
-	sbc #16                 ; Fix the new HSCROL
-	sta HSCROL_TABLE,x      ; Save the updated HSCROL.
-	ldx BOAT_LMS_OFFSET,y   ; X = Get the index to the LMS in the Display List for this line.
-	lda PF_LMS1,x           ; Get the actual LMS low byte.
-	sec
-	sbc #4                  ; Subtract 4 from LMS in display list.
-	bpl SaveNewRightLMS     ; If still positive (0), then good to update LMS
-	lda #12                 ; LMS went negative. Reset to start position.
-SaveNewRightLMS
-	sta PF_LMS1,x           ; Update LMS pointer.
-
-EndOfRightBoat
-	rts
-
-
-; ==========================================================================
-; LEFT BOAT FINE SCROLLING
-; 
-; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
-; End   Scroll position = LMS + 12,            HSCROL 0
-;
-; X and Y are current row to analyze/scroll.
-; --------------------------------------------------------------------------
-LeftBoatFineScrolling
-	; Easier to push the frog first before the actual fine scrolling.
-	cpy FrogRow             ; Are we on the frog's row?
-	bne DoFineScrollLeft    ; No.  Continue with boat scroll.
-	sec
-	lda FrogNewPMX
-	sbc (BoatMovePointer),y ; Increment the position same as HSCROL distance.
-	sta FrogNewPMX
-
-DoFineScrollLeft
-	ldx BOAT_HS_TABLE,y     ; X = Get the index into HSCROL table.
-	lda HSCROL_TABLE,x      ; Get value of HSCROL.
-	sec
-	sbc (BoatMovePointer),y ; Decrement the HSCROL
-	bmi DoCoarseScrollLeft  ; It went negative, must reset and coarse scroll
-	sta HSCROL_TABLE,x      ; It's OK. Save the updated HSCROL.
-	rts                     ; Done.  No coarse scroll this time.
-
-	; HSCROL wrapped below 0.  Time to coarse scroll by Adding 4 to LMS.
-DoCoarseScrollLeft
-	adc #16                 ; Re-wrap over 0 into the positive.
-	sta HSCROL_TABLE,x      ; Save the updated HSCROL.
-	ldx BOAT_LMS_OFFSET,y   ; X = Get the index to the LMS in the Display List for this line.
-	lda PF_LMS2,x           ; Get the actual LMS low byte.
-	clc
-	adc #4                  ; Add 4 to LMS in display list.
-	cmp #13                 ; Is it greater than max (12)? 
-	bcc SaveNewLeftLMS      ; No.  Good to update LMS.
-	lda #0                  ; LMS greater than 12. Reset to start position.
-SaveNewLeftLMS
-	sta PF_LMS2,x           ; Update LMS pointer.
-
-EndOfLeftBoat
-	rts
-
-
-; ==========================================================================
-; TOGGLE PressAButtonState 
-; --------------------------------------------------------------------------
-TogglePressAButtonState
-	inc PressAButtonState    ; Add 1.  (says Capt Obvious)
-	lda PressAButtonState
-	and #1                   ; Keep only lowest bit -- 0, 1, 0, 1, 0, 1...
-	sta PressAButtonState
-
-	rts
-
-
-; ==========================================================================
-; TOGGLE BUTTON PROMPT
-; Fade the prompt colors up and down. 
-;
-; PressAButtonState...
-; If  0, then fading background down to dark.  (and text light)  
-; If  1, then fading background up to light  (and text dark) 
-; When background reaches 0 luminance change the color.
-;
-; On entry, the first choice may end up being black/white.  
-; The code generally tries to exclude black/white, but on 
-; entry this may occur depending on prior state. (fadeouts, etc.)
-;
-; A  is used for background color
-; X  is used for text color.
-; --------------------------------------------------------------------------
-ToggleButtonPrompt
-	lda #BLINK_SPEED            ; Text Fading speed for prompt
-	sta PressAButtonFrames      ; Reset the frame counter.
-
-	lda PressAButtonState       ; Up or down?
-	bne PromptFadeUp            ; 1 == up.
-
-	; Prompt Fading the background down.
-	lda PressAButtonColor         ; Get the current background color.
-	AND #$0F                    ; Look at only the luminance.
-	bne RegularPromptFadeDown   ; Not 0 yet, do a normal job on it.
-
-SetNewPromptColor
-	lda RANDOM                  ; A random color and then prevent same 
-	eor PressAButtonColor         ; value by chewing on it with the original color.
-	and #$F0                    ; Mask out the luminance for Dark.
-	beq SetNewPromptColor       ; Do again if black/color 0 turned up
-	sta PressAButtonColor         ; Set background.
-	jsr TogglePressAButtonState ; Change fading mode to up (1)
-	bne SetTextAsInverse        ; Text Brightness inverse from the background
-
-RegularPromptFadeDown
-	dec PressAButtonColor         ; Subtract 1 from the color (which is the luminance)
-	jmp SetTextAsInverse        ; And reset the text to accordingly.
-
-PromptFadeUp
-	lda PressAButtonColor
-	AND #$0F                    ; Look at only the luminance.
-	cmp #$0F                    ; Is it is at max luminance now?
-	bne RegularPromptFadeUp     ; No, do the usual fade.
-
-	jsr TogglePressAButtonState ; Change fading mode to down.
-	rts
-
-RegularPromptFadeUp
-	inc PressAButtonColor         ; Add 1 to the color (which is the luminance)
-	; and fall into setting the text luminance setup....
-
-SetTextAsInverse  ; Make the text luminance the opposite of the background.
-	lda PressAButtonColor         ; Background color...
-	eor #$0F                    ; Not (!) the background color's luminance.
-	sta PressAButtonText         ; Use as the text's luminance.
-	rts
-
-
-; ==========================================================================
-; RUN PROMPT FOR BUTTON
-; Maintain blinking timer.
-; Update/blink text on line 23.
-; Return 0/BEQ when the any key is not pressed.
-; Return !0/BNE when the any key is pressed.
-;
-; On Exit:
-; A  contains key press.
-; CPU flags are comparison of key value to $FF which means no key press.
-; --------------------------------------------------------------------------
-RunPromptForButton
-	lda #1
-	sta EnablePressAButton   ; Tell VBI to the prompt flashing is enabled.
-
-	jsr CheckInput           ; Get input. Non Zero means there is input.
-	and #%00010000           ; Strip it down to only the joystick button.
-	beq ExitRunPrompt        ; If 0, then do not play sound.
-
-	ldx #2                   ; Button pressed. Set Pokey channel 2 to tink sound.
-	ldy #SOUND_TINK
-	jsr SetSound 
-
-	lda #%00010000       ; Set the button is pressed.
-
-ExitRunPrompt
-	rts
-
-
-	.align $0100 ; Get the DLIs to start in the same page to simplify chaining.
+	.align $0100 ; Make the DLIs start in the same page to simplify chaining.
 
 ;==============================================================================
 ;                                                           MyDLI

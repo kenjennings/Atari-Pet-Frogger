@@ -1413,6 +1413,9 @@ CHARACTER_SET
 ;==================================================================================================
 
 ; Here we reached the end of the 1K for the Character set, so the rest of this is a new page...
+; None of this is directly displayed.   These are individual frames that are copied to the 
+; real character position above to animate the boat parts.
+
 
 LEFT_BOAT_FRONT_ANIM ; 2 images, each used 4 times with one frame from LEFT_BOAT_WATER_ANIM (16 bytes)
 ; Char $53: ctrl-S 
@@ -1436,6 +1439,7 @@ LEFT_BOAT_FRONT_ANIM ; 2 images, each used 4 times with one frame from LEFT_BOAT
 ; $17: .. ## ## XX 
 ; $55: ## ## ## ## 
 ; Char $55: ctrl-U 
+
 
 LEFT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat. (64 bytes)
 ; Char $4A: ctrl-J 
@@ -1518,7 +1522,6 @@ LEFT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat. (64 bytes
 ; $EA: XX OO OO OO 
 ; $FA: XX XX OO OO 
 ; $FE: XX XX XX OO 
-
 
 
 LEFT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (64 bytes)
@@ -1626,6 +1629,7 @@ RIGHT_BOAT_FRONT_ANIM ; 2 images, each used 4 times with one frame from RIGHT_BO
 ; $D4: XX ## ## .. 
 ; $55: ## ## ## ## 
 
+
 RIGHT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat. (64 bytes)
 ; Char $6A:   j    
   .BYTE $00,$0A,$AA,$AA,$AB,$AF,$BF,$FF
@@ -1708,6 +1712,7 @@ RIGHT_BOAT_WATER_ANIM ; 8 frames, water waves at the front of the boat. (64 byte
 ; $AF: OO OO XX XX 
 ; $BF: OO XX XX XX 
 
+
 RIGHT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (64 bytes)
 ; Char $61:   a    
   .BYTE $00,$00,$00,$00,$00,$00,$33,$5F
@@ -1789,3 +1794,4 @@ RIGHT_BOAT_WAKE_ANIM ; 8 Frames, water behind the engines. (64 bytes)
 ; $C0: XX .. .. .. 
 ; $FF: XX XX XX XX 
 ; $7F: ## XX XX XX 
+

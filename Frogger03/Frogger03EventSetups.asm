@@ -92,7 +92,7 @@ SetupGame
 	lda #0
 	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
 
-	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
+	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled on the game screen.
 
 	lda #18                 ; 18 (dec), number of screen rows of game field.
 	sta FrogNewRow
@@ -101,7 +101,7 @@ SetupGame
 	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
 	sta FrogPMX
 	sta FrogPMY
-	sta FrogShape           ; 0 is "off"
+	sta FrogShape           ; 0 is "off"  (it would already be off by default)
 
 	lda #MID_FROGX          ; Set new X position to middle of screen.
 	sta FrogNewPMX

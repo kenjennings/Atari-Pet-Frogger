@@ -1462,10 +1462,10 @@ PLAYER5_FROG_DATA
 ; . . . .  . 0 0 .    . . . .  . 1 1 .  - 10
 
 PLAYER0_SPLATTER_DATA
-	.by $63 $F7 $F7 $76 $1C $DF $7C $7C $E6 $E7 06
+	.by $63 $F7 $F7 $76 $1C $DF $7C $7C $E6 $E7 $06
 
 PLAYER1_SPLATTER_DATA
-	.by $63 $F7 $F7 $76 $1C $DF $7C $7C $E6 $E7 06
+	.by $63 $F7 $F7 $76 $1C $DF $7C $7C $E6 $E7 $06
 
 
 ; HPOS changes:
