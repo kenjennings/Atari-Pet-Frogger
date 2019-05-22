@@ -782,7 +782,7 @@ GAME_COLPF0_COLORS; 22 entries
 	.by COLOR_AQUA+6      
 	
 	.by COLOR_AQUA+6      ; Beach sky (water)
-;	.by COLOR_ORANGE2+2                                      ; one last Beach.
+
 
 GAME_COLPF1_COLORS ; 22 entries
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
@@ -791,27 +791,27 @@ GAME_COLPF1_COLORS ; 22 entries
 	
 	.by COLOR_ORANGE2+$8     ; beach
 	.by COLOR_PINK+$a
-	.by COLOR_PURPLE+$a
+	.by COLOR_PURPLE+$c
 	
 	.by COLOR_RED_ORANGE+$8 ; beach
 	.by COLOR_PURPLE_BLUE+$a
-	.by COLOR_BLUE_GREEN+$a
+	.by COLOR_BLUE_GREEN+$c
 	
 	.by COLOR_ORANGE2+$8 ; beach
 	.by COLOR_GREEN+$a
-	.by COLOR_YELLOW_GREEN+$a
+	.by COLOR_YELLOW_GREEN+$c
 	
 	.by COLOR_RED_ORANGE+$8 ; beach
-	.by COLOR_YELLOW_GREEN+$a
 	.by COLOR_ORANGE_GREEN+$a
+	.by COLOR_LITE_ORANGE+$c
 	
 	.by COLOR_ORANGE2+$8 ; beach
-	.by COLOR_LITE_ORANGE+$a
 	.by COLOR_ORANGE1+$a
+	.by COLOR_ORANGE2+$c
 	
 	.by COLOR_RED_ORANGE+$8 ; beach
-	.by COLOR_ORANGE2+$a
 	.by COLOR_RED_ORANGE+$a
+	.by COLOR_PINK+$c
 	
 	.by COLOR_RED_ORANGE+$8 ; Last beach
 
@@ -821,31 +821,31 @@ GAME_COLPF2_COLORS ; 24 entries... ?????????????
 	.by COLOR_BLACK                   ; Scores
 	.by COLOR_BLACK                   ; lives, saved frogs.
 	
-	.by COLOR_GREEN+2
-	.by COLOR_YELLOW_GREEN
-	.by COLOR_YELLOW_GREEN+$6
+	.by COLOR_GREEN+2                 ; beach
+	.by COLOR_PINK+$4
+	.by COLOR_PURPLE+$4
 	
-	.by COLOR_RED_ORANGE+2
-	.by COLOR_RED_ORANGE+$4
+	.by COLOR_RED_ORANGE+2            ; beach
+	.by COLOR_PURPLE_BLUE+$4
+	.by COLOR_BLUE_GREEN+$4
+	
+	.by COLOR_ORANGE2+2               ; beach
+	.by COLOR_GREEN+$4
 	.by COLOR_YELLOW_GREEN+$4
 	
-	.by COLOR_ORANGE2+2 
-	.by COLOR_RED_ORANGE+$4
-	.by COLOR_YELLOW_GREEN+$4
+	.by COLOR_RED_ORANGE+2            ; beach
+	.by COLOR_ORANGE_GREEN+$4
+	.by COLOR_LITE_ORANGE+$4
 	
-	.by COLOR_RED_ORANGE+2
-	.by COLOR_RED_ORANGE+$4
-	.by COLOR_YELLOW_GREEN+$4
+	.by COLOR_ORANGE2+2               ; beach
+	.by COLOR_ORANGE1+$4
+	.by COLOR_ORANGE2+$4
 	
-	.by COLOR_ORANGE2+2  
+	.by COLOR_RED_ORANGE+2            ; beach
 	.by COLOR_RED_ORANGE+$4
-	.by COLOR_YELLOW_GREEN+$4
+	.by COLOR_PINK+$4
 	
-	.by COLOR_RED_ORANGE+2 
-	.by COLOR_RED_ORANGE+$4
-	.by COLOR_YELLOW_GREEN+$4
-	
-	.by COLOR_GREEN+2
+	.by COLOR_GREEN+2                 ; last beach
 
 	.by COLOR_BLACK+$0E
 	.by COLOR_BLACK+$0E
@@ -1668,15 +1668,15 @@ BASE_PMCOLORS_TABLE ; When "off", and so multiplication for frog = 1 works.
 	.by 0 0 0 0
 	
 FROG_PMCOLORS_TABLE ; 0, 1, 2, 3
-	.by COLOR_GREEN+$2       ; P0, frog
-	.by COLOR_GREEN+$4       ; P1, frog
+	.by COLOR_GREEN+$4       ; P0, frog
+	.by COLOR_GREEN+$2       ; P1, frog
 	.by COLOR_PURPLE_BLUE+$2 ; P2, Colored eye irises
 	.by COLOR_PINK+$8        ; P3, frog 
 
 
 SPLAT_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_PINK+$4        ; P0, splat
-	.by COLOR_PINK+$8        ; P1, splat
+	.by COLOR_PINK+$2        ; P1, splat
 	.by COLOR_PINK+$6        ; P2, 
 	.by COLOR_PINK+$8        ; P3, 
 

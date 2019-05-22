@@ -19,8 +19,8 @@
 ;
 ; Miscellaneous:
 ; Timer ranges
-; Key Values
-; Tick Tock value,
+; Joystick input,
+; Tick Tock values,
 ; Count downs,
 ; DLI and VBI routines.
 ; Prompt for Button press.
@@ -163,7 +163,7 @@ BOAT_HS_TABLE
 
 
 ; ==========================================================================
-; RESET KEY SCAN TIMER and ANIMATION TIMER
+; RESET INPUT SCAN TIMER and ANIMATION TIMER
 ;
 ; A  is the time to set for animation.
 ; --------------------------------------------------------------------------
@@ -473,12 +473,6 @@ EndOfBoatScrolling
 MaintainFrogliness
 	lda FrogNewShape             ; Get the new frog shape.
 	beq NoFrogUpdate             ; 0 is off, so no movement there at all, so skip all
-
-	ldx FrogRow                  ; What screen row is the frog currently on?
-	lda MOVING_ROW_STATES,x      ; Is the current Row a boat row?
-	beq SimplyUpdatePosition     ; No. So no collision processing. 
-
-	jsr CheckRideTheBoat         ; Make sure the frog is riding the boat.  Otherwise it dies.
 
 ; ==== Frog and boat position gyrations are done.  ==== Is there actual movement?
 SimplyUpdatePosition

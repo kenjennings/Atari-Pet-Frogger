@@ -375,7 +375,15 @@ DisplayTitleScreen
 ; Xcoords and Ycoords will be used  
 ; --------------------------------------------------------------------------
 
-
+FROG_WOBBLE_SINE_TABLE
+	.by $28 $2c $30 $34 $37 $3b $3e $41 
+	.by $44 $47 $49 $4b $4d $4e $4f $50 
+	.by $50 $50 $4f $4e $4d $4b $49 $47 
+	.by $44 $41 $3e $3b $37 $34 $30 $2c 
+	.by $28 $24 $20 $1c $19 $15 $12 $0f 
+	.by $0c $09 $07 $05 $03 $02 $01 $00 
+	.by $00 $00 $01 $02 $03 $05 $07 $09 
+	.by $0c $0f $12 $15 $19 $1c $20 $24 
 
 
 
@@ -390,7 +398,7 @@ DisplayTitleScreen
 DisplayGameScreen
 	mRegSaveAYX             ; Save A and Y and X, so the caller doesn't need to.
 
-	jsr SetBoatSpeed       ; Animation speed set by number of saved frogs
+;	jsr SetBoatSpeed       ; Animation speed set by number of saved frogs
 
 	; Display the current score and number of frogs that crossed the river.
 	jsr CopyScoreToScreen
@@ -454,7 +462,7 @@ RemoveFroggies
 
 	sta FrogsCrossed      ; reset count to 0.
 	sta FrogsCrossedIndex ; and the base index into difficulty arrays
-	jsr SetBoatSpeed      ; just in case
+;	jsr SetBoatSpeed      ; just in case
 
 	rts
 
