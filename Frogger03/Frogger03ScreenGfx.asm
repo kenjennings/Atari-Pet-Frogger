@@ -299,37 +299,40 @@
 ;SHAPE_SPLAT = 2
 ;SHAPE_TOMB  = 3
 
-
 ; ==========================================================================
-; Set the splattered frog on the screen.
+; SET SPLATTERED ON SCREEN
+; ==========================================================================
+; Show the splattered frog image on the screen.
 ;
 ; Write the splat frog character into screen memory.
 ; --------------------------------------------------------------------------
 
 SetSplatteredOnScreen
-;	lda #I_SPLAT
+
 	lda #SHAPE_SPLAT
 	sta FrogNewShape
-;	bne UpdateFrogInScreenMemory
 
 	rts
 
 
 ; ==========================================================================
-; Set the frog on the screen.
+; SET FROG ON SCREEN
+; ==========================================================================
+; Show the frog image on the screen.
 ;
 ; Write the Frog character into screen memory.
 ; --------------------------------------------------------------------------
 
 SetFrogOnScreen
-;	lda #I_FROG
+
 	lda #SHAPE_FROG
 	sta FrogNewShape
-;	bne UpdateFrogInScreenMemory
 
 	rts
 
 
+; ==========================================================================
+; REMOVE FROG ON SCREEN
 ; ==========================================================================
 ; Remove the frog from the screen.
 ;
@@ -339,66 +342,21 @@ SetFrogOnScreen
 ; --------------------------------------------------------------------------
 
 RemoveFrogOnScreen
-;	lda LastCharacter  ; Get the last character (under the frog)
+	jsr EraseShape     ; Remove the current image (assuming it is the frog)
+
 	lda #SHAPE_OFF
-	sta FrogNewShape
-	                   ; VBI will stop frog updates with Shape_off.   
-	jsr UpdateShape    ; So, call the update directly.
+	sta FrogNewShape   ; Assign the current shape as OFF.
+
+                       ; VBI will stop frog updates with Shape_off.   
+;	jsr UpdateShape    ; So, call the update directly.
 
 	rts
 
 
-; N/A  ?  
-; No frog in screen memory, but update P/M graphics?
-; VBI should be taking care of this at all times.
 ; ==========================================================================
-; Update the frog image in screen memory.
-;
-; Score/Lives, and the frog are the only place where screen memory
-; is being changed.  The actual movements of boats does not move in
-; screen memory.  Coarse scrolling is done by updating LMS in the
-; Display List.
-;
-; The 80 characters of scrolling (twice the visible screen width) means
-; there must be two frogs in the screen memory for the current row.
-; One frog at the X location, one at the X location + 40. Whichever one
-; is actually seen on screen depends on current scroll offset.  The scroll
-; offset could be reset to the origin at any time, therefore the frog must
-; be displayed in the adjusted place.
-;
-; In the future the Frog will be a P/M graphics object, and then this
-; discussion is a complete non-issue as moving the frog will only require
-; changing the P/MG HPOS value.
-;
-; A  is the byte value to store.
-; It could be the frog, splattered frog, or the character under the frog.
-; --------------------------------------------------------------------------
-
-;UpdateFrogInScreenMemory
-;	ldy FrogRealColumn1  ; Current X coordinate
-;	sta (FrogLocation),y ; Erase the frog with the last character.
-;	ldy FrogRealColumn2  ; Current X coordinate of alternate scroll location
-;	sta (FrogLocation),y ; Erase the frog with the last character.
-
-;	rts
-
-
-; N/A  -  No frog in screen memory
+; DISPLAY TITLE SCREEN
 ; ==========================================================================
-; Get the character from screen memory where the frog will reside.
-; Save it to lastCharacter to restore as needed.
-; --------------------------------------------------------------------------
-;GetScreenMemoryUnderFrog
-;	ldy FrogRealColumn1
-;	lda (FrogLocation),y
-;	sta lastCharacter
-
-;	rts
-
-
-; ==========================================================================
-; Print the instruction/title screen text.
-; Set state of the text line that is blinking.
+; Show the instruction/title screen.
 ; --------------------------------------------------------------------------
 
 DisplayTitleScreen
@@ -409,6 +367,8 @@ DisplayTitleScreen
 
 
 ; ==========================================================================
+;
+; ==========================================================================
 ; Frog Gymnastics.
 ; On the title screen the frog moves in a sine path from  +88 to +160.
 ; This value is centered at 128, the middle of the screen.
@@ -416,19 +376,19 @@ DisplayTitleScreen
 ; --------------------------------------------------------------------------
 
 
+
+
+
+
+
 ; ==========================================================================
-; Display the game screen.
+; DISPLAY GAME SCREEN
 ; ==========================================================================
-; The credits at the bottom of the screen is still always redrawn.
-; From the title screen it is animated to move to the bottom of the
-; screen.  But from the Win and Dead frog screens the credits
-; are overdrawn.
+; Display the game screen.  (duh)
 ; --------------------------------------------------------------------------
 
 DisplayGameScreen
 	mRegSaveAYX             ; Save A and Y and X, so the caller doesn't need to.
-
-;	jsr ResetGamePlayfield ; initialize all game playfield LMS values.
 
 	jsr SetBoatSpeed       ; Animation speed set by number of saved frogs
 
@@ -442,111 +402,6 @@ DisplayGameScreen
 	mRegRestoreAYX          ; Restore X, Y and A
 
 	rts
-
-
-; N/A  -  VBI continuously scrolls boats
-; ==========================================================================
-; ANIMATE BOATS
-; ==========================================================================
-; Move the lines of boats around either left or right.
-; Changed logic for moving lines.  The original code moved all the
-; rows going right then all the rows going left.
-; This version does each line in order from the top to the bottom of
-; the screen.  This is done on the chance that the code is racing the
-; screen rendering and so we don't want main line execution to find
-; a pattern where the code is updating a text line that is being
-; displayed and we end up with tearing animation.
-; --------------------------------------------------------------------------
-;AnimateBoats
-	; Update with working positions of the scrolling lines.
-
-;	dec CurrentRightOffset ; subtract one to move screen contents right.
-;	bpl IncLeftOffset      ; It did not go negative. Done. Go update screen.
-;	lda #39                ; Fell off the end.  Restart.
-;	sta CurrentRightOffset ; reset to scroll start.
-
-;IncLeftOffset
-;	inc CurrentLeftOffset  ; subtract one to move screen contents left.
-;	lda CurrentLeftOffset
-;	cmp #40                ; 40th position is identical to 0th,
-;	bne UpdatePlayfieldLMS ; Did not go off the deep end. Done. Go update screen.
-;	lda #0                 ; Fell off the end.  Restart.
-;	sta CurrentLeftOffset  ; reset to scroll start.
-
-;UpdatePlayfieldLMS
-	; We could cleverly pull address for each LMS and update....
-	; Why?  The address are known and only low bytes need to be updated,
-	; So, then stuff them all directly.   This ends up being shorter than
-	; cleverly looping through the LMS table.
-
-	; A already is Left offset. Make X the Right offset.
-;	ldx CurrentRightOffset
-
-;	jsr UpdateGamePlayfield ; Update all the LMS offsets.
-
-; CopyScoreToScreen MAY NEED TO BE SUBSTUITUTED FOR AnimateBoats in V03
-;	jsr CopyScoreToScreen   ; Finish up by updating score display.
-
-;	rts
-
-
-; N/A  -  VBI continuously scrolls boats
-; ==========================================================================
-; UPDATE GAME PLAYFIELD
-; Update Game screen LMS addresses and scrolling offset to specified
-; values.
-; ==========================================================================
-;
-; Note that only the low bytes needs to be reset as no line of data
-; crosses over a page boundary.
-;
-; A  is Left scroll position
-; X  is Right scroll position.
-; --------------------------------------------------------------------------
-;UpdateGamePlayfield
-
-;	stx PF_LMS1 ; Right
-;	sta PF_LMS2 ; Left
-
-;	stx PF_LMS4 ; and so on
-;	sta PF_LMS5
-
-;	stx PF_LMS7
-;	sta PF_LMS8
-
-;	stx PF_LMS10
-;	sta PF_LMS11
-
-;	stx PF_LMS13
-;	sta PF_LMS14
-
-;	stx PF_LMS16
-;	sta PF_LMS17
-
-;	stx CurrentRightOffset
-;	sta CurrentLeftOffset
-
-;	rts
-
-
-; N/A  -  VBI continuously scrolls boats
-; ==========================================================================
-; RESET GAME PLAYFIELD
-; ==========================================================================
-; Reset Game screen LMS addresses and scrolling offset to starting values.
-; Note that only the low bytes needs to be reset as no line of data
-; crosses over a page boundary.
-;
-; Used A, X and Y
-; --------------------------------------------------------------------------
-;ResetGamePlayfield
-
-;	lda #$00               ; Reset the actual position trackers.
-;	ldx #$00
-
-;	jsr UpdateGamePlayfield
-
-;	rts
 
 
 ; ==========================================================================
@@ -581,15 +436,16 @@ DoUpdateScreenScore
 
 ; ==========================================================================
 ; CLEAR SAVED FROGS
-; Remove the number of saved frogs from the screen.
 ; ==========================================================================
+; Remove the number of saved frogs from the screen.
+;
 ; 1  |0000000:Score                 Hi:0000000| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; --------------------------------------------------------------------------
 
 ClearSavedFrogs
 	lda #INTERNAL_SPACE ; Blank space (zero)
-	ldx #17
+	ldx #16
 
 RemoveFroggies
 	sta SCREEN_SAVED,x  ; Write to screen. (second line, 24th position)
@@ -795,6 +651,9 @@ SkipIncCurrent
 ; ==========================================================================
 ; Increment color table luminance values until they reach target values.
 ; Exit with 0 flag when all values are matching.
+;
+; I'm sure there's a smarter way to drive this off a list of data
+; and make this smaller code.
 ;
 ; X  is the index into the tables. 
 ; --------------------------------------------------------------------------
@@ -1131,6 +990,11 @@ ExitFadeColPfToBlack          ; Insure we're leaving with 0 for both colors 0.  
 ; only on frame 2 and frame 6, so there is extra exception logic to 
 ; copy those frames when they occur.
 ;
+; You know, a marginally smart person would have made this code smaller 
+; by using  another list of values based on component number to provide the 
+; base pointers to the arrays of addresses for the source and target
+; character maps.
+;
 ; X = frame counter
 ; -----------------------------------------------------------------------------
 
@@ -1253,7 +1117,7 @@ ExitBoatCharacterAnimation
 ;==============================================================================
 ; DoBoatCharacterAnimation set up zero page VBIPointer1 and VBIPointer2.
 ; Copy 8 bytes from pointer1 to pointer 2.
-;
+; Without the cpy/bne loop overhead *  8 bytes.
 ; Y = byte index.
 ; -----------------------------------------------------------------------------
 
@@ -1420,20 +1284,22 @@ EndOfLeftBoat
 ; P R E S S   J O Y S T I C K   B U T T O N
 ;==============================================================================
 
-; ==========================================================================
+;==============================================================================
 ; TOGGLE PressAButtonState 
-; --------------------------------------------------------------------------
+;==============================================================================
+; Flip the fade up/fade down state.
+
 TogglePressAButtonState
-	inc PressAButtonState    ; Add 1.  (says Capt Obvious)
-	lda PressAButtonState
-	and #1                   ; Keep only lowest bit -- 0, 1, 0, 1, 0, 1...
-	sta PressAButtonState
+	lda PressAButtonState    ; Get button state
+	eor #$FF                 ; Invert the value
+	sta PressAButtonState    ; Save new value.
 
 	rts
 
 
-; ==========================================================================
+;==============================================================================
 ; TOGGLE BUTTON PROMPT
+;==============================================================================
 ; Fade the prompt colors up and down. 
 ;
 ; PressAButtonState...
@@ -1453,7 +1319,7 @@ ToggleButtonPrompt
 	sta PressAButtonFrames      ; Reset the frame counter.
 
 	lda PressAButtonState       ; Up or down?
-	bne PromptFadeUp            ; 1 == up.
+	bne PromptFadeUp            ; >0 == up.
 
 	; Prompt Fading the background down.
 	lda PressAButtonColor         ; Get the current background color.
@@ -1493,8 +1359,9 @@ SetTextAsInverse  ; Make the text luminance the opposite of the background.
 	rts
 
 
-; ==========================================================================
+;==============================================================================
 ; RUN PROMPT FOR BUTTON
+;==============================================================================
 ; Maintain blinking timer.
 ; Update/blink text on line 23.
 ; Return 0/BEQ when the any key is not pressed.
@@ -1579,27 +1446,32 @@ libPmgInit
 ; Typically used only at program startup to zero everything
 ; and prevent any screen glitchiness on startup.
 ;
+; Also useful when the program wants to turn off the current 
+; player image.
+;
 ; Reset all Players and Missiles horizontal positions to 0, so
 ; that none are visible no matter the size or bitmap contents.
 ; Also reset sizes.
 ; -----------------------------------------------------------------------------
 
 libPmgMoveAllZero
-	lda #$00     ; 0 position
-	ldx #$03     ; four objects, 3 to 0
+	lda #$00                ; 0 position
+	ldx #$03                ; four objects, 3 to 0
 
 bLoopZeroPMPosition
-	sta HPOSP0,x ; Player positions 3, 2, 1, 0
-	sta SIZEP0,x ; Player width 3, 2, 1, 0
-	sta HPOSM0,x ; Missiles 3, 2, 1, 0 just to be sure.
+	sta HPOSP0,x            ; Player positions 3, 2, 1, 0
+	sta SIZEP0,x            ; Player width 3, 2, 1, 0
+	sta HPOSM0,x            ; Missiles 3, 2, 1, 0 just to be sure.
 	dex
 	bpl bLoopZeroPMPosition
 
-	sta SIZEM    ; and Missile size 3, 2, 1, 0
+	sta SIZEM               ; and Missile size 3, 2, 1, 0
 
-	; Zero a group of page 0 values:
+	; Zero a group of page 0 values: 
+	; (coordinates, and current shape index.)
+	; FrogPMY, FrogPMX, FrogShape, FrogNewPMY, FrogNewPMX, FrogNewShape
 	ldx #5
-bPMAZClearCoords ; Clear coordinates, and shape index.
+bPMAZClearCoords 
 	sta FrogPMY,x
 	dex
 	bpl bPMAZClearCoords
@@ -1666,13 +1538,19 @@ CheckRideTheBoat
 	lda FrogSafety               ; Is the frog already dead ?
 	bne ExitCheckRideTheBoat     ; Yes.   No need to check.
 
+	ldx FrogRow                  ; What screen row is the frog currently on?
+	lda MOVING_ROW_STATES,x      ; Is the current Row a boat row?
+	beq ExitCheckRideTheBoat     ; No. So no collision processing. 
+
 	lda P0PF                     ; Get Player 0 collision with playfield
 	ora P1PF                     ; Add Player 1 collision 
-	and #COLPMF2_BIT             ; Is there collision with COLPF2 (Lines on the boats)
+	and #COLPMF2_BIT             ; Is there collision with COLPF2 (Lines on the boats)?
 	bne ExitCheckRideTheBoat     ; Yes.  Frog is safe.
 
-	; Oops.   This frog is off a boat.  Frog should die here but still be dragged by the boats.
-	inc FrogSafety               ; It is MAIN's job to change the image.
+	; Oops.  This frog is off a boat.  
+	; Frog should die here but still be dragged by the moving boats/water.
+	; It is MAIN's job to change the image.
+	inc FrogSafety               ; Shrodinger's frog is not alive. 
 
 ExitCheckRideTheBoat
 	rts
@@ -1685,17 +1563,21 @@ ExitCheckRideTheBoat
 ; -----------------------------------------------------------------------------
 
 EraseShape
-	lda FrogShape
-	beq ExitEraseShape  ; 0 is off.
+	lda FrogShape       ; Current shape?
+	beq ExitEraseShape  ; 0 is off. Nothing to Erase.
 
 	; Note that if there is animation here is where the frame change 
 	; would be evaluated to be followed by the position check if the 
 	; frame does not change.
 
+	cmp FrogNewShape       ; Is it different from the old shape?
+	bne bes_Test1          ; Yes.  Erase is mandatory.
+
 	ldy FrogNewPMY      ; Get new position.
-	cpy FrogPMY         ; Is the the same as the old position?
+	cpy FrogPMY         ; Is it the same as the old position?
 	beq ExitEraseShape  ; Yes.  Nothing to erase here.
 
+bes_Test1
 	cmp #SHAPE_FROG
 	bne bes_Test2
 	jsr EraseFrog
@@ -1802,10 +1684,14 @@ DrawShape
 	; would be evaluated to be followed by the position check if the 
 	; frame does not change.
 
+	cmp FrogShape          ; Is it different from the old shape?
+	bne bds_Test1          ; Yes.  Redraw is mandatory.
+
 	ldy FrogNewPMY      ; Get new position.
-	cpy FrogPMY         ; Is the the same as the old position?
+	cpy FrogPMY         ; Is it the same as the old position?
 	beq ExitDrawShape   ; Yes.  Nothing to draw here.
 
+bds_Test1
 	cmp #SHAPE_FROG
 	bne bds_Test2
 	jsr DrawFrog
@@ -1951,17 +1837,21 @@ bLoopDF_DrawFrog
 ; -----------------------------------------------------------------------------
 
 PositionShape
-	lda FrogNewShape
-	beq ExitPositionShape  ; 0 is off.
-
-	; Note that if there is animation here is where the frame change 
-	; would be evaluated to be followed by the position check if the 
-	; frame does not change.
+	ldy FrogNewShape       ; Get new shape
+	cpy FrogShape          ; Is it different from the old shape?
+	bne bps_Test0          ; Yes.   Reposition is mandatory.
 
 	ldy FrogNewPMX         ; Get new position.
-	cpy FrogPMX            ; Is the the same as the old position?
+	cpy FrogPMX            ; Is it the same as the old position?
 	beq ExitPositionShape  ; Yes.  Nothing to draw here.
 
+bps_Test0
+	cmp #SHAPE_OFF
+	bne bps_Test1
+	jsr libPmgMoveAllZero ; Zero all P/M HPOS, and sizes.
+	jmp ExitPositionShape
+
+bps_Test1
 	cmp #SHAPE_FROG
 	bne bps_Test2
 	jsr PositionFrog

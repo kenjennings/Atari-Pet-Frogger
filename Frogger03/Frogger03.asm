@@ -319,13 +319,13 @@
 ; SHAPE_TOMB  = 3
 
 FrogRow           .byte $00       ; = Frog Y row position (in the beach/boat playfield not counting score lines)
-FrogPMY           .byte $00       ; = Frog's current Player/missile Y coordinate
-FrogPMX           .byte $00       ; = Frog's current Player/missile X coordinate
-FrogShape         .byte SHAPE_OFF ; = Image in use -- 0 = off, 1 = frog, 2 = splat, 3 = tombstone 
-
 FrogNewRow        .byte $00       ; = Main signals to VBI to move row.
+
+FrogPMY           .byte $00       ; = Frog's current Player/missile Y coordinate
 FrogNewPMY        .byte $00       ; = Frog new/next Player/missile Y coordinate
+FrogPMX           .byte $00       ; = Frog's current Player/missile X coordinate
 FrogNewPMX        .byte $00       ; = Frog new/next Player/missile X coordinate
+FrogShape         .byte SHAPE_OFF ; = Image in use -- 0 = off, 1 = frog, 2 = splat, 3 = tombstone 
 FrogNewShape      .byte SHAPE_OFF ; = Image to use -- 0 = off, 1 = frog, 2 = splat, 3 = tombstone 
 
 FrogUpdate        .byte 0         ; 0 = no movement.  1 = Any reason to change position...
@@ -440,9 +440,7 @@ VBIPointer2      .word $0000
 ; Main code sets 1 to turn it on. 
 ; Visibility actions performed by VBI.
 EnablePressAButton .byte 0
-; 0/1 toggle for light/dark state of Press a button prompt.
-; 0 = Background fade up, text fades down/
-PressAButtonState  .byte 0   ; 0 means fading background down.   1 means fading up.
+PressAButtonState  .byte 0           ; 0 means fading background color down.   !0 means fading up.
 PressAButtonFrames .byte BLINK_SPEED ; Timer value for Press A Button Prompt updating.
 PressAButtonColor  .byte 0           ; The actual color of the prompt.
 PressAButtonText   .byte 0           ; The text luminance.

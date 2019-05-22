@@ -256,12 +256,6 @@ FrogMoveUp
 	sta FrogNewPMY ; New location is one row higher.
 
 	dec FrogNewRow
-;	ldx FrogRow
-
-;;	lda PLAYFIELD_MEM_LO_TABLE,x
-;	sta FrogLocation
-;;	lda PLAYFIELD_MEM_HI_TABLE,x
-;	sta FrogLocation+1
 
 	ldx FrogNewRow ; Make sure CPU flags reflect X = 0 or !0
 
@@ -319,7 +313,7 @@ FrogMoveUp
 ;ExitWhereIsThePhysicalFrog
 ;;	jsr GetScreenMemoryUnderFrog ; Update the cached character where the frog resides.
 
-	rts
+;	rts
 
 
 ; This does not have direct purpose.
@@ -348,7 +342,7 @@ FrogMoveUp
 ;
 ; FrogSafety (and Z flag) indicates frog is now dead.
 ; --------------------------------------------------------------------------
-AnticipateFrogDeath
+;AnticipateFrogDeath
 ;	ldy FrogColumn          ; Logical position (where visible on screen)
 ;	ldx FrogRow             ; Get the current row number.
 ;	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
@@ -367,9 +361,9 @@ AnticipateFrogDeath
 ;FrogDemiseByWallSplat
 ;	inc FrogSafety            ; Schrodinger's frog is known to be dead.
 
-;ExitFrogNowAlive
-	lda FrogSafety            ; branching here is no change, so we assume frog is alive.
-	rts
+;;ExitFrogNowAlive
+;	lda FrogSafety            ; branching here is no change, so we assume frog is alive.
+;	rts
 
 
 ; This is N/A for the game.
@@ -388,7 +382,7 @@ AnticipateFrogDeath
 ; 1   = first boat/river row, move right
 ; 255 = second boat/river row, move left.
 ; --------------------------------------------------------------------------
-AutoMoveFrog
+;AutoMoveFrog
 ;	ldy FrogColumn          ; Logical position (where visible on screen)
 ;	ldx FrogRow             ; Get the current row number
 ;	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
@@ -417,7 +411,7 @@ AutoMoveFrog
 ; NOTE ANIMATION_FRAMES is in the TimerStuff.asm file.
 ; A  and  X  will be saved.
 ; --------------------------------------------------------------------------
-SetBoatSpeed
+;SetBoatSpeed
 
 ;	mRegSaveAX
 
@@ -426,7 +420,7 @@ SetBoatSpeed
 ;	bcc FrogsCrossedIsOK
 ;	ldx #MAX_FROG_SPEED
 
-FrogsCrossedIsOK
+;FrogsCrossedIsOK
 ;	lda BOAT_FRAMES,x             ; Reset Frame counter based on number of frogs saves.
 ;	sta BoatFrames
 

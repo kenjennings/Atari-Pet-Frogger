@@ -307,6 +307,7 @@ EndTransitionToGame
 
 	rts
 
+
 ; ==========================================================================
 ; Event Process GAME SCREEN
 ; Play the game.
@@ -322,6 +323,10 @@ EventGameScreen
 ; ==========================================================================
 ; GAME SCREEN - Joystick Input Section
 ; --------------------------------------------------------------------------
+	; VBI manages frog falling off the boats.
+	lda FrogSafety           ; Did the VBI flag the Shrodinger's frog is dead?
+	bne DoSetupForYerDead    ; Yes.  No input allowed.  Start the funeral.
+
 	jsr CheckInput           ; Get cooked stick or trigger if timer permits.
 	beq EndOfJoystickMoves   ; Nothing pressed, Skip the input section.
 
@@ -355,7 +360,7 @@ LeftStickTest
 
 RightStickTest
 	ror                      ; Roll out low bit. RIGHT
-	bcc EndOfJoystickMoves  ; No bit.  Replace Frog on screen.  Try boat animation.
+	bcc EndOfJoystickMoves   ; No bit.  Replace Frog on screen.  Try boat animation.
 
 	ldy FrogPMX              ; Get current Frog position
 	iny                      ; - plus 2 color clocks. is 1/2 character.
@@ -363,42 +368,21 @@ RightStickTest
 	sty FrogNewPMX           ; Save as new suggested location.
 	bne FrogHasMoved         ; Done here.  Frog moved.  Always branches.
 
-
 	; Safe location at the far beach.  the Frog is saved.
 DoSetupForFrogWins
 	jsr SetupTransitionToWin
 	bne EndGameScreen        ; last action in function is lda/sta a non-zero value.
 
-
 FrogHasMoved
 	jsr PlayThump            ; Sound for when frog moves.
+	jsr CopyScoreToScreen    ; Make sure the score is in sync.
 
 EndOfJoystickMoves
 
-;SkipExitTransitions
-;ReplaceFrogOnScreen
-; VBI updates frog appearance.   Main just updates data for New position.
-;	jsr SetFrogOnScreen ; redraw the frog where it belongs
+	jsr ToReplayFXWaterOrNot ; Time to replay the water noises?
+	jmp EndGameScreen        ; Done with game loop.
 
-; ==========================================================================
-; GAME SCREEN - Everything else....
-; --------------------------------------------------------------------------
-;CheckForAnim
-;	lda AnimateFrames        ; Does the timer allow the boats to move?
-;	bne EndGameScreen        ; Nothing at this time. Exit.
-
-;	jsr SetBoatSpeed         ; Reset timer for animation based on number of saved frogs.
-
-;	jsr AnticipateFrogDeath  ; Will the frog die when the boat moves?
-;	beq PlaySoundEffects     ; Shrodinger says apparently not.  live frog.
-;	bne DoSetupForYerDead    ; Shrodinger says apparently so.  dead frog.
-
-; Wherever the Frog will land now, it is Baaaaad.
-
-	; VBI manages frog falling off the boats.
-	lda FrogSafety ; Is the frog still alive?
-	beq PlaySoundEffects ; 0 == Not Dead. So, just play sounds. 
-
+	
 DoSetupForYerDead
 	jsr SetupTransitionToDead
 	bne EndGameScreen        ; last action in function is lda/sta a non-zero value.
@@ -406,12 +390,9 @@ DoSetupForYerDead
 ; VBI does these now.
 ;	jsr AnimateBoats         ; Move the boats around.
 ;	jsr AutoMoveFrog         ; Move the frog relative to boats.
-	jsr CopyScoreToScreen    ; Was in AnimateBoats.  The only thing needed from there.
-
-PlaySoundEffects
-	jsr ToReplayFXWaterOrNot ; Time to replay the water noises?
 
 EndGameScreen
+
 	lda CurrentScreen
 
 	rts

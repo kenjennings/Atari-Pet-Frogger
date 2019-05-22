@@ -16,14 +16,14 @@
 
 ; ==========================================================================
 ; SETUPS
-;
-; All the routines to move to a different screen/state.
+; ==========================================================================
+; All the routines to move to a different screen/event state.
 ; --------------------------------------------------------------------------
 
 
 ; ==========================================================================
 ; SETUP TRANSITION TO TITLE
-;
+; ==========================================================================
 ; Prep values to begin the Transition Event for the Title Screen. That is:
 ; Initialize scrolling line in title text.
 ; Tell VBI to switch to title screen.
@@ -35,7 +35,9 @@
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
+
 SetupTransitionToTitle
+
 	lda #TITLE_SPEED         ; Animation moving speed.
 	jsr ResetTimers
 
@@ -55,12 +57,14 @@ SetupTransitionToTitle
 
 ; ==========================================================================
 ; SETUP TRANSITION TO GAME SCREEN
-;
+; ==========================================================================
 ; Prep values to run the game screen.
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
+
 SetupTransitionToGame
+
 	lda #TITLE_WIPE_SPEED   ; Speed of fade/dissolve for transition
 	jsr ResetTimers
 
@@ -80,13 +84,14 @@ SetupTransitionToGame
 
 ; ==========================================================================
 ; SETUP GAME SCREEN
-;
+; ==========================================================================
 ; Prep values to run the game screen.
 ;
 ; The actual game display was switched on by the Trans Game event.
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
+
 SetupGame
 
 	lda #0
@@ -122,12 +127,14 @@ SetupGame
 
 ; ==========================================================================
 ; SETUP TRANSITION TO WIN SCREEN
-;
+; ==========================================================================
 ; Prep values to run the Transition Event for the Win screen
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
+
 SetupTransitionToWin
+
 	jsr Add500ToScore
 
 	jsr CopyScoreToScreen   ; Update the screen information
@@ -150,19 +157,21 @@ SetupTransitionToWin
 
 ; ==========================================================================
 ; SETUP WIN SCREEN
-;
+; ==========================================================================
 ; Prep values to run the Win screen
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
+
 SetupWin
+
 	lda #WIN_CYCLE_SPEED    ; 
 	jsr ResetTimers
 
-	lda #238               ; Color scrolling 238 to 16
+	lda #238                ; Color scrolling 238 to 16
 	sta EventCounter
 
-	lda #SCREEN_WIN     ; Change to wins screen.
+	lda #SCREEN_WIN         ; Change to wins screen.
 	sta CurrentScreen
 
 	rts
@@ -170,22 +179,24 @@ SetupWin
 
 ; ==========================================================================
 ; SETUP TRANSITION TO DEAD SCREEN
-;
+; ==========================================================================
 ; Prep values to run the Transition Event for the dead frog.
 ; Splat frog.
 ; Set timer to 1.5 second wait.
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
+
 SetupTransitionToDead
+
 	jsr SetSplatteredOnScreen ; splat the frog:
 
 	dec NumberOfLives       ; subtract a life.
 	jsr CopyScoreToScreen   ; Update the screen information
 	jsr PrintFrogsAndLives
 
-	inc FrogSafety          ; Schrodinger knows the frog is dead.
-	lda #FROG_WAKE_SPEED    ; Initial delay 1.5 sec for frog corpse viewing/mourning
+;	inc FrogSafety          ; Schrodinger knows the frog is dead.
+	lda #FROG_WAKE_SPEED    ; Initial delay 3 sec for frog corpse viewing/mourning
 	jsr ResetTimers
 
 	lda #1                  ; Set Stage 1 in the fading control.
@@ -208,12 +219,14 @@ SetupTransitionToDead
 
 ; ==========================================================================
 ; SETUP DEAD SCREEN
-;
+; ==========================================================================
 ; Prep values to run the Dead screen
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
+
 SetupDead
+
 	lda #DEAD_CYCLE_SPEED     ; Animation moving speed.
 	jsr ResetTimers
 	
@@ -235,7 +248,7 @@ SetupDead
 
 ; ==========================================================================
 ; SETUP TRANSITION TO GAME OVER SCREEN
-;
+; ==========================================================================
 ; Prep values to run the Transition Event for the Game Over.
 ;
 ; Fade out all lines of the Dead Screen.  
@@ -249,6 +262,7 @@ SetupDead
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
+
 SetupTransitionToGameOver
 
 	lda #DEAD_FADE_SPEED   ; Animation moving speed.
@@ -275,7 +289,9 @@ SetupTransitionToGameOver
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
+
 SetupGameOver
+
 	lda #GAME_OVER_SPEED   ; Animation moving speed.
 	jsr ResetTimers
 

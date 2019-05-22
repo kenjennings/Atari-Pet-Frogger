@@ -30,17 +30,17 @@
 ; ==========================================================================
 ; Animation speeds of various displayed items.   Number of frames to wait...
 ; --------------------------------------------------------------------------
-BLINK_SPEED      = 3  ; Speed of updated to Press A Button prompt.
+BLINK_SPEED      = 3   ; Speed of updates to Press A Button prompt.
 
-TITLE_SPEED      = 2  ; Scrolling speed for title. 
-TITLE_WIPE_SPEED = 0  ; Title screen to game screen fade speed.
+TITLE_SPEED      = 2   ; Scrolling speed for title. 
+TITLE_WIPE_SPEED = 0   ; Title screen to game screen fade speed.
 
-FROG_WAKE_SPEED  = 95 ; Initial delay 1.5 sec for frog corpse '*' viewing/mourning
-DEAD_FADE_SPEED  = 4  ; Fade the game screen to black for Dead Frog
-DEAD_CYCLE_SPEED = 6  ; Speed of color animation on Dead screen
+FROG_WAKE_SPEED  = 190 ; Initial delay about 3 sec for frog corpse '*' viewing/mourning
+DEAD_FADE_SPEED  = 4   ; Fade the game screen to black for Dead Frog
+DEAD_CYCLE_SPEED = 6   ; Speed of color animation on Dead screen
 
-WIN_FADE_SPEED   = 4  ; Fade the game screen to black to show Win
-WIN_CYCLE_SPEED  = 5  ; Speed of color animation on Win screen 
+WIN_FADE_SPEED   = 4   ; Fade the game screen to black to show Win
+WIN_CYCLE_SPEED  = 5   ; Speed of color animation on Win screen 
 
 GAME_OVER_SPEED  = 12  ; Speed of Game over Res in animation
 
@@ -90,7 +90,7 @@ INPUTSCAN_FRAMES = $07 ; previously $09
 ; (and by making rows closer to the bottom run faster it produces a 
 ; kind of parallax effect. almost).
 
-MAX_FROG_SPEED = 13 ; Number of difficulty levels
+MAX_FROG_SPEED = 13 ; Number of difficulty levels (which means 14)
 
 ; About the arrays below.  18 bytes per row instead of 19:
 ; FrogRow ranges from 0 to 18 which is 19 rows.  The first and
@@ -157,8 +157,9 @@ BOAT_HS_TABLE
 ; KEYSCAN_FRAMES = $07
 ; based on number of frogs, how many frames between boat movements...
 ;ANIMATION_FRAMES .byte 25,21,17,14,12,11,10,9,8,7,6,5
-; Not really sure what to do about the new model using the BOAT_SHIFT lists.
-; PAL would definitely be different speeds.
+; Not really sure what to do about the new model using the 
+; BOAT_FRAMES/BOAT_SHIFT lists.
+; PAL would definitely be a different set of speeds.
 
 
 ; ==========================================================================
@@ -364,6 +365,7 @@ ExitMyImmediateVBI
 ;==============================================================================
 
 MyDeferredVBI
+
 ; ======== Manage InputScanFrames Delay Counter ========
 	lda InputScanFrames          ; Is input delay already 0?
 	beq DoAnimateClock           ; Yes, do not decrement it again.
@@ -387,6 +389,23 @@ ScrollTheCreditLine              ; Scroll the text identifying the perpetrators
 	jsr FineScrollTheCreditLine  ; Do the business.
 
 EndOfScrollTheCredits
+
+; ======== Manage Frog Death  ========
+; Here we are at the end of the frame.  If the CURRENT position of the frog 
+; is on a moving boat row, then collect the collision information with the "safe" 
+; area of the boat (the horizontal lines), and flag the death accordingly.
+; The Flag-Of-Death tells the Main code to splatter the frog shape, and 
+; start the other activities to announce death.
+
+ManageDeathOfASalesfrog
+	lda CurrentDL                ; Get current display list
+	cmp #DISPLAY_GAME            ; Is this the Game display?
+	bne EndOfDeathOfASalesfrog   ; No. So no collision processing. 
+
+	jsr CheckRideTheBoat         ; Make sure the frog is riding the boat.  Otherwise it dies.
+
+EndOfDeathOfASalesfrog
+	sta HITCLR                   ; Always reset the P/M collision bits.
 
 
 ; ======== Manage Boat fine scrolling ========
@@ -533,7 +552,6 @@ DoCheesySoundService         ; World's most inept sound sequencer.
 	jsr SoundService
 
 ExitMyDeferredVBI
-	sta HITCLR               ; Clear collision bits for Players.
 	jmp XITVBV               ; Return to OS.  SYSVBV for Immediate interrupt.
 
 
