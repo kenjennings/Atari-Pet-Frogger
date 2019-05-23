@@ -397,9 +397,9 @@ TitleFrogY .byte $00 ; Index in table for where froggy flies
 
 WobbleDeWobbleFrog
 	lda AnimateFrames
-	beq CheckOnAnimateY
+	bne CheckOnAnimateY
 
-	lda #3
+	lda #2
 	sta AnimateFrames
 
 	inc TitleX
@@ -413,9 +413,9 @@ WobbleDeWobbleFrog
 
 CheckOnAnimateY
 	lda AnimateFrames2
-	beq EndWobbleDeWobbleFrog
+	bne EndWobbleDeWobbleFrog
 
-	lda #4
+	lda #3
 	sta AnimateFrames2
 
 	inc TitleY
