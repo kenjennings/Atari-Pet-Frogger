@@ -41,7 +41,7 @@ SetupTransitionToTitle
 	lda #TITLE_SPEED         ; Animation moving speed.
 	jsr ResetTimers
 
-	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
+	jsr HideButtonPrompt     ; Tell VBI the prompt flashing is disabled.
 
 	lda #1
 	sta EventCounter         ; Declare stage 1 behavior for scrolling.
@@ -51,6 +51,20 @@ SetupTransitionToTitle
 
 	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
 	sta CurrentScreen
+
+	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
+	sta FrogPMX
+	sta FrogPMY
+	sta FrogShape           ; 0 is "off"  (it would already be off by default)
+
+	lda #MID_FROGX          ; Set new X position to middle of screen.
+	sta FrogNewPMX
+
+	lda #MAX_FROGY          ; Set new Y position to origin. (row 18)
+	sta FrogNewPMY
+
+	lda #SHAPE_FROG         ; Set new frog shape.
+	sta FrogNewShape
 
 	rts
 

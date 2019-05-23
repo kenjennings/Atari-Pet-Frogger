@@ -1346,6 +1346,9 @@ MID_FROGX = [MIN_FROGX+MAX_FROGX]/2       ; Middle of screen, starting position.
 
 MAX_FROGY = PM_1LINE_NORMAL_BOTTOM-15     ; starting position for frog at bottom of screen
 
+OFF_FROGX = 84                            ; Offset for frog X coordinates on title animation.
+OFF_FROGY = 84                            ; Offset for frog Y coordinates on title animation.
+
 SHAPE_OFF   = 0
 SHAPE_FROG  = 1
 SHAPE_SPLAT = 2

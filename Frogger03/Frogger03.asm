@@ -342,6 +342,9 @@ ScoreToAdd        .byte 0         ; = Number To Be Added to Score
 NumberOfChars     .byte 0         ; = Number Of Characters across for score
 FlaggedHiScore    .byte 0         ; = Flag For Hi Score.  0 = no high score.  $FF = High score.
 
+TitleX            .byte 0         ; Index into FROG_WOBBLE_SINE_TABLE for X coordinates.
+TitleY            .byte 0         ; Index into FROG_WOBBLE_SINE_TABLE for Y coordinates.
+
 ; Input, event control, and timers.
 ; FYI: Frame counters are decremented each frame (by the VBI).
 ; Once they decrement to  0 they enable the related activity.
@@ -375,8 +378,8 @@ ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into
 ; Frame counter set by main code events for delay/speed of main activity.
 ; The VBI decrements this value until 0.
 ; Main code acts on value 0.
-AnimateFrames    .byte $00 ; = ANIMATION_FRAMES,X.
-
+AnimateFrames    .byte $00 
+AnimateFrames2   .byte $00
 
 ; ======== V B I ======== MANAGE DISPLAY LISTS
 ; DISPLAY_TITLE = 0

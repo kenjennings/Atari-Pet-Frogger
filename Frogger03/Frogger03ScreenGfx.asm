@@ -372,7 +372,14 @@ DisplayTitleScreen
 ; Frog Gymnastics.
 ; On the title screen the frog moves in a sine path from  +88 to +160.
 ; This value is centered at 128, the middle of the screen.
-; Xcoords and Ycoords will be used  
+; The data from the sine generator is 0 to $80  (0 to 80).
+; The center of the screen should be 128,128. 
+; So, the value to add to center the sine motion on the screen is:
+; 128 - (80 / 2) ==  88. 
+; Minus 4 for the width/height of the Frog == 84
+; Add that to current values to position the frog.
+; The rate of updates between X and Y values differs, so the 
+; frog does not travel in a circle, but a 
 ; --------------------------------------------------------------------------
 
 FROG_WOBBLE_SINE_TABLE
@@ -385,8 +392,43 @@ FROG_WOBBLE_SINE_TABLE
 	.by $00 $00 $01 $02 $03 $05 $07 $09 
 	.by $0c $0f $12 $15 $19 $1c $20 $24 
 
+TitleFrogX .byte $00 ; Index in table for where froggy flies
+TitleFrogY .byte $00 ; Index in table for where froggy flies
 
+WobbleDeWobbleFrog
+	lda AnimateFrames
+	beq CheckOnAnimateY
 
+	lda #3
+	sta AnimateFrames
+
+	inc TitleX
+	lda TitleX
+	and #$3F ; (0 to 63)
+	tax
+	lda FROG_WOBBLE_SINE_TABLE,x
+	clc
+	adc #OFF_FROGX
+	sta FrogNewPMX
+
+CheckOnAnimateY
+	lda AnimateFrames2
+	beq EndWobbleDeWobbleFrog
+
+	lda #4
+	sta AnimateFrames2
+
+	inc TitleY
+	lda TitleY
+	and #$3F ; (0 to 63)
+	tax
+	lda FROG_WOBBLE_SINE_TABLE,x
+	clc
+	adc #OFF_FROGY
+	sta FrogNewPMY
+
+EndWobbleDeWobbleFrog
+	rts
 
 
 ; ==========================================================================

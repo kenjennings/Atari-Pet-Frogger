@@ -372,10 +372,16 @@ MyDeferredVBI
 	dec InputScanFrames          ; Minus 1.
 
 ; ======== Manage Main code's timer.  Decrement while non-zero. ========
+; It is MAIN's job to act when the timer is 0, and reset it if needed.
 DoAnimateClock
 	lda AnimateFrames            ; Is animation countdown already 0?
-	beq EndOfClockChecks         ; Yes, do not decrement now.
+	beq DoAnimateClock2          ; Yes, do not decrement now.
 	dec AnimateFrames            ; Minus 1
+
+DoAnimateClock2
+	lda AnimateFrames2           ; Is animation countdown already 0?
+	beq EndOfClockChecks         ; Yes, do not decrement now.
+	dec AnimateFrames2           ; Minus 1
 
 EndOfClockChecks
 
@@ -485,6 +491,7 @@ NoFrogUpdate
 ; Parts of the boats are animated to look like they're moving 
 ; through the water.
 ; When BoatyMcBoatCounter is 0, then animate based on BoatyComponent
+; thus only one part of a boat is animated on any given vertical blank.
 ; 0 = Right Boat Front
 ; 1 = Right Boat Back
 ; 2 = Left Boat Front
