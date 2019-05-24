@@ -1585,7 +1585,7 @@ PLAYER1_GRAVE_DATA
 ; . . . . | 3 | 2 . . 2 | . 2 . . . .  - 15 $80 $94
 ; . . . . | 3 | . 2 . 2 | . 2 . . . .  - 16 $80 $54
 ; . . . . | . | . . . . | . . . . . .  - 17 $00 $00
-; . . . . | . | . 2 2 2 | 2 2 . . . .  - 18 $80 $7C
+; . . . . | . | . 2 2 2 | 2 2 . . . .  - 18 $00 $7C
 ; . . . . | . | . . . . | . . . . . .  - 19 $00 $00
 ; . . . . | . | . . . . | . . . . . .  - 20 $00 $00
 ; . . . . | . | . . . . | . . . . . .  - 21 $00 $00
@@ -1600,7 +1600,7 @@ PLAYER2_GRAVE_DATA
 PLAYER3_GRAVE_DATA
 	.by $00 $00 $00 $00 $00 $00 $00 $00
 	.by $00 $00 $00 $80 $80 $80 $80 $80
-	.by $00 $80 $00 $00 $00 $00 $00
+	.by $00 $00 $00 $00 $00 $00 $00
 
 
 ; FYI, remaining left detail...
@@ -1679,7 +1679,6 @@ FROG_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_PURPLE_BLUE+$2 ; P2, Colored eye irises
 	.by COLOR_PINK+$8        ; P3, frog 
 
-
 SPLAT_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_PINK+$4        ; P0, splat
 	.by COLOR_PINK+$2        ; P1, splat
@@ -1687,7 +1686,7 @@ SPLAT_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_PINK+$8        ; P3, 
 
 GRAVE_PMCOLORS_TABLE ; 0, 1, 2, 3
-	.by COLOR_BLACK+$C        ; P0, 
+	.by COLOR_BLACK+$4        ; P0, 
 	.by COLOR_BLACK+$C        ; P1, 
 	.by COLOR_BLACK+$2        ; P2, 
 	.by COLOR_BLACK+$2        ; P3, 

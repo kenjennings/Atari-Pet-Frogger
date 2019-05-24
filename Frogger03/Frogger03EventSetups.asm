@@ -59,9 +59,11 @@ SetupTransitionToTitle
 	sta FrogShape           ; 0 is "off"  (it would already be off by default)
 
 	lda #OFF_FROGX          ; Set new X position to middle of screen.
+	sta WobOffsetX
 	sta FrogNewPMX
 
 	lda #OFF_FROGY          ; Set new Y position to origin. (row 18)
+	sta WobOffsetY
 	sta FrogNewPMY
 
 	lda #SHAPE_FROG         ; Set new frog shape.
@@ -302,9 +304,11 @@ SetupTransitionToGameOver
 	sta FrogShape           ; 0 is "off"  (it would already be off by default)
 
 	lda #OFF_TOMBX          ; Set new X position to middle of screen.
+	sta WobOffsetX
 	sta FrogNewPMX
 
 	lda #OFF_TOMBY          ; Set new Y position to origin. (row 18)
+	sta WobOffsetX
 	sta FrogNewPMY
 
 	lda #SHAPE_TOMB         ; Set new tomb shape.

@@ -186,8 +186,8 @@ EventScreenStart            ; This is New Game and Transition to title.
 ; 3) Setup for next transition.
 ; --------------------------------------------------------------------------
 EventTitleScreen
-	jsr WobbleDeWobbleFrog     ; Frog drawing spirograph art the title.
-	jsr RunPromptForButton     ; Blink Prompt to press ANY key.  check button.
+	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
+	jsr RunPromptForButton     ; Blink Prompt to press Joystick button and check input.
 	beq EndTitleScreen         ; Nothing pressed, done with title screen.
 
 ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transition.
@@ -778,6 +778,7 @@ DoOverNextLine
 ;
 ; --------------------------------------------------------------------------
 EventGameOverScreen
+	jsr WobbleDeWobble              ; tomb drawing spirograph art on the game over.
 	jsr RunPromptForButton          ; Check button press.
 	bne ProcessGameOverScreenInput  ; Button pressed.  Run the dead exit section.
 

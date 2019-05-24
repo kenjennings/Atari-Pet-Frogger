@@ -367,74 +367,6 @@ DisplayTitleScreen
 
 
 ; ==========================================================================
-; WOBBLE DE WOBBLE                           A  X  
-; ==========================================================================
-; Frog (etc) Gymnastics.
-; On the title screen the frog moves in a sine path from  +88 to +160.
-; This value is centered at 128, the middle of the screen.
-; The data from the sine generator is 0 to $80  (0 to 80).
-; The center of the screen should be 128,128. 
-; So, the value to add to center the sine motion on the screen is:
-; 128 - (80 / 2) ==  88. 
-; Minus 4 for the width/height of the Frog == 84
-; Add that to current values to position the frog.
-; The rate of updates between X and Y values differs, so the 
-; frog does not travel in a circle, but a distorted arc.
-; The frog Y center position is offset slightly differently from 
-; the X Center.
-; This same code is used for the Tomb/gravestone on the GameOver screen.
-; --------------------------------------------------------------------------
-
-WOBBLE_SINE_TABLE
-	.by $28 $2c $30 $34 $37 $3b $3e $41 
-	.by $44 $47 $49 $4b $4d $4e $4f $50 
-	.by $50 $50 $4f $4e $4d $4b $49 $47 
-	.by $44 $41 $3e $3b $37 $34 $30 $2c 
-	.by $28 $24 $20 $1c $19 $15 $12 $0f 
-	.by $0c $09 $07 $05 $03 $02 $01 $00 
-	.by $00 $00 $01 $02 $03 $05 $07 $09 
-	.by $0c $0f $12 $15 $19 $1c $20 $24 
-
-
-WobbleDeWobble
-	lda AnimateFrames        ; Get the countdown timer for X movement.
-	bne CheckOnAnimateY      ; Not 0.  No X movement.  Go try Y movement.
-
-	lda #WOBBLEX_SPEED       ; Reset the X movement timer.
-	sta AnimateFrames        
-
-	inc WobbleX              ; Increment Index for X offset
-	lda WobbleX              ; Get new X index
-	and #$3F                 ; Limit to 0 to 63.
-;	sta WobbleX              ; Remarkably, the Base-2-ness of the size plus the AND above make this STA unnecessary.
-	tax                      ; X = Index for X movement
-	lda WOBBLE_SINE_TABLE,x  ; Get current path value for Horizontal placement.
-	clc
-	adc WobOffsetX           ; Add to offset for placement.
-	sta FrogNewPMX           ; Tell VBI where to draw the object.
-
-CheckOnAnimateY
-	lda AnimateFrames2       ; Get the countdown timer for Y movement.
-	bne EndWobbleDeWobble    ; Not 0.  No Y movement.  Depart.
-
-	lda #WOBBLEY_SPEED       ; Reset the Y movement timer.
-	sta AnimateFrames2
-
-	inc WobbleY              ; Increment Index for Y offset.
-	lda WobbleY              ; Get new Y index
-	and #$3F                 ; Limit to 0 to 63.
-;	sta WobbleY              ; Remarkably, the Base-2-ness of the size plus the AND above make this STA unnecessary.
-	tax                      ; X = Index for Y movement
-	lda WOBBLE_SINE_TABLE,x  ; Get current path value for Vertical placement.
-	clc
-	adc WobOffsetY           ; Add to offset for placement.
-	sta FrogNewPMY           ; Tell VBI where to draw the object.
-
-EndWobbleDeWobble
-	rts
-
-
-; ==========================================================================
 ; DISPLAY GAME SCREEN
 ; ==========================================================================
 ; Display the game screen.  (duh)
@@ -1580,6 +1512,73 @@ libPmgSetColors
 	rts
 
 
+; ==========================================================================
+; WOBBLE DE WOBBLE                           A  X  
+; ==========================================================================
+; Frog (etc) Gymnastics.
+; On the title screen the frog moves in a sine path from  +88 to +160.
+; This value is centered at 128, the middle of the screen.
+; The data from the sine generator is 0 to $80  (0 to 80).
+; The center of the screen should be 128,128. 
+; So, the value to add to center the sine motion on the screen is:
+; 128 - (80 / 2) ==  88. 
+; Minus 4 for the width/height of the Frog == 84
+; Add that to current values to position the frog.
+; The rate of updates between X and Y values differs, so the 
+; frog does not travel in a circle, but a distorted arc.
+; The frog Y center position is offset slightly differently from 
+; the X Center.
+; This same code is used for the Tomb/gravestone on the GameOver screen.
+; --------------------------------------------------------------------------
+
+WOBBLE_SINE_TABLE
+	.by $28 $2c $30 $34 $37 $3b $3e $41 
+	.by $44 $47 $49 $4b $4d $4e $4f $50 
+	.by $50 $50 $4f $4e $4d $4b $49 $47 
+	.by $44 $41 $3e $3b $37 $34 $30 $2c 
+	.by $28 $24 $20 $1c $19 $15 $12 $0f 
+	.by $0c $09 $07 $05 $03 $02 $01 $00 
+	.by $00 $00 $01 $02 $03 $05 $07 $09 
+	.by $0c $0f $12 $15 $19 $1c $20 $24 
+
+WobbleDeWobble
+	lda AnimateFrames        ; Get the countdown timer for X movement.
+	bne CheckOnAnimateY      ; Not 0.  No X movement.  Go try Y movement.
+
+	lda #WOBBLEX_SPEED       ; Reset the X movement timer.
+	sta AnimateFrames        
+
+	inc WobbleX              ; Increment Index for X offset
+	lda WobbleX              ; Get new X index
+	and #$3F                 ; Limit to 0 to 63.
+;	sta WobbleX              ; Remarkably, the Base-2-ness of the size plus the AND above make this STA unnecessary.
+	tax                      ; X = Index for X movement
+	lda WOBBLE_SINE_TABLE,x  ; Get current path value for Horizontal placement.
+	clc
+	adc WobOffsetX           ; Add to offset for placement.
+	sta FrogNewPMX           ; Tell VBI where to draw the object.
+
+CheckOnAnimateY
+	lda AnimateFrames2       ; Get the countdown timer for Y movement.
+	bne EndWobbleDeWobble    ; Not 0.  No Y movement.  Depart.
+
+	lda #WOBBLEY_SPEED       ; Reset the Y movement timer.
+	sta AnimateFrames2
+
+	inc WobbleY              ; Increment Index for Y offset.
+	lda WobbleY              ; Get new Y index
+	and #$3F                 ; Limit to 0 to 63.
+;	sta WobbleY              ; Remarkably, the Base-2-ness of the size plus the AND above make this STA unnecessary.
+	tax                      ; X = Index for Y movement
+	lda WOBBLE_SINE_TABLE,x  ; Get current path value for Vertical placement.
+	clc
+	adc WobOffsetY           ; Add to offset for placement.
+	sta FrogNewPMY           ; Tell VBI where to draw the object.
+
+EndWobbleDeWobble
+	rts
+
+
 ;==============================================================================
 ;											CheckRidetheBoat
 ;==============================================================================
@@ -1944,9 +1943,9 @@ PositionTomb
 	stx HPOSM0 ; + 2 is p5 left part of tombstone
 	inx
 	inx
-	stx HPOSP2 ; + 4 is part of RIP
+	stx HPOSP3 ; + 4 is part of RIP
 	inx
-	stx HPOSP3 ; + 5 is rest of the RIP
+	stx HPOSP2 ; + 5 is rest of the RIP
 	inx
 	inx
 	stx HPOSP1 ; + 7 right side of tombstone
