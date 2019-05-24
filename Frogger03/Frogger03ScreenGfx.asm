@@ -367,9 +367,9 @@ DisplayTitleScreen
 
 
 ; ==========================================================================
-;
+; WOBBLE DE WOBBLE                           A  X  
 ; ==========================================================================
-; Frog Gymnastics.
+; Frog (etc) Gymnastics.
 ; On the title screen the frog moves in a sine path from  +88 to +160.
 ; This value is centered at 128, the middle of the screen.
 ; The data from the sine generator is 0 to $80  (0 to 80).
@@ -379,10 +379,13 @@ DisplayTitleScreen
 ; Minus 4 for the width/height of the Frog == 84
 ; Add that to current values to position the frog.
 ; The rate of updates between X and Y values differs, so the 
-; frog does not travel in a circle, but a 
+; frog does not travel in a circle, but a distorted arc.
+; The frog Y center position is offset slightly differently from 
+; the X Center.
+; This same code is used for the Tomb/gravestone on the GameOver screen.
 ; --------------------------------------------------------------------------
 
-FROG_WOBBLE_SINE_TABLE
+WOBBLE_SINE_TABLE
 	.by $28 $2c $30 $34 $37 $3b $3e $41 
 	.by $44 $47 $49 $4b $4d $4e $4f $50 
 	.by $50 $50 $4f $4e $4d $4b $49 $47 
@@ -392,42 +395,42 @@ FROG_WOBBLE_SINE_TABLE
 	.by $00 $00 $01 $02 $03 $05 $07 $09 
 	.by $0c $0f $12 $15 $19 $1c $20 $24 
 
-TitleFrogX .byte $00 ; Index in table for where froggy flies
-TitleFrogY .byte $00 ; Index in table for where froggy flies
 
-WobbleDeWobbleFrog
-	lda AnimateFrames
-	bne CheckOnAnimateY
+WobbleDeWobble
+	lda AnimateFrames        ; Get the countdown timer for X movement.
+	bne CheckOnAnimateY      ; Not 0.  No X movement.  Go try Y movement.
 
-	lda #2
-	sta AnimateFrames
+	lda #WOBBLEX_SPEED       ; Reset the X movement timer.
+	sta AnimateFrames        
 
-	inc TitleX
-	lda TitleX
-	and #$3F ; (0 to 63)
-	tax
-	lda FROG_WOBBLE_SINE_TABLE,x
+	inc WobbleX              ; Increment Index for X offset
+	lda WobbleX              ; Get new X index
+	and #$3F                 ; Limit to 0 to 63.
+;	sta WobbleX              ; Remarkably, the Base-2-ness of the size plus the AND above make this STA unnecessary.
+	tax                      ; X = Index for X movement
+	lda WOBBLE_SINE_TABLE,x  ; Get current path value for Horizontal placement.
 	clc
-	adc #OFF_FROGX
-	sta FrogNewPMX
+	adc WobOffsetX           ; Add to offset for placement.
+	sta FrogNewPMX           ; Tell VBI where to draw the object.
 
 CheckOnAnimateY
-	lda AnimateFrames2
-	bne EndWobbleDeWobbleFrog
+	lda AnimateFrames2       ; Get the countdown timer for Y movement.
+	bne EndWobbleDeWobble    ; Not 0.  No Y movement.  Depart.
 
-	lda #3
+	lda #WOBBLEY_SPEED       ; Reset the Y movement timer.
 	sta AnimateFrames2
 
-	inc TitleY
-	lda TitleY
-	and #$3F ; (0 to 63)
-	tax
-	lda FROG_WOBBLE_SINE_TABLE,x
+	inc WobbleY              ; Increment Index for Y offset.
+	lda WobbleY              ; Get new Y index
+	and #$3F                 ; Limit to 0 to 63.
+;	sta WobbleY              ; Remarkably, the Base-2-ness of the size plus the AND above make this STA unnecessary.
+	tax                      ; X = Index for Y movement
+	lda WOBBLE_SINE_TABLE,x  ; Get current path value for Vertical placement.
 	clc
-	adc #OFF_FROGY
-	sta FrogNewPMY
+	adc WobOffsetY           ; Add to offset for placement.
+	sta FrogNewPMY           ; Tell VBI where to draw the object.
 
-EndWobbleDeWobbleFrog
+EndWobbleDeWobble
 	rts
 
 

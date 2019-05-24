@@ -342,8 +342,10 @@ ScoreToAdd        .byte 0         ; = Number To Be Added to Score
 NumberOfChars     .byte 0         ; = Number Of Characters across for score
 FlaggedHiScore    .byte 0         ; = Flag For Hi Score.  0 = no high score.  $FF = High score.
 
-TitleX            .byte 0         ; Index into FROG_WOBBLE_SINE_TABLE for X coordinates.
-TitleY            .byte 0         ; Index into FROG_WOBBLE_SINE_TABLE for Y coordinates.
+WobbleX           .byte 0         ; Index into FROG_WOBBLE_SINE_TABLE for X coordinates.
+WobbleY           .byte 0         ; Index into FROG_WOBBLE_SINE_TABLE for Y coordinates.
+WobOffsetX        .byte 0         ; 84 for Frog. 80 for Tomb.
+WobOffsetY        .byte 0         ; 75 for Frog. XX for Tomb.
 
 ; Input, event control, and timers.
 ; FYI: Frame counters are decremented each frame (by the VBI).

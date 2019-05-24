@@ -42,6 +42,7 @@ SetupTransitionToTitle
 	jsr ResetTimers
 
 	jsr HideButtonPrompt     ; Tell VBI the prompt flashing is disabled.
+	jsr EraseFrog            ; Specifically zero the object (from Game Over)
 
 	lda #1
 	sta EventCounter         ; Declare stage 1 behavior for scrolling.
@@ -57,10 +58,10 @@ SetupTransitionToTitle
 	sta FrogPMY
 	sta FrogShape           ; 0 is "off"  (it would already be off by default)
 
-	lda #MID_FROGX          ; Set new X position to middle of screen.
+	lda #OFF_FROGX          ; Set new X position to middle of screen.
 	sta FrogNewPMX
 
-	lda #MAX_FROGY          ; Set new Y position to origin. (row 18)
+	lda #OFF_FROGY          ; Set new Y position to origin. (row 18)
 	sta FrogNewPMY
 
 	lda #SHAPE_FROG         ; Set new frog shape.
@@ -83,6 +84,7 @@ SetupTransitionToGame
 	jsr ResetTimers
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
+	jsr EraseFrog          ; Specifically zero the object.
 
 	lda #24
 	sta EventCounter2       ; Prep the first transition loop.
@@ -289,9 +291,24 @@ SetupTransitionToGameOver
 	sta EventCounter2
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
+	jsr EraseFrog          ; Specifically zero the object.
 
 	lda #SCREEN_TRANS_OVER ; Change to transition to Game Over.
 	sta CurrentScreen
+
+	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
+	sta FrogPMX
+	sta FrogPMY
+	sta FrogShape           ; 0 is "off"  (it would already be off by default)
+
+	lda #OFF_TOMBX          ; Set new X position to middle of screen.
+	sta FrogNewPMX
+
+	lda #OFF_TOMBY          ; Set new Y position to origin. (row 18)
+	sta FrogNewPMY
+
+	lda #SHAPE_TOMB         ; Set new tomb shape.
+	sta FrogNewShape
 
 	rts
 

@@ -59,9 +59,9 @@
 ;    screen memory.  It is not something that must be copied to screen
 ;    memory.  Data properly placed in any memory makes it the actual
 ;    screen memory thanks to the Display List LMS instructions.
-; 2) a) In all the prior versions all the rows of boats moving left look 
+; 2) a) In the prior versions all the rows of boats moving left look 
 ;       the same, and all the rows moving right looked the same.  
-;       Version 02 declared another copy of data for every line of boats.
+;       Version 02 declared a copy of data for every line of boats.
 ;       This was necessary, because the frog was drawn in screen memory 
 ;       and must appear on every row.
 ;    b) But now, since the frog is a Player/Missile object there is no 
@@ -69,7 +69,7 @@
 ;       all the boat rows could be the same screen memory.  Declaring 
 ;       one row of left boats, and one row of right boats saves the 
 ;       contents of 10 more rows of the same.  This is actually a 
-;       significant part of the entire executable. 
+;       significant part of the executable size. 
 ;    c) Even if the same data is used for each type of boat, they do not 
 ;       need to appear identical on screen.   If each row has its own 
 ;       concept of current scroll value, then all the rows can be in 
@@ -78,9 +78,9 @@
 ;    to allow the boats to move from an original position to destination
 ;    and then return the the original scroll position.  If the boats 
 ;    and waves between them are identical then the entire line of boats 
-;    does not need to be duplicated.  There only need to be enough 
+;    does not need to be duplicated.  There only needs to be enough 
 ;    data to scroll from one boat position to the next boat's position.
-; 3) Organizing the boats row of graphics to sit within one page of data 
+; 3) Organizing the boats' row of graphics to sit within one page of data 
 ;    means scrolling updates and LMS math only need deal with the low
 ;    byte of addresses. 
 ; 3) To avoid wasting space the lines of data from other displays can be
@@ -388,7 +388,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; But, since the visibly adjacent lines of screen data need not be
 ; contiguous in memory we can simply align screen data into 256
 ; byte pages only making sure a line doesn't cross the end of a 
-; bage.  This will prevent any line of displayed data from crossing 
+; page.  This will prevent any line of displayed data from crossing 
 ; over a 4K boundary.
 
 
@@ -422,7 +422,7 @@ PLAYFIELD_MEM16
 	mLineOfRightBoats
 
 
-; Title text.  Bitmapped version for Mode 9.
+; Title text.  Bit-mapped version for Mode 9.
 ; Will not scroll these, so no need for individual labels and leading blanks.
 ; 60 bytes here instead of the 240 bytes used for the scrolling text version.
 
@@ -505,7 +505,7 @@ INSTRUCT_MEM6
 ; 6  |                                        |
 
 ; Now:
-SCROLLING_CREDIT   ; 40+52+62+61+40 == 255 ; almost a page, how nice.
+SCROLLING_CREDIT   ; 40+52+62+56+40 == 250 ; almost a page, how nice.
 BLANK_MEM ; Blank text also used for blanks in other places.
 	.sb "                                        " ; 40
 
@@ -514,7 +514,7 @@ BLANK_MEM ; Blank text also used for blanks in other places.
 
 	.sb "Original program for CBM PET 4032 written by John C. Dale.    " ; 62
 
-	.sb "Atari 8-bit computer port by Ken Jennings, V03, May 2019" ; 61
+	.sb "Atari 8-bit computer port by Ken Jennings, V03, May 2019" ; 56
 
 END_OF_CREDITS
 EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
@@ -1348,7 +1348,10 @@ MAX_FROGY = PM_1LINE_NORMAL_BOTTOM-15     ; starting position for frog at bottom
 
 OFF_FROGX = 84                            ; Offset for frog X coordinates on title animation.
 OFF_FROGY = 75                            ; Offset for frog Y coordinates on title animation.
+OFF_TOMBX = 84                            ; Offset for tomb X coordinates on game over animation.
+OFF_TOMBY = 75                            ; Offset for tomb Y coordinates on game over animation.
 
+; List of Player/Missile shapes.
 SHAPE_OFF   = 0
 SHAPE_FROG  = 1
 SHAPE_SPLAT = 2

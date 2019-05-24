@@ -35,6 +35,9 @@ BLINK_SPEED      = 3   ; Speed of updates to Press A Button prompt.
 TITLE_SPEED      = 2   ; Scrolling speed for title. 
 TITLE_WIPE_SPEED = 0   ; Title screen to game screen fade speed.
 
+WOBBLEX_SPEED    = 2   ; Speed of flying objects on Title and Game Over.
+WOBBLEY_SPEED    = 3   ; Speed of flying objects on Title and Game Over.
+
 FROG_WAKE_SPEED  = 190 ; Initial delay about 3 sec for frog corpse '*' viewing/mourning
 DEAD_FADE_SPEED  = 4   ; Fade the game screen to black for Dead Frog
 DEAD_CYCLE_SPEED = 6   ; Speed of color animation on Dead screen
