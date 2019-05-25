@@ -679,8 +679,8 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for Beach.
 
 	; Make Beach lines full horizontal overscan.  Looks more interesting-er.
 
-	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_WIDE
-	sta DMACTL
+;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_WIDE
+;	sta DMACTL
 
 	jmp SetupAlmostAllColors_DLI
 
@@ -691,17 +691,18 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for Beach.
 ; Set Normal width screen for Boats.
 GAME_DLI_25 ; DLI 2 sets COLPF0,1,2,3,BK for first line of boats.
 	mStart_DLI
-
-	lda COLBK_TABLE,y   ; Get color Rocks 1   
-	sta WSYNC
-	sta COLBK
-
-	; Reset the scrolling water line to normal width. 
-	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_NORMAL
-	sta DMACTL
-
+	
+	lda COLBK_TABLE,y   ; Get color background
+	pha
 	lda HSCROL_TABLE,y   ; Get boat fine scroll.
+	; Reset the scrolling water line to normal width. 
+;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_NORMAL
+	sta WSYNC
+;	sta DMACTL
+;	pla
 	sta HSCROL
+	pla
+	sta COLBK
 
 SetupAllColors_DLI
 	lda COLPF0_TABLE,y   ; Get color Rocks 1   

@@ -298,22 +298,6 @@ SetupTransitionToGameOver
 	lda #SCREEN_TRANS_OVER ; Change to transition to Game Over.
 	sta CurrentScreen
 
-	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
-	sta FrogPMX
-	sta FrogPMY
-	sta FrogShape           ; 0 is "off"  (it would already be off by default)
-
-	lda #OFF_TOMBX          ; Set new X position to middle of screen.
-	sta WobOffsetX
-	sta FrogNewPMX
-
-	lda #OFF_TOMBY          ; Set new Y position to origin. (row 18)
-	sta WobOffsetX
-	sta FrogNewPMY
-
-	lda #SHAPE_TOMB         ; Set new tomb shape.
-	sta FrogNewShape
-
 	rts
 
 
@@ -330,10 +314,26 @@ SetupGameOver
 	lda #GAME_OVER_SPEED   ; Animation moving speed.
 	jsr ResetTimers
 
-	lda #SCREEN_OVER       ; Change to Game Over screen.
-	sta CurrentScreen
-
 	lda #0                ; base color for down color scroll
 	sta EventCounter
+
+	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
+	sta FrogPMX
+	sta FrogPMY
+	sta FrogShape           ; 0 is "off"  (it would already be off by default)
+
+	lda #OFF_TOMBX          ; Set new X position to middle of screen.
+	sta WobOffsetX
+	sta FrogNewPMX
+
+	lda #OFF_TOMBY          ; Set new Y position to origin. (row 18)
+	sta WobOffsetX
+	sta FrogNewPMY
+
+	lda #SHAPE_TOMB         ; Set new tomb shape.
+	sta FrogNewShape
+
+	lda #SCREEN_OVER       ; Change to Game Over screen.
+	sta CurrentScreen
 
 	rts
