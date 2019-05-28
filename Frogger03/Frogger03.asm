@@ -375,6 +375,13 @@ ThisDLIAddr     .word TITLE_DLI_CHAIN_TABLE  ; by default (VBI corrects this)
 ; by the VBI, the VBI starts the counter for DLI operation at 1 instead of 0
 ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
 
+; For speed reasons (I think)  the next DLI's values are pre-loaded into zero page.
+ColorBak     .byte $00 ; Attempt at optimazation to save tya; pha; ldy $, lda $,y
+ColorPF0     .byte $00   
+ColorPF1     .byte $00   
+ColorPF2     .byte $00   
+ColorPF3     .byte $00  
+NextHSCROL   .byte $00
 
 ; ======== V B I ======== TIMER FOR MAIN CODE
 ; Frame counter set by main code events for delay/speed of main activity.

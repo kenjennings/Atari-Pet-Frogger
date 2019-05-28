@@ -28,18 +28,20 @@
 ; * Mode 4, 5 colors colors:
 ;   This provides the game's beach and rocks graphics, waves, animated
 ;   boats and water effects. Five colors (including background.)
+;
 ; Boat Lines:
+; COLBK  = Water waves (from above line)
 ; COLPF0 = blue (and varieties) for the water waves. 
 ; COLPF1 = Browns Main boat body. 
 ; COLPF2 = Boat Seats (collision color used for safe frog on boat.) 
 ; COLPF3 = White (full screen) Wave effects, Missile colors for frog eyes.
-; COLBK  = Water waves (from above line)
+;
 ; Beach Lines:
+; COLBK  = Sand color
 ; COLPF0 = Water color (from line above)
 ; COLPF1 = Rock 1 main color
 ; COLPF2 = Sand background (darker) 
 ; COLPF3 = White (rock hilight) 
-; COLBK  = Sand color
 ; --------------------------------------------------------------------------
 
 I_BOAT_LF    = $02 ; ", boat, left, front,       animated (2 images)
@@ -130,6 +132,19 @@ CHARACTER_SET
 ; $00: . . . . . . . .
 ; $18: . . . # # . . .
 ; $00: . . . . . . . .
+
+; Boat Lines:
+; COLBK  = Water waves (matching COLPF0 from water line above)
+; COLPF0 = blue (and varieties) for the water waves. 
+; COLPF1 = Main boat body. 
+; COLPF2 = Boat Seats (collision color used for safe frog on boat.) 
+; COLPF3 = White (full screen) Wave effects, Missile colors for frog eyes.
+
+; .. == 00 == COLBK
+; ## == 01 == COLPF0
+; OO == 10 == COLPF1
+; XX == 11 == COLPF2 
+; XX == 11 == COLPF3 (inverse char) 
 
 ; Char $02:   " ======================= I_BOAT_LF animated (2 images)
   .BYTE $A0,$AA,$2A,$2A,$0A,$03,$17,$55
@@ -877,6 +892,20 @@ CHARACTER_SET
 ; $C0: XX .. .. .. 
 ; $D4: XX ## ## .. 
 ; $55: ## ## ## ## 
+
+; Beach Lines:
+; COLBK  = Sand color
+; COLPF0 = Water color (from line above)
+; COLPF1 = Rock 1 main color
+; COLPF2 = Sand background (darker) 
+; COLPF3 = White (rock hilight) 
+
+; .. == 00 == COLBK
+; ## == 01 == COLPF0
+; OO == 10 == COLPF1
+; XX == 11 == COLPF2 
+; XX == 11 == COLPF3 (inverse char) 
+
 ; Char $4C: ctrl-L ==================== I_BEACH1
   .BYTE $57,$5F,$FF,$FF,$FF,$F0,$00,$00
 ; $57: ## ## ## XX 
@@ -1017,6 +1046,14 @@ CHARACTER_SET
 ; $38: .. XX OO .. 
 ; $EA: XX OO OO OO 
 ; $00: .. .. .. .. 
+
+; Boat Lines:
+; COLBK  = Water waves (matching COLPF0 from water line above)
+; COLPF0 = blue (and varieties) for the water waves. 
+
+; .. == 00 == COLBK
+; ## == 01 == COLPF0
+
 ; Char $5A: ctrl-Z ==================== I_WATER1
   .BYTE $00,$00,$00,$00,$00,$00,$05,$55
 ; $00: .. .. .. .. 

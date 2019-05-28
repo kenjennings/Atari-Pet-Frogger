@@ -1057,29 +1057,33 @@ TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 
 
 GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
-	.byte <Score_DLI    ; DLI (0) for scores
-	.byte <GAME_DLI_1   ; DLI (1) Text - COLPF1, for scores 
-	.byte <GAME_DLI_2   ; DLI 2   Beach 18 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A).
-	.byte <GAME_DLI_25  ; DLI 3   Boats 17 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-	.byte <GAME_DLI_3   ; DLI 4   Boats 16 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 17)
-	.byte <GAME_DLI_2   ; DLI 5   Beach 15 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 16).
-	.byte <GAME_DLI_25  ; DLI 6   Boats 14 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-	.byte <GAME_DLI_3   ; DLI 7   Boats 13 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 14)
-	.byte <GAME_DLI_2   ; DLI 8   Beach 12 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 13).
-	.byte <GAME_DLI_25  ; DLI 9   Boats 11 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-	.byte <GAME_DLI_3   ; DLI 10  Boats 10 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 11)
-	.byte <GAME_DLI_2   ; DLI 11  Beach 09 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 10).
-	.byte <GAME_DLI_25  ; DLI 12  Boats 08 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-	.byte <GAME_DLI_3   ; DLI 13  Boats 07 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 8)
-	.byte <GAME_DLI_2   ; DLI 14  Beach 06 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 7).
-	.byte <GAME_DLI_25  ; DLI 15  Boats 05 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-	.byte <GAME_DLI_3   ; DLI 16  Boats 04 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 5)
-	.byte <GAME_DLI_2   ; DLI 17  Beach 03 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 4).
-	.byte <GAME_DLI_25  ; DLI 18  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-	.byte <GAME_DLI_3   ; DLI 19  Boats 01 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 2)
-	.byte <GAME_DLI_2   ; DLI 20  Beach 00 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (for 1).
-	.byte <GAME_DLI_25  ; DLI 21  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3, get PXPF collisions (N/A)
-	.byte <GAME_DLI_5   ; DLI 22  Calls SPC2 to set scrolling credits HSCROL and colors.
+	.byte <Score_DLI    ; DLI (0)   SCORES   - COLBK,                 COLPF1
+	.byte <Score_DLI    ; DLI (1)   SCORES   - COLBK,                 COLPF1
+	.byte <GAME_DLI_2   ; DLI (2)   Beach 18 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
+	.byte <GAME_DLI_3   ; DLI (3)   Boats 17 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_25  ; DLI (4)   Boats 16 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	
+	
+	
+	
+	.byte <GAME_DLI_2   ; DLI (5)   Beach 15 - COLBK,        COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_25  ; DLI (6)   Boats 14 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_3   ; DLI (7)   Boats 13 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_2   ; DLI (8)   Beach 12 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
+	.byte <GAME_DLI_25  ; DLI (9)   Boats 11 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_3   ; DLI (10)  Boats 10 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_2   ; DLI (11)  Beach 09 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
+	.byte <GAME_DLI_25  ; DLI (12)  Boats 08 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_3   ; DLI (13)  Boats 07 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_2   ; DLI (14)  Beach 06 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
+	.byte <GAME_DLI_25  ; DLI (15)  Boats 05 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_3   ; DLI (16)  Boats 04 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_2   ; DLI (17)  Beach 03 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
+	.byte <GAME_DLI_25  ; DLI (18)  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_3   ; DLI (19)  Boats 01 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_2   ; DLI (20)  Beach 00 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
+	.byte <GAME_DLI_25  ; DLI (21)  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_5   ; DLI (22)  Calls SPC2 to set scrolling credits HSCROL and colors.
 	; FYI: GAME_DLI_5 goes directly to SPC2, not SPC1 because there is no Press The Button prompt on this screen.
 
 
