@@ -697,7 +697,7 @@ TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to
 
 
 ; BEACH
-; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has a whole 
+; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has another  
 ; blank scan line to finish everything else.  
 ; Set Wide screen for Beach.
 
@@ -754,8 +754,10 @@ GAME_DLI_25 ; DLI 2 sets COLPF0,1,2,3,BK for first line of boats.
 
 
 
-; BOATS 2
-; Starts on BEACH line. Therefore setup and sync should have time to work
+; BOATS 
+; Startup is beachline + 1 blank
+; Starts on BEACH line or Blank Line. 
+Therefore setup and sync should have time to work
 ; and an entire blank scan line follows before the boats.
 GAME_DLI_3 ; DLI 3 sets COLPF0,1,2,3,BK and HSCROL for Boats.
 ;	mStart_DLI
