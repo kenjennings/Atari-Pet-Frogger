@@ -757,7 +757,7 @@ GAME_DLI_25 ; DLI 2 sets COLPF0,1,2,3,BK for first line of boats.
 ; BOATS 
 ; Startup is beachline + 1 blank
 ; Starts on BEACH line or Blank Line. 
-Therefore setup and sync should have time to work
+; Therefore setup and sync should have time to work
 ; and an entire blank scan line follows before the boats.
 GAME_DLI_3 ; DLI 3 sets COLPF0,1,2,3,BK and HSCROL for Boats.
 ;	mStart_DLI
@@ -945,9 +945,9 @@ DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
 
 	sta WSYNC            ; sync to end of scan line
 
-;	sty COLPF1           ; Write text luminance for credits.
-;	sta COLBK            ; Write new border color.
-;	sta COLPF2           ; Write new background color
+	sty COLPF1           ; Write text luminance for credits.
+	sta COLBK            ; Write new border color.
+	sta COLPF2           ; Write new background color
 
 	lda #<DoNothing_DLI  ; Stop DLI Chain.  VBI will restart the chain.
 	sta VDSLST

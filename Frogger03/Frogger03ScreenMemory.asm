@@ -1064,7 +1064,7 @@ GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
 	.byte <GAME_DLI_3   ; DLI (3)   Boats 17 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 	.byte <GAME_DLI_3   ; DLI (4)   Boats 16 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 	
-	.byte <GAME_DLI_2   ; DLI (5)   Beach 15 - COLBK,        COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_2   ; DLI (5)   Beach 15 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3
 	.byte <GAME_DLI_3   ; DLI (6)   Boats 14 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 	.byte <GAME_DLI_3   ; DLI (7)   Boats 13 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 
@@ -1085,8 +1085,7 @@ GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
 	.byte <GAME_DLI_3   ; DLI (19)  Boats 01 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 
 	.byte <GAME_DLI_2   ; DLI (20)  Beach 00 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
-;	.byte <GAME_DLI_3   ; DLI (21)  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
-	.byte <GAME_DLI_5   ; DLI (22)  Calls SPC2 to set scrolling credits HSCROL and colors.
+	.byte <GAME_DLI_5   ; DLI (21)  Credits  - Set scrolling credits HSCROL.  Calls SPC2 to set colors.
 	; FYI: GAME_DLI_5 goes directly to SPC2, not SPC1 because there is no Press The Button prompt on this screen.
 
 
