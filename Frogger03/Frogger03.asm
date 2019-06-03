@@ -10,7 +10,7 @@
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019 
-; Version 03, May 2019
+; Version 03, June 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -543,7 +543,7 @@ SAVEY = $FF
 	.by "** Thanks to the Word (John 1:1), Creator of heaven, and earth, and "
 	.by "semiconductor chemistry and physics which makes all this fun possible. "
 	.by "** Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. "
-	.by "** Atari port by Ken Jennings, May 2019, Version 03. "
+	.by "** Atari port by Ken Jennings, June 2019, Version 03. "
 	.by "** Improved graphics for the playfield and frog. "
 	.by "Fine Scrolling Boats. Custom character set for boats. "
 	.by "Player/Missile Frog. "

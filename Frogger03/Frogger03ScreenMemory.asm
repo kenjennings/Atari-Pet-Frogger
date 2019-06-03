@@ -10,7 +10,7 @@
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019
-; Version 03, May 2019
+; Version 03, June 2019
 ;
 ; --------------------------------------------------------------------------
 
@@ -505,7 +505,7 @@ INSTRUCT_MEM6
 ; 6  |                                        |
 
 ; Now:
-SCROLLING_CREDIT   ; 40+52+62+56+40 == 250 ; almost a page, how nice.
+SCROLLING_CREDIT   ; 40+52+62+57+40 == 251 ; almost a page, how nice.
 BLANK_MEM ; Blank text also used for blanks in other places.
 	.sb "                                        " ; 40
 
@@ -514,7 +514,7 @@ BLANK_MEM ; Blank text also used for blanks in other places.
 
 	.sb "Original program for CBM PET 4032 written by John C. Dale.    " ; 62
 
-	.sb "Atari 8-bit computer port by Ken Jennings, V03, May 2019" ; 56
+	.sb "Atari 8-bit computer port by Ken Jennings, V03, June 2019" ; 57
 
 END_OF_CREDITS
 EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
