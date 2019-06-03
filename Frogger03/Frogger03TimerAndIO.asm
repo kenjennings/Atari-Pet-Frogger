@@ -143,16 +143,6 @@ BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 MOVING_ROW_STATES ; 19 entries describing boat directions. Beach (0), Right (1), Left (FF) directions.
 	.by 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0
 
-; Offsets from first LMS low byte in Display List to 
-; the subsequent LMS low byte of each boat line. (VBI)
-; For the Right Boats this is the offset from PF_LMS1.
-; For the Left Boats this is the offset from PF_LMS2.
-BOAT_LMS_OFFSET 
-	.by 0 0 0 0 12 12 0 24 24 0 36 36 0 48 48 0 60 60 
-
-; Index into DLI's HSCROL table for each boat row. (needed by VBI)
-BOAT_HS_TABLE
-	.by 0 4 5 0 7 8 0 10 11 0 13 14 0 16 17 0 19 20
 
 
 ; PAL Timer values.  PAL ?? guesses...
@@ -798,8 +788,8 @@ GAME_DLI_3 ; DLI 3 sets COLPF0,1,2,3,BK and HSCROL for Boats.
 GAME_DLI_5 ; Needs to set HSCROL for credits, then call to set text color.  LAST DLI on screen.
 	mRegSaveAY
 
-	lda CreditHSCROL      ; HScroll for credits.
-	sta HSCROL
+;	lda CreditHSCROL      ; HScroll for credits.
+;	sta HSCROL
 
 	jmp DLI_SPC2_SetCredits ; Finish by setting text luminance.
 
@@ -857,12 +847,16 @@ SetBlack_DLI
 	sta COLPF2           ; Write new background color
 	pla
 	sta COLPF1           ; write new text color.
-	; finish by loading next DLI's colors, so the second score is ready for Beach.
+; finish by loading next DLI's colors, so the second score is ready for Beach.
 	tya
 	pha
 	ldy ThisDLI
-	
 
+	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
+
+;	bne Exit_DLI
+
+; Since this falls through to Exit_DLI...  the Y register will be fixed below
 
 
 ;==============================================================================
@@ -949,11 +943,14 @@ DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
 	sta COLBK            ; Write new border color.
 	sta COLPF2           ; Write new background color
 
+	lda CreditHSCROL      ; HScroll for credits.
+	sta HSCROL
+
 	lda #<DoNothing_DLI  ; Stop DLI Chain.  VBI will restart the chain.
 	sta VDSLST
 	lda #>DoNothing_DLI  ; Stop DLI Chain.  VBI will restart the chain.
 	sta VDSLST+1
-	
+
 	mRegRestoreAY
 
 	rti
@@ -970,8 +967,8 @@ DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
 
 LoadAllColors_DLI
 
-;	lda ColorPF0   ; Get color Rocks 1   
-;	sta COLPF0
+	lda ColorPF0   ; Get color Rocks 1   
+	sta COLPF0
 
 LoadAlmostAllColors_DLI
 	lda ColorPF1   ; Get color Rocks 2

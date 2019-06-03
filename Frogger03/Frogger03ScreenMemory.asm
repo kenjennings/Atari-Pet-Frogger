@@ -725,9 +725,11 @@ GAME_BACK_COLORS; 22 entries.
 	.by COLOR_BLACK                   ; Scores
 	.by COLOR_BLACK                   ; lives, saved frogs.
 	
-	.by COLOR_GREEN+6    
-	.by COLOR_AQUA+$2      
-	.by COLOR_AQUA+4      ; Beach, boats, boats.
+	.by COLOR_GREEN+6     ; Beach
+;	.by COLOR_RED_ORANGE+$e
+;	.by COLOR_BLACK+$e
+	.by COLOR_AQUA+2      ; Water for boats
+	.by COLOR_AQUA+4      ; Water for boats. 
 
 	.by COLOR_RED_ORANGE+6
 	.by COLOR_BLUE1+2     
@@ -758,6 +760,8 @@ GAME_COLPF0_COLORS; 22 entries
 	.by COLOR_BLACK                   ; lives, saved frogs.
 
 	.by COLOR_BLUE1     ; Beach sky
+;	.by COLOR_ORANGE2+10
+;	.by COLOR_ORANGE2+8
 	.by COLOR_AQUA+4    ; Water top 1 with boats
 	.by COLOR_AQUA+6    ; Water top 2 with boats
 
@@ -783,47 +787,47 @@ GAME_COLPF0_COLORS; 22 entries
 	
 	.by COLOR_AQUA+6      ; Beach sky (water)
 
-
+; beach color and the boats
 GAME_COLPF1_COLORS ; 22 entries
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by COLOR_BLACK+$e                        ; Scores
 	.by COLOR_BLACK+$a                        ; lives, saved frogs.
 	
-	.by COLOR_ORANGE2+$8     ; beach
-	.by COLOR_PINK+$a
-	.by COLOR_PURPLE+$c
+	.by COLOR_ORANGE2+$8     ; beach 
+	.by COLOR_PINK+$a        ; boat
+	.by COLOR_PURPLE+$c      ; boat
 	
-	.by COLOR_RED_ORANGE+$8 ; beach
+	.by COLOR_RED_ORANGE+$8  ; beach
 	.by COLOR_PURPLE_BLUE+$a
 	.by COLOR_BLUE_GREEN+$c
 	
-	.by COLOR_ORANGE2+$8 ; beach
+	.by COLOR_ORANGE2+$8     ; beach
 	.by COLOR_GREEN+$a
 	.by COLOR_YELLOW_GREEN+$c
 	
-	.by COLOR_RED_ORANGE+$8 ; beach
+	.by COLOR_RED_ORANGE+$8  ; beach
 	.by COLOR_ORANGE_GREEN+$a
 	.by COLOR_LITE_ORANGE+$c
 	
-	.by COLOR_ORANGE2+$8 ; beach
+	.by COLOR_ORANGE2+$8     ; beach
 	.by COLOR_ORANGE1+$a
 	.by COLOR_ORANGE2+$c
 	
-	.by COLOR_RED_ORANGE+$8 ; beach
+	.by COLOR_RED_ORANGE+$8  ; beach
 	.by COLOR_RED_ORANGE+$a
 	.by COLOR_PINK+$c
 	
-	.by COLOR_RED_ORANGE+$8 ; Last beach
+	.by COLOR_RED_ORANGE+$8  ; Last beach
 
-
+; beach color, and the lines on the boat.
 GAME_COLPF2_COLORS ; 24 entries... ?????????????
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by COLOR_BLACK                   ; Scores
 	.by COLOR_BLACK                   ; lives, saved frogs.
 	
 	.by COLOR_GREEN+2                 ; beach
-	.by COLOR_PINK+$4
-	.by COLOR_PURPLE+$4
+	.by COLOR_PINK+$4                 ; boat lines
+	.by COLOR_PURPLE+$4               ; boat lines
 	
 	.by COLOR_RED_ORANGE+2            ; beach
 	.by COLOR_PURPLE_BLUE+$4

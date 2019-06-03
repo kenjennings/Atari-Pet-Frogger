@@ -1176,6 +1176,21 @@ ExitScrollTheCredits
 	rts
 
 
+;==============================================================================
+; F I N E   S C R O L L I N G   B O A T S
+;==============================================================================
+
+; Offsets from first LMS low byte in Display List to 
+; the subsequent LMS low byte of each boat line. (VBI)
+; For the Right Boats this is the offset from PF_LMS1.
+; For the Left Boats this is the offset from PF_LMS2.
+BOAT_LMS_OFFSET 
+	.by 0 0 0 0 13 13 0 26 26 0 39 39 0 52 52 0 65 65 
+
+; Index into DLI's HSCROL table for each boat row. 
+BOAT_HS_TABLE
+	.by 0 4 5 0 7 8 0 10 11 0 13 14 0 16 17 0 19 20
+
 ; ==========================================================================
 ; RIGHT BOAT FINE SCROLLING
 ; 

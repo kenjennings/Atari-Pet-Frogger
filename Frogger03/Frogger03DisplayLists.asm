@@ -135,6 +135,8 @@ TITLE_DISPLAYLIST
 
 	.byte   DL_BLANK_8|DL_DLI              ; (177-184) An empty line.  DLI SPC1/25 sets COLBK, COLPF2, COLPF1 colors.
 
+	.byte   DL_BLANK_1                     ; (191)     One extra to line up credit with the same line on the game screen 
+
 	mDL_JMP BOTTOM_OF_DISPLAY              ; (185-192, 193-200) End of display.  See Page 0 for this evil.
 
 
@@ -215,6 +217,23 @@ PF_LMS1 = [* + 1] ; Right
 
 PF_LMS2 = [* + 1] ; Left
 	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM2+8          ; (37-44)   Boats Left (row 16)
+
+
+; ========== End
+
+
+;	.byte DL_BLANK_1|DL_DLI                                ; (182)     One scan line 
+;	;                                                                  DLI 2/20 sets COLPF0,1,2,3,BK for Beach (row 0) 
+
+;PF_LMS18 = [* + 1]                                         ;           Plus 1 is the address of the display list LMS
+;	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM18               ; (183-190) Beach. 
+;	;                                                                  DLI 5/21 HSCROL for credit, calls SPC2 to set COLPF2/COLBK Black
+
+; ========== End
+
+;	.byte DL_BLANK_1                                       ; (191)     One scan line 
+
+;	mDL_JMP DL_SCROLLING_CREDIT                            ; (192-199) End of display. No prompt for button. See Page 0 for the evil.
 
 
 ; ========== 2
@@ -458,7 +477,9 @@ GFX_LMS = [* + 1]                        ; Label the low byte of the LMS address
 	.rept 20                             ; an empty line. times 20
 		.byte DL_BLANK_4|DL_DLI          ; (105-184) DLI 0/26 - 0/43 COLBK color, 
 	.endr                                ;           DLI DLI SPC1/44 sets COLBK, COLPF2, COLPF1 colors.
-
+	
+	.byte DL_BLANK_1                                       ; (191)     One scan line 
+	
 	mDL_JMP BOTTOM_OF_DISPLAY            ; End of display.  See Page 0 for the evil.
 
 
