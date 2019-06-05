@@ -64,6 +64,6 @@ By the way, there is now sound and "music" (minimally).
 
 Uh, Oh...   What's happening here...
 
-[![V03 Proto](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_NewProtoTitle.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03/README_V03.md)
+[![V03 Proto](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_NewProtoTitle2.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03/README_V03.md)
 
 ---
