@@ -89,6 +89,7 @@ SetupTransitionToGame
 	jsr ResetTimers
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
+
 	lda #$FF               ; Remove the animated thing from display.
 	sta FrogUpdate         ; This cause VBI to erase and not redraw.
 

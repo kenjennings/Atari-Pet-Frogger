@@ -731,7 +731,8 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
  
 ; Set Wide screen for Beach?
 
-GAME_DLI_BEACH2BOAT ; DLI sets BK, HS, COLPF3,2,1,0 for the Right Boats.
+GAME_DLI_BEACH2BOAT ; DLI sets HS, BK, COLPF3,2,1,0 for the Right Boats.
+GAME_DLI_BOAT2BOAT ; DLI sets HS, BK, COLPF3,2,1,0 for the Left Boats.
 
 	mStart_DLI
 
@@ -762,18 +763,19 @@ GAME_DLI_BEACH2BOAT ; DLI sets BK, HS, COLPF3,2,1,0 for the Right Boats.
  
 ; Set Wide screen for Beach?
 
-GAME_DLI_BOAT2BOAT ; DLI sets HS, BK, COLPF3,2,1,0 for the Right Boats.
+;GAME_DLI_BOAT2BOAT ; DLI sets HS, BK, COLPF3,2,1,0 for the Left Boats.
 
-	mStart_DLI
+;	mStart_DLI
 
-	lda NextHSCROL    ; Get boat fine scroll.
-	sta HSCROL        ; Ok to set now as this line does not scroll.
+;	lda NextHSCROL    ; Get boat fine scroll.
+;	sta HSCROL        ; Ok to set now as this line does not scroll.
 
-	lda ColorBak
-	sta WSYNC
-	sta COLBK
+;	lda ColorBak
+;	sta WSYNC
+;	sta COLBK
 
-	jmp LoadAlmostAllBoatColors_DLI ; set colors.  setup next row.
+;	jmp LoadAlmostAllBoatColors_DLI ; set colors.  setup next row.
+
 
 ; Make Beach lines full horizontal overscan.  Looks more interesting-er.
 ;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_WIDE
@@ -808,9 +810,9 @@ GAME_DLI_BOAT2BEACH ; DLI sets COLPF1,2,3,COLPF0, BK for the Beach.
 	sta COLBK
 	sta COLPF0
 
-	tya
-	pha
-	ldy ThisDLI
+;	tya
+;	pha
+;	ldy ThisDLI
 
 ; Make Beach lines full horizontal overscan.  Looks more interesting-er.
 ;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_WIDE

@@ -1185,7 +1185,7 @@ ExitScrollTheCredits
 ; For the Right Boats this is the offset from PF_LMS1.
 ; For the Left Boats this is the offset from PF_LMS2.
 BOAT_LMS_OFFSET 
-	.by 0 0 0 0 16 16 0 29 29 0 42 42 0 55 55 0 68 68 
+	.by 0 0 0 0 17 17 0 34 34 0 51 51 0 68 68 0 85 85 
 
 ; Index into DLI's HSCROL table for each boat row. 
 BOAT_HS_TABLE
