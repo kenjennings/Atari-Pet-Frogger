@@ -665,6 +665,12 @@ SCREEN_LIVES
 SCREEN_SAVED
 	.sb "                 "
 
+; Filler space for a Mode C line to show a line of COLPF0 between scrolling boat lines.
+MODE_C_COLPF0
+	.rept 20
+		.by %11111111
+	.endr
+
 
 	.align $0100 ; Realign to next page.
 
@@ -695,7 +701,7 @@ SCREEN_SAVED
 TITLE_BACK_COLORS ; 25 entries ; Mode 2, text background and border. Also the Gfx background.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry. 
 	.by COLOR_BLACK              ; Scores, and blank line
-	.by COLOR_BLUE1        COLOR_PURPLE_BLUE+2      ; Title lines
+	.by COLOR_BLUE1        COLOR_PURPLE_BLUE+2      ; Title colors.  Dark to light... 
 	.by COLOR_PURPLE+4     COLOR_PINK+6             ; Title lines
 	.by COLOR_RED_ORANGE+8 COLOR_ORANGE2+10         ; Title lines
 	.by COLOR_ORANGE1+12                            ; Title lines
@@ -710,7 +716,7 @@ TITLE_BACK_COLORS ; 25 entries ; Mode 2, text background and border. Also the Gf
 TITLE_TEXT_COLORS ; 25 entries ; Mode 2 Text luminance.  Also the Gfx pixel colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by $0E                                     ; Scores, and blank line
-	.by COLOR_ORANGE_GREEN+$0C $DA $C8 $B6 $A4 $92 $C2                 ; title
+	.by $EC $DA $C8 $B6 $A4 $92 $C2                 ; title colors. light to dark
 	.by $00                                         ; blank
 	.by $04 $06 $08 $0A $0C $0A $08 $06             ; Instructions
 	.by $00                                         ; blank
@@ -1061,20 +1067,20 @@ TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 
 
 GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
-	.byte <Score_DLI    ; DLI (0)   SCORES   - COLBK,                 COLPF1
-	.byte <Score_DLI    ; DLI (1)   SCORES   - COLBK,                 COLPF1
+	.byte <Score_DLI            ; DLI (0)   SCORES   - COLBK,                 COLPF1
+	.byte <Score_DLI            ; DLI (1)   SCORES   - COLBK,                 COLPF1
 	
-	.byte <GAME_DLI_2   ; DLI (2)   Beach 18 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
-	.byte <GAME_DLI_3   ; DLI (3)   Boats 17 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
-	.byte <GAME_DLI_3   ; DLI (4)   Boats 16 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_2           ; DLI (2)   Beach 18 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
+	.byte <GAME_DLI_BEACH2BOAT  ; DLI (3)   Boats 17 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_BOAT2BOAT   ; DLI (4)   Boats 16 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 	
-	.byte <GAME_DLI_2   ; DLI (5)   Beach 15 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3
-	.byte <GAME_DLI_3   ; DLI (6)   Boats 14 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
-	.byte <GAME_DLI_3   ; DLI (7)   Boats 13 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_BOAT2BEACH  ; DLI (5)   Beach 15 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_3           ; DLI (6)   Boats 14 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_3           ; DLI (7)   Boats 13 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 
-	.byte <GAME_DLI_2   ; DLI (8)   Beach 12 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
-	.byte <GAME_DLI_3   ; DLI (9)   Boats 11 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
-	.byte <GAME_DLI_3   ; DLI (10)  Boats 10 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_2           ; DLI (8)   Beach 12 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
+	.byte <GAME_DLI_3           ; DLI (9)   Boats 11 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_3           ; DLI (10)  Boats 10 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 
 	.byte <GAME_DLI_2   ; DLI (11)  Beach 09 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
 	.byte <GAME_DLI_3   ; DLI (12)  Boats 08 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3

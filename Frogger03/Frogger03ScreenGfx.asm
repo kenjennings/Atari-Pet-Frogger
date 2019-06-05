@@ -1185,7 +1185,7 @@ ExitScrollTheCredits
 ; For the Right Boats this is the offset from PF_LMS1.
 ; For the Left Boats this is the offset from PF_LMS2.
 BOAT_LMS_OFFSET 
-	.by 0 0 0 0 13 13 0 26 26 0 39 39 0 52 52 0 65 65 
+	.by 0 0 0 0 16 16 0 29 29 0 42 42 0 55 55 0 68 68 
 
 ; Index into DLI's HSCROL table for each boat row. 
 BOAT_HS_TABLE
@@ -2103,7 +2103,7 @@ UpdateShapeSpecs
 	lda FrogNewRow       ; Also new Frog Row.
 	sta FrogRow
 
-	ldx FrogNewShape    ; And the shape is last.
+	ldx FrogNewShape    ; And the shape.
 	stx FrogShape
 
 	rts
@@ -2118,11 +2118,26 @@ UpdateShapeSpecs
 ; Update current position == new position.
 ; Y positioning different from X positioning, since it must reload memory.
 ; Update current shape = new shape.
+; Frog Update controls parts to do (because Main trying to erase the 
+; shape is arguing with the VBI)
+; FrogUpdate 0 = no changes.  
+;            1 = Any reason to change position... 
+;           -1 = erase, stop, and no further updates. 
 ; -----------------------------------------------------------------------------
 
 UpdateShape
-	jsr EraseShape       ; Remove old shape at the old vertical Y position.
+	lda FrogUpdate       ; 
+	beq ExitUpdateShape  ; 0 == no movement.  skip all.
 
+	jsr EraseShape       ; Remove old shape at the old vertical Y position.
+	lda FrogUpdate        
+	bpl b_usRedrawShape  ; 1 = continue   
+
+	lda #0               ; -1 = stop
+	sta FrogUpdate       ; Erased above, therefore stop further updates.
+	beq ExitUpdateShape
+
+b_usRedrawShape
 	jsr DrawShape        ; Draw NEW shape at new vertical Y position.
 	jsr PositionShape    ; Move shape to new horizontal X position. (and set sizes).
 
@@ -2142,23 +2157,23 @@ ExitUpdateShape
 ; -----------------------------------------------------------------------------
 
 ProcessNewShapePosition
-	lda FrogNewPMX               ; Is the new X different
-	cmp #MIN_FROGX               ; Is PM X smaller than the minimum?
-	bcs CheckHPOSMax             ; No.  
+	lda FrogNewPMX      ; Is the new X different
+	cmp #MIN_FROGX      ; Is PM X smaller than the minimum?
+	bcs CheckHPOSMax    ; No.  
 
-	lda #MIN_FROGX               ; Yes.  Reset X
-	sta FrogNewPMX               ; to the minimum.
-	bne UpdateTheFrog            ; render it.
+	lda #MIN_FROGX      ; Yes.  Reset X
+	sta FrogNewPMX      ; to the minimum.
+	bne UpdateTheFrog   ; render it.
 
 CheckHPOSMax
-	cmp #MAX_FROGX+1             ; Is PM X bigger than the maximum?
-	bcc UpdateTheFrog            ; No.
+	cmp #MAX_FROGX+1    ; Is PM X bigger than the maximum?
+	bcc UpdateTheFrog   ; No.
 
-	lda #MAX_FROGX               ; Yes.  Reset X
-	sta FrogNewPMX               ; to the maximum.
+	lda #MAX_FROGX      ; Yes.  Reset X
+	sta FrogNewPMX      ; to the maximum.
 
 UpdateTheFrog
-	jsr UpdateShape 	; then FrogPMX == FrogNewPMX. FrogPMY == FrogNewPMY. FrogRow=FrogNewRow.
+	jsr UpdateShape     ; then FrogPMX == FrogNewPMX. FrogPMY == FrogNewPMY. FrogRow=FrogNewRow.
 
 	rts
 

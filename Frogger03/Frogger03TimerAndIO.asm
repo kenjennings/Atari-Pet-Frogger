@@ -685,16 +685,26 @@ TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to
 
 
 
-
-; BEACH
-; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has another  
-; blank scan line to finish everything else.  
+; BEACH 0
+; Sets colors for the first Beach line. 
+; This is a little different from the other transitions to Beaches.  
+; Here, ALL colors must be set. 
+; In the later transitions from Boats to the Beach  COLPF0 should 
+; be setup as the same color as in the previous line of boats.
+; COLBAK is temporarily set to the value of COLPF0 to make a full
+; scan line of "sky" color matching the COLPF0 sky color for the 
+; beach line that follows.
+; COLBAK's real land color is set last as it is the color used in the 
+; lower part of the beach characters.
+;
 ; Set Wide screen for Beach.
 
-GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for Beach.
+GAME_DLI_BEACH0 
+GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
 	; custom startup to deal with a possible timing problem.
 	pha 
-	; for the extra line Get color Rocks (or water color) instead of COLBK
+	; for the extra scan line get the sky color for the Beach 
+	; (usually prior water color) instead of COLBK.
 	lda ColorPF0 ; from Page 0.
 	sta WSYNC
 	; Top of the line is sky or blue water from row above.   
@@ -713,34 +723,130 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for Beach.
 	jmp LoadAlmostAllColors_DLI
 
 
-; BOATS 1
-; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has a whole 
-; blank scan line to finish everything else.
-; Collect Player/Playfield collisions.
-; Set Normal width screen for Boats.
-GAME_DLI_25 ; DLI 2 sets COLPF0,1,2,3,BK for first line of boats.
-	; custom startup to deal with a possible timing problem.
-	pha 
-	; for the extra line Get color Rocks (or water color) instead of COLBK
-	lda ColorBak      ; Get color background;  Page 0.
-	pha
-	lda NextHSCROL    ; Get boat fine scroll.
-	sta WSYNC
+; Boats Right 1, 4, 7, 10 . . . .
+; Sets colors for the Boat lines coming from a Beach line.
+; This starts on the Beach line which is followed by one blank scan line 
+; before the Right Boats.
+; HSCROL is set early for the boats.  Followed by all color registers.
  
-	; Reset the scrolling water line to normal width. 
-;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_NORMAL
-;	sta WSYNC
-;	sta DMACTL
-;	pla
-	sta HSCROL
-	pla
+; Set Wide screen for Beach?
+
+GAME_DLI_BEACH2BOAT ; DLI sets BK, HS, COLPF3,2,1,0 for the Right Boats.
+
+	mStart_DLI
+
+	lda NextHSCROL    ; Get boat fine scroll.
+	sta HSCROL        ; Ok to set now as this line does not scroll.
+
+	lda ColorBak
+	sta WSYNC
 	sta COLBK
+
+	jmp LoadAlmostAllBoatColors_DLI ; set colors.  setup next row.
+
+; Make Beach lines full horizontal overscan.  Looks more interesting-er.
+;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_WIDE
+;	sta DMACTL
+
+
+; Boats Left 2, 5, 8, 11 . . . .
+; Sets colors for the Left Boat lines coming from a Right Boat line.
+; This starts on the ModeC line which is followed by one blank scan line 
+; before the Left Boats.
+; The Mode C line uses only COLPF0 to match the previous water, and the 
+; following "sky".
+; Therefore, the color of the line is automatically matched to both prior and 
+; the next lines without changing COLPF0.  (For the fading purpose it does 
+; need to get reset on the following blank line. 
+; HSCROL is set early for the boats.  Followed by all color registers.
+ 
+; Set Wide screen for Beach?
+
+GAME_DLI_BOAT2BOAT ; DLI sets HS, BK, COLPF3,2,1,0 for the Right Boats.
+
+	mStart_DLI
+
+	lda NextHSCROL    ; Get boat fine scroll.
+	sta HSCROL        ; Ok to set now as this line does not scroll.
+
+	lda ColorBak
+	sta WSYNC
+	sta COLBK
+
+	jmp LoadAlmostAllBoatColors_DLI ; set colors.  setup next row.
+
+; Make Beach lines full horizontal overscan.  Looks more interesting-er.
+;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_WIDE
+;	sta DMACTL
+
+
+; BEACH 3, 6, 9, 12 . . . .
+; Sets colors for the Beach lines coming from a boat line. 
+; This is different from line 0, because the DLI starts with only one scan line
+; of Mode C pixels (COLPF0) between the boats, and the Beach.
+; The line uses only COLPF0 to match the previous water, and the following "sky".
+; Therefore, the color of the line is automatically matched to both prior and 
+; the next lines without changing COLPF0.  (For the fading purpose it does 
+; need to get set. 
+; Since the beam is in the middle of an already matching color this opearates
+; without WSYNC up front to set all the color registers as quickly as possible. 
+; COLBAK can be re-set to its beach color last as it is the color used in the 
+; lower part of the characters.
+ 
+; Set Wide screen for Beach?
+
+GAME_DLI_BOAT2BEACH ; DLI sets COLPF1,2,3,COLPF0, BK for the Beach.
+
+	mStart_DLI
+
+	; custom startup to deal with a possible timing problem.
+;	pha 
+
+	lda ColorPF0 ; from Page 0.
+	; Top of the line is sky or blue water from row above.   
+	; Make background temporarily match the playfield drawn this on the next line.
+	sta COLBK
+	sta COLPF0
 
 	tya
 	pha
 	ldy ThisDLI
+
+; Make Beach lines full horizontal overscan.  Looks more interesting-er.
+;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_WIDE
+;	sta DMACTL
+
+	jmp LoadAlmostAllColors_DLI
+
+
+; ; BOATS 1
+; ; Slow and easy as DLIs go.  DLI Starts on a text line, does sync and has a whole 
+; ; blank scan line to finish everything else.
+; ; Collect Player/Playfield collisions.
+; ; Set Normal width screen for Boats.
+; GAME_DLI_25 ; DLI 2 sets COLPF0,1,2,3,BK for first line of boats.
+	; ; custom startup to deal with a possible timing problem.
+	; pha 
+	; ; for the extra line Get color Rocks (or water color) instead of COLBK
+	; lda ColorBak      ; Get color background;  Page 0.
+	; pha
+	; lda NextHSCROL    ; Get boat fine scroll.
+	; sta WSYNC
+ 
+	; ; Reset the scrolling water line to normal width. 
+; ;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_NORMAL
+; ;	sta WSYNC
+; ;	sta DMACTL
+; ;	pla
+	; sta HSCROL
+	; pla
+	; sta COLBK
+
+	; tya
+	; pha
+	; ldy ThisDLI
 	
-	jmp LoadAllColors_DLI
+	; jmp LoadAllColors_DLI
 
 
 
@@ -934,7 +1040,7 @@ DLI_SPC2  ; DLI just sets black for background COLBK, COLPF2, and text luminance
 	mRegSaveAY
 
 DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
-	ldy #$0C             ; luminance for text
+	ldy #$0C             ; luminance for text.  Hardcoded.  Always visible on all screens.
 	lda #COLOR_BLACK     ; color for background.
 
 	sta WSYNC            ; sync to end of scan line
@@ -989,8 +1095,22 @@ SetupAllColors_DLI
 	jsr SetupAllColors
 
 	dey
-	
+
 	jmp Exit_DLI
+
+
+; Called by Beach 2 Boat
+LoadAlmostAllBoatColors_DLI
+	lda ColorPF1   
+	sta COLPF1
+	lda ColorPF2   
+	sta COLPF2
+	lda ColorPF3   
+	sta COLPF3
+	lda ColorPF0 
+	sta COLPF0
+
+	jmp SetupAllOnNextLine_DLI
 
 
 ;==============================================================================
@@ -1014,8 +1134,8 @@ SetupAllColors
 	sta ColorPF3
 	lda HSCROL_TABLE,y   ; Get boat fine scroll.
 	sta NextHSCROL
-	lda COLBK_TABLE,y   ; Get real background color again. (To repair the color for the Beach background)
+	lda COLBK_TABLE,y    ; Get background color .
 	sta ColorBak
 
 	rts
-	
+

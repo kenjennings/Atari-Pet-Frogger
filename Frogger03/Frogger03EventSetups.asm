@@ -69,6 +69,9 @@ SetupTransitionToTitle
 	lda #SHAPE_FROG         ; Set new frog shape.
 	sta FrogNewShape
 
+	lda #1                  ; Approval to render.
+	sta Frogupdate
+
 	rts
 
 
@@ -86,7 +89,8 @@ SetupTransitionToGame
 	jsr ResetTimers
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
-	jsr EraseFrog          ; Specifically zero the object.
+	lda #$FF               ; Remove the animated thing from display.
+	sta FrogUpdate         ; This cause VBI to erase and not redraw.
 
 	lda #24
 	sta EventCounter2       ; Prep the first transition loop.
