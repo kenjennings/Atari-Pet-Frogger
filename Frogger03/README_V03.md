@@ -6,7 +6,12 @@ Video of the game play on YouTube: A URL for YouTube goes here
   
 Prototype Title Screen:
 
-[![Title Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_NewProtoTitle.png "Title Screen")](#features1)
+[![Title Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_NewProtoTitle2.png "Title Screen")](#features1)
+
+Prototype Game Screen:
+
+[![Game Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_NewProtoGame2.png "Game Screen")](#features2)
+
 
 Various Screen grabs go here...
 
