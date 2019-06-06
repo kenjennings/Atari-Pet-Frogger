@@ -332,6 +332,13 @@ FrogUpdate        .byte 0         ; 0 = no movement.  1 = Any reason to change p
 
 FrogSafety        .byte 0         ; = 0 When Frog OK.  !0 == Yer Dead.  Can be set by VBI. Main must change shape.
 
+; Eye positions:
+;  - 3 -
+;  0 1 2
+;  - - -
+FrogEyeball       .byte 1         ; Image for the Frog Eyeballs. (1) position is default.
+FrogRefocus       .byte 0         ; Countdown timer to return the eyeballs to the normal position. (1)
+
 FrogsCrossed      .byte 0         ; = Number Of Frogs crossed
 FrogsCrossedIndex .byte 0         ; FrogsCrossed, limit to range of 0 to 13 difficulty, then times 18.  
                                   ; FrogsCrossedIndex + FrogRow = Index to read from master lookups. 
@@ -376,7 +383,7 @@ ThisDLIAddr     .word TITLE_DLI_CHAIN_TABLE  ; by default (VBI corrects this)
 ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
 
 ; For speed reasons (I think)  the next DLI's values are pre-loaded into zero page.
-ColorBak     .byte $00 ; Attempt at optimazation to save tya; pha; ldy $, lda $,y
+ColorBak     .byte $00 ; Attempt at optimization to save tya; pha; ldy $, lda $,y
 ColorPF0     .byte $00   
 ColorPF1     .byte $00   
 ColorPF2     .byte $00   

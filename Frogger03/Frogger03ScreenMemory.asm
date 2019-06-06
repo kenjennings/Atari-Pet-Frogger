@@ -1035,121 +1035,133 @@ DLI_HI_TABLE
 	.byte >SPLASH_DLI_CHAIN_TABLE ; FROGDEAD_DLI
 	.byte >SPLASH_DLI_CHAIN_TABLE ; GAMEOVER_DLI
 
+	; GTIA GPRIOR varies by Display.
+	; The VBI will manage the values based on the current Display List.
+	; Tell GTIA the various Player/Missile options and color controls
+	; Turn on 5th Player (Missiles COLPF3), Multicolor players, and 
+	; Priority bits %0001 put 5th Player below regular Players. 
+GPRIOR_TABLE
+	.byte MULTICOLOR_PM|%0001              ; Title Screen
+	.byte MULTICOLOR_PM|%0001              ; Game Screen uses P3/M3 to black left and right borders
+	.byte 0                                ; Splash screen SAVED, no P/M
+	.byte FIFTH_PLAYER|MULTICOLOR_PM|%0001 ; Splash screen DEAD - needs P5
+	.byte 0                                ; Splash screen GAMEOVER, no P/M
+	sta GPRIOR
+
 
 TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte <Score_DLI        ; DLI (0) Text - COLPF1, Black - COLBK COLPF2
-	.byte <COLPF0_COLBK_DLI ; DLI (1) Table - COLBK, Pixels - COLPF0
-	.byte <COLPF0_COLBK_DLI ; DLI 2   Table - COLBK, Pixels - COLPF0
-	.byte <COLPF0_COLBK_DLI ; DLI 3   Table - COLBK, Pixels - COLPF0
-	.byte <COLPF0_COLBK_DLI ; DLI 4   Table - COLBK, Pixels - COLPF0
-	.byte <COLPF0_COLBK_DLI ; DLI 5   Table - COLBK, Pixels - COLPF0
-	.byte <COLPF0_COLBK_DLI ; DLI 6   Table - COLBK, Pixels - COLPF0
-	.byte <COLPF0_COLBK_DLI ; DLI 7   Table - COLBK, Pixels - COLPF0
-	.byte <TITLE_DLI_3      ; DLI 8   Black - COLBK COLPF2
-	.byte <TITLE_DLI_4      ; DLI 9   Text - COLPF1, Table - COLBK COLPF2. - start instructions
-	.byte <TITLE_DLI_4      ; DLI 10  Text - COLPF1
-	.byte <TITLE_DLI_4      ; DLI 11  Text - COLPF1
-	.byte <TITLE_DLI_4      ; DLI 12  Text - COLPF1
-	.byte <TITLE_DLI_4      ; DLI 13  Text - COLPF1
-	.byte <TITLE_DLI_4      ; DLI 14  Text - COLPF1
-	.byte <TITLE_DLI_4      ; DLI 15  Text - COLPF1
-	.byte <TITLE_DLI_4      ; DLI 16  Text - COLPF1 - end instructions.
-	.byte <TITLE_DLI_3      ; DLI 17  Black - COLBK COLPF2
-	.byte <TITLE_DLI_4      ; DLI 18  Text - COLPF1, Table - COLBK COLPF2. - start scoring
-	.byte <TITLE_DLI_4      ; DLI 19  Text - COLPF1
-	.byte <TITLE_DLI_4      ; DLI 20  Text - COLPF1 - end scoring
-	.byte <TITLE_DLI_3      ; DLI 21  Black - COLBK COLPF2
-	.byte <TITLE_DLI_4      ; DLI 22  Text - COLPF1, Table - COLBK COLPF2. - start controls
-	.byte <TITLE_DLI_4      ; DLI 23  Text - COLPF1 - end controls
-	.byte <TITLE_DLI_3      ; DLI 24  Black - COLBK COLPF2
-	.byte <DLI_SPC1         ; DLI 25 Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.	
-;	.byte <TITLE_DLI_SPC2   ; DLI 26 
+	.byte <Score_DLI            ; DLI (0) Text - COLPF1, Black - COLBK COLPF2
+	.byte <COLPF0_COLBK_DLI     ; DLI (1) Table - COLBK, Pixels - COLPF0
+	.byte <COLPF0_COLBK_DLI     ; DLI 2   Table - COLBK, Pixels - COLPF0
+	.byte <COLPF0_COLBK_DLI     ; DLI 3   Table - COLBK, Pixels - COLPF0
+	.byte <COLPF0_COLBK_DLI     ; DLI 4   Table - COLBK, Pixels - COLPF0
+	.byte <COLPF0_COLBK_DLI     ; DLI 5   Table - COLBK, Pixels - COLPF0
+	.byte <COLPF0_COLBK_DLI     ; DLI 6   Table - COLBK, Pixels - COLPF0
+	.byte <COLPF0_COLBK_DLI     ; DLI 7   Table - COLBK, Pixels - COLPF0
+	.byte <TITLE_DLI_BLACKOUT   ; DLI 8   Black - COLBK COLPF2
+	.byte <TITLE_DLI_TEXTBLOCK  ; DLI 9   Text - COLPF1, Table - COLBK COLPF2. - start instructions
+	.byte <TITLE_DLI_TEXTBLOCK  ; DLI 10  Text - COLPF1
+	.byte <TITLE_DLI_TEXTBLOCK  ; DLI 11  Text - COLPF1
+	.byte <TITLE_DLI_TEXTBLOCK  ; DLI 12  Text - COLPF1
+	.byte <TITLE_DLI_TEXTBLOCK  ; DLI 13  Text - COLPF1
+	.byte <TITLE_DLI_TEXTBLOCK  ; DLI 14  Text - COLPF1
+	.byte <TITLE_DLI_TEXTBLOCK  ; DLI 15  Text - COLPF1
+	.byte <TITLE_DLI_TEXTBLOCK  ; DLI 16  Text - COLPF1 - end instructions.
+	.byte <TITLE_DLI_BLACKOUT   ; DLI 17  Black - COLBK COLPF2
+	.byte <TITLE_DLI_TEXTBLOCK  ; DLI 18  Text - COLPF1, Table - COLBK COLPF2. - start scoring
+	.byte <TITLE_DLI_TEXTBLOCK  ; DLI 19  Text - COLPF1
+	.byte <TITLE_DLI_TEXTBLOCK  ; DLI 20  Text - COLPF1 - end scoring
+	.byte <TITLE_DLI_BLACKOUT   ; DLI 21  Black - COLBK COLPF2
+	.byte <TITLE_DLI_TEXTBLOCK  ; DLI 22  Text - COLPF1, Table - COLBK COLPF2. - start controls
+	.byte <TITLE_DLI_TEXTBLOCK  ; DLI 23  Text - COLPF1 - end controls
+	.byte <TITLE_DLI_BLACKOUT   ; DLI 24  Black - COLBK COLPF2
+	.byte <DLI_SPC1             ; DLI 25 Special DLI for Press Button Prompt will go to DLI SPC2 for Scrolling text.	
+;	.byte <TITLE_DLI_SPC2       ; DLI 26 
 
 
 GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
 	.byte <Score_DLI            ; DLI (0)   SCORES   - COLBK,                 COLPF1
 	.byte <Score_DLI            ; DLI (1)   SCORES   - COLBK,                 COLPF1
 	
-	.byte <GAME_DLI_BEACH0           ; DLI (2)   Beach 18 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
+	.byte <GAME_DLI_BEACH0      ; DLI (2)   Beach 18 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
 	.byte <GAME_DLI_BEACH2BOAT  ; DLI (3)   Boats 17 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 	.byte <GAME_DLI_BOAT2BOAT   ; DLI (4)   Boats 16 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 	
 	.byte <GAME_DLI_BOAT2BEACH  ; DLI (5)   Beach 15 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3
-	.byte <GAME_DLI_BEACH2BOAT           ; DLI (6)   Boats 14 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
-	.byte <GAME_DLI_BOAT2BOAT           ; DLI (7)   Boats 13 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_BEACH2BOAT  ; DLI (6)   Boats 14 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_BOAT2BOAT   ; DLI (7)   Boats 13 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 
-	.byte <GAME_DLI_BOAT2BEACH           ; DLI (8)   Beach 12 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
-	.byte <GAME_DLI_BEACH2BOAT           ; DLI (9)   Boats 11 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
-	.byte <GAME_DLI_BOAT2BOAT           ; DLI (10)  Boats 10 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_BOAT2BEACH  ; DLI (8)   Beach 12 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
+	.byte <GAME_DLI_BEACH2BOAT  ; DLI (9)   Boats 11 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_BOAT2BOAT   ; DLI (10)  Boats 10 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 
-	.byte <GAME_DLI_BOAT2BEACH   ; DLI (11)  Beach 09 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
-	.byte <GAME_DLI_BEACH2BOAT   ; DLI (12)  Boats 08 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_BOAT2BEACH  ; DLI (11)  Beach 09 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
+	.byte <GAME_DLI_BEACH2BOAT  ; DLI (12)  Boats 08 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 	.byte <GAME_DLI_BOAT2BOAT   ; DLI (13)  Boats 07 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 
-	.byte <GAME_DLI_BOAT2BEACH   ; DLI (14)  Beach 06 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
-	.byte <GAME_DLI_BEACH2BOAT   ; DLI (15)  Boats 05 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_BOAT2BEACH  ; DLI (14)  Beach 06 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
+	.byte <GAME_DLI_BEACH2BOAT  ; DLI (15)  Boats 05 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 	.byte <GAME_DLI_BOAT2BOAT   ; DLI (16)  Boats 04 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 
-	.byte <GAME_DLI_BOAT2BEACH   ; DLI (17)  Beach 03 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
-	.byte <GAME_DLI_BEACH2BOAT   ; DLI (18)  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
+	.byte <GAME_DLI_BOAT2BEACH  ; DLI (17)  Beach 03 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
+	.byte <GAME_DLI_BEACH2BOAT  ; DLI (18)  Boats 02 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 	.byte <GAME_DLI_BOAT2BOAT   ; DLI (19)  Boats 01 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 
 	.byte <GAME_DLI_BOAT2BEACH   ; DLI (20)  Beach 00 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
-	.byte <GAME_DLI_5   ; DLI (21)  Credits  - Set scrolling credits HSCROL.  Calls SPC2 to set colors.
-	; FYI: GAME_DLI_5 goes directly to SPC2, not SPC1 because there is no Press The Button prompt on this screen.
+	.byte <DLI_SPC2_SetCredits   ; DLI (21)  Credits  - Set scrolling credits HSCROL.  Set colors.
 
 
 ; All three graphics screens use the same list.
 ; Basically, the background color is updated per every line
 SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte <COLPF0_COLBK_DLI ; DLI (0)  1
-	.byte <COLPF0_COLBK_DLI ; DLI (1)  2
-	.byte <COLPF0_COLBK_DLI ; DLI (2)  3
-	.byte <COLPF0_COLBK_DLI ; DLI (3)  4
-	.byte <COLPF0_COLBK_DLI ; DLI (4)  5
-	.byte <COLPF0_COLBK_DLI ; DLI (5)  6
-	.byte <COLPF0_COLBK_DLI ; DLI (6)  7
-	.byte <COLPF0_COLBK_DLI ; DLI (7)  8
-	.byte <COLPF0_COLBK_DLI ; DLI (8)  9
-	.byte <COLPF0_COLBK_DLI ; DLI (9)  10
-	.byte <COLPF0_COLBK_DLI ; DLI (10) 11
-	.byte <COLPF0_COLBK_DLI ; DLI (11) 12
-	.byte <COLPF0_COLBK_DLI ; DLI (12) 13
-	.byte <COLPF0_COLBK_DLI ; DLI (13) 14
-	.byte <COLPF0_COLBK_DLI ; DLI (14) 15
-	.byte <COLPF0_COLBK_DLI ; DLI (15) 16
-	.byte <COLPF0_COLBK_DLI ; DLI (16) 17
-	.byte <COLPF0_COLBK_DLI ; DLI (17) 18
-	.byte <COLPF0_COLBK_DLI ; DLI (18) 19
-	.byte <COLPF0_COLBK_DLI ; DLI (19) 20
-	.byte <COLPF0_COLBK_DLI ; DLI (20) 1 Splash Graphics
-	.byte <COLPF0_COLBK_DLI ; DLI (21) 2 Splash Graphics
-	.byte <COLPF0_COLBK_DLI ; DLI (22) 3 Splash Graphics
-	.byte <COLPF0_COLBK_DLI ; DLI (23) 4 Splash Graphics
-	.byte <COLPF0_COLBK_DLI ; DLI (24) 5 Splash Graphics
-	.byte <COLPF0_COLBK_DLI ; DLI (25) 6 Splash Graphics
-	.byte <COLPF0_COLBK_DLI ; DLI (26) 20 
-	.byte <COLPF0_COLBK_DLI ; DLI (27) 19 
-	.byte <COLPF0_COLBK_DLI ; DLI (28) 18 
-	.byte <COLPF0_COLBK_DLI ; DLI (29) 17 
-	.byte <COLPF0_COLBK_DLI ; DLI (30) 16 
-	.byte <COLPF0_COLBK_DLI ; DLI (31) 15 
-	.byte <COLPF0_COLBK_DLI ; DLI (32) 14
-	.byte <COLPF0_COLBK_DLI ; DLI (33) 13
-	.byte <COLPF0_COLBK_DLI ; DLI (34) 12
-	.byte <COLPF0_COLBK_DLI ; DLI (35) 11
-	.byte <COLPF0_COLBK_DLI ; DLI (36) 10
-	.byte <COLPF0_COLBK_DLI ; DLI (37) 9
-	.byte <COLPF0_COLBK_DLI ; DLI (38) 8
-	.byte <COLPF0_COLBK_DLI ; DLI (39) 7
-	.byte <COLPF0_COLBK_DLI ; DLI (40) 6
-	.byte <COLPF0_COLBK_DLI ; DLI (41) 5
-	.byte <COLPF0_COLBK_DLI ; DLI (42) 4
-	.byte <COLPF0_COLBK_DLI ; DLI (43) 3
-	.byte <COLPF0_COLBK_DLI ; DLI (44) 2
-	.byte <COLPF0_COLBK_DLI ; DLI (45) 1
-	.byte <DLI_SPC1    ; DLI 46 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
-;	.byte <GAME_DLI_SPC2    ; DLI 47 - Set black background and white text for scrolling credits
+	.byte <COLPF0_COLBK_DLI     ; DLI (0)  1
+	.byte <COLPF0_COLBK_DLI     ; DLI (1)  2
+	.byte <COLPF0_COLBK_DLI     ; DLI (2)  3
+	.byte <COLPF0_COLBK_DLI     ; DLI (3)  4
+	.byte <COLPF0_COLBK_DLI     ; DLI (4)  5
+	.byte <COLPF0_COLBK_DLI     ; DLI (5)  6
+	.byte <COLPF0_COLBK_DLI     ; DLI (6)  7
+	.byte <COLPF0_COLBK_DLI     ; DLI (7)  8
+	.byte <COLPF0_COLBK_DLI     ; DLI (8)  9
+	.byte <COLPF0_COLBK_DLI     ; DLI (9)  10
+	.byte <COLPF0_COLBK_DLI     ; DLI (10) 11
+	.byte <COLPF0_COLBK_DLI     ; DLI (11) 12
+	.byte <COLPF0_COLBK_DLI     ; DLI (12) 13
+	.byte <COLPF0_COLBK_DLI     ; DLI (13) 14
+	.byte <COLPF0_COLBK_DLI     ; DLI (14) 15
+	.byte <COLPF0_COLBK_DLI     ; DLI (15) 16
+	.byte <COLPF0_COLBK_DLI     ; DLI (16) 17
+	.byte <COLPF0_COLBK_DLI     ; DLI (17) 18
+	.byte <COLPF0_COLBK_DLI     ; DLI (18) 19
+	.byte <COLPF0_COLBK_DLI     ; DLI (19) 20
+	.byte <COLPF0_COLBK_DLI     ; DLI (20) 1 Splash Graphics
+	.byte <COLPF0_COLBK_DLI     ; DLI (21) 2 Splash Graphics
+	.byte <COLPF0_COLBK_DLI     ; DLI (22) 3 Splash Graphics
+	.byte <COLPF0_COLBK_DLI     ; DLI (23) 4 Splash Graphics
+	.byte <COLPF0_COLBK_DLI     ; DLI (24) 5 Splash Graphics
+	.byte <COLPF0_COLBK_DLI     ; DLI (25) 6 Splash Graphics
+	.byte <COLPF0_COLBK_DLI     ; DLI (26) 20 
+	.byte <COLPF0_COLBK_DLI     ; DLI (27) 19 
+	.byte <COLPF0_COLBK_DLI     ; DLI (28) 18 
+	.byte <COLPF0_COLBK_DLI     ; DLI (29) 17 
+	.byte <COLPF0_COLBK_DLI     ; DLI (30) 16 
+	.byte <COLPF0_COLBK_DLI     ; DLI (31) 15 
+	.byte <COLPF0_COLBK_DLI     ; DLI (32) 14
+	.byte <COLPF0_COLBK_DLI     ; DLI (33) 13
+	.byte <COLPF0_COLBK_DLI     ; DLI (34) 12
+	.byte <COLPF0_COLBK_DLI     ; DLI (35) 11
+	.byte <COLPF0_COLBK_DLI     ; DLI (36) 10
+	.byte <COLPF0_COLBK_DLI     ; DLI (37) 9
+	.byte <COLPF0_COLBK_DLI     ; DLI (38) 8
+	.byte <COLPF0_COLBK_DLI     ; DLI (39) 7
+	.byte <COLPF0_COLBK_DLI     ; DLI (40) 6
+	.byte <COLPF0_COLBK_DLI     ; DLI (41) 5
+	.byte <COLPF0_COLBK_DLI     ; DLI (42) 4
+	.byte <COLPF0_COLBK_DLI     ; DLI (43) 3
+	.byte <COLPF0_COLBK_DLI     ; DLI (44) 2
+	.byte <COLPF0_COLBK_DLI     ; DLI (45) 1
+	.byte <DLI_SPC1             ; DLI 46 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
+;	.byte <DLI_SPC2_SetCredits  ; DLI 47 - Set black background and white text for scrolling credits
 
 
 ; Color tables must be big enough to contain data up to the maximum DLI index that
@@ -1384,19 +1396,22 @@ PLAYERADR1 = PMADR+$500
 PLAYERADR2 = PMADR+$600
 PLAYERADR3 = PMADR+$700
 
+
 ; The first three pages of P/M memory are free, so plenty of space
 ; to lay out the simple and mostly un-animated frog stuff.
+
+; P0 = Left part of Frog.
+; P1 = Right part of frog, mouth, and the eyeballs.
+; P2 = Whites of the eyes.
+
+; P3/M3 = Black (On game screen the left and right masks.)
+;               (On Dead screen the "RIP" on the tomb)
+;               (unused on Main, Win, and GameOver.)
 
 ; HPOS changes:
 ; P0 == X
 ; P1 == X+1
-; P2 == X (-1, +0, +1)
-; P3 == X
-; M3 == X
-; M2 == X+2
-; M1 == X+4
-; M0 == X+6
-; 
+; P2 == X+1
 
 ; . - ] + . - ] + .
 ; . - ] ] ] ] ] + .
@@ -1405,9 +1420,9 @@ PLAYERADR3 = PMADR+$700
 ; - W W W ] W W W +
 ; - ] ] ] ] ] ] ] +
 ; . - ] ] ] ] ] + .
-; . - B ] ] ] B + .
-; . - B B ] B B + .
-; . . - B B B + . .
+; . - ] + + + ] + .
+; . - ] ] ] ] ] + .
+; . . - ] ] ] + . .
 ; . . . - ] + . . .
 
 ; Players 0, 1 Are the greens of the Frog.
@@ -1417,35 +1432,72 @@ PLAYERADR3 = PMADR+$700
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 2   88  11
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 3   88  11
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 4   88  11
-; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1  - 5   FE  7F  
-; . 0 0 0 0 0 0 .    . 1 1 1 1 1 1 .  - 6   7E  7E
-; . 0 . 0 0 0 . .    . . 1 1 1 . 1 .  - 7   5C  3A
-; . 0 . . 0 0 . .    . . 1 1 . . 1 .  - 8   4C  32
-; . . 0 . . . . .    . . . . . 1 . .  - 9   20  04
-; . . . 0 0 . . .    . . . 1 1 . . .  - 10  18  18
+; 0 0 0 0 0 0 0 0    1 1 1 1 1 1 1 1  - 5   FF  ff  
+; 0 0 0 0 0 0 0 0    1 1 1 1 1 1 1 1  - 6   FF  ff
+; . 0 0 . . . . .    . . 1 1 1 1 1 .  - 7   60  3E
+; . 0 0 0 0 0 . .    . . 1 1 1 1 1 .  - 8   7C  3E
+; . . 0 0 0 0 . .    . . . 1 1 1 . .  - 9   3c  3c
+; . . 0 0 0 0 . .    . . . 1 1 . . .  - 10  3c  3c
 
 PLAYER0_FROG_DATA 
-	.by $66 $FE $88 $88 $88 $FF $FF $9C $C0 $60 $3C
+	.by $66 $FE $88 $88 $88 $FF $FF $60 $7c $38 $3C
 
 PLAYER1_FROG_DATA
-	.by $66 $7F $11 $11 $11 $FF $FF $39 $03 $06 $3C
+	.by $66 $7F $11 $11 $11 $FF $FF $3e $3e $3c $3C
 
+; Player 2 is the white eyes.
+; 2 2 2 . 2 2 2 . 
+PLAYER2_FROG_DATA  ; at Y+2 to Y+4
+	.by $00 $00 $ee $ee $ee $00 $00 $00 $00 $00 $00
+
+; Using 4 bytes here instead of 3 to eliminate another address lookup table.
+; The 4th byte is the same for all instances.
+; Eye positions:
+;  - 3 -
+;  0 1 2
+;  - - -
+
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 3   88  11
+; 0 . . . 0 . . .    1 . . 1 1 . . 1  - 2   88  99
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 4   88  11
+; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1  - 5   FE  7F  
+
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 2   88  11
+; 0 . . . 0 . . .    . 1 . 1 . 1 . 1  - 3   88  55
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 4   88  11
+; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1  - 5   FE  7F  
+
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 3   88  11
+; 0 . . . 0 . . .    . . 1 1 . . 1 1  - 2   88  33
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 4   88  11
+; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1  - 5   FE  7F  
+
+; 0 . . . 0 . . .    . 1 . 1 . 1 . 1  - 2   88  55
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 3   88  11
+; 0 . . . 0 . . .    . . . 1 . . . 1  - 4   88  11
+; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1  - 5   FE  7F  
+
+PLAYER1_EYE_DATA
+	.by $11 $99 $11 $7F
+	.by $11 $55 $11 $7F
+	.by $11 $33 $11 $7F
+	.by $55 $11 $11 $7F
+
+;PLAYER1_EYE_OFFSET ; Image number * 4 -1
+;	.by 3 7 11 15
+
+	
+	
 ; The small frog parts are padded to minimum 3 bytes so they 
 ; can be redrawn in a common loop.
 
-; Player 2 is the colored eye irises.
-; 2 . . . 2 . . . 
+;; Player 3 is the mouth.
+;; 3 . . . 3 . . .
+;; 3 3 . 3 3 . . .
+;; . 3 3 3 . . . .
 
-PLAYER2_FROG_DATA  ; at Y +1, +2, or +3
-	.by $00 $00 $00 $22 $00 $00 $00 $00 $00 $00 $00
-
-; Player 3 is the mouth.
-; 3 . . . 3 . . .
-; 3 3 . 3 3 . . .
-; . 3 3 3 . . . .
-
-PLAYER3_FROG_DATA
-	.by $00 $00 $00 $00 $00 $00 $00 $63 $3E $1C $00
+;PLAYER3_FROG_DATA
+;	.by $00 $00 $00 $00 $00 $00 $00 $63 $3E $1C $00
 
 ; Player 5 (the Missile, M3) is COLPF3, White. +1 
 ; 1 1 . . . . . .  ; 
@@ -1464,8 +1516,12 @@ PLAYER3_FROG_DATA
 ; . . . . . . 1 .  ; 
 ; . . . . . . 1 .  ; 
 
+; Data for Player 3 and Missile 3 is $C0 to draw the vertical 
+; mask for the left and right sides of the game display.
+; At quad width that will cover 8 color clocks/2 characters.
+
 PLAYER5_FROG_DATA 
-	.by $00 $00 $77 $55 $77 $00 $00 $00 $00 $00 $00
+	.by $C0 $C0 $C0 $C0 $C0 $0C0 $C0 $C0 $C0 $C0 $C0
 
 
 
@@ -1645,7 +1701,7 @@ PLAYER3_GRAVE_DATA
 ; . . ~ ~ ~ ~ ~ . . . . . . . .  - 23
 
 ; Masking 
-; M0 (p%) - left detail - quad width lowest priority.
+; M0 (p5) - left detail - quad width lowest priority.
 ; Upper section masked by shadow (P0) and this is 
 ; also lower priority than P2 and P3 displaying text.
  
@@ -1688,18 +1744,23 @@ PLAYER5_GRAVE_DATA; Missile 0
 
 BASE_PMCOLORS_TABLE ; When "off", and so multiplication for frog = 1 works.
 	.by 0 0 0 0
-	
+
 FROG_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_GREEN+$4       ; P0, frog
-	.by COLOR_GREEN+$2       ; P1, frog
-	.by COLOR_PURPLE_BLUE+$2 ; P2, Colored eye irises
-	.by COLOR_PINK+$8        ; P3, frog 
+	.by COLOR_GREEN+$2       ; P1, frog, green iris
+;	.by COLOR_PURPLE_BLUE+$2 ; P2, Colored eye irises
+;	.by COLOR_PINK+$8        ; P3, frog mouth
+	.by COLOR_BLACK+$E        ; P2, frog mouth 
+	.by COLOR_BLACK          ; P3, (and M3) Left/Right Wall Masks 
 
 SPLAT_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_PINK+$4        ; P0, splat
 	.by COLOR_PINK+$2        ; P1, splat
 	.by COLOR_PINK+$6        ; P2, 
-	.by COLOR_PINK+$8        ; P3, 
+;	.by COLOR_PINK+$8        ; P3, 
+	.by COLOR_BLACK          ; P3, (and M3) Left/Right Wall Masks 
+
+; Splash screens don;t need the wall masks.
 
 GRAVE_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_BLACK+$4        ; P0, 

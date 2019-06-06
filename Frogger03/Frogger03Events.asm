@@ -186,7 +186,7 @@ EventScreenStart            ; This is New Game and Transition to title.
 ; 3) Setup for next transition.
 ; --------------------------------------------------------------------------
 EventTitleScreen
-	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
+;	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
 	jsr RunPromptForButton     ; Blink Prompt to press Joystick button and check input.
 	beq EndTitleScreen         ; Nothing pressed, done with title screen.
 

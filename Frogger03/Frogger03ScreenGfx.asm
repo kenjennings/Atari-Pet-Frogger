@@ -1423,11 +1423,9 @@ libPmgInit
 	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_NORMAL
 	sta SDMCTL
 
-	; Tell GTIA the various Player/Missile options and color controls
-	; Turn on 5th Player (Missiles COLPF3), Multicolor players, and 
-	; Priority bits %0001 put 5th Player below regular Players. 
-	lda #FIFTH_PLAYER|MULTICOLOR_PM|%0001
-	sta GPRIOR
+	; Ordinarily, GPRIOR would be set here.
+	; However, GTIA GPRIOR varies by Display.
+	; The VBI will manage the values based on the current Display List.
 
 	ldx #SHAPE_FROG ; Frog Shape
 	jsr libPmgSetColors
@@ -1725,11 +1723,11 @@ EraseFrog
 	ldy #10
 	
 bLoopEF_Erase
-	sta PLAYERADR0,x   ; main frog 1
-	sta PLAYERADR1,x   ; main frog 2
-	sta PLAYERADR2,x ; iris
-	sta PLAYERADR3,x ; mouth
-	sta MISSILEADR,x ; eyeballs
+	sta PLAYERADR0,x  ; main frog 1
+	sta PLAYERADR1,x  ; main frog 2, mouth, pupil
+	sta PLAYERADR2,x  ; eyeball
+;	sta PLAYERADR3,x  ; mouth
+;	sta MISSILEADR,x  ; eyeballs
 	inx
 	dey
 	bpl bLoopEF_Erase
@@ -1854,18 +1852,40 @@ bLoopDF_DrawFrog
 	lda PLAYER1_FROG_DATA,y
 	sta PLAYERADR1+10,x
 
-	lda PLAYER2_FROG_DATA,y
-	sta PLAYERADR2+10,x
+;	lda PLAYER2_FROG_DATA,y
+;	sta PLAYERADR2+10,x
 
-	lda PLAYER3_FROG_DATA,y
-	sta PLAYERADR3+10,x
+;	lda PLAYER3_FROG_DATA,y
+;	sta PLAYERADR3+10,x
 
-	lda PLAYER5_FROG_DATA,y
-	sta MISSILEADR+10,x
+;	lda PLAYER5_FROG_DATA,y
+;	sta MISSILEADR+10,x
 
 	dex
 	dey
 	bpl bLoopDF_DrawFrog
+
+	; Player 2 is the eyeball whites
+	ldx FrogNewPMY             ; Reload new frog Y
+	lda #$EE
+	sta PLAYERADR2+2,x
+	sta PLAYERADR2+3,x
+	sta PLAYERADR2+4,x
+
+	; Player 1 also contains the animated pupil.
+	lda FrogEyeball            ; What shape is the eye pupil?
+	asl
+	asl
+	tay
+
+	lda PLAYER1_EYE_DATA,y
+	sta PLAYERADR1+2,x
+	iny
+	lda PLAYER1_EYE_DATA,y
+	sta PLAYERADR1+3,x
+	iny
+	lda PLAYER1_EYE_DATA,y
+	sta PLAYERADR1+3,x
 
 	rts
 
@@ -2029,19 +2049,19 @@ PositionFrog
 	; Do horizontal repositioning.
 	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
 	stx HPOSP0 ; + 0 is frog parts 1
-	stx HPOSP2 ; + 0 is frog eye iris
-	stx HPOSP3 ; + 0 is frog mouth
-	stx HPOSM3 ; + 0 is p5 frog eye balls
+;	stx HPOSP3 ; + 0 is frog mouth
+;	stx HPOSM3 ; + 0 is p5 frog eye balls
 	inx
 	stx HPOSP1 ; + 1 is frog parts 2
-	inx
-	stx HPOSM2 ; + 2 is p5 frog eye balls
-	inx
-	inx
-	stx HPOSM1 ; + 4 is p5 frog eye balls
-	inx
-	inx
-	stx HPOSM0 ; + 5 is p5 frog eye balls
+	stx HPOSP2 ; + 0 is frog eye iris
+;	inx
+;	stx HPOSM2 ; + 2 is p5 frog eye balls
+;	inx
+;	inx
+;	stx HPOSM1 ; + 4 is p5 frog eye balls
+;	inx
+;	inx
+;	stx HPOSM0 ; + 5 is p5 frog eye balls
 
 	; Bonus extra...  
 	; Force set  Player/Missile sizes
@@ -2049,8 +2069,8 @@ PositionFrog
 	sta SIZEP0 ; Frog parts 1
 	sta SIZEP1 ; Frog parts 2
 	sta SIZEP2 ; Frog colored iris
-	sta SIZEP3 ; Frog mouth
-	sta SIZEM  ; Eyeballs are Missile/P5 showing through the holes in head. (All need to be set 0)
+;	sta SIZEP3 ; Frog mouth
+;	sta SIZEM  ; Eyeballs are Missile/P5 showing through the holes in head. (All need to be set 0)
 
 	rts
 
