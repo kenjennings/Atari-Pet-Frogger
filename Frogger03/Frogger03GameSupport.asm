@@ -17,7 +17,7 @@
 ; ==========================================================================
 ; GAME SUPPORT
 ;
-; Miscellaneous:
+; Miscellaneous supporting data.
 ; Clear game scores.
 ; Add 500 to game score (and increment saved Frogs)
 ; Add 10 to game score.
@@ -27,6 +27,94 @@
 ; Set boat speed based on number of frogs saved.
 ;
 ; --------------------------------------------------------------------------
+
+
+; ==========================================================================
+; Originally, this was coarse scroll movement and the frog moved the 
+; width of a character.  
+; Based on number of frogs, how many frames between the boats' 
+; character-based coarse scroll movement:
+; ANIMATION_FRAMES .byte 30,25,20,18,15,13,11,10,9,8,7,6,5,4,3
+;
+; Fine scroll increments 4 times to equal one character 
+; movement per timer above. Frog movement is two color clocks,
+; or half a character per horizontal movement.
+;
+; Minimum coarse scroll speed was 2 characters per second, or 8 
+; color clocks per second, or between 7 and 8 frames per color clock.
+; The fine scroll will start at 7 frames per color clock.
+;
+; Maximum coarse scroll speed (3 frames == 20 character movements 
+; per second) was the equivalent of 4 color clocks in 3 frames.
+; The fine scroll speed will max out at 3 color clockw per frame.
+;
+; The Starting speed is slower than the coarse scrolling version.
+; It ramps up to maximum speed in fewer levels/rescued frogs, and 
+; the maximum speed is faster than the fastest coarse scroll
+; speed (60 FPS fine scroll is faaast.)
+
+; FYI -- SCROLLING RANGE
+; Boats Right ;   64
+; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
+; End   Scroll position = LMS + 0,              HSCROL 15
+; Boats Left ; + 64 
+; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
+; End   Scroll position = LMS + 12,            HSCROL 0
+
+; Difficulty Progression Enhancement.... Each row can have its own frame 
+; counter and scroll distance. 
+; (and by making rows closer to the bottom run faster it produces a 
+; kind of parallax effect. almost).
+
+MAX_FROG_SPEED = 13 ; Number of difficulty levels (which means 14)
+
+; About the arrays below.  18 bytes per row instead of 19:
+; FrogRow ranges from 0 to 18 which is 19 rows.  The first and
+; last rows are always have values 0.  When reading a row from the array,
+; the index will overshoot the end of a row (18th entry) and read the 
+; beginning of the next row as the 19th entry.  Since both always 
+; use values 0, they are logically overlapped.  Therefore, each array 
+; row needs only 18 bytes instead of 19.  Only the last row needs 
+; the trailing 19th 0 added.
+; 14 difficulty levels is the max, because of 6502 indexing.
+; 18 bytes per row * 14 levels is 252 bytes.
+; More levels would require more pointer expression to reach each row
+; rather than simply (BOAT_FRAMES),Y.
+
+BOAT_FRAMES ; Number of frames to wait to move boat. (top to bottom) (Difficulty 0 to 13)
+	.by 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7   ; Difficulty 0 
+	.by 0 7 7 0 7 7 0 7 7 0 5 5 0 5 5 0 5 5   ; Difficulty 1 
+	.by 0 7 7 0 7 7 0 5 5 0 5 5 0 3 3 0 3 3   ; Difficulty 2
+	.by 0 7 7 0 7 5 0 5 5 0 3 3 0 3 2 0 2 2   ; Difficulty 3 
+	.by 0 5 5 0 5 3 0 3 3 0 2 2 0 2 2 0 1 1   ; Difficulty 4 
+	.by 0 5 5 0 3 3 0 3 2 0 2 2 0 1 1 0 1 1   ; Difficulty 5 
+	.by 0 5 3 0 3 3 0 2 2 0 2 1 0 1 1 0 1 0   ; Difficulty 6 
+	.by 0 3 3 0 3 2 0 2 2 0 1 1 0 1 0 0 0 0   ; Difficulty 7
+	.by 0 3 3 0 2 2 0 1 1 0 1 1 0 0 0 0 0 0   ; Difficulty 8
+	.by 0 3 2 0 2 1 0 1 1 0 0 0 0 0 0 0 0 0   ; Difficulty 9
+	.by 0 2 2 0 1 1 0 1 0 0 0 0 0 0 0 0 0 0   ; Difficulty 10
+	.by 0 2 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
+	.by 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 12
+	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 13
+
+BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 0
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 1
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 2
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 3
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 4
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 5
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 6
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 7
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 8
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 2 0 2 2   ; Difficulty 9
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 2 2 0 2 2   ; Difficulty 10
+	.by 0 1 1 0 1 1 0 1 1 0 2 2 0 2 2 0 2 2   ; Difficulty 11
+	.by 0 1 1 0 1 1 0 2 2 0 2 2 0 2 2 0 2 2   ; Difficulty 12
+	.by 0 1 1 0 2 2 0 2 2 0 2 3 0 2 3 0 3 3 0 ; Difficulty 13
+
+MOVING_ROW_STATES ; 19 entries describing boat directions. Beach (0), Right (1), Left (FF) directions.
+	.by 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0
 
 
 ; ==========================================================================

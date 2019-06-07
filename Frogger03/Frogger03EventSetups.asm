@@ -47,30 +47,35 @@ SetupTransitionToTitle
 	lda #1
 	sta EventCounter         ; Declare stage 1 behavior for scrolling.
 
-	lda #DISPLAY_TITLE       ; Tell VBI to change screens.
+	lda #DISPLAY_TITLE       ; Tell VBI to change displays.
 	jsr ChangeScreen         ; Then copy the color tables.
 
 	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
 	sta CurrentScreen
 
-	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
+	lda #0                   ; Zero "old" position to trigger Updates to redraw first time.
 	sta FrogPMX
 	sta FrogPMY
-	sta FrogShape           ; 0 is "off"  (it would already be off by default)
+	sta FrogShape            ; 0 is "off"  (it would already be off by default)
 
-	lda #OFF_FROGX          ; Set new X position to middle of screen.
+	lda #OFF_FROGX           ; Set new X position to middle of screen.
 	sta WobOffsetX
 	sta FrogNewPMX
 
-	lda #OFF_FROGY          ; Set new Y position to origin. (row 18)
+	lda #OFF_FROGY           ; Set new Y position to origin. (row 18)
 	sta WobOffsetY
 	sta FrogNewPMY
 
-	lda #SHAPE_FROG         ; Set new frog shape.
+	lda #SHAPE_FROG          ; Set new frog shape.
 	sta FrogNewShape
 
-	lda #1                  ; Approval to render.
-	sta Frogupdate
+	lda #1
+	sta FrogEyeball          ; Set default eyeball shape (1 is default/centered)
+
+	jsr WobbleDeWobbleX_Now  ; Force immediate calculation of new X position.
+	jsr WobbleDeWobbleY_Now  ; Force immediate calculation of new Y position.
+
+	sta FrogUpdate           ; and finally enable VBI to start P/M redraw. (>0 is ON)
 
 	rts
 

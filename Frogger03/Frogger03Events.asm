@@ -153,6 +153,7 @@ TestTransTitle3
 	sta CurrentScreen
 
 EndTransitionToTitle
+	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
 	lda CurrentScreen
 
 	rts
@@ -186,7 +187,7 @@ EventScreenStart            ; This is New Game and Transition to title.
 ; 3) Setup for next transition.
 ; --------------------------------------------------------------------------
 EventTitleScreen
-;	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
+	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
 	jsr RunPromptForButton     ; Blink Prompt to press Joystick button and check input.
 	beq EndTitleScreen         ; Nothing pressed, done with title screen.
 
@@ -341,6 +342,11 @@ UpStickTest
 	ror                      ; Roll out low bit. UP
 	bcc LeftStickTest        ; No bit. Try Left.
 
+	lda #1
+	sta FrogEyeball
+	lda #60
+	sta FrogRefocus
+
 	jsr FrogMoveUp           ; Yes, go do UP. Subtract from FrogRow and PM Y position.
 	beq DoSetupForFrogWins   ; Returned 0.  No more rows to cross. Update to frog Wins!
 	bne FrogHasMoved         ; Row greater than 0.  Done with this..
@@ -351,17 +357,28 @@ LeftStickTest
 	ror                      ; Roll out low bit. LEFT
 	bcc RightStickTest       ; No bit. Try Right.
 
+	lda #0
+	sta FrogEyeball
+	lda #60
+	sta FrogRefocus
+	
 	ldy FrogPMX              ; Get current Frog position
 	dey                      ; - minus 2 color clocks is 1/2 character.
 	dey
 
 	sty FrogNewPMX           ; Save as new suggested location.
+	
 	bne FrogHasMoved         ; Done here.  Frog moved.  Always branches.
 
 
 RightStickTest
 	ror                      ; Roll out low bit. RIGHT
 	bcc EndOfJoystickMoves   ; No bit.  Replace Frog on screen.  Try boat animation.
+
+	lda #2
+	sta FrogEyeball
+	lda #60
+	sta FrogRefocus
 
 	ldy FrogPMX              ; Get current Frog position
 	iny                      ; - plus 2 color clocks. is 1/2 character.

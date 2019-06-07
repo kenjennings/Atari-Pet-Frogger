@@ -328,7 +328,7 @@ FrogNewPMX        .byte $00       ; = Frog new/next Player/missile X coordinate
 FrogShape         .byte SHAPE_OFF ; = Image in use -- 0 = off, 1 = frog, 2 = splat, 3 = tombstone 
 FrogNewShape      .byte SHAPE_OFF ; = Image to use -- 0 = off, 1 = frog, 2 = splat, 3 = tombstone 
 
-FrogUpdate        .byte 0         ; 0 = no movement.  1 = Any reason to change position... -1 = stop and remove frog.
+FrogUpdate        .byte 0         ; 0 = no movement.  >0 = Any reason to change position... <0 = stop and remove frog.
 
 FrogSafety        .byte 0         ; = 0 When Frog OK.  !0 == Yer Dead.  Can be set by VBI. Main must change shape.
 

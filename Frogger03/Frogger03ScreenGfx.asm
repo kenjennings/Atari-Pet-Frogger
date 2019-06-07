@@ -292,66 +292,9 @@
 ;    +----------------------------------------+
 
 
-
-; Game-specific Shapes:
-;SHAPE_OFF   = 0
-;SHAPE_FROG  = 1
-;SHAPE_SPLAT = 2
-;SHAPE_TOMB  = 3
-
 ; ==========================================================================
-; SET SPLATTERED ON SCREEN
+; D I S P L A Y S   A N D   P L A Y F I E L D 
 ; ==========================================================================
-; Show the splattered frog image on the screen.
-;
-; Write the splat frog character into screen memory.
-; --------------------------------------------------------------------------
-
-SetSplatteredOnScreen
-
-	lda #SHAPE_SPLAT
-	sta FrogNewShape
-
-	rts
-
-
-; ==========================================================================
-; SET FROG ON SCREEN
-; ==========================================================================
-; Show the frog image on the screen.
-;
-; Write the Frog character into screen memory.
-; --------------------------------------------------------------------------
-
-SetFrogOnScreen
-
-	lda #SHAPE_FROG
-	sta FrogNewShape
-
-	rts
-
-
-; ==========================================================================
-; REMOVE FROG ON SCREEN
-; ==========================================================================
-; Remove the frog from the screen.
-;
-; Restore the character that is under the frog.
-;
-; Note this falls right into UpdateFrogInMemory.
-; --------------------------------------------------------------------------
-
-RemoveFrogOnScreen
-	jsr EraseShape     ; Remove the current image (assuming it is the frog)
-
-	lda #SHAPE_OFF
-	sta FrogNewShape   ; Assign the current shape as OFF.
-
-                       ; VBI will stop frog updates with Shape_off.   
-;	jsr UpdateShape    ; So, call the update directly.
-
-	rts
-
 
 ; ==========================================================================
 ; DISPLAY TITLE SCREEN
@@ -484,51 +427,6 @@ WriteLives
 
 
 ; ==========================================================================
-; ZERO CURRENT COLORS                                                 A  Y
-; ==========================================================================
-; Force all the colors in the current tables to black.
-; Used before Fade up to game screen.
-; --------------------------------------------------------------------------
-
-ZeroCurrentColors
-	ldy #22
-	lda #0
-
-LoopZeroColors
-	sta COLBK_TABLE,y
-	sta COLPF0_TABLE,y
-	sta COLPF1_TABLE,y
-	sta COLPF2_TABLE,y
-	sta COLPF3_TABLE,y
-
-	dey
-	bpl LoopZeroColors
-
-	jsr HideButtonPrompt
-
-	rts
-
-
-; ==========================================================================
-; HIDE BUTTON PROMPT                                                   A
-; ==========================================================================
-; Tell the VBI to shut off the prompt.
-;
-; Uses A.   Preserves original value, so caller is not affected.
-; --------------------------------------------------------------------------
-
-HideButtonPrompt
-	pha                     ; Save whatever is here.
-
-	lda #0                  ; 0 == off
-	sta EnablePressAButton  ; Tell VBI this is off.
-
-	pla                     ; Get A back.
-
-	rts                     ; bye.  Are there enough comments here?
-
-
-; ==========================================================================
 ; CHANGE SCREEN                                                     A (Y)
 ; ==========================================================================
 ; Set a new display.
@@ -570,6 +468,36 @@ LoopChangeScreenWaitForVBI         ; Wait for VBI to signal the values changed.
 	; Now update the DLI color tables.
 	tay
 	jsr CopyBaseColors
+
+	rts
+
+
+; ==========================================================================
+; C O L O R   T A B L E S
+; ==========================================================================
+
+; ==========================================================================
+; ZERO CURRENT COLORS                                                 A  Y
+; ==========================================================================
+; Force all the colors in the current tables to black.
+; Used before Fade up to game screen.
+; --------------------------------------------------------------------------
+
+ZeroCurrentColors
+	ldy #22
+	lda #0
+
+LoopZeroColors
+	sta COLBK_TABLE,y
+	sta COLPF0_TABLE,y
+	sta COLPF1_TABLE,y
+	sta COLPF2_TABLE,y
+	sta COLPF3_TABLE,y
+
+	dey
+	bpl LoopZeroColors
+
+	jsr HideButtonPrompt
 
 	rts
 
@@ -869,6 +797,7 @@ DEAD_COLOR_SINE_TABLE ; 20 entries.
 ;
 ; A  is the current color.   
 ; --------------------------------------------------------------------------
+
 WinColorScroll
 	sec
 	sbc #4                      ; Subtract 4
@@ -890,6 +819,7 @@ ExitWinColorScroll
 ; 
 ; A = color value to adjust
 ; --------------------------------------------------------------------------
+
 SAVE_PF  .byte 0
 SAVE_PFC .byte 0
 
@@ -928,6 +858,7 @@ ExitSliceColorAndLuma
 ; Fade out COLPF0 and COLPF1 at the same time.
 ; When luminance reaches 0, set color to 0. 
 ; Return flags the OR value of the COLPF0 and COLPF1.
+; --------------------------------------------------------------------------
 
 FadeColPfToBlack
 	ldx EventCounter2         ; Row counter decrementing.
@@ -1155,6 +1086,7 @@ BoatCsetCopy8
 ; compared to any other 8-bit.  Only update one pointer instead of rewriting 
 ; the screen data to coarse scroll.
 ; --------------------------------------------------------------------------
+
 FineScrollTheCreditLine          ; scroll the text identifying the perpetrators
 	dec CreditHSCROL             ; Subtract one color clock from the left (aka fine scroll).
 	bne ExitScrollTheCredits     ; It is not yet 0.  Nothing else to do here.
@@ -1199,6 +1131,7 @@ BOAT_HS_TABLE
 ;
 ; X and Y are current row to analyze.
 ; --------------------------------------------------------------------------
+
 RightBoatFineScrolling
 	; Easier to push the frog first before the actual fine scrolling.
 	cpy FrogRow             ; Are we on the frog's row?
@@ -1244,6 +1177,7 @@ EndOfRightBoat
 ;
 ; X and Y are current row to analyze/scroll.
 ; --------------------------------------------------------------------------
+
 LeftBoatFineScrolling
 	; Easier to push the frog first before the actual fine scrolling.
 	cpy FrogRow             ; Are we on the frog's row?
@@ -1281,8 +1215,27 @@ EndOfLeftBoat
 
 
 ;==============================================================================
-; P R E S S   J O Y S T I C K   B U T T O N
+; P R E S S   J O Y S T I C K   B U T T O N   P R O M P T
 ;==============================================================================
+
+; ==========================================================================
+; HIDE BUTTON PROMPT                                                   A
+; ==========================================================================
+; Tell the VBI to shut off the prompt.
+;
+; Uses A.   Preserves original value, so caller is not affected.
+; --------------------------------------------------------------------------
+
+HideButtonPrompt
+	pha                     ; Save whatever is here.
+
+	lda #0                  ; 0 == off
+	sta EnablePressAButton  ; Tell VBI this is off.
+
+	pla                     ; Get A back.
+
+	rts                     ; bye.  Are there enough comments here?
+
 
 ;==============================================================================
 ; TOGGLE PressAButtonState 
@@ -1314,6 +1267,7 @@ TogglePressAButtonState
 ; A  is used for background color
 ; X  is used for text color.
 ; --------------------------------------------------------------------------
+
 ToggleButtonPrompt
 	lda #BLINK_SPEED            ; Text Fading speed for prompt
 	sta PressAButtonFrames      ; Reset the frame counter.
@@ -1356,6 +1310,7 @@ SetTextAsInverse  ; Make the text luminance the opposite of the background.
 	lda PressAButtonColor         ; Background color...
 	eor #$0F                    ; Not (!) the background color's luminance.
 	sta PressAButtonText         ; Use as the text's luminance.
+
 	rts
 
 
@@ -1371,6 +1326,7 @@ SetTextAsInverse  ; Make the text luminance the opposite of the background.
 ; A  contains key press.
 ; CPU flags are comparison of key value to $FF which means no key press.
 ; --------------------------------------------------------------------------
+
 RunPromptForButton
 	lda #1
 	sta EnablePressAButton   ; Tell VBI to the prompt flashing is enabled.
@@ -1398,6 +1354,61 @@ ExitRunPrompt
 ; SHAPE_SPLAT = 2
 ; SHAPE_TOMB  = 3
 
+; ==========================================================================
+; SET SPLATTERED ON SCREEN
+; ==========================================================================
+; Show the splattered frog image on the screen...
+;
+; This does not bother changing the FrogUpdate for the VBI, since 
+; this activity should only occur when frog animation is already 
+; underway.
+; --------------------------------------------------------------------------
+
+SetSplatteredOnScreen
+
+	lda #SHAPE_SPLAT
+	sta FrogNewShape
+
+	rts
+
+
+; ==========================================================================
+; SET FROG ON SCREEN
+; ==========================================================================
+; Show the frog image on the screen...
+;
+; Set default eyeball shape.  
+; Enable updates for the VBI.
+; Write the Frog character into screen memory.
+; --------------------------------------------------------------------------
+
+SetFrogOnScreen
+
+	lda #SHAPE_FROG
+	sta FrogNewShape ; Set new shape
+	lda #1
+	sta FrogEyeball  ; Set default eyeball shape (1 is default/centered)
+
+	sta FrogUpdate   ; and finally enable VBI to do P/M redraw. (>0 is ON)
+
+	rts
+
+
+; ==========================================================================
+; REMOVE FROG ON SCREEN
+; ==========================================================================
+; Remove the frog from the screen...
+;
+; VBI will update other values, and the shape ID.
+; --------------------------------------------------------------------------
+
+RemoveFrogOnScreen
+	lda #$FF           ; (<0 is shutdown)
+	sta FrogUpdate     ; Signal VBI to erase and do not redraw. 
+
+	rts
+
+	
 ;==============================================================================
 ;												PmgInit  A  X  Y
 ;==============================================================================
@@ -1561,6 +1572,24 @@ WobbleDeWobble
 	lda #WOBBLEX_SPEED       ; Reset the X movement timer.
 	sta AnimateFrames        
 
+	jsr WobbleDeWobbleX_Now  ; Do the actual X wobble work.
+
+CheckOnAnimateY
+	lda AnimateFrames2       ; Get the countdown timer for Y movement.
+	bne EndWobbleDeWobble    ; Not 0.  No Y movement.  Depart.
+
+	lda #WOBBLEY_SPEED       ; Reset the Y movement timer.
+	sta AnimateFrames2
+
+	jsr WobbleDeWobbleY_Now  ; Do the actual X wobble work.
+
+EndWobbleDeWobble
+	rts
+
+
+; Working parts of the Wobble, callable by others.
+
+WobbleDeWobbleX_Now          ; jsr here to force wobble coordinates
 	inc WobbleX              ; Increment Index for X offset
 	lda WobbleX              ; Get new X index
 	and #$3F                 ; Limit to 0 to 63.
@@ -1571,12 +1600,12 @@ WobbleDeWobble
 	adc WobOffsetX           ; Add to offset for placement.
 	sta FrogNewPMX           ; Tell VBI where to draw the object.
 
-CheckOnAnimateY
-	lda AnimateFrames2       ; Get the countdown timer for Y movement.
-	bne EndWobbleDeWobble    ; Not 0.  No Y movement.  Depart.
+	rts
 
-	lda #WOBBLEY_SPEED       ; Reset the Y movement timer.
-	sta AnimateFrames2
+
+; Working parts of the Wobble, callable by others.
+
+WobbleDeWobbleY_Now          ; jsr here to force wobble coordinates
 
 	inc WobbleY              ; Increment Index for Y offset.
 	lda WobbleY              ; Get new Y index
@@ -1588,33 +1617,41 @@ CheckOnAnimateY
 	adc WobOffsetY           ; Add to offset for placement.
 	sta FrogNewPMY           ; Tell VBI where to draw the object.
 
-EndWobbleDeWobble
 	rts
 
 
 ;==============================================================================
 ;											CheckRidetheBoat
 ;==============================================================================
-; Remarkably, collision processing the prior frame is utterly trivial.
+; Collision processing the prior frame results is utterly trivial.
+;
+; The caller should not make this attempt unless it know the frog is
+; on a row with the boats.
+;
+; Here's how life and death works:
 ; If frog parts 1 or part 2 (Player 0 or 1) are touching the colored 
-; lines on the boat, then the frog is safe.  
+; lines on the boat, then the frog is safe.
+;
+; This is easy, because the Atari identifies exactly what playfield 
+; color is involved in the collision.  
+; On other systems we're lucky to get a bit that says a sprite collided 
+; with a pixel. Then we would have to do a series of coordinate bounding 
+; box checks to see if the frog is in a safe position on a boat.
 ; -----------------------------------------------------------------------------
+
 CheckRideTheBoat
 	lda FrogSafety               ; Is the frog already dead ?
 	bne ExitCheckRideTheBoat     ; Yes.   No need to check.
 
-	ldx FrogRow                  ; What screen row is the frog currently on?
-	lda MOVING_ROW_STATES,x      ; Is the current Row a boat row?
-	beq ExitCheckRideTheBoat     ; No. So no collision processing. 
-
 	lda P0PF                     ; Get Player 0 collision with playfield
-	ora P1PF                     ; Add Player 1 collision 
-	and #COLPMF2_BIT             ; Is there collision with COLPF2 (Lines on the boats)?
-	bne ExitCheckRideTheBoat     ; Yes.  Frog is safe.
+	ora P1PF                     ; OR with Player 1 collision with playfield
+	and #COLPMF2_BIT             ; Keep only the collision with COLPF2 (lines on the boats)
+	bne ExitCheckRideTheBoat     ; 1 == touching the lines. Therefore Frog is safe.
 
-	; Oops.  This frog is off a boat.  
-	; Frog should die here but still be dragged by the moving boats/water.
-	; It is MAIN's job to change the image.
+	; Oops.  This frog is off a boat.  Frog must die.  
+	; The rest of the motion processing will happily drag the frog corpse 
+	; along with the moving boats/water.
+	; It is MAIN's job to change the image to the splttered frog.
 	inc FrogSafety               ; Shrodinger's frog is not alive. 
 
 ExitCheckRideTheBoat
@@ -1885,38 +1922,11 @@ bLoopDF_DrawFrog
 	sta PLAYERADR1+3,x
 	iny
 	lda PLAYER1_EYE_DATA,y
-	sta PLAYERADR1+3,x
+	sta PLAYERADR1+4,x
 
 	rts
 
 
-;==============================================================================
-;											UpdateFrogY  A  X  Y
-;==============================================================================
-; Move Y position.
-; FYI: Removing a frog from display requires setting FrogShape == SHAPE_OFF,
-; because re-analysis of position by the VBI will move the frog back into 
-; the display.
-; Update current Y position == new position.
-; -----------------------------------------------------------------------------
-; UpdateFrogY
-	; ldx FrogPMY            ; Get current (old) position
-
-	; ; Do new vertical repositioning.
-	
-	; ; 1) Erase frog from memory at current (old) position.
-	; jsr EraseFrog
-
-	; ; 2) Current position = new position
-	; ldx FrogNewPMY         ; New frog Y...
-	; stx FrogPMY            ; Set current Frog Y == New Frog Y
-
-	; ; 3) load new frog image in the current (new) position
-	; jsr DrawFrog
-
-	; rts
-
-	
 ;==============================================================================
 ;											PositionShape  A  X  Y
 ;==============================================================================
@@ -2020,9 +2030,16 @@ PositionSplat
 	stx HPOSP1 ; + 1 is splat parts 2
 
 	ldx #0     ; Remove these other parts from visible display
-	stx HPOSP2 ;  0 is off
+
+	lda CurrentDL
+	cmp #DISPLAY_GAME
+	beq bps_SkipZeroP3  ; Do not remove P3 on the game screen.
+
 	stx HPOSP3 ;  0 is off
 	stx HPOSM3 ;  0 is p5 off
+
+bps_SkipZeroP3
+	stx HPOSP2 ;  0 is p5 off
 	stx HPOSM2 ;  0 is p5 off
 	stx HPOSM1 ;  0 is p5 off
 	stx HPOSM0 ;  0 is p5 off
@@ -2032,6 +2049,7 @@ PositionSplat
 	ldx #PM_SIZE_NORMAL ; aka $00
 	stx SIZEP0 ; Splat parts 1
 	stx SIZEP1 ; Splat parts 2
+	stx SIZEP2 ; Splat parts 2
 
 	rts
 
@@ -2063,12 +2081,26 @@ PositionFrog
 ;	inx
 ;	stx HPOSM0 ; + 5 is p5 frog eye balls
 
+	ldx #0     ; Remove these other parts from visible display
+	lda CurrentDL
+	cmp #DISPLAY_GAME
+	beq bps_DoNoMoveMask
+
+	stx HPOSP3 ; On the game screen these need to stay to mask the left/right borders.
+	stx HPOSM3
+
+bps_DoNoMoveMask 
+	stx HPOSM2 ;  0 is off
+	stx HPOSM1 ;  0 is off
+	stx HPOSM0 ;  0 is off
+
 	; Bonus extra...  
 	; Force set  Player/Missile sizes
 	lda #PM_SIZE_NORMAL ; aka $00
 	sta SIZEP0 ; Frog parts 1
 	sta SIZEP1 ; Frog parts 2
-	sta SIZEP2 ; Frog colored iris
+	sta SIZEP2 ; Frog eyeball 
+
 ;	sta SIZEP3 ; Frog mouth
 ;	sta SIZEM  ; Eyeballs are Missile/P5 showing through the holes in head. (All need to be set 0)
 
@@ -2151,10 +2183,12 @@ UpdateShape
 
 	jsr EraseShape       ; Remove old shape at the old vertical Y position.
 	lda FrogUpdate        
-	bpl b_usRedrawShape  ; 1 = continue   
+	bpl b_usRedrawShape  ; >0 = continue   
 
-	lda #0               ; -1 = stop
-	sta FrogUpdate       ; Erased above, therefore stop further updates.
+	lda #SHAPE_OFF       ; <0 = stop, so stop doing things after the erase.
+	sta FrogUpdate       ; Erased above, therefore stop everything further.
+	sta FrogNewShape     ; SHAPE_OFF is 0.  Make all shapes off.
+	sta FrogShape
 	beq ExitUpdateShape
 
 b_usRedrawShape

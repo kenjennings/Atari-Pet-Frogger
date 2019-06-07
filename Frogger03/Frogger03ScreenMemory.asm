@@ -1108,7 +1108,7 @@ GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
 	.byte <GAME_DLI_BOAT2BOAT   ; DLI (19)  Boats 01 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
 
 	.byte <GAME_DLI_BOAT2BEACH   ; DLI (20)  Beach 00 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
-	.byte <DLI_SPC2_SetCredits   ; DLI (21)  Credits  - Set scrolling credits HSCROL.  Set colors.
+	.byte <DLI_SPC2   ; DLI (21)  Credits  - Set scrolling credits HSCROL.  Set colors.
 
 
 ; All three graphics screens use the same list.
@@ -1432,18 +1432,18 @@ PLAYERADR3 = PMADR+$700
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 2   88  11
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 3   88  11
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 4   88  11
-; 0 0 0 0 0 0 0 0    1 1 1 1 1 1 1 1  - 5   FF  ff  
-; 0 0 0 0 0 0 0 0    1 1 1 1 1 1 1 1  - 6   FF  ff
-; . 0 0 . . . . .    . . 1 1 1 1 1 .  - 7   60  3E
-; . 0 0 0 0 0 . .    . . 1 1 1 1 1 .  - 8   7C  3E
-; . . 0 0 0 0 . .    . . . 1 1 1 . .  - 9   3c  3c
-; . . 0 0 0 0 . .    . . . 1 1 . . .  - 10  3c  3c
+; 0 0 0 0 0 0 0 0    1 1 1 1 1 1 1 1  - 5   FF  FF
+; 0 0 0 0 0 0 0 0    1 1 1 1 1 1 1 1  - 6   FF  FF
+; 0 0 . . . . . 0    1 1 1 1 1 1 1 1  - 7   C1  FF
+; 0 0 0 . . . 0 0    1 1 1 1 1 1 1 1  - 8   E3  FF
+; . 0 0 0 0 0 0 .    . 1 1 1 1 1 1 .  - 9   7E  7E
+; . . 0 0 0 0 . .    . . 1 1 1 1 . .  - 10  3C  3C
 
 PLAYER0_FROG_DATA 
-	.by $66 $FE $88 $88 $88 $FF $FF $60 $7c $38 $3C
+	.by $66 $FE $88 $88 $88 $FF $FF $C1 $E3 $7E $3c
 
 PLAYER1_FROG_DATA
-	.by $66 $7F $11 $11 $11 $FF $FF $3e $3e $3c $3C
+	.by $66 $7F $11 $11 $11 $FF $FF $FF $FF $7E $3C
 
 ; Player 2 is the white eyes.
 ; 2 2 2 . 2 2 2 . 
@@ -1460,28 +1460,28 @@ PLAYER2_FROG_DATA  ; at Y+2 to Y+4
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 3   88  11
 ; 0 . . . 0 . . .    1 . . 1 1 . . 1  - 2   88  99
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 4   88  11
-; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1  - 5   FE  7F  
+; 0 0 0 0 0 0 0 .    1 1 1 1 1 1 1 1  - 5   FE  FF  
 
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 2   88  11
 ; 0 . . . 0 . . .    . 1 . 1 . 1 . 1  - 3   88  55
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 4   88  11
-; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1  - 5   FE  7F  
+; 0 0 0 0 0 0 0 .    1 1 1 1 1 1 1 1  - 5   FE  FF  
 
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 3   88  11
 ; 0 . . . 0 . . .    . . 1 1 . . 1 1  - 2   88  33
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 4   88  11
-; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1  - 5   FE  7F  
+; 0 0 0 0 0 0 0 .    1 1 1 1 1 1 1 1  - 5   FE  FF  
 
 ; 0 . . . 0 . . .    . 1 . 1 . 1 . 1  - 2   88  55
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 3   88  11
 ; 0 . . . 0 . . .    . . . 1 . . . 1  - 4   88  11
-; 0 0 0 0 0 0 0 .    . 1 1 1 1 1 1 1  - 5   FE  7F  
+; 0 0 0 0 0 0 0 .    1 1 1 1 1 1 1 1  - 5   FE  FF  
 
 PLAYER1_EYE_DATA
-	.by $11 $99 $11 $7F
-	.by $11 $55 $11 $7F
-	.by $11 $33 $11 $7F
-	.by $55 $11 $11 $7F
+	.by $11 $99 $11 $FF
+	.by $11 $55 $11 $FF
+	.by $11 $33 $11 $FF
+	.by $55 $11 $11 $FF
 
 ;PLAYER1_EYE_OFFSET ; Image number * 4 -1
 ;	.by 3 7 11 15
