@@ -116,6 +116,48 @@ BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 MOVING_ROW_STATES ; 19 entries describing boat directions. Beach (0), Right (1), Left (FF) directions.
 	.by 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0
 
+PM_OFFS=15 ; offset to line up P/M Vertical Y line to Playfield scan line
+
+FROG_PMY_TABLE ; 19 entries providing Frog Y position for each row.  (Each row is no longer equal size.)
+	.by [ 17+PM_OFFS] [ 26+PM_OFFS] [ 36+PM_OFFS]  ; Beach, Boat Right, Boat Left
+	.by [ 45+PM_OFFS] [ 54+PM_OFFS] [ 64+PM_OFFS] 
+	.by [ 73+PM_OFFS] [ 82+PM_OFFS] [ 92+PM_OFFS] 
+	.by [101+PM_OFFS] [110+PM_OFFS] [120+PM_OFFS] 
+	.by [129+PM_OFFS] [138+PM_OFFS] [148+PM_OFFS] 
+	.by [157+PM_OFFS] [166+PM_OFFS] [176+PM_OFFS] 
+	.by [185+PM_OFFS]                             ; Home Beach
+
+
+; ==========================================================================
+; FROG MOVE UP
+;
+; Add 10 to the score.
+; Decrement the Row counter.
+; Set new Frog screen position.
+;
+; On return BEQ means the frog has reached safety. (Row 0)
+; Thus BNE means continue game.
+;
+; FROG_PMY_TABLE is the lookup for vertical positions, because each row 
+; on screen is not equal height.  Rather than a pile of logical comparisons
+; and math the resulting values are put in the table.
+; 
+; Uses A, X
+;
+; Returns Row number, and Z flag indicates game can continue.
+; --------------------------------------------------------------------------
+FrogMoveUp
+	jsr Add10ToScore ; 10 points for moving forward.
+
+	ldx FrogRow          ; Get the current Row number
+	dex                  ; Minus 1 row.
+	lda FROG_PMY_TABLE,x ; Get the new Player/Missile Y position based on row number.
+	sta FrogNewPMY       ; Update Frog position on screen. 
+	stx FrogNewRow       ; Save new Row Number. 
+	; Side effect...  STX made sure CPU flags reflect X = 0 or !0
+
+	rts
+
 
 ; ==========================================================================
 ; Clear the score digits to zeros.
@@ -167,66 +209,6 @@ Add500ToScore
 
 	rts
 
-
-; ==========================================================================
-; MULTIPLY FROGS CROSSED
-;
-; Multiply FroggsCrossed times 18 and save to FrogsCrossesIndex, to 
-; determine the base entry in the difficulty arrays that control each 
-; boat's speed on screen.
-;
-; Uses A
-; -------------------------------------------------------------------------- 
-MultiplyFrogsCrossed
-	lda FrogsCrossed
-	cmp #MAX_FROG_SPEED+1         ; Number of difficulty levels. 0 to 10 OK.  11 not so much
-	bcc SkipLimitCrossed
-	lda #MAX_FROG_SPEED
-
-SkipLimitCrossed
-	asl              ; Times 2
-	sta FrogsCrossedIndex
-	asl              ; Times 4
-	asl              ; Times 8
-	asl              ; Times 16
-	clc
-	adc FrogsCrossedIndex ; Add to self (*2) + (*16) == (*18)
-	sta FrogsCrossedIndex ; And Save Times 18
-
-	jsr MakeDifficultyPointers ; Set pointers to the array row for the difficulty values.
-
-	rts
-
-
-; ==========================================================================
-; MAKE DIFFICULTY POINTERS
-;
-; Get the Address of the start of the current difficulty data.
-; These are the BOAT_FRAMES and BOAT_SHIFT base addresses plus the 
-; FrogsCrossedIndex. 
-; From Here the code can use the FrogRow as Y index and reference the 
-; master data by (ZeroPage),Y.
-;
-; Uses A
-; -------------------------------------------------------------------------- 
-MakeDifficultyPointers
-	lda #<BOAT_FRAMES
-	clc
-	adc FrogsCrossedIndex
-	sta BoatFramesPointer
-	lda #>BOAT_FRAMES
-	adc #0
-	sta BoatFramesPointer+1
-
-	lda #<BOAT_SHIFT
-	clc
-	adc FrogsCrossedIndex
-	sta BoatMovePointer
-	lda #>BOAT_SHIFT
-	adc #0
-	sta BoatMovePointer+1
-
-	rts
 
 
 ; ==========================================================================
@@ -323,197 +305,63 @@ ExitHighScoreOrNot
 
 
 ; ==========================================================================
-; FROG MOVE UP
+; MULTIPLY FROGS CROSSED
 ;
-; Add 10 to the score.
-; Decrement the Row counter.
-; Set new Frog screen position.
-; Update Playfield pointer based from table based on row number.
+; Multiply FroggsCrossed times 18 and save to FrogsCrossesIndex, to 
+; determine the base entry in the difficulty arrays that control each 
+; boat's speed on screen.
 ;
-; On return BEQ means the frog has reached safety.
-; Thus BNE means continue game.
-;
-; Uses A, X
-; --------------------------------------------------------------------------
-FrogMoveUp
-	jsr Add10ToScore
+; Uses A
+; -------------------------------------------------------------------------- 
+MultiplyFrogsCrossed
+	lda FrogsCrossed
+	cmp #MAX_FROG_SPEED+1         ; Number of difficulty levels. 0 to 10 OK.  11 not so much
+	bcc SkipLimitCrossed
+	lda #MAX_FROG_SPEED
 
-	sec
-	lda FrogPMY    ; Old Frog vertical screen position.
-	sbc #9         ; 9 scan lines per row.
-	sta FrogNewPMY ; New location is one row higher.
+SkipLimitCrossed
+	asl              ; Times 2
+	sta FrogsCrossedIndex
+	asl              ; Times 4
+	asl              ; Times 8
+	asl              ; Times 16
+	clc
+	adc FrogsCrossedIndex ; Add to self (*2) + (*16) == (*18)
+	sta FrogsCrossedIndex ; And Save Times 18
 
-	dec FrogNewRow
-
-	ldx FrogNewRow ; Make sure CPU flags reflect X = 0 or !0
+	jsr MakeDifficultyPointers ; Set pointers to the array row for the difficulty values.
 
 	rts
 
 
-	; This has no direct purpose since the frog is not in screen memory.
-	; But, position adjustment/calculation is a thing for the P/M frog
-	; which is similar to this function.
-
 ; ==========================================================================
-; Determine the new, real memory location of the frog.
+; MAKE DIFFICULTY POINTERS
 ;
-; Given the row, logical X coordinate, and scrolling factor of the row
-; determine where the frog really is in screen memory.
-; Note that FrogMoveUp established the pointer to the frog's row.
-; Two positions need to be calculated separated by 40 bytes.  
-; If the first calculation produces a number less than 40, then the 
-; second position is +40.   Otherwise the second position is -40
-; --------------------------------------------------------------------------
-;WhereIsThePhysicalFrog
-;;	clc
-;;;	lda FrogColumn          ; Logical position (where visible on screen)
-;;	ldx FrogRow             ; Get the current row number.
-;;	ldy MOVING_ROW_STATES,x ; Get the movement flag for the row.
-;;	beq FrogOnTheBeach      ; Zero is no scrolling, so no math.
-;;	bpl FrogOnBoatRight     ; +1 is boats going right
-
-;;	; Determine frog on boats going left.
-;;	adc CurrentLeftOffset      ; Add scroll position to the logical column
-;;	bcc NormalizeFrogPositions ; Calculate second frog position
-
-;FrogOnBoatRight
-;;;	adc CurrentRightOffset
-
-;NormalizeFrogPositions
-;;;	sta FrogRealColumn1
-;;	cmp #40                   ; Where is the first calculated position
-;;	bcs PhysicalFrogMinus40   ; Greater than, equal to 40, so subtract 40 
-
-;;	; BCC == Less than 40, so add 40. 
-;;	adc #40
-;;	bpl SaveSecondPosition    ; We know the maximum value is 79
-
-;PhysicalFrogMinus40           ; Got here due to BCS, so no SEC needed.
-;;	sbc #40 
-;;	bpl SaveSecondPosition
-
-;FrogOnTheBeach                ; No alternate position for beach rows.  Trick the
-;;;	sta FrogRealColumn1       ; future use by keeping the same value for both...
-
-;SaveSecondPosition
-;;;	sta FrogRealColumn2       ; 
-
-;ExitWhereIsThePhysicalFrog
-;;	jsr GetScreenMemoryUnderFrog ; Update the cached character where the frog resides.
-
-;	rts
-
-
-; This does not have direct purpose.
-; VBI detects the conditions for Frog Death: 
-; 1) Frog is on a boat row, and there is no collision with 
-;    the special boat color.
-; 2) Frog is on a boat row, and the automatic movement would move
-;    the frog past the minimum or maximum screen position.
-; When these occur the VBI sets FrogSafety.
-; Main is expected to observe FrogSafety and engage the Frog Death.
-; 
-; ==========================================================================
-; ANTICIPATE FROG DEATH
-; If the boat moves will the frog die?
+; Get the Address of the start of the current difficulty data.
+; These are the BOAT_FRAMES and BOAT_SHIFT base addresses plus the 
+; FrogsCrossedIndex. 
+; From Here the code can use the FrogRow as Y index and reference the 
+; master data by (ZeroPage),Y.
 ;
-; Due to the change to scrolling by LMS the frog must be shown dead in its
-; current position BEFORE the boat would move it off screen.
-; Therefore the game logic tilts a little from collision detection to
-; collision avoidance.
-;
-; Data to drive AutoMoveFrog routine.
-; Byte value indicates direction of row movement.
-; 0   = Beach line, no movement.
-; 1   = first boat/river row, move right
-; 255 = second boat/river row, move left.
-;
-; FrogSafety (and Z flag) indicates frog is now dead.
-; --------------------------------------------------------------------------
-;AnticipateFrogDeath
-;	ldy FrogColumn          ; Logical position (where visible on screen)
-;	ldx FrogRow             ; Get the current row number.
-;	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
-;	beq ExitFrogNowAlive    ; Is it 0?  Beach. Nothing to do.  Bail.
-;	bpl CheckFrogGoRight    ; is it $1?  then check right move.
+; Uses A
+; -------------------------------------------------------------------------- 
+MakeDifficultyPointers
+	lda #<BOAT_FRAMES
+	clc
+	adc FrogsCrossedIndex
+	sta BoatFramesPointer
+	lda #>BOAT_FRAMES
+	adc #0
+	sta BoatFramesPointer+1
 
-; Check Frog Go Left
-;	cpy #0
-;	bne ExitFrogNowAlive      ; Not at limit means frog is still alive.
-;	beq FrogDemiseByWallSplat ; At zero means frog will leave screen.
-
-;CheckFrogGoRight
-;	cpy #39                   ; 39 is limit or frog would leave screen
-;	bne ExitFrogNowAlive      ; Not at limit means frog is still alive.
-
-;FrogDemiseByWallSplat
-;	inc FrogSafety            ; Schrodinger's frog is known to be dead.
-
-;;ExitFrogNowAlive
-;	lda FrogSafety            ; branching here is no change, so we assume frog is alive.
-;	rts
-
-
-; This is N/A for the game.
-; The VBI now moves the frog with the boats.
-; Main only need wait for FrogSafety to be flagged.
-; ==========================================================================
-; AUTO MOVE FROG
-; Process automagical movement on the frog in the moving boat lines
-;
-; The code must call AnticipateFrogDeath first, so it knows the auto
-; movement will be safe.
-;
-; Data to drive AutoMoveFrog routine.
-; Byte value indicates direction of row movement.
-; 0   = Beach line, no movement.
-; 1   = first boat/river row, move right
-; 255 = second boat/river row, move left.
-; --------------------------------------------------------------------------
-;AutoMoveFrog
-;	ldy FrogColumn          ; Logical position (where visible on screen)
-;	ldx FrogRow             ; Get the current row number
-;	lda MOVING_ROW_STATES,x ; Get the movement flag for the row.
-;	beq ExitAutoMoveFrog    ; Is it 0?  Nothing to do.  Bail.
-;	bpl AutoFrogRight       ; is it $1?  then automatic right move.
-
-; Auto Frog Left
-;	dec FrogColumn            ; It is not 0, so move Frog left one character
-;	rts                       ; Done, successful move.
-
-;AutoFrogRight
-;	inc FrogColumn            ; Move Frog right one character
-
-;ExitAutoMoveFrog
-	rts                       ; Done, successful move.
-
-
-; This is managed by the VBI moving the boats.
-; Whatever the value of Frogs crossed is sets the boat movement
-; speed when the next frame counter is acquired for the boat row.
-; ==========================================================================
-; SET BOAT SPEED
-; Set the animation timer for the game screen based on the
-; number of frogs that have been saved.
-;
-; NOTE ANIMATION_FRAMES is in the TimerStuff.asm file.
-; A  and  X  will be saved.
-; --------------------------------------------------------------------------
-;SetBoatSpeed
-
-;	mRegSaveAX
-
-;	ldx FrogsCrossed
-;	cpx #MAX_FROG_SPEED+1         ; 0 to 10 OK.  11 not so much
-;	bcc FrogsCrossedIsOK
-;	ldx #MAX_FROG_SPEED
-
-;FrogsCrossedIsOK
-;	lda BOAT_FRAMES,x             ; Reset Frame counter based on number of frogs saves.
-;	sta BoatFrames
-
-;	jsr ResetTimers
-
-;	mRegRestoreAX
+	lda #<BOAT_SHIFT
+	clc
+	adc FrogsCrossedIndex
+	sta BoatMovePointer
+	lda #>BOAT_SHIFT
+	adc #0
+	sta BoatMovePointer+1
 
 	rts
+
+	

@@ -1621,22 +1621,31 @@ WobbleDeWobbleY_Now          ; jsr here to force wobble coordinates
 
 
 ;==============================================================================
-;											CheckRidetheBoat
+;											CheckRidetheBoat    A 
 ;==============================================================================
 ; Collision processing the prior frame results is utterly trivial.
 ;
-; The caller should not make this attempt unless it know the frog is
-; on a row with the boats.
+; The caller should make this check for collisions only when the  
+; Frog is in a Boat row.
 ;
 ; Here's how life and death works:
-; If frog parts 1 or part 2 (Player 0 or 1) are touching the colored 
-; lines on the boat, then the frog is safe.
+; As long as a frog part (Player 0 or 1) is touching the colored, horizontal 
+; lines (COLPF2) on the boat, then the frog lives.
 ;
 ; This is easy, because the Atari identifies exactly what playfield 
 ; color is involved in the collision.  
 ; On other systems we're lucky to get a bit that says a sprite collided 
 ; with a pixel. Then we would have to do a series of coordinate bounding 
 ; box checks to see if the frog is in a safe position on a boat.
+; 
+; In the event of a rare border condition where the frog lost the collision  
+; attachment on the past frame AND the player has directed the frog move to 
+; the next row in the coming frame, then grace is applied to ignore the 
+; collision results and keep the frog alive.  
+;
+; Output: 
+; FrogSafety = 0  ; Life
+; FrogSafety = 1  ; Death
 ; -----------------------------------------------------------------------------
 
 CheckRideTheBoat
@@ -1648,11 +1657,20 @@ CheckRideTheBoat
 	and #COLPMF2_BIT             ; Keep only the collision with COLPF2 (lines on the boats)
 	bne ExitCheckRideTheBoat     ; 1 == touching the lines. Therefore Frog is safe.
 
-	; Oops.  This frog is off a boat.  Frog must die.  
-	; The rest of the motion processing will happily drag the frog corpse 
-	; along with the moving boats/water.
-	; It is MAIN's job to change the image to the splttered frog.
-	inc FrogSafety               ; Shrodinger's frog is not alive. 
+	; Oops.  The frog is off a boat. 
+	; Frog must die. Unless, the frog must live. :-) 
+	; If the Frog is moving to the next row on the next frame, then 
+	; disregard the collision failure to permit the frog to live.
+
+	lda FrogRow                  ; Get the current Row number.
+	cmp FrogNewRow               ; Is the new Row the same?  
+	bne ExitCheckRideTheBoat     ; No.  Life!
+
+	inc FrogSafety               ; Yes.  Die, Frog, Die!
+
+	; The rest of the VBI motion processing will happily drag the frog  
+	; corpse along with the moving boats/water.
+	; It is MAIN's job to change the image to the splattered frog.
 
 ExitCheckRideTheBoat
 	rts

@@ -302,9 +302,11 @@ ExitMyImmediateVBI
 MyDeferredVBI
 
 ; ======== Manage Frog Death  ========
-; Here we are at the end of the frame.  If the CURRENT position of the frog 
-; is on a moving boat row, then go collect the collision information with the 
-; "safe" area of the boat (the horizontal lines).
+; Here we are at the end of the frame.  Collision is checked first.  
+; Actual movement processing happens last.
+; If the CURRENT position of the frog is on a moving boat row, 
+; then go collect the collision information with the "safe" area of the boat 
+; (the horizontal lines).
 ; The collision check code will flag the death accordingly.
 ; The Flag-Of-Death (FrogSafety) tells the Main code to splatter the frog 
 ; shape, and start the other activities to announce death.
@@ -316,12 +318,12 @@ ManageDeathOfASalesfrog
 
 	ldx FrogRow                  ; What screen row is the frog currently on?
 	lda MOVING_ROW_STATES,x      ; Is the current Row a boat row?
-	beq EndOfDeathOfASalesfrog   ; No. So no collision processing. 
+	beq EndOfDeathOfASalesfrog   ; No. So skip collision processing. 
 
 	jsr CheckRideTheBoat         ; Make sure the frog is riding the boat.  Otherwise it dies.
 
 EndOfDeathOfASalesfrog
-	sta HITCLR                   ; Always reset the P/M collision bits.
+	sta HITCLR                   ; Always reset the P/M collision bits for next frame.
 
 
 ; ======== Manage Boat fine scrolling ========
