@@ -443,26 +443,40 @@ WriteLives
 ; --------------------------------------------------------------------------
 
 ChangeScreen
-	jsr HideButtonPrompt           ; Always tell the VBI to stop the prompt.
+	jsr HideButtonPrompt              ; Always tell the VBI to stop the prompt.
 
-	sta VBICurrentDL               ; Tell VBI to change to new display mode.
+	sta VBICurrentDL                  ; Tell VBI to change to new display mode.
 
 	; While waiting for the DLI to do its part, lets do something useful.
 	; Display Win, Display Dead and Display Game Over are the same display lists.  
 	; The only difference is the LMS to point to the big text.
 	; So, reassign that here.
-	pha                            ; Save Display number for later.
+	pha                               ; Save Display number for later.
 	tay
-	lda DISPLAYLIST_GFXLMS_TABLE,y ; Get the new address.
-	beq bCSSkipLMSUpdate           ; If it is 0 it is not for the update.  Skip this.
-	sta GFX_LMS                    ; Save in the Win/Dead/Over display list.
+	lda DISPLAYLIST_GFXLMS_TABLE,y    ; Get the new address.
+	beq bCSCheckScreenBorders         ; If it is 0 it is not for the update.  Skip this.
+	sta GFX_LMS                       ; Save in the Win/Dead/Over display list.
 
-bCSSkipLMSUpdate
-	pla                            ; Get the display number back.
+	; ALSO, the Game screen needs the mask borders pon the left and right sides
+	; of the screen.   Determine if we need to do it or not do it and then
+	; draw or erase the borders accordingly.
 
-LoopChangeScreenWaitForVBI         ; Wait for VBI to signal the values changed.
-	cmp VBICurrentDL               ; Is the DISPLAY value the same?
-	beq LoopChangeScreenWaitForVBI ; Yes. Keep looping.
+bCSCheckScreenBorders
+	lda DISPLAY_NEEDS_BORDERS_TABLE,y ; Does this display need the P/m graphics borders? 
+	beq bCSNoBorders                  ; If it is 0 it is not needed.  Erase it this.
+	jsr DrawGameBorder                ; Game screen needs left and right sides masked.
+	jmp bCSContinueUpdate
+
+bCSNoBorders
+	jsr EraseGameBorder
+
+	; Back to checking on what the VBI has accomplished...
+bCSContinueUpdate
+	pla                               ; Get the display number back.
+
+LoopChangeScreenWaitForVBI            ; Wait for VBI to signal the values changed.
+	cmp VBICurrentDL                  ; Is the DISPLAY value the same?
+	beq LoopChangeScreenWaitForVBI    ; Yes. Keep looping.
 
 	; The VBI has changed the display and loaded page zero pointers.
 	; Now update the DLI color tables.
@@ -1690,6 +1704,9 @@ EraseShape
 	; would be evaluated to be followed by the position check if the 
 	; frame does not change.
 
+	ldy FrogUpdate     ; If -1, then update/erase is mandatory.
+	bmi bes_Test1
+
 	cmp FrogNewShape       ; Is it different from the old shape?
 	bne bes_Test1          ; Yes.  Erase is mandatory.
 
@@ -1718,6 +1735,28 @@ bes_Test3
 ; Drawing a new shape will transition New to Current.
 ExitEraseShape
 	lda FrogShape  ; return with value for caller.
+	rts
+
+;==============================================================================
+;											EraseGameBorder  A  X  Y
+;==============================================================================
+; Erase Shape in Missile memory.
+; -----------------------------------------------------------------------------
+
+EraseGameBorder
+	ldx #[177]
+
+begb_LoopFillBorder
+	lda #$00
+	sta PLAYERADR3+43,x
+	
+	lda MISSILEADR+43,x
+	and #%00111111
+	sta MISSILEADR+43,x
+	
+	dex
+	bne begb_LoopFillBorder
+
 	rts
 
 
@@ -1781,8 +1820,6 @@ bLoopEF_Erase
 	sta PLAYERADR0,x  ; main frog 1
 	sta PLAYERADR1,x  ; main frog 2, mouth, pupil
 	sta PLAYERADR2,x  ; eyeball
-;	sta PLAYERADR3,x  ; mouth
-;	sta MISSILEADR,x  ; eyeballs
 	inx
 	dey
 	bpl bLoopEF_Erase
@@ -1830,6 +1867,48 @@ bds_Test3
 
 ExitDrawShape
 	lda FrogNewShape ; return value to caller.
+	rts
+
+;==============================================================================
+;											DrawGameBorder  A  X  Y
+;==============================================================================
+; Show the black border that masks the left and right sides of the background.
+;
+; Draw Shape in Player/Missile memory.
+; Set color of border to Black.
+; Set position of Player/Missile.
+; Set size of Player and Missile.
+; -----------------------------------------------------------------------------
+
+DrawGameBorder
+	ldx #177
+
+bdgb_LoopFillBorder
+	lda #$C0
+	sta PLAYERADR3+43,x
+	
+	lda MISSILEADR+43,x
+	ora #$C0
+	sta MISSILEADR+43,x
+	
+	dex
+	bne bdgb_LoopFillBorder
+
+	lda #$FF
+	sta COLPM3
+
+	lda #[PLAYFIELD_RIGHT_EDGE_NORMAL+1]
+	sta HPOSP3
+	
+	lda #[PLAYFIELD_LEFT_EDGE_NORMAL-8]
+	sta HPOSM3
+	
+	lda #PM_SIZE_QUAD
+	sta SIZEP3
+	
+	lda #%11000000
+	sta SIZEM
+
 	rts
 
 

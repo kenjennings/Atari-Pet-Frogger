@@ -1021,6 +1021,13 @@ DISPLAYLIST_GFXLMS_TABLE
 	.byte <FROGDEAD_MEM
 	.byte <GAMEOVER_MEM
 
+DISPLAY_NEEDS_BORDERS_TABLE
+	.byte 0 ; Title, no.
+	.byte 1 ; Game, Yes.
+	.byte 0 ; Saved, No.
+	.byte 0 ; Dead, No.
+	.byte 0 ; Over, No.
+
 DLI_LO_TABLE  ; Address of first chained DLI per each screen.
 	.byte <TITLE_DLI_CHAIN_TABLE ; DLI (0) -- Set colors for Scores.
 	.byte <GAME_DLI_CHAIN_TABLE
@@ -1748,19 +1755,16 @@ BASE_PMCOLORS_TABLE ; When "off", and so multiplication for frog = 1 works.
 FROG_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_GREEN+$4       ; P0, frog
 	.by COLOR_GREEN+$2       ; P1, frog, green iris
-;	.by COLOR_PURPLE_BLUE+$2 ; P2, Colored eye irises
-;	.by COLOR_PINK+$8        ; P3, frog mouth
-	.by COLOR_BLACK+$E        ; P2, frog mouth 
+	.by COLOR_BLACK+$E       ; P2, frog mouth 
 	.by COLOR_BLACK          ; P3, (and M3) Left/Right Wall Masks 
 
 SPLAT_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_PINK+$4        ; P0, splat
 	.by COLOR_PINK+$2        ; P1, splat
 	.by COLOR_PINK+$6        ; P2, 
-;	.by COLOR_PINK+$8        ; P3, 
 	.by COLOR_BLACK          ; P3, (and M3) Left/Right Wall Masks 
 
-; Splash screens don;t need the wall masks.
+; Splash screens don't use the wall masks.
 
 GRAVE_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_BLACK+$4        ; P0, 

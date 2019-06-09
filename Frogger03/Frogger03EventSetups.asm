@@ -145,6 +145,9 @@ SetupGame
 	lda #SHAPE_FROG         ; Set new frog shape.
 	sta FrogNewShape
 
+	lda #1
+	sta FrogUpdate
+
 	jsr PlayWaterFX         ; Start water noises.  Now.
 
 	lda #SCREEN_GAME        ; Yes, change to game screen event.
@@ -201,7 +204,7 @@ SetupWin
 
 	lda #SCREEN_WIN         ; Change to wins screen.
 	sta CurrentScreen
-
+	
 	rts
 
 
@@ -261,7 +264,9 @@ SetupDead
 	lda #DISPLAY_DEAD        ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
-	jsr libPmgClearBitmaps   ; Scrape splattered frog off screen.
+;	jsr libPmgClearBitmaps   ; Scrape splattered frog off screen.
+	lda #$ff 
+	sta FrogUpdate
 
 ;	jsr RemoveFrogOnScreen   ; Remove the frog (corpse) from the screen
 

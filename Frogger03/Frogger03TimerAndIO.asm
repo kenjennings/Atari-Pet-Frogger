@@ -389,6 +389,9 @@ EndOfBoatScrolling
 ; input.  The VBI change position if the frog was on a scrolling boat row.
 ; Here, finally apply the position and move the frog image.
 MaintainFrogliness
+	lda FrogUpdate               ; Nonzero means something important needs to be updated.
+	bne SimplyUpdatePosition
+
 	lda FrogNewShape             ; Get the new frog shape.
 	beq NoFrogUpdate             ; 0 is off, so no movement there at all, so skip all
 
