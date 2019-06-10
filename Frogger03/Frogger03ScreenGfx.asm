@@ -1474,7 +1474,8 @@ libPmgInit
 ;
 ; Reset all Players and Missiles horizontal positions to 0, so
 ; that none are visible no matter the size or bitmap contents.
-; Also reset sizes.
+; Zero all colors.
+; Also reset sizes to zero.
 ; -----------------------------------------------------------------------------
 
 libPmgMoveAllZero
@@ -1485,19 +1486,11 @@ bLoopZeroPMPosition
 	sta HPOSP0,x            ; Player positions 3, 2, 1, 0
 	sta SIZEP0,x            ; Player width 3, 2, 1, 0
 	sta HPOSM0,x            ; Missiles 3, 2, 1, 0 just to be sure.
+	sta PCOLOR0,x           ; And black the colors.
 	dex
 	bpl bLoopZeroPMPosition
 
 	sta SIZEM               ; and Missile size 3, 2, 1, 0
-
-	; Zero a group of page 0 values: 
-	; (coordinates, and current shape index.)
-	; FrogPMY, FrogPMX, FrogShape, FrogNewPMY, FrogNewPMX, FrogNewShape
-	ldx #5
-bPMAZClearCoords 
-	sta FrogPMY,x
-	dex
-	bpl bPMAZClearCoords
 
 	rts
 
@@ -1546,7 +1539,7 @@ libPmgSetColors
 	sta PCOLOR2
 	lda BASE_PMCOLORS_TABLE+3,x
 	sta PCOLOR3
-                                 ; FYI, P5 color/COLPF3 is set by DLI 
+
 	rts
 
 
@@ -1837,10 +1830,16 @@ DrawShape
 	lda FrogNewShape
 	beq ExitDrawShape  ; 0 is off.
 
+	ldy FrogUpdate        ; Is update mandatory?
+	bmi ExitDrawShape     ; Update is forced off.
+	beq bds_CheckInMotion ; Update is neutral.
+	bpl bds_Test1         ; FrogUpdate >0 means redraw is required.
+	
 	; Note that if there is animation here is where the frame change 
 	; would be evaluated to be followed by the position check if the 
 	; frame does not change.
 
+bds_CheckInMotion
 	cmp FrogShape          ; Is it different from the old shape?
 	bne bds_Test1          ; Yes.  Redraw is mandatory.
 
@@ -1881,6 +1880,10 @@ ExitDrawShape
 ; -----------------------------------------------------------------------------
 
 DrawGameBorder
+
+	lda #$00
+	sta PCOLOR3
+
 	ldx #177
 
 bdgb_LoopFillBorder
@@ -1893,9 +1896,6 @@ bdgb_LoopFillBorder
 	
 	dex
 	bne bdgb_LoopFillBorder
-
-	lda #$FF
-	sta COLPM3
 
 	lda #[PLAYFIELD_RIGHT_EDGE_NORMAL+1]
 	sta HPOSP3
@@ -2292,11 +2292,11 @@ b_usRedrawShape
 	jsr DrawShape        ; Draw NEW shape at new vertical Y position.
 	jsr PositionShape    ; Move shape to new horizontal X position. (and set sizes).
 
+ExitUpdateShape
 	jsr UpdateShapeSpecs ; Commit the new shape and the new X and Y coords.
 	;  UpdateShapeSpecs returns the new shape number in X.
 	jsr libPmgSetColors  ; Set colors for this object.  Depends on X = Shape number.
 
-ExitUpdateShape
 	rts
 
 

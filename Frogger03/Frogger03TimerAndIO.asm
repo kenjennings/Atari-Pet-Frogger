@@ -383,6 +383,40 @@ EndOfScrollLoop                  ; end of this row.  go to the next one.
 EndOfBoatScrolling
 
 
+; ======== Manage InputScanFrames Delay Counter ========
+DoManageInputClock
+	lda InputScanFrames          ; Is input delay already 0?
+	beq DoAnimateClock           ; Yes, do not decrement it again.
+	dec InputScanFrames          ; Minus 1.
+
+; ======== Manage Main code's timer.  Decrement while non-zero. ========
+; It is MAIN's job to act when the timer is 0, and reset it if needed.
+DoAnimateClock
+	lda AnimateFrames            ; Is animation countdown already 0?
+	beq DoAnimateClock2          ; Yes, do not decrement now.
+	dec AnimateFrames            ; Minus 1
+
+; ======== Manage Another Main code timer.  Decrement while non-zero. ========
+; It is MAIN's job to act when the timer is 0, and reset it if needed.
+DoAnimateClock2
+	lda AnimateFrames2           ; Is animation countdown already 0?
+	beq DoAnimateEyeballs        ; Yes, do not decrement now.
+	dec AnimateFrames2           ; Minus 1
+
+; ======== Manage Frog Eyeball motion ========
+; If the timer is non-zero, Change eyeball position and force redraw.
+DoAnimateEyeballs
+	lda FrogRefocus              ; Is the eye move counter greater than 0?
+	beq EndOfClockChecks         ; No, Nothing else to do here.
+	dec FrogRefocus              ; Subtract 1.
+	bne EndOfClockChecks         ; Has not reached 0, so nothing left to do here.
+	lda #1                       ; Inform the Frog renderer  
+	sta FrogEyeball              ; to use the default/centered eyeball.
+	sta FrogUpdate               ; Mandatory redraw.
+
+EndOfClockChecks
+
+
 ; ======== Reposition the Frog (or Splat). ========
 ; At this point everyone and their cousin have been giving their advice 
 ; about the frog position.  The main code changed position based on joystick
@@ -467,34 +501,6 @@ DoPromptColorchange
 DoCheesySoundService         ; World's most inept sound sequencer.
 	jsr SoundService
 
-
-; ======== Manage InputScanFrames Delay Counter ========
-DoManageInputClock
-	lda InputScanFrames          ; Is input delay already 0?
-	beq DoAnimateClock           ; Yes, do not decrement it again.
-	dec InputScanFrames          ; Minus 1.
-
-; ======== Manage Main code's timer.  Decrement while non-zero. ========
-; It is MAIN's job to act when the timer is 0, and reset it if needed.
-DoAnimateClock
-	lda AnimateFrames            ; Is animation countdown already 0?
-	beq DoAnimateClock2          ; Yes, do not decrement now.
-	dec AnimateFrames            ; Minus 1
-
-DoAnimateClock2
-	lda AnimateFrames2           ; Is animation countdown already 0?
-	beq DoAnimateEyeballs        ; Yes, do not decrement now.
-	dec AnimateFrames2           ; Minus 1
-
-DoAnimateEyeballs
-	lda FrogRefocus              ; Is the eye move counter greater than 0?
-	beq EndOfClockChecks         ; No, Nothing else to do here.
-	dec FrogRefocus              ; Subtract 1.
-	bne EndOfClockChecks         ; Has not reached 0, so nothing left to do here.
-	lda #1                       ; Inform the Frog renderer  
-	sta FrogEyeball              ; to use the default/centered eyeball.
-
-EndOfClockChecks
 
 ; ======== Manage scrolling the Credits text ========
 ScrollTheCreditLine              ; Scroll the text identifying the perpetrators

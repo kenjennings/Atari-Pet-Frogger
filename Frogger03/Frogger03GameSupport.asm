@@ -116,7 +116,7 @@ BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 MOVING_ROW_STATES ; 19 entries describing boat directions. Beach (0), Right (1), Left (FF) directions.
 	.by 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0
 
-PM_OFFS=20 ; offset to line up P/M Vertical Y line to Playfield scan line
+PM_OFFS=26 ; offset to line up P/M Vertical Y line to Playfield scan line
 
 FROG_PMY_TABLE ; 19 entries providing Frog Y position for each row.  (Each row is no longer equal size.)
 	.by [ 17+PM_OFFS] [ 26+PM_OFFS] [ 36+PM_OFFS]  ; Beach, Boat Right, Boat Left
@@ -147,14 +147,60 @@ FROG_PMY_TABLE ; 19 entries providing Frog Y position for each row.  (Each row i
 ; Returns Row number, and Z flag indicates game can continue.
 ; --------------------------------------------------------------------------
 FrogMoveUp
-	jsr Add10ToScore ; 10 points for moving forward.
+	jsr Add10ToScore     ; 10 points for moving forward.
 
 	ldx FrogRow          ; Get the current Row number
 	dex                  ; Minus 1 row.
+	stx FrogNewRow       ; Save new Row Number. 
 	lda FROG_PMY_TABLE,x ; Get the new Player/Missile Y position based on row number.
 	sta FrogNewPMY       ; Update Frog position on screen. 
-	stx FrogNewRow       ; Save new Row Number. 
-	; Side effect...  STX made sure CPU flags reflect X = 0 or !0
+
+	lda FrogNewRow       ; Tell caller the new row number.
+	rts
+
+
+; ==========================================================================
+; ZERO FROG PAGE ZERO
+;
+; Zero a group of page 0 values: 
+; (coordinates, and current shape index.)
+; FrogPMY, FrogPMX, FrogShape, FrogNewPMY, FrogNewPMX, FrogNewShape
+; --------------------------------------------------------------------------
+ZeroFrogPageZero
+
+	ldx #5
+bPMAZClearCoords 
+	sta FrogPMY,x
+	dex
+	bpl bPMAZClearCoords
+
+	rts
+
+
+; ==========================================================================
+; FROG EYE FOCUS
+;
+; The Frog's eyes move based on the joystick input direction.
+; Default position for the eyes is #1.
+;
+; Eye positions:
+;  - 3 -
+;  0 1 2
+;  - - -
+;
+; Set the eye position.
+; Set the Timer for how long the eye will remain at that position 
+; before returning to the default.
+; Flag the mandatory redraw notification for the VBI.
+;
+; A is the Eye position.
+; --------------------------------------------------------------------------
+FrogEyeFocus
+
+	sta FrogEyeball ; Set the eyeball shape.
+	lda #60         ; Set one second timer.
+	sta FrogRefocus
+	inc FrogUpdate  ; Set mandatory Frog Update on next frame.
 
 	rts
 

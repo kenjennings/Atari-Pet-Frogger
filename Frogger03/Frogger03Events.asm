@@ -342,10 +342,8 @@ UpStickTest
 	ror                      ; Roll out low bit. UP
 	bcc LeftStickTest        ; No bit. Try Left.
 
-	lda #1
-	sta FrogEyeball
-	lda #60
-	sta FrogRefocus
+	lda #3                   ; Eyeballs left
+	jsr FrogEyeFocus
 
 	jsr FrogMoveUp           ; Yes, go do UP. Subtract from FrogRow and PM Y position.
 	beq DoSetupForFrogWins   ; Returned 0.  No more rows to cross. Update to frog Wins!
@@ -357,11 +355,9 @@ LeftStickTest
 	ror                      ; Roll out low bit. LEFT
 	bcc RightStickTest       ; No bit. Try Right.
 
-	lda #0
-	sta FrogEyeball
-	lda #60
-	sta FrogRefocus
-	
+	lda #0                   ; Eyeballs left
+	jsr FrogEyeFocus
+
 	ldy FrogPMX              ; Get current Frog position
 	dey                      ; - minus 2 color clocks is 1/2 character.
 	dey
@@ -375,10 +371,8 @@ RightStickTest
 	ror                      ; Roll out low bit. RIGHT
 	bcc EndOfJoystickMoves   ; No bit.  Replace Frog on screen.  Try boat animation.
 
-	lda #2
-	sta FrogEyeball
-	lda #60
-	sta FrogRefocus
+	lda #2                   ; Eyeballs Right
+	jsr FrogEyeFocus
 
 	ldy FrogPMX              ; Get current Frog position
 	iny                      ; - plus 2 color clocks. is 1/2 character.

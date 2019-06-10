@@ -127,20 +127,22 @@ SetupGame
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled on the game screen.
 
-	lda #18                 ; 18 (dec), number of screen rows of game field.
-	sta FrogNewRow
-	sta FrogRow
+
 
 	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
 	sta FrogPMX
 	sta FrogPMY
 	sta FrogShape           ; 0 is "off"  (it would already be off by default)
 
+	ldx #18                 ; 18 (dec), number of screen rows of game field.
+	stx FrogNewRow
+	stx FrogRow
+	
+	lda FROG_PMY_TABLE,x    ; Get the new Player/Missile Y position based on row number.
+	sta FrogNewPMY          ; Update Frog position on screen. 
+
 	lda #MID_FROGX          ; Set new X position to middle of screen.
 	sta FrogNewPMX
-
-	lda #MAX_FROGY          ; Set new Y position to origin. (row 18)
-	sta FrogNewPMY
 
 	lda #SHAPE_FROG         ; Set new frog shape.
 	sta FrogNewShape
@@ -347,6 +349,9 @@ SetupGameOver
 
 	lda #SHAPE_TOMB         ; Set new tomb shape.
 	sta FrogNewShape
+	
+	lda #1
+	sta FrogUpdate
 
 	lda #SCREEN_OVER       ; Change to Game Over screen.
 	sta CurrentScreen
