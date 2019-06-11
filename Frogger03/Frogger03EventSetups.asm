@@ -163,6 +163,10 @@ SetupGame
 ; ==========================================================================
 ; Prep values to run the Transition Event for the Win screen
 ;
+; The Ode To Joy winning song is played on two channels started a 
+; frame apart (1/60th sec NTSC).  Hopefully this makes a ringing/echo 
+; kind of effect.
+;
 ; Uses A, X
 ; --------------------------------------------------------------------------
 
@@ -176,9 +180,15 @@ SetupTransitionToWin
 	lda #DISPLAY_WIN        ; Tell VBI to change screens.
 	jsr ChangeScreen        ; Then copy the color tables.
 
-	jsr libPmgClearBitmaps  ; Get rid of frog.
+;	jsr libPmgClearBitmaps  ; Get rid of frog.
 
 	ldx #3                  ; Setup channel 3 to play Ode To Joy for saving the frog.
+	ldy #SOUND_JOY
+	jsr SetSound 
+
+	jsr libScreenWaitFrame  ; Wait for a frame.
+
+	ldx #2                  ; Setup channel 2 to play Ode To Joy for saving the frog.
 	ldy #SOUND_JOY
 	jsr SetSound 
 

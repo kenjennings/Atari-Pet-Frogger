@@ -1986,15 +1986,6 @@ bLoopDF_DrawFrog
 	lda PLAYER1_FROG_DATA,y
 	sta PLAYERADR1+10,x
 
-;	lda PLAYER2_FROG_DATA,y
-;	sta PLAYERADR2+10,x
-
-;	lda PLAYER3_FROG_DATA,y
-;	sta PLAYERADR3+10,x
-
-;	lda PLAYER5_FROG_DATA,y
-;	sta MISSILEADR+10,x
-
 	dex
 	dey
 	bpl bLoopDF_DrawFrog

@@ -622,16 +622,16 @@ GAMEOVER_MEM ; Graphics data, Game Over.  (34) + 6 spaces.
  
 PLAYFIELD_MEM0 ; Default display of "Beach", for lack of any other description, and the two lines of Boats
 ; 3  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_BEACH7      I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_ROCKS1L+$80 I_ROCKS1R+$80 I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_ROCKS2+$80  I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_ROCKS3+$80  I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_ROCKS4+$80  I_BEACH8
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_BEACH7      I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_ROCKS3+$80  I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_ROCKS1L+$80 I_ROCKS1R+$80 I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_BEACH7      I_BEACH8 
-	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6      I_ROCKS4+$80  I_BEACH8 ; "Beach"
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_BEACH7  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_ROCKS1L I_ROCKS1R I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS2  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS3  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS4  I_BEACH8
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_BEACH7  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS3  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_ROCKS1L I_ROCKS1R I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_BEACH7  I_BEACH8 
+	.by I_BEACH1 I_BEACH2 I_BEACH3 I_BEACH4 I_BEACH5 I_BEACH6  I_ROCKS4  I_BEACH8 ; "Beach"
 
 PLAYFIELD_MEM3 = PLAYFIELD_MEM0+32 ; Default display of "Beach", for lack of any other description.
 
@@ -732,8 +732,6 @@ GAME_BACK_COLORS; 22 entries.
 	.by COLOR_BLACK                   ; lives, saved frogs.
 	
 	.by COLOR_GREEN+6     ; Beach
-;	.by COLOR_RED_ORANGE+$e
-;	.by COLOR_BLACK+$e
 	.by COLOR_AQUA+2      ; Water for boats
 	.by COLOR_AQUA+4      ; Water for boats. 
 
@@ -745,7 +743,7 @@ GAME_BACK_COLORS; 22 entries.
 	.by COLOR_BLUE2+2     
 	.by COLOR_BLUE2+4     ; Beach, boats, boats.
 
-	.by COLOR_RED_ORANGE+6 
+	.by COLOR_RED_ORANGE+6
 	.by COLOR_LITE_BLUE+2 
 	.by COLOR_LITE_BLUE+4 ; Beach, boats, boats.
 
@@ -753,11 +751,11 @@ GAME_BACK_COLORS; 22 entries.
 	.by COLOR_BLUE1+2     
 	.by COLOR_BLUE1+4     ; Beach, boats, boats.
 
-	.by COLOR_RED_ORANGE+6
+	.by COLOR_GREEN+6 
 	.by COLOR_AQUA+2      
 	.by COLOR_AQUA+4     ; Beach, boats, boats.
 
-	.by COLOR_GREEN+6                                    ; one last Beach.
+	.by COLOR_ORANGE2+6                                    ; one last Beach.
 
 	
 GAME_COLPF0_COLORS; 22 entries
@@ -766,8 +764,6 @@ GAME_COLPF0_COLORS; 22 entries
 	.by COLOR_BLACK                   ; lives, saved frogs.
 
 	.by COLOR_BLUE1     ; Beach sky
-;	.by COLOR_ORANGE2+10
-;	.by COLOR_ORANGE2+8
 	.by COLOR_AQUA+4    ; Water top 1 with boats
 	.by COLOR_AQUA+6    ; Water top 2 with boats
 
@@ -799,7 +795,7 @@ GAME_COLPF1_COLORS ; 22 entries
 	.by COLOR_BLACK+$e                        ; Scores
 	.by COLOR_BLACK+$a                        ; lives, saved frogs.
 	
-	.by COLOR_ORANGE2+$8     ; beach 
+	.by COLOR_GREEN+$8     ; beach 
 	.by COLOR_PINK+$a        ; boat
 	.by COLOR_PURPLE+$c      ; boat
 	
@@ -819,11 +815,11 @@ GAME_COLPF1_COLORS ; 22 entries
 	.by COLOR_ORANGE1+$a
 	.by COLOR_ORANGE2+$c
 	
-	.by COLOR_RED_ORANGE+$8  ; beach
+	.by COLOR_GREEN+$8  ; beach
 	.by COLOR_RED_ORANGE+$a
 	.by COLOR_PINK+$c
 	
-	.by COLOR_RED_ORANGE+$8  ; Last beach
+	.by COLOR_ORANGE2+$8  ; Last beach
 
 ; beach color, and the lines on the boat.
 GAME_COLPF2_COLORS ; 24 entries... ?????????????
@@ -851,11 +847,11 @@ GAME_COLPF2_COLORS ; 24 entries... ?????????????
 	.by COLOR_ORANGE1+$4
 	.by COLOR_ORANGE2+$4
 	
-	.by COLOR_RED_ORANGE+2            ; beach
+	.by COLOR_GREEN+2            ; beach
 	.by COLOR_RED_ORANGE+$4
 	.by COLOR_PINK+$4
 	
-	.by COLOR_GREEN+2                 ; last beach
+	.by COLOR_ORANGE2+2                 ; last beach
 
 	.by COLOR_BLACK+$0E
 	.by COLOR_BLACK+$0E
@@ -912,19 +908,20 @@ GAME_COLPF3_COLORS ; 22 entries.  Arg!  Tried to avoid this, but it is needed in
 
 DEAD_BACK_COLORS ; 47 entries.  Gfx background colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
-	.by COLOR_PURPLE_BLUE+2 COLOR_PURPLE_BLUE+4 COLOR_PURPLE_BLUE+6 COLOR_PURPLE_BLUE+8
-	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
-	.by COLOR_PURPLE_BLUE+2 COLOR_PURPLE_BLUE+4 COLOR_PURPLE_BLUE+6 COLOR_PURPLE_BLUE+8
-	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
+	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6
+	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14
+	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6
+	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14
+	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6
 
-	.by COLOR_PURPLE COLOR_PURPLE+2 COLOR_PURPLE+4 COLOR_PURPLE+6 COLOR_PURPLE+8 COLOR_PURPLE+10 
+	.by COLOR_GREEN COLOR_GREEN+2 COLOR_GREEN+4 COLOR_GREEN+6 COLOR_GREEN+8 COLOR_GREEN+10 
 
-	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
-	.by COLOR_PURPLE_BLUE+2 COLOR_PURPLE_BLUE+4 COLOR_PURPLE_BLUE+6 COLOR_PURPLE_BLUE+8
-	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8
-	.by COLOR_PURPLE_BLUE+2 COLOR_PURPLE_BLUE+4 COLOR_PURPLE_BLUE+6 COLOR_PURPLE_BLUE+8
-	.by COLOR_RED_ORANGE+2  COLOR_RED_ORANGE+4  COLOR_RED_ORANGE+6  COLOR_RED_ORANGE+8 
+	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14
+	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6
+	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14
+	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6
+	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14
+
 
 DEAD_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
@@ -932,7 +929,7 @@ DEAD_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
 		.by $00                                     ; Top Scroll.
 	.endr
 
-	.by $0C $0A $08 $06 $04 $02
+	.by COLOR_PINK+$0C COLOR_PINK+$0A COLOR_PINK+$08 COLOR_PINK+$06 COLOR_PINK+$04 COLOR_PINK+$02
 
 	.rept 20
 		.by $00                                     ; Bottom Scroll
@@ -941,27 +938,29 @@ DEAD_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
 
 WIN_BACK_COLORS ; 47 entries.  Gfx background colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by $14 $18 $1C $1E
-	.by $24 $28 $2C $2E
-	.by $34 $38 $3C $3E
-	.by $44 $48 $4C $4E
-	.by $54 $58 $5C $5E
+	; Do not use $0x or $Fx for base color.
+	.by $2c $2a $28 $26
+	.by $24 $22 $3c $3a
+	.by $38 $36 $34 $32
+	.by $4c $4a $48 $46
+	.by $44 $42 $5c $5a
 	
-	.by $60 $62 $64 $66 $68 $6a
+	.by $02 $06 $0A $0A $06 $02 ; Static white background
 
-	.by $74 $78 $7C $7E
-	.by $84 $88 $8C $8E
-	.by $94 $98 $9C $9E
-	.by $A4 $A8 $AC $AE
-	.by $B4 $B8 $BC $BE
+	.by $5a $5c $42 $44
+	.by $46 $48 $4a $4c
+	.by $32 $34 $36 $38
+	.by $3a $3c $22 $24
+	.by $26 $28 $2a $2c
+
 
 WIN_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.rept 20
 		.by $00                                     ; Top Scroll.
 	.endr
-
-	.by $eC $eA $e8 $e6 $e4 $e2
+	; EOR first color of WIN_BACK+$80 (but not $0x or $Fx)
+	.by $AE $AC $AA $A8 $A6 $A4
 
 	.rept 20
 		.by $00                                     ; Bottom Scroll
@@ -974,7 +973,7 @@ OVER_BACK_COLORS  ; 47 entries.  Gfx background colors.
 		.by $00                                     ; Top Scroll.
 	.endr
 
-	.by  COLOR_PINK COLOR_PINK COLOR_PINK COLOR_PINK COLOR_PINK COLOR_PINK 
+	.by  $00 $00 $00 $00 $00 $00 
 
 	.rept 20
 		.by $00                                     ; Bottom Scroll
