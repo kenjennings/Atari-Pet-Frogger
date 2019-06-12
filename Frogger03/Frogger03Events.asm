@@ -428,7 +428,12 @@ EndTransitionToWin
 
 ; ==========================================================================
 ; Event Process WIN SCREEN
-; Scroll colors on screen while waiting for a button press.
+;
+; Scroll Rainbow colors on screen while waiting for a button press.
+; Scroll up at top. light to dark.  
+; SCroll down at bottom.  Dark to light.
+; Do not use $0x or $F0  (Min 16, max 238)
+; 
 ; Setup for next transition.
 ; --------------------------------------------------------------------------
 EventWinScreen
@@ -819,6 +824,9 @@ LoopBottomOverGrey
 	beq EndGameOverScreen
 
 ProcessGameOverScreenInput      ; a key is pressed. Prepare for the screen transition.
+	lda #$FF
+	sta FrogUpdate              ; Tell VBI to erase and stop redrawing the animated object.
+	jsr libScreenWaitFrame      ; Let's wait to the end of the frame to prevent the setup from confusing cleanup.
 	jsr SetupTransitionToTitle
 
 EndGameOverScreen

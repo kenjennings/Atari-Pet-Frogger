@@ -230,9 +230,11 @@ NextScoreDigit
 	lda #3              ; Reset number of
 	sta NumberOfLives   ; lives to 3.
 
-	lda #0
-	sta FrogsCrossed      ; Zero the number of successful crossings.
-	sta FrogsCrossedIndex ; And the index lookup for the boat/row settings.
+;	lda #0
+;	sta FrogsCrossed         ; Zero the number of successful crossings.
+;	sta FrogsCrossedIndex    ; And the index lookup for the boat/row settings.
+;	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
+
 	rts
 
 
@@ -251,7 +253,7 @@ Add500ToScore
 	jsr AddToScore    ; Deal with score update.
 
 	inc FrogsCrossed         ; Add to frogs successfully crossed the rivers.
-	jsr MultiplyFrogsCrossed ; Multiply by 18 to get the new index base.
+	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
 
 	rts
 

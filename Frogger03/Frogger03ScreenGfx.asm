@@ -376,13 +376,14 @@ ClearSavedFrogs
 	ldx #16
 
 RemoveFroggies
-	sta SCREEN_SAVED,x  ; Write to screen. (second line, 24th position)
-	dex                 ; Decrement number of frogs.
-	bne RemoveFroggies  ; then go back and display the next frog counter.
+	sta SCREEN_SAVED,x       ; Write to screen. (second line, 24th position)
+	dex                      ; Decrement number of frogs.
+	bne RemoveFroggies       ; then go back and display the next frog counter.
 
-	sta FrogsCrossed      ; reset count to 0.
-	sta FrogsCrossedIndex ; and the base index into difficulty arrays
-;	jsr SetBoatSpeed      ; just in case
+	sta FrogsCrossed         ; reset count to 0.
+	sta FrogsCrossedIndex    ; and the base index into difficulty arrays
+	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
+;	jsr SetBoatSpeed         ; just in case
 
 	rts
 
