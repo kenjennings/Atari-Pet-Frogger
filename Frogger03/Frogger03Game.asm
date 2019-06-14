@@ -77,7 +77,7 @@ GAMESTART
 	lda #4                     ; Quick hack to init the scrolling credits.
 	sta HSCROL
 
-	jsr SetupTransitionToTitle ; will set CurrentScreen = SCREEN_TRANS_TITLE
+	jsr SetupTransitionToTitle ; will set CurrentEvent = EVENT_TRANS_TITLE
 
 ; Ready to go to main game loop . . . .
 
@@ -91,7 +91,7 @@ GAMESTART
 ;
 ; Rules:  "Continue" labels for the next screen/event block must
 ;         be called with screen value in A.  Therefore, each Event
-;         routine must end by lda CurrentScreen.
+;         routine must end by lda CurrentEvent.
 ; --------------------------------------------------------------------------
 
 GameLoop
@@ -100,7 +100,7 @@ GameLoop
 ; Due to the frame sync above, at this point the code
 ; is running at/near the top of the screen refresh.
 
-	lda CurrentScreen
+	lda CurrentEvent
 
 ; ==========================================================================
 ; TRANSITION TO TITLE
@@ -110,7 +110,7 @@ GameLoop
 ; Stage 3: Initialize setup for Press Button on Title screen.
 ; --------------------------------------------------------------------------
 ContinueTransitionToTitle
-	cmp #SCREEN_TRANS_TITLE
+	cmp #EVENT_TRANS_TITLE
 	bne ContinueStartNewGame
 
 	jsr EventTransitionToTitle
@@ -125,8 +125,8 @@ ContinueTransitionToTitle
 ; The title screen has already been presented by Transition To Title.
 ; --------------------------------------------------------------------------
 ContinueStartNewGame
-	cmp #SCREEN_START
-	bne ContinueTitleScreen ; SCREEN_START=0?  No?
+	cmp #EVENT_START
+	bne ContinueTitleScreen ; EVENT_START=0?  No?
 
 	jsr EventScreenStart
 
@@ -138,7 +138,7 @@ ContinueStartNewGame
 ; 3) Setup for next transition.
 ; --------------------------------------------------------------------------
 ContinueTitleScreen
-	cmp #SCREEN_TITLE
+	cmp #EVENT_TITLE
 	bne ContinueTransitionToGame
 
 	jsr EventTitleScreen
@@ -155,7 +155,7 @@ ContinueTitleScreen
 ;          When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
 ; --------------------------------------------------------------------------
 ContinueTransitionToGame
-	cmp #SCREEN_TRANS_GAME
+	cmp #EVENT_TRANS_GAME
 	bne ContinueGameScreen
 
 	jsr EventTransitionToGame
@@ -177,7 +177,7 @@ ContinueTransitionToGame
 ; to the boats.
 ; --------------------------------------------------------------------------
 ContinueGameScreen
-	cmp #SCREEN_GAME
+	cmp #EVENT_GAME
 	bne ContinueTransitionToWin
 
 	jsr EventGameScreen
@@ -190,7 +190,7 @@ ContinueGameScreen
 ; 3) Setup to do the Win screen event.
 ; --------------------------------------------------------------------------
 ContinueTransitionToWin
-	cmp #SCREEN_TRANS_WIN
+	cmp #EVENT_TRANS_WIN
 	bne ContinueWinScreen
 
 	jsr EventTransitionToWin
@@ -201,7 +201,7 @@ ContinueTransitionToWin
 ; Setup for next transition.
 ; --------------------------------------------------------------------------
 ContinueWinScreen
-	cmp #SCREEN_WIN
+	cmp #EVENT_WIN
 	bne ContinueTransitionToDead
 
 	jsr EventWinScreen
@@ -216,7 +216,7 @@ ContinueWinScreen
 ; 2) Launch the Dead Frog Display.
 ; --------------------------------------------------------------------------
 ContinueTransitionToDead
-	cmp #SCREEN_TRANS_DEAD
+	cmp #EVENT_TRANS_DEAD
 	bne ContinueDeadScreen
 
 	jsr EventTransitionToDead
@@ -227,7 +227,7 @@ ContinueTransitionToDead
 ; Run an animated scroll driven by the data in the sine table.
 ; --------------------------------------------------------------------------
 ContinueDeadScreen
-	cmp #SCREEN_DEAD
+	cmp #EVENT_DEAD
 	bne ContinueTransitionToOver
 
 	jsr EventDeadScreen
@@ -251,7 +251,7 @@ ContinueDeadScreen
 ; Not feeling enterprising, so just use the Fade value from the Dead event.
 ; --------------------------------------------------------------------------
 ContinueTransitionToOver
-	cmp #SCREEN_TRANS_OVER
+	cmp #EVENT_TRANS_OVER
 	bne ContinueOverScreen
 
 	jsr EventTransitionGameOver
@@ -262,7 +262,7 @@ ContinueTransitionToOver
 ; The Activity in the transition area, based on timer.
 ; --------------------------------------------------------------------------
 ContinueOverScreen
-	cmp #SCREEN_OVER
+	cmp #EVENT_OVER
 	bne EndGameLoop
 
 	jsr EventGameOverScreen

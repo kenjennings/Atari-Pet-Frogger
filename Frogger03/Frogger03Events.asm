@@ -34,22 +34,22 @@
 ; Note that the order here does not imply the only order of
 ; movement between screens/event activity.  The enumeration
 ; could be entirely random.
-SCREEN_START       = 0  ; Entry Point for New Game setup..
-SCREEN_TITLE       = 1  ; Credits and Instructions.
+EVENT_START       = 0  ; Entry Point for New Game setup..
+EVENT_TITLE       = 1  ; Credits and Instructions.
 
-SCREEN_TRANS_GAME  = 2  ; Transition animation from Title to Game.
-SCREEN_GAME        = 3  ; GamePlay
+EVENT_TRANS_GAME  = 2  ; Transition animation from Title to Game.
+EVENT_GAME        = 3  ; GamePlay
 
-SCREEN_TRANS_WIN   = 4  ; Transition animation from Game to Win.
-SCREEN_WIN         = 5  ; Crossed the river!
+EVENT_TRANS_WIN   = 4  ; Transition animation from Game to Win.
+EVENT_WIN         = 5  ; Crossed the river!
 
-SCREEN_TRANS_DEAD  = 6  ; Transition animation from Game to Dead.
-SCREEN_DEAD        = 7  ; Yer Dead!
+EVENT_TRANS_DEAD  = 6  ; Transition animation from Game to Dead.
+EVENT_DEAD        = 7  ; Yer Dead!
 
-SCREEN_TRANS_OVER  = 8  ; Transition animation from Dead to Game Over.
-SCREEN_OVER        = 9  ; Game Over.
+EVENT_TRANS_OVER  = 8  ; Transition animation from Dead to Game Over.
+EVENT_OVER        = 9  ; Game Over.
 
-SCREEN_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
+EVENT_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
 
 ; Screen Order/Path
 ;                       +-------------------------+
@@ -149,12 +149,12 @@ TestTransTitle3
 	cmp #3
 	bne EndTransitionToTitle  ; Really shouldn't get to that point
 
-	lda #SCREEN_START         ; Yes, change to event to start new game.
-	sta CurrentScreen
+	lda #EVENT_START         ; Yes, change to event to start new game.
+	sta CurrentEvent
 
 EndTransitionToTitle
 	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
-	lda CurrentScreen
+	lda CurrentEvent
 
 	rts
 
@@ -173,8 +173,8 @@ EventScreenStart            ; This is New Game and Transition to title.
 	jsr ClearSavedFrogs     ; Erase the saved frogs from the screen. (Zero the count)
 	jsr PrintFrogsAndLives  ; Update the screen memory.
 
-	lda #SCREEN_TITLE       ; Next step is operating the title screen input.
-	sta CurrentScreen
+	lda #EVENT_TITLE       ; Next step is operating the title screen input.
+	sta CurrentEvent
 
 	rts
 
@@ -201,7 +201,7 @@ ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transiti
 	jsr ClearGameScores     ; Zero the score.  And high score if not set.
 
 EndTitleScreen
-	lda CurrentScreen
+	lda CurrentEvent
 
 	rts
 
@@ -296,8 +296,8 @@ TransGameNextLine            ; All colors match on this line.  Do next line.
 	bne EndTransitionToGame  ; No.  Finish this pass.
 
 	; Finished stage 3, now go to the main event.
-	lda #SCREEN_START         ; Yes, change to event to start new game.
-	sta CurrentScreen
+	lda #EVENT_START         ; Yes, change to event to start new game.
+	sta CurrentEvent
 
 	lda #BLINK_SPEED          ; Text Blinking speed for prompt ?
 	jsr ResetTimers
@@ -305,7 +305,7 @@ TransGameNextLine            ; All colors match on this line.  Do next line.
 	jsr SetupGame
 
 EndTransitionToGame
-	lda CurrentScreen
+	lda CurrentEvent
 
 	rts
 
@@ -347,7 +347,7 @@ UpStickTest
 
 	jsr FrogMoveUp           ; Yes, go do UP. Subtract from FrogRow and PM Y position.
 	beq DoSetupForFrogWins   ; Returned 0.  No more rows to cross. Update to frog Wins!
-	bne FrogHasMoved         ; Row greater than 0.  Done with this..
+	bne FrogHasMoved         ; Row greater than 0.  Done with this.
 
 
 LeftStickTest
@@ -405,15 +405,19 @@ DoSetupForYerDead
 
 EndGameScreen
 
-	lda CurrentScreen
+	lda CurrentEvent
 
 	rts
 
 
 ; ==========================================================================
 ; Event Process TRANSITION TO WIN
+; V03 currently removes the transition to Win screen.
+; Now, just does immediate switch to the Win screen.
+;
+; Prior version...
 ; The Activity in the transition area, based on timer.
-; 1) wipe screen from top to middle, and bottom to middle
+; 1) wipe screen from top to middle, and bottom to middle.
 ; 2) Display the Frogs SAVED!
 ; 3) Setup to do the Win screen event.
 ; --------------------------------------------------------------------------
@@ -421,7 +425,7 @@ EventTransitionToWin
 	jsr SetupWin             ; Setup for Wins screen 
 
 EndTransitionToWin
-	lda CurrentScreen
+	lda CurrentEvent
 
 	rts
 
@@ -431,8 +435,8 @@ EndTransitionToWin
 ;
 ; Scroll Rainbow colors on screen while waiting for a button press.
 ; Scroll up at top. light to dark.  
-; SCroll down at bottom.  Dark to light.
-; Do not use $0x or $F0  (Min 16, max 238)
+; Scroll down at bottom.  Dark to light.
+; Do not use $0x or $Fx  (Min 16, max 238)
 ; 
 ; Setup for next transition.
 ; --------------------------------------------------------------------------
@@ -446,53 +450,94 @@ EventWinScreen
 	lda #WIN_CYCLE_SPEED        ; yes.  Reset animation timer.
 	jsr ResetTimers
 
-; Color scrolling skips the black/grey/white.  
+; ======================== T O P ========================  
+; Color scrolling skips the black/grey/white values.  
 ; The scrolling uses values 238 to 18 step -4
 	lda EventCounter            ; Get starting value from last frame
-	jsr WinColorScroll          ; Subtract 4 and reset to start if needed.
+	jsr WinColorScrollUp        ; Subtract 4 and reset to start if needed.
 	sta EventCounter            ; Save it for next time.
 
-	ldy #0 ; Color the Top 9 lines of screen...
+	ldy #1 ; Color the Top 20 lines of screen...
 LoopTopWinScroll
-	sta COLPF2_TABLE,y          ; Set color for line on screen
-	jsr WinColorScroll          ; Subtract 4 and reset to start if needed.
+	sta COLBK_TABLE,y           ; Set color for line on screen
+	jsr WinColorScrollUp        ; Subtract 4 and reset to start if needed.
 
 	iny                         ; Next line on screen.
-	cpy #9                      ; Reached the 9th line?
+	cpy #21                     ; Reached the 20th (21st table entry) line?
 	bne LoopTopWinScroll        ; No, continue looping.
 
-	pha                         ; Save to use as start value later.
+	pha                         ; Save current color to use as start value later.
 
+; ======================== M I D D L E ========================  
+; Background/COLBK in the text section is static in the color tables.
+; Manipulate current color to make it the "inverse" color for the Text.
 	eor #$F0                    ; Invert color bits for the middle SAVED text.
-	and #$F0                    ; Truncate luminace bits.
-	sta COLPF2_TABLE+10         ; Use as background color for 
-	sta COLPF2_TABLE+11         ; the three lines of text.
-	sta COLPF2_TABLE+12
+	and #$F0                    ; Truncate luminance bits.
+	ora #$02                    ; Start at +2.
 
-	pla                         ; Get the color back for scolling the bottom. 
+	ldy #26                     ; Start at bottom of text going backwards.
+bews_LoopTextColors
+	sta COLPF0_TABLE,Y          ; Use as manipulated color for 
+	clc                         ; the six lines of giant label "text."
+	adc #2                      ; brightness:  2, 4, 6, 8, A, C
+	dey
+	cpy #20
+	bne bews_LoopTextColors
 
-	ldy #14                     ; Bottom 9 lines of screen (above prompt and credits.)
+; ======================== B O T T O M ========================  
+	pla                         ; Get the color back for scrolling the bottom. 
+
+; Color scrolling skips the black/grey/white values.  
+; The scrolling uses values 18 to 238 step +4
+	ldy #27                     ; Bottom 20 lines of screen (above prompt and credits.)
 LoopBottomWinScroll             ; Scroll colors in opposite direction
-	clc
-	adc #4                      ; Add 4 to the color.
-	cmp #242                    ; Reached limit? (238 + 4)
-	bne SkipDownScrollReset     ; No. Continue.
-	lda #18                     ; Yes. Reset back to start.
-SkipDownScrollReset
-	sta COLPF2_TABLE,y          ; Set color for line on screen
+	jsr WinColorScrollDown      ; Add 4, and reset to start if needed.
+	sta COLBK_TABLE,y          ; Set color for line on screen
 	iny                         ; Next line on screen.
-	cpy #23                     ; Reached the 23rd line?
+	cpy #47                     ; Reached the end, 20th line after text? 
 	bne LoopBottomWinScroll     ; No, continue looping.
-	beq EndWinScreen            ; Yes.  Nothing left to do. Exit now. 
+	beq EndWinScreen            ; Yes. Done. Nothing left to do. Exit now. 
 
 ProcessWinScreenInput           ; Button is pressed. Prepare for the screen transition.
 	jsr SetupTransitionToGame
 
 EndWinScreen
-	lda CurrentScreen           ; Yeah, redundant to when a key is pressed.
+	lda CurrentEvent           ; Yeah, redundant to when a key is pressed.
 
 	rts
 
+
+
+
+GreyAllColorTables
+	sta TEMP_WIPE_COLOR
+
+	lda COLPF0_TABLE+2,x
+	and #$0F
+	ora TEMP_WIPE_COLOR
+	sta COLPF0_TABLE+2,x
+
+	lda COLPF1_TABLE+2,x
+	and #$0F
+	ora TEMP_WIPE_COLOR
+	sta COLPF1_TABLE+2,x
+
+	lda COLPF2_TABLE+2,x
+	and #$0F
+	ora TEMP_WIPE_COLOR
+	sta COLPF2_TABLE+2,x
+
+	lda COLPF3_TABLE+2,x
+	and #$0F
+	ora TEMP_WIPE_COLOR
+	sta COLPF3_TABLE+2,x
+
+	lda COLBK_TABLE+2,x
+	and #$0F
+	ora TEMP_WIPE_COLOR
+	sta COLBK_TABLE+2,x
+
+	rts
 
 
 ; ==========================================================================
@@ -500,12 +545,15 @@ EndWinScreen
 ; The Activity in the transition area, based on timer.
 ; 0) On Entry, wait (1.5 sec) to observe splattered frog. (timer set in 
 ;    the setup event)
-; 1) Black background for all playfield lines, turn frog's line red.
+; 1) Greyscale for all all playfield lines, except frog's line.
 ; 2) Fade playfield text to black.
 ; 2) Launch the Dead Frog Display.
 ; --------------------------------------------------------------------------
+TEMP_WIPE_COLOR .by 0
+
+
 EventTransitionToDead
-	lda AnimateFrames        ; Did animation counter reach 0 ?
+	lda AnimateFrames        ; Did animation counter reach 0 ? (1.5 sec delay)
 	bne EndTransitionToDead  ; Nope.  Nothing to do.
 	lda #DEAD_FADE_SPEED     ; yes.  Reset it. (fade speed)
 	jsr ResetTimers
@@ -515,18 +563,20 @@ EventTransitionToDead
 	bne TestTransDead2       ; Not the Playfield blackout, try next stage
 
 ; ======== Stage 1 ========
-; Black the playfield background.   Make frog line red.
+; Grey the playfield.   Leave frog line alone. 
 	ldx #19
 
 LoopDeadToBlack
 	cpx FrogRow             ; Is X the same as Frog Row?
 	bne SkipRedFrog         ; No.  Skip setting row to red.
 	lda #COLOR_PINK         ; Really, it is like red.
+
 	bne SkipBlackFrog       ; Skip over choosing black.
 SkipRedFrog
 	lda #COLOR_BLACK        ; Choose black instead.
 SkipBlackFrog
-	sta COLPF2_TABLE+3,x    ; Set playfield row to black (or red)
+	jsr GreyAllColorTables
+
 	dex                     ; Next row.
 	bpl LoopDeadToBlack     ; 18 to 0...
 
@@ -578,7 +628,7 @@ TestTransDead3 ; Used up the fading iterations. Go to Dead screen now.
 	jsr SetupDead            ; Setup for Dead screen (wait for input loop)
 
 EndTransitionToDead
-	lda CurrentScreen
+	lda CurrentEvent
 
 	rts
 
@@ -598,34 +648,24 @@ EventDeadScreen
 	lda #DEAD_CYCLE_SPEED       ; yes.  Reset animation timer.
 	jsr ResetTimers
 
-	ldx EventCounter            ; Get starting color index.
-	inx                         ; Next index. 
-	cpx #20                     ; Did index reach the repeat?
-	bne SkipZeroDeadCycle       ; Nope.
-	ldx #0                      ; Yes, restart at 0.
-SkipZeroDeadCycle
-	stx EventCounter            ; And save for next time.
+	inc EventCounter                ; Increment base color 
+	inc EventCounter                ; Twice.  (need to use even numbers.)
+	lda EventCounter                ; Get value 
+	and #$0F                        ; Keep this truncated to grey (black) $0 to $F
+	sta EventCounter                ; Save it for next time.
 
-	ldy #1 ; Top 9 lines of screen...
-LoopTopDeadSine
-	jsr DeadFrogRedScroll       ; Increments and color stuffing.
-	cpx #20
-	bne SkipZeroDeadCycle2
-	ldx #0
-SkipZeroDeadCycle2
-	cpy #21                      ; Reached the 21th line?
-	bne LoopTopDeadSine         ; No, continue looping.
+	ldy #1 ; Top 20 lines of screen...
+LoopTopOverGrey
+	jsr GameOverGreyScroll      ; Increments and color stuffing.
+	cpy #21                     ; Reached the 9th line?
+	bne LoopTopOverGrey         ; No, continue looping.
 
-	ldy #28 ; Bottom 9 lines of screen (above prompt and credits.
-LoopBottomDeadSine
-	jsr DeadFrogRedScroll       ; Increments and color stuffing.
-	cpx #20
-	bne SkipZeroDeadCycle3
-	ldx #0
-SkipZeroDeadCycle3
+	ldy #27 ; Bottom 20 lines of screen (above prompt and credits.
+LoopBottomOverGrey
+	jsr GameOverGreyScroll      ; Increments and color stuffing.
 	cpy #47                     ; Reached the 23rd line?
-	bne LoopBottomDeadSine      ; No, continue looping.
-	beq EndDeadScreen           ; Yes.  Exit now. 
+	bne LoopBottomOverGrey      ; No, continue looping.
+	beq EndDeadScreen
 
 ; Button was pressed, so we're done with this event.
 ; Evaluate to return to the game, or if game is over.
@@ -640,9 +680,11 @@ SwitchToGameOver
 	jsr SetupTransitionToGameOver
 
 EndDeadScreen
-	lda CurrentScreen          ; Yeah, redundant to when a key is pressed.
+	lda CurrentEvent          ; Yeah, redundant to when a key is pressed.
 
 	rts
+
+
 
 
 ; ==========================================================================
@@ -669,121 +711,27 @@ EventTransitionGameOver
 	lda #DEAD_FADE_SPEED      ; yes.  Reset it.
 	jsr ResetTimers
 
-	lda EventCounter
-	cmp #1
-	bne TestTransOver2
-; ======== Stage 1 ========
 ; Fade to black the playfield background...
-; Where text is greater than 0, then fade that too.
-; When text is 0, then background color can be 0.
-	jsr TransGameOverStage1Scroll
+; Wipe bottom to top to black.
+	ldx EventCounter2              ; Get the screen row.  Expected to be non-zero.
+	cpx #26                        ; Did this reach the text lines in the middle?
+	bne DoContinueGameOverFadeLoop ; No.
+	ldx #20                        ; Yes, skip over the text lines.
+DoContinueGameOverFadeLoop
+	lda #0                         ; Zero/Black
+	sta COLPF0_TABLE,x             ; Background.
+	sta COLBK_TABLE,x              ; Pixel, if present.
 
-	dec EventCounter2
-	bne EndTransitionGameOver  ; Still not 0, so end for now.
+	dex                            ; Next time do the row above,
+	stx EventCounter2              ; and save it.
+	bne EndTransitionGameOver      ; Non zero. Next Loop will continue this Stage.
 
-	; End of Stage 1.  Now setup to do Stage 2 to fade in Game Over.
-	lda #DISPLAY_OVER          ; Tell VBI to change screens.
-	jsr ChangeScreen           ; Then copy the color tables.
-
-; Force the base background color without luminance for all the lines.
-	ldx #22
-DoCopyBaseColors
-	lda OVER_BACK_COLORS,x
-	and #$F0
-	sta COLPF2_TABLE,x
-	lda #0
-	sta COLPF1_TABLE,x
-	dex
-	bpl DoCopyBaseColors
-
-	lda #2
-	sta EventCounter           ; Identify doing Stage 2
-	lda #16
-	sta EventCounter2          ; Prep the instance count.
-
-	bne EndTransitionGameOver  ; Done here. Nothing else to do.
-
-; ======== Stage 2 ========
-; Fade in Game Over text.
-TestTransOver2
-	cmp #2
-	bne EndTransitionGameOver
-
-	ldx #22
-DoFadeUpOverText
-	lda COLPF1_TABLE,x
-	cmp OVER_COLPF0_COLORS,x
-	beq DoNextLineFadeUp
-	inc COLPF1_TABLE,x
-DoNextLineFadeUp
-	dex
-	bpl DoFadeUpOverText
-
-	dec EventCounter2
-	bne EndTransitionGameOver  ; Not 0, so skip to end
-
+	; End of fade.  Setup to the Game Over screen. 
 DoneWithTranOver               ; call counter is 0.  go to game over.
 	jsr SetupGameOver
 
 EndTransitionGameOver
-	lda CurrentScreen
-
-	rts
-
-
-; ==========================================================================
-; Transition Game Over Stage 1  Scroll
-; The code in EventTransitionGameOver is too long to make a branch to the
-; end of the routine.  So, the code for the Stage 1 fading is cut out 
-; into this routine.
-;
-; --------------------------------------------------------------------------
-TransGameOverStage1Scroll
-
-	ldx #22
-LoopOverToBlack
-	lda COLPF1_TABLE,x      ; Get the text brightness.
-	and #$0F                ; Look at only luminance.
-	beq DoFadeCOLPF2        ; Already 0.  Just do background.
-	tay                     ; Y = A
-	dey                     ; Decrement Text luminance
-	bmi BlackOutCOLPF1      ; If it went negative, then we're done.
-	dey                     ; Decrement Text luminance
-	bmi BlackOutCOLPF1      ; If it went negative, then we're done.
-;	sty COLPF1_TABLE,x      ; Save the updated value in the color table.
-	
-; Yes, this is a little inconsistent.  The pass when the text 
-; luminance reaches 0 will end up skipping the fade on the background. 
-; Meh.  I don't think anyone will notice.
-DoFadeCOLPF2
-	lda COLPF2_TABLE,x      ; Get the color.
-	and #$F0                ; Keep the color
-	sta SAVEA               ; Save for later.
-	lda COLPF2_TABLE,x      ; Get the color. again
-	and #$0F                ; Look at only the luminance
-	beq BlackOutCOLPF2     ; Zero luminance now, so zero table entries.          
-
-	; Luminance is >0, therefore decrement.
-	tay                     ; Fade out the background brighness.
-	dey                     ; Decrement background luminance
-	bmi BlackOutCOLPF2      ; If it went negative, then we're done.
-	dey                     ; Decrement background luminance
-	bmi BlackOutCOLPF2      ; If it went negative, then we're done.
-	tya                     ; the new luminance.
-	ora SAVEA               ; merge with the original color back.
-	sta COLPF2_TABLE,x      ; update the background color.
-	jmp DoOverNextLine
-
-BlackOutCOLPF2             
-	lda #COLOR_BLACK        ; Black out background (and the text below)
-	sta COLPF2_TABLE,x
-BlackOutCOLPF1 
-	lda #COLOR_BLACK        ; Black out the text.  Redundantly. 
-	sta COLPF1_TABLE,x
-
-DoOverNextLine
-	dex                     ; Next row.
-	bpl LoopOverToBlack     ; 22 to 0...
+	lda CurrentEvent
 
 	rts
 
@@ -804,24 +752,35 @@ EventGameOverScreen
 	lda #GAME_OVER_SPEED            ; yes.  Reset animation timer.
 	jsr ResetTimers
 
-	inc EventCounter                ; Increment base color 
-	inc EventCounter                ; Twice.  (need to use even numbers.)
-	lda EventCounter                ; Get value 
-	and #$0F                        ; Keep this truncated to grey (black) $0 to $F
-	sta EventCounter                ; Save it for next time.
+	ldx EventCounter            ; Get starting color index.
+	inx                         ; Next index. 
+	cpx #20                     ; Did index reach the repeat?
+	bne SkipZeroDeadCycle       ; Nope.
+	ldx #0                      ; Yes, restart at 0.
+SkipZeroDeadCycle
+	stx EventCounter            ; And save for next time.
 
-	ldy #0 ; Top 9 lines of screen...
-LoopTopOverGrey
-	jsr GameOverGreyScroll      ; Increments and color stuffing.
-	cpy #9                      ; Reached the 9th line?
-	bne LoopTopOverGrey         ; No, continue looping.
+	ldy #1 ; Top 20 lines of screen...
+LoopTopDeadSine
+	jsr DeadFrogRedScroll       ; Increments and color stuffing.
+	cpx #20
+	bne SkipZeroDeadCycle2
+	ldx #0
+SkipZeroDeadCycle2
+	cpy #47 ; #21                     ; Reached the 21th line?
+	bne LoopTopDeadSine         ; No, continue looping.
 
-	ldy #14 ; Bottom 9 lines of screen (above prompt and credits.
-LoopBottomOverGrey
-	jsr GameOverGreyScroll      ; Increments and color stuffing.
-	cpy #23                     ; Reached the 23rd line?
-	bne LoopBottomOverGrey      ; No, continue looping.
-	beq EndGameOverScreen
+	; ldy #27 ; Bottom 9 lines of screen (above prompt and credits.
+; LoopBottomDeadSine
+	; jsr DeadFrogRedScroll       ; Increments and color stuffing.
+	; cpx #20
+	; bne SkipZeroDeadCycle3
+	; ldx #0
+; SkipZeroDeadCycle3
+	; cpy #47                     ; Reached the 23rd line?
+	; bne LoopBottomDeadSine      ; No, continue looping.
+
+	beq EndGameOverScreen       ; Yes.  Exit now. 
 
 ProcessGameOverScreenInput      ; a key is pressed. Prepare for the screen transition.
 	lda #$FF
@@ -830,7 +789,7 @@ ProcessGameOverScreenInput      ; a key is pressed. Prepare for the screen trans
 	jsr SetupTransitionToTitle
 
 EndGameOverScreen
-	lda CurrentScreen           ; Yeah, redundant to when a key is pressed.
+	lda CurrentEvent           ; Yeah, redundant to when a key is pressed.
 
 	rts
 

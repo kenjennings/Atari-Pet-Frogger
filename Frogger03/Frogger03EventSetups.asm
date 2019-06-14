@@ -50,8 +50,8 @@ SetupTransitionToTitle
 	lda #DISPLAY_TITLE       ; Tell VBI to change displays.
 	jsr ChangeScreen         ; Then copy the color tables.
 
-	lda #SCREEN_TRANS_TITLE  ; Change to Title Screen transition.
-	sta CurrentScreen
+	lda #EVENT_TRANS_TITLE  ; Change to Title Screen transition.
+	sta CurrentEvent
 
 	lda #0                   ; Zero "old" position to trigger Updates to redraw first time.
 	sta FrogPMX
@@ -104,8 +104,8 @@ SetupTransitionToGame
 	lda #1                  ; First transition stage: Loop from bottom to top
 	sta EventCounter
 
-	lda #SCREEN_TRANS_GAME  ; Next step is operating the transition animation.
-	sta CurrentScreen
+	lda #EVENT_TRANS_GAME  ; Next step is operating the transition animation.
+	sta CurrentEvent
 
 	rts
 
@@ -152,8 +152,8 @@ SetupGame
 
 	jsr PlayWaterFX         ; Start water noises.  Now.
 
-	lda #SCREEN_GAME        ; Yes, change to game screen event.
-	sta CurrentScreen
+	lda #EVENT_GAME        ; Yes, change to game screen event.
+	sta CurrentEvent
 
 	rts
 
@@ -192,8 +192,8 @@ SetupTransitionToWin
 	ldy #SOUND_JOY
 	jsr SetSound 
 
-	lda #SCREEN_TRANS_WIN   ; Next step is operating the transition animation.
-	sta CurrentScreen
+	lda #EVENT_TRANS_WIN   ; Next step is operating the transition animation.
+	sta CurrentEvent
 
 	rts
 
@@ -211,11 +211,11 @@ SetupWin
 	lda #WIN_CYCLE_SPEED    ; 
 	jsr ResetTimers
 
-	lda #238                ; Color scrolling 238 to 16
+	lda #238                ; Color scrolling 238 to 16;  Light to dark. Increment.
 	sta EventCounter
 
-	lda #SCREEN_WIN         ; Change to wins screen.
-	sta CurrentScreen
+	lda #EVENT_WIN         ; Change to wins screen.
+	sta CurrentEvent
 	
 	rts
 
@@ -254,8 +254,8 @@ SetupTransitionToDead
 	; mourn the splattered frog remains laying in state.  There will be 
 	; a pause of about 1.5 seconds for player's tears. 
 
-	lda #SCREEN_TRANS_DEAD  ; Next step is operating the transition animation.
-	sta CurrentScreen
+	lda #EVENT_TRANS_DEAD  ; Next step is operating the transition animation.
+	sta CurrentEvent
 
 	rts
 
@@ -285,8 +285,8 @@ SetupDead
 	lda #0                   ; Color cycling index for dead.
 	sta EventCounter
 
-	lda #SCREEN_DEAD         ; Change to dead screen event.
-	sta CurrentScreen
+	lda #EVENT_DEAD         ; Change to dead screen event.
+	sta CurrentEvent
 
 	rts
 
@@ -316,14 +316,18 @@ SetupTransitionToGameOver
 	lda #1                 ; set Stage 1 for fade out.
 	sta EventCounter
 
-	lda #16                ; Set number of times to loop the fade.
+	lda #47                ; Set line number for the fade.
 	sta EventCounter2
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
-	jsr EraseFrog          ; Specifically zero the object.
 
-	lda #SCREEN_TRANS_OVER ; Change to transition to Game Over.
-	sta CurrentScreen
+	lda #$FF               ; Hide the Player/Missile
+	sta FrogUpdate
+	jsr libScreenWaitFrame ; Wait for update to finish.
+;	jsr EraseFrog          ; Specifically zero the object.
+
+	lda #EVENT_TRANS_OVER ; Change to transition to Game Over.
+	sta CurrentEvent
 
 	rts
 
@@ -341,7 +345,10 @@ SetupGameOver
 	lda #GAME_OVER_SPEED   ; Animation moving speed.
 	jsr ResetTimers
 
-	lda #0                ; base color for down color scroll
+	lda #DISPLAY_OVER          ; Tell VBI to change screens.
+	jsr ChangeScreen           ; Then copy the color tables.
+
+	lda #0                     ; base color for sine scroll. 
 	sta EventCounter
 
 	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
@@ -363,7 +370,7 @@ SetupGameOver
 	lda #1
 	sta FrogUpdate
 
-	lda #SCREEN_OVER       ; Change to Game Over screen.
-	sta CurrentScreen
+	lda #EVENT_OVER       ; Change to Game Over screen.
+	sta CurrentEvent
 
 	rts

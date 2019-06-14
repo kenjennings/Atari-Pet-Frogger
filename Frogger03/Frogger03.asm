@@ -365,9 +365,9 @@ WobOffsetY        .byte 0         ; 75 for Frog. XX for Tomb.
 InputScanFrames   .byte $00 ; = INPUTSCAN_FRAMES
 InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits + trigger
 
-; Identify the current screen.  This is what drives which timer/event loop
-; features are in effect.  Value is enumerated from SCREEN_LIST table.
-CurrentScreen   .byte $00 ; = identity of current screen events.
+; Identify the current event target.  This is what drives which timer/event loop
+; features are in effect.  Value is enumerated from EVENT_LIST table.
+CurrentEvent   .byte $00 ; = identity of current event target.
 
 ; Event values.  Use for counting things for each pass of a screen/event.
 EventCounter    .byte 0

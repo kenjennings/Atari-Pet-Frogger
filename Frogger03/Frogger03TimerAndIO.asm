@@ -94,36 +94,42 @@ EndResetTimers
 
 
 ; ==========================================================================
+; CHECK INPUT
+; ==========================================================================
 ; Check for input from the controller....
 ;
 ; Eliminate Down direction.
 ; Eliminate conflicting directions.
 ; Add trigger to the input stick value.
 ;
-; STICK0 Joystick Bits:  00001111
-; "NA NA NA NA Right Left Down Up", 0 bit means joystick is pushed.
+; STICK0 Joystick bits that matter:  
+; ----1111  OR  "NA NA NA NA Right Left Down Up".
+; A zero value bit means joystick is pushed in that direction.
+; 
+; Wow, but this became a sloppy mess of bit flogging.
+; But it does replace several functions of key reading shenanigans.
+; Description of the over-engineered bit twiddling below:
+; 
 ; Cook the bits to turn on the directions we care about and zero the other
-; bits, therefore, if stick value is 0 then it means no input.
+; bits, therefore, if resulting stick value is 0 then it means no input.
 ; - Down input is ignored (masked out).
 ; - Since up movement is the most likely to result in death the up movement
 ;    must be exclusively up.  If a horizontal movement is also on at the
 ;    same time then the up movement will be masked out.
 ;
-; Arcade controllers with individual buttons would allow both left and
-; right to be pressed at the same time.  To avoid unnecessary fiddling
-; with the frog in this situation eliminate both motions if both are
-; engaged.
+; Arcade controllers with individual buttons would allow accidentally 
+; (or intentionally) pushing both left and right directions at the same 
+; time.  To avoid unnecessary fiddling with the frog in this situation 
+; eliminate both motions if both are engaged.
 ;
 ; STRIG0 Button
 ; 0 is button pressed., !0 is not pressed.
-; If STRIG0 input then set bit $10 for trigger.
+; If STRIG0 input then set bit $10 (OR ---1----  for trigger.
 ;
-; Return  A  with InputStick value of cooked Input bits where the direction
-; and trigger set are 1 bits.  Bit values:   00011101
-; "NA NA NA Trigger Right Left NA Up"
-;
-; Wow, but this became a sloppy mess of bit flogging.
-; But it does replace several functions of key reading shenanigans.
+; Return  A  with InputStick value of cooked Input bits where the 
+; direction and trigger set are 1 bits.  
+; Resulting Bit values:   
+; 00011101  OR  "NA NA NA Trigger Right Left NA Up"
 ; --------------------------------------------------------------------------
 CheckInput
 	lda InputScanFrames       ; Is input timer delay  0?

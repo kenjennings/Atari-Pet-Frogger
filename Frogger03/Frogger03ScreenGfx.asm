@@ -458,7 +458,7 @@ ChangeScreen
 	beq bCSCheckScreenBorders         ; If it is 0 it is not for the update.  Skip this.
 	sta GFX_LMS                       ; Save in the Win/Dead/Over display list.
 
-	; ALSO, the Game screen needs the mask borders pon the left and right sides
+	; ALSO, the Game screen needs the mask borders on the left and right sides
 	; of the screen.   Determine if we need to do it or not do it and then
 	; draw or erase the borders accordingly.
 
@@ -704,7 +704,7 @@ bLoopCopyColorsToTitle
 	sta COLPF0_TABLE,x ; Only for Title, the COLPF0 graphics colors are in the text colors list.
 
 	dex
-	bpl bLoopCopyColorsToTitle
+	bne bLoopCopyColorsToTitle
 
 	rts  ; ChangeScreen is over.
 
@@ -727,7 +727,7 @@ bLoopCopyColorsToWin
 	sta COLPF0_TABLE,x
 
 	dex
-	bpl bLoopCopyColorsToWin
+	bne bLoopCopyColorsToWin
 
 	rts ; ChangeScreen is over.
 
@@ -744,7 +744,7 @@ bLoopCopyColorsToDead
 	sta COLPF0_TABLE,x
 
 	dex
-	bpl bLoopCopyColorsToDead
+	bne bLoopCopyColorsToDead
 
 	rts ; ChangeScreen is over.
 
@@ -761,7 +761,7 @@ bLoopCopyColorsTOver
 	sta COLPF0_TABLE,x
 
 	dex
-	bpl bLoopCopyColorsTOver
+	bne bLoopCopyColorsTOver
 
 	rts ; ChangeScreen is over.
 
@@ -805,25 +805,51 @@ DEAD_COLOR_SINE_TABLE ; 20 entries.
 
 
 ; ==========================================================================
+; WIN COLOR SCROLL UP                                                   A
+; ==========================================================================
 ; Support function.
 ; Redundant code section used for two separate places in the Win event.
 ; Subtract 4 from the current color.
-; Reset to 238 if the limit 14 is reached.
+; Reset to 238 if the limit 14 (== 18-4) is reached.
 ;
 ; A  is the current color.   
 ; --------------------------------------------------------------------------
 
-WinColorScroll
+WinColorScrollUp
 	sec
 	sbc #4                      ; Subtract 4
  	cmp #14                     ; Did it pass the limit (minimum 18, minus 4 == 14)
-	bne ExitWinColorScroll      ; No. We're done here.
+	bne ExitWinColorScrollUp    ; No. We're done here.
 	lda #238                    ; Yes.  Reset back to start.
 
-ExitWinColorScroll
+ExitWinColorScrollUp
 	rts
 
 
+; ==========================================================================
+; WIN COLOR SCROLL DOWN                                                 A
+; ==========================================================================
+; Support function.
+; Redundant code section used for two separate places in the Win event.
+; Add 4 to the current color.
+; Reset to 18 if the limit 242 (== 238 + 4) is reached.
+;
+; A  is the current color.   
+; --------------------------------------------------------------------------
+
+WinColorScrollDown
+	clc
+	adc #4                      ; Add 4
+ 	cmp #242                    ; Did it pass the limit (max 238, plus 4 == 242)
+	bne ExitWinColorScrollDown  ; No. We're done here.
+	lda #18                     ; Yes.  Reset back to start.
+
+ExitWinColorScrollDown
+	rts
+
+
+; ==========================================================================
+; SLICE COLOR AND LUMA                                              A  Y
 ; ==========================================================================
 ; Supporting the support function. Decrement Title text colors.
 ;

@@ -939,19 +939,15 @@ DEAD_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
 WIN_BACK_COLORS ; 47 entries.  Gfx background colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	; Do not use $0x or $Fx for base color.
-	.by $2c $2a $28 $26
-	.by $24 $22 $3c $3a
-	.by $38 $36 $34 $32
-	.by $4c $4a $48 $46
-	.by $44 $42 $5c $5a
-	
-	.by $02 $06 $0A $0A $06 $02 ; Static white background
+	.rept 20
+		.by $00                                     ; Top Scroll.
+	.endr
 
-	.by $5a $5c $42 $44
-	.by $46 $48 $4a $4c
-	.by $32 $34 $36 $38
-	.by $3a $3c $22 $24
-	.by $26 $28 $2a $2c
+	.by $02 $04 $06 $08 $0A $0C ; Static white background
+
+	.rept 20
+		.by $00                                     ; Top Scroll.
+	.endr
 
 
 WIN_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
@@ -1120,54 +1116,59 @@ GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
 ; All three graphics screens use the same list.
 ; Basically, the background color is updated per every line
 SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte <COLPF0_COLBK_DLI     ; DLI (0)  1
-	.byte <COLPF0_COLBK_DLI     ; DLI (1)  2
-	.byte <COLPF0_COLBK_DLI     ; DLI (2)  3
-	.byte <COLPF0_COLBK_DLI     ; DLI (3)  4
-	.byte <COLPF0_COLBK_DLI     ; DLI (4)  5
-	.byte <COLPF0_COLBK_DLI     ; DLI (5)  6
-	.byte <COLPF0_COLBK_DLI     ; DLI (6)  7
-	.byte <COLPF0_COLBK_DLI     ; DLI (7)  8
-	.byte <COLPF0_COLBK_DLI     ; DLI (8)  9
-	.byte <COLPF0_COLBK_DLI     ; DLI (9)  10
-	.byte <COLPF0_COLBK_DLI     ; DLI (10) 11
-	.byte <COLPF0_COLBK_DLI     ; DLI (11) 12
-	.byte <COLPF0_COLBK_DLI     ; DLI (12) 13
-	.byte <COLPF0_COLBK_DLI     ; DLI (13) 14
-	.byte <COLPF0_COLBK_DLI     ; DLI (14) 15
-	.byte <COLPF0_COLBK_DLI     ; DLI (15) 16
-	.byte <COLPF0_COLBK_DLI     ; DLI (16) 17
-	.byte <COLPF0_COLBK_DLI     ; DLI (17) 18
-	.byte <COLPF0_COLBK_DLI     ; DLI (18) 19
-	.byte <COLPF0_COLBK_DLI     ; DLI (19) 20
-	.byte <COLPF0_COLBK_DLI     ; DLI (20) 1 Splash Graphics
-	.byte <COLPF0_COLBK_DLI     ; DLI (21) 2 Splash Graphics
-	.byte <COLPF0_COLBK_DLI     ; DLI (22) 3 Splash Graphics
-	.byte <COLPF0_COLBK_DLI     ; DLI (23) 4 Splash Graphics
-	.byte <COLPF0_COLBK_DLI     ; DLI (24) 5 Splash Graphics
-	.byte <COLPF0_COLBK_DLI     ; DLI (25) 6 Splash Graphics
-	.byte <COLPF0_COLBK_DLI     ; DLI (26) 20 
-	.byte <COLPF0_COLBK_DLI     ; DLI (27) 19 
-	.byte <COLPF0_COLBK_DLI     ; DLI (28) 18 
-	.byte <COLPF0_COLBK_DLI     ; DLI (29) 17 
-	.byte <COLPF0_COLBK_DLI     ; DLI (30) 16 
-	.byte <COLPF0_COLBK_DLI     ; DLI (31) 15 
-	.byte <COLPF0_COLBK_DLI     ; DLI (32) 14
-	.byte <COLPF0_COLBK_DLI     ; DLI (33) 13
-	.byte <COLPF0_COLBK_DLI     ; DLI (34) 12
-	.byte <COLPF0_COLBK_DLI     ; DLI (35) 11
-	.byte <COLPF0_COLBK_DLI     ; DLI (36) 10
-	.byte <COLPF0_COLBK_DLI     ; DLI (37) 9
-	.byte <COLPF0_COLBK_DLI     ; DLI (38) 8
-	.byte <COLPF0_COLBK_DLI     ; DLI (39) 7
-	.byte <COLPF0_COLBK_DLI     ; DLI (40) 6
-	.byte <COLPF0_COLBK_DLI     ; DLI (41) 5
-	.byte <COLPF0_COLBK_DLI     ; DLI (42) 4
-	.byte <COLPF0_COLBK_DLI     ; DLI (43) 3
-	.byte <COLPF0_COLBK_DLI     ; DLI (44) 2
-	.byte <COLPF0_COLBK_DLI     ; DLI (45) 1
-	.byte <DLI_SPC1             ; DLI 46 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
-;	.byte <DLI_SPC2_SetCredits  ; DLI 47 - Set black background and white text for scrolling credits
+	.byte <COLPF0_COLBK_DLI     ; DLI (0)  ; VBI uses for initializing DLI.
+
+	.byte <COLPF0_COLBK_DLI     ; DLI (1)  1
+	.byte <COLPF0_COLBK_DLI     ; DLI (2)  2
+	.byte <COLPF0_COLBK_DLI     ; DLI (3)  3
+	.byte <COLPF0_COLBK_DLI     ; DLI (4)  4
+	.byte <COLPF0_COLBK_DLI     ; DLI (5)  5
+	.byte <COLPF0_COLBK_DLI     ; DLI (6)  6
+	.byte <COLPF0_COLBK_DLI     ; DLI (7)  7
+	.byte <COLPF0_COLBK_DLI     ; DLI (8)  8
+	.byte <COLPF0_COLBK_DLI     ; DLI (9)  9
+	.byte <COLPF0_COLBK_DLI     ; DLI (10) 10
+	.byte <COLPF0_COLBK_DLI     ; DLI (11) 11
+	.byte <COLPF0_COLBK_DLI     ; DLI (12) 12
+	.byte <COLPF0_COLBK_DLI     ; DLI (13) 13
+	.byte <COLPF0_COLBK_DLI     ; DLI (14) 14
+	.byte <COLPF0_COLBK_DLI     ; DLI (15) 15
+	.byte <COLPF0_COLBK_DLI     ; DLI (16) 16
+	.byte <COLPF0_COLBK_DLI     ; DLI (17) 17
+	.byte <COLPF0_COLBK_DLI     ; DLI (18) 18
+	.byte <COLPF0_COLBK_DLI     ; DLI (19) 19
+	.byte <COLPF0_COLBK_DLI     ; DLI (20) 20
+
+	.byte <COLPF0_COLBK_DLI     ; DLI (21) 1 Splash Graphics
+	.byte <COLPF0_COLBK_DLI     ; DLI (22) 2 Splash Graphics
+	.byte <COLPF0_COLBK_DLI     ; DLI (23) 3 Splash Graphics
+	.byte <COLPF0_COLBK_DLI     ; DLI (24) 4 Splash Graphics
+	.byte <COLPF0_COLBK_DLI     ; DLI (25) 5 Splash Graphics
+	.byte <COLPF0_COLBK_DLI     ; DLI (26) 6 Splash Graphics
+
+	.byte <COLPF0_COLBK_DLI     ; DLI (27) 20 
+	.byte <COLPF0_COLBK_DLI     ; DLI (28) 19 
+	.byte <COLPF0_COLBK_DLI     ; DLI (29) 18 
+	.byte <COLPF0_COLBK_DLI     ; DLI (30) 17 
+	.byte <COLPF0_COLBK_DLI     ; DLI (31) 16 
+	.byte <COLPF0_COLBK_DLI     ; DLI (32) 15 
+	.byte <COLPF0_COLBK_DLI     ; DLI (33) 14
+	.byte <COLPF0_COLBK_DLI     ; DLI (34) 13
+	.byte <COLPF0_COLBK_DLI     ; DLI (35) 12
+	.byte <COLPF0_COLBK_DLI     ; DLI (36) 11
+	.byte <COLPF0_COLBK_DLI     ; DLI (37) 10
+	.byte <COLPF0_COLBK_DLI     ; DLI (38) 9
+	.byte <COLPF0_COLBK_DLI     ; DLI (39) 8
+	.byte <COLPF0_COLBK_DLI     ; DLI (40) 7
+	.byte <COLPF0_COLBK_DLI     ; DLI (41) 6
+	.byte <COLPF0_COLBK_DLI     ; DLI (42) 5
+	.byte <COLPF0_COLBK_DLI     ; DLI (43) 4
+	.byte <COLPF0_COLBK_DLI     ; DLI (44) 3
+	.byte <COLPF0_COLBK_DLI     ; DLI (45) 2
+;	.byte <COLPF0_COLBK_DLI     ; DLI (46) 1
+
+	.byte <DLI_SPC1             ; DLI 47 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
+;	.byte <DLI_SPC2_SetCredits  ; DLI 48 - Set black background and white text for scrolling credits
 
 
 ; Color tables must be big enough to contain data up to the maximum DLI index that
