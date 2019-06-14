@@ -367,12 +367,19 @@ InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits + trigge
 
 ; Identify the current event target.  This is what drives which timer/event loop
 ; features are in effect.  Value is enumerated from EVENT_LIST table.
-CurrentEvent   .byte $00 ; = identity of current event target.
+CurrentEvent      .byte $00 ; = identity of current event target.
 
 ; Event values.  Use for counting things for each pass of a screen/event.
-EventCounter    .byte 0
-EventCounter2   .byte 0 ; Used for other counting, such as long event counting.
+EventCounter      .byte 0
+EventCounter2     .byte 0 ; Used for other counting, such as long event counting.
 
+TempWipeColor     .byte 0 ; Used in a color update loop for splash screen.
+SavePF            .byte 0 ; Temp values for SliceColorAndLuma
+SavePFC           .byte 0 ; Temp values for SliceColorAndLuma
+TempSaveColor     .byte 0 ; Nudder temp value
+TempTargetColor   .byte 0 ; an a nudder.
+EverythingMatches .byte 0 ; Logical condition collection indicating all colors examined do match.
+						  ; Bits $10, $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2, COLPF3
 
 ; ======== D L I ======== DLI TABLES
 ; Pointer to current DLI address chain table.  (ThisDLIAddr),Y = DLI routine low byte.
@@ -390,12 +397,14 @@ ColorPF2     .byte $00
 ColorPF3     .byte $00  
 NextHSCROL   .byte $00
 
+
 ; ======== V B I ======== TIMER FOR MAIN CODE
 ; Frame counter set by main code events for delay/speed of main activity.
 ; The VBI decrements this value until 0.
 ; Main code acts on value 0.
 AnimateFrames    .byte $00 
 AnimateFrames2   .byte $00
+
 
 ; ======== V B I ======== MANAGE DISPLAY LISTS
 ; DISPLAY_TITLE = 0
@@ -417,13 +426,6 @@ CreditHSCROL    .byte 4  ; Fine scrolling the credits
 
 
 ; ======== V B I ======== SCROLLING BOAT MANAGEMENT
-; Boat movements are managed by the VBI.
-; The frame count value comes from BOAT_FRAMES based on the number of 
-; frogs that crossed the river (FrogsCrossed) (0 to 10 difficulty level).
-CurrentRowLoop  .byte 0 ; Count from 0 to 18 in VBI
-;BoatFrames      .byte 0 ; Count frames until next boat movement. (Note that 0 correctly means move every frame).
-;BoatsMoveLeft   .byte 0 ; How many color clocks did boats move on this frame (to move the frog accordingly)
-;BoatsMoveRight  .byte 0 ; How many color clocks... etc, blah blah 
 ; FYI -- SCROLLING RANGE
 ; Boats Right ;   64
 ; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
@@ -432,8 +434,15 @@ CurrentRowLoop  .byte 0 ; Count from 0 to 18 in VBI
 ; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
 ; End   Scroll position = LMS + 12,            HSCROL 0
 ; Keep Current Address for LMS, and index to HSCROL_TABLE
-BoatFramesPointer .word BOAT_FRAMES
-CurrentBoatFrames .ds 19  ; How many frames does each row wait?
+
+; Boat movements are managed by the VBI.
+; The frame count value comes from BOAT_FRAMES based on the number of 
+; frogs that crossed the river (FrogsCrossed) (0 to 10 difficulty level).
+CurrentRowLoop    .byte 0 ; Count from 0 to 18 in VBI
+CurrentBoatFrames .ds   19  ; How many frames does each row wait?
+; Count frames until next boat movement. (Note that 0 correctly means move every frame).
+BoatFramesPointer .word BOAT_FRAMES 
+; How many color clocks did boats move on this frame (to move the frog accordingly)
 BoatMovePointer   .word BOAT_SHIFT
 
 
@@ -513,16 +522,25 @@ SOUND_DURATION3 .byte $00
 
 
 ; ======== D I S P L A Y   L I S T ======== EVILNESS
-; Each display list (except the game screen) ends with a JMP to here, BOTTOM_OF_DISPLAY.
-; These instructions provide the Press A Button prompt and the scrolling credit lines.
-; The GAME screen jumps to the DL_SCROLLING_CREDIT, because it does not need the prompt.
-; This "laziness" provides a constant, common DL section.  Only one set of code is needed
-; to manage the credit fine scrolling.  If each DL had its own instructions for the 
-; credit line, then there would need to be code using a lookup table to grab addresses  
-; for the credit line's LMS based on the current display list in use.
-BOTTOM_OF_DISPLAY                                 ; Prior to this DLI SPC1/25 set colors and HSCROL
+; Each display list (except the game screen) ends with a JMP to 
+; here, BOTTOM_OF_DISPLAY.  These Display List instructions 
+; provide the Press A Button prompt and the scrolling credit lines.
+; The GAME screen jumps to the DL_SCROLLING_CREDIT location, 
+; because it does not need the prompt.
+;
+; This laziness provides a constant, common DL section.  Only one 
+; set of code is needed to manage the credit fine scrolling on 
+; every Display.  If each Display List had its own instructions for 
+; the credit line, then there would need to be more complicated 
+; code using a lookup table to grab addresses for the credit line's 
+; LMS based on the current display list in use.
+; 
+; Having one, common Display List code pointing to the scrolling text 
+; also eliminates any possibility of the text glitching when switching 
+; between displays.   
+BOTTOM_OF_DISPLAY                                 ; Prior to this DLI SPC1 set colors and HSCROL
 	mDL_LMS DL_TEXT_2,ANYBUTTON_MEM               ; (+0 to +7)   Prompt to start game.
-	.by DL_BLANK_1|DL_DLI                         ; (+8)         DLI SPC2/26, set COLBK/COLPF2/COLPF1 for scrolling text.
+	.by DL_BLANK_1|DL_DLI                         ; (+8)         DLI SPC2, set COLBK/COLPF2/COLPF1 for scrolling text.
 DL_SCROLLING_CREDIT
 SCROLL_CREDIT_LMS = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_HSCROLL,SCROLLING_CREDIT ; (+9 to +16)  The perpetrators identified

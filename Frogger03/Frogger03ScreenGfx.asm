@@ -16,7 +16,7 @@
 
 ; ==========================================================================
 ; SCREEN GRAPHICS
-;
+; ==========================================================================
 ; This should contain everything that pertains to changes in visible screen 
 ; components.  
 ; Managing the score/status lines.
@@ -525,12 +525,10 @@ LoopZeroColors
 ;
 ; Exit with 0 flag.
 ;
+; Uses Page 0 value: EverythingMatches
+;
 ; A  is the mask to apply to the tracking bits.
 ; --------------------------------------------------------------------------
-
-EverythingMatches 
-	.byte 0 ; Bits indicate all colors match, then this row is done.
-		    ; Bits $10, $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2, COLPF3
 
 FlipOffEverything
 	and EverythingMatches
@@ -549,12 +547,11 @@ FlipOffEverything
 ; A = target color
 ; Y = current color.
 ;
+; Uses Page 0 locations: TempSaveColor, TempTargetColor
+;
 ; Output:
 ; A = New current color.
 ; --------------------------------------------------------------------------
-
-TempSaveColor   .byte 0
-TempTargetColor .byte 0
 
 ; Such sloppiness....  gah!
 IncrementGameColor      ; Y = current color.   A = target color
@@ -582,6 +579,8 @@ SkipIncCurrent
 ;
 ; I'm sure there's a smarter way to drive this off a list of data
 ; and make this smaller code.
+;
+; Uses Page 0 value: EverythingMatches
 ;
 ; X  is the index into the tables. 
 ; --------------------------------------------------------------------------
@@ -861,15 +860,12 @@ ExitWinColorScrollDown
 ; A = color value to adjust
 ; --------------------------------------------------------------------------
 
-SAVE_PF  .byte 0
-SAVE_PFC .byte 0
-
 SliceColorAndLuma
-	sta SAVE_PF               ; Save the incoming value
+	sta SavePF                ; Save the incoming value
 	and #$F0                  ; Mask out the luminance.
-	sta SAVE_PFC              ; Save just the color part.
+	sta SavePFC               ; Save just the color part.
 
-	lda SAVE_PF               ; Get the original value again.
+	lda SavePF                ; Get the original value again.
 	and #$0F                  ; Now check keep the luminance.
 	beq ExitSliceColorAndLuma ; If it is 0, we can exit with A as color/lum 0.
 
@@ -880,7 +876,7 @@ SliceColorAndLuma
 
 Reassemble_PF
 	tya                       ; A = Y = Luminance
-	ora SAVE_PFC              ; join the color.
+	ora SavePFC               ; join the color.
 
 ExitSliceColorAndLuma
 	rts
@@ -922,6 +918,53 @@ ExitFadeColPfToBlack          ; Insure we're leaving with 0 for both colors 0.  
 	rts
 
 
+; ==========================================================================
+; Support function. Turn color table entries to grey. 
+; 
+; Replace all the color components of the current row with the 
+; chosen color. 
+;
+; Grey doesn't necessarily mean grey. It would be whatever the chosen 
+; base color is that is passed in the A register. 
+;
+; Uses TempWipeColor in page 0.
+; A = color to use.
+; --------------------------------------------------------------------------
+
+GreyEachColorTable
+	sta TempWipeColor
+
+	lda COLPF0_TABLE+3,x
+	and #$0F
+	ora TempWipeColor
+	sta COLPF0_TABLE+3,x
+
+	lda COLPF1_TABLE+3,x
+	and #$0F
+	ora TempWipeColor
+	sta COLPF1_TABLE+3,x
+
+	lda COLPF2_TABLE+3,x
+	and #$0F
+	ora TempWipeColor
+	sta COLPF2_TABLE+3,x
+
+	lda COLPF3_TABLE+3,x
+	and #$0F
+	ora TempWipeColor
+	sta COLPF3_TABLE+3,x
+
+	lda COLBK_TABLE+3,x
+	and #$0F
+	ora TempWipeColor
+	sta COLBK_TABLE+3,x
+
+	rts
+
+
+;==============================================================================
+; C H A R A C T E R   A N I M A T I O N
+;==============================================================================
 
 ;==============================================================================
 ;										DoBoatCharacterAnimation  A  X
@@ -1225,7 +1268,7 @@ LeftBoatFineScrolling
 	bne DoFineScrollLeft    ; No.  Continue with boat scroll.
 	sec
 	lda FrogNewPMX
-	sbc (BoatMovePointer),y ; Increment the position same as HSCROL distance.
+	sbc (BoatMovePointer),y ; Decrement the position same as HSCROL distance.
 	sta FrogNewPMX
 
 DoFineScrollLeft
@@ -1764,7 +1807,11 @@ ExitEraseShape
 ; -----------------------------------------------------------------------------
 
 EraseGameBorder
-	ldx #[177]
+	lda #$00
+	sta HPOSP3
+	sta HPOSM3
+
+	ldx #177
 
 begb_LoopFillBorder
 	lda #$00
@@ -1773,7 +1820,7 @@ begb_LoopFillBorder
 	lda MISSILEADR+43,x
 	and #%00111111
 	sta MISSILEADR+43,x
-	
+
 	dex
 	bne begb_LoopFillBorder
 
@@ -1789,10 +1836,15 @@ begb_LoopFillBorder
 EraseTomb
 	lda #0
 	ldx FrogPMY            ; Old  Y
-	ldy #22
+;	ldy #22
+	ldy #23
 	
 bLoopET_Erase
+	lda #%10000001
+
 	sta PLAYERADR0,x   ; main  1
+
+	lda #0
 	sta PLAYERADR1,x   ; main  2
 	sta PLAYERADR2,x ; 
 	sta PLAYERADR3,x ; 
@@ -1804,6 +1856,39 @@ bLoopET_Erase
 	rts
 
 
+	
+	
+	; DrawTomb
+	; ldx FrogNewPMY            ; New frog Y
+	; ldy #22
+
+; bLoopDT_DrawTomb
+	; lda PLAYER0_GRAVE_DATA,y
+	; sta PLAYERADR0+22,x
+
+	; lda PLAYER1_GRAVE_DATA,y
+	; sta PLAYERADR1+22,x
+
+	; lda PLAYER2_GRAVE_DATA,y
+	; sta PLAYERADR2+22,x
+
+	; lda PLAYER3_GRAVE_DATA,y
+	; sta PLAYERADR3+22,x
+
+	; lda PLAYER5_GRAVE_DATA,y
+	; sta MISSILEADR+22,x
+
+	; dex
+	; dey
+	; bpl bLoopDT_DrawTomb
+
+	; rts
+
+	
+	
+	
+	
+	
 ;==============================================================================
 ;											EraseSplat  A  X  Y
 ;==============================================================================
@@ -1910,31 +1995,33 @@ DrawGameBorder
 
 	lda #$00
 	sta PCOLOR3
+	sta COLOR3
+	sta HPOSP3
+	sta HPOSM3
+
+	lda #PM_SIZE_QUAD
+	sta SIZEP3
+
+	lda #%11000000
+	sta SIZEM
 
 	ldx #177
-
 bdgb_LoopFillBorder
 	lda #$C0
 	sta PLAYERADR3+43,x
-	
+
 	lda MISSILEADR+43,x
 	ora #$C0
 	sta MISSILEADR+43,x
-	
+
 	dex
 	bne bdgb_LoopFillBorder
 
 	lda #[PLAYFIELD_RIGHT_EDGE_NORMAL+1]
 	sta HPOSP3
-	
+
 	lda #[PLAYFIELD_LEFT_EDGE_NORMAL-8]
 	sta HPOSM3
-	
-	lda #PM_SIZE_QUAD
-	sta SIZEP3
-	
-	lda #%11000000
-	sta SIZEM
 
 	rts
 
@@ -2319,9 +2406,9 @@ ExitUpdateShape
 
 
 ;==============================================================================
-;											ProcessNewShapePosition
+; PROCESS NEW SHAPE POSITION                                         
 ;==============================================================================
-; Limit new positions to the game playfield area.
+; Forcibly clip the new frog positions to the game's playfield area limits.
 ; Call the main routine to redraw the object.
 ; -----------------------------------------------------------------------------
 

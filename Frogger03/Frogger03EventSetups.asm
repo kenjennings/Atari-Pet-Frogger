@@ -239,7 +239,7 @@ SetupTransitionToDead
 	jsr PrintFrogsAndLives
 
 ;	inc FrogSafety          ; Schrodinger knows the frog is dead.
-	lda #FROG_WAKE_SPEED    ; Initial delay 3 sec for frog corpse viewing/mourning
+	lda #FROG_WAKE_SPEED    ; Initial delay 2 sec for frog corpse viewing/mourning
 	jsr ResetTimers
 
 	lda #1                  ; Set Stage 1 in the fading control.
@@ -279,6 +279,7 @@ SetupDead
 ;	jsr libPmgClearBitmaps   ; Scrape splattered frog off screen.
 	lda #$ff 
 	sta FrogUpdate
+	jsr libScreenWaitFrame
 
 ;	jsr RemoveFrogOnScreen   ; Remove the frog (corpse) from the screen
 

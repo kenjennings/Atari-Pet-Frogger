@@ -509,53 +509,23 @@ EndWinScreen
 
 
 
-GreyAllColorTables
-	sta TEMP_WIPE_COLOR
 
-	lda COLPF0_TABLE+2,x
-	and #$0F
-	ora TEMP_WIPE_COLOR
-	sta COLPF0_TABLE+2,x
-
-	lda COLPF1_TABLE+2,x
-	and #$0F
-	ora TEMP_WIPE_COLOR
-	sta COLPF1_TABLE+2,x
-
-	lda COLPF2_TABLE+2,x
-	and #$0F
-	ora TEMP_WIPE_COLOR
-	sta COLPF2_TABLE+2,x
-
-	lda COLPF3_TABLE+2,x
-	and #$0F
-	ora TEMP_WIPE_COLOR
-	sta COLPF3_TABLE+2,x
-
-	lda COLBK_TABLE+2,x
-	and #$0F
-	ora TEMP_WIPE_COLOR
-	sta COLBK_TABLE+2,x
-
-	rts
 
 
 ; ==========================================================================
 ; Event Process TRANSITION TO DEAD
 ; The Activity in the transition area, based on timer.
-; 0) On Entry, wait (1.5 sec) to observe splattered frog. (timer set in 
+; 0) On Entry, wait (2 sec) to observe splattered frog. (timer set in 
 ;    the setup event)
-; 1) Greyscale for all all playfield lines, except frog's line.
-; 2) Fade playfield text to black.
-; 2) Launch the Dead Frog Display.
+; 1) Greyscale for all playfield lines, except frog's line.
+; 2) Allow another 2 seconds of waiting.
+; 3) Launch the Dead Frog Display.
 ; --------------------------------------------------------------------------
-TEMP_WIPE_COLOR .by 0
-
 
 EventTransitionToDead
 	lda AnimateFrames        ; Did animation counter reach 0 ? (1.5 sec delay)
 	bne EndTransitionToDead  ; Nope.  Nothing to do.
-	lda #DEAD_FADE_SPEED     ; yes.  Reset it. (fade speed)
+	lda #FROG_WAKE_SPEED     ; yes.  Reset it. (2 more seconds) to wait for stage 2
 	jsr ResetTimers
 
 	lda EventCounter         ; What stage are we in?
@@ -564,67 +534,39 @@ EventTransitionToDead
 
 ; ======== Stage 1 ========
 ; Grey the playfield.   Leave frog line alone. 
-	ldx #19
+	ldx #18
 
 LoopDeadToBlack
 	cpx FrogRow             ; Is X the same as Frog Row?
-	bne SkipRedFrog         ; No.  Skip setting row to red.
-	lda #COLOR_PINK         ; Really, it is like red.
-
-	bne SkipBlackFrog       ; Skip over choosing black.
+	beq SkipGreyFrog        ; Yes, do not grey this line.
+;	bne SkipRedFrog         ; No.  Skip setting row to red.
+;	lda #COLOR_PINK         ; Really, it is like red.
+;	bne SkipBlackFrog       ; Skip over choosing black.
 SkipRedFrog
 	lda #COLOR_BLACK        ; Choose black instead.
 SkipBlackFrog
-	jsr GreyAllColorTables
+; A subroutine, because it is too much code for the EventTransitionToDead
+; branches to reach around. 
+	jsr GreyEachColorTable  
 
+SkipGreyFrog
 	dex                     ; Next row.
 	bpl LoopDeadToBlack     ; 18 to 0...
 
 	; Do the empty green grass rows, too.  Logically, the frog cannot die 
 	; on row 18 or row 0, so we must know that A still contains #BLACK.  
-	sta COLPF2_TABLE+2
-	sta COLPF2_TABLE+21
+;	sta COLPF2_TABLE+2
+;	sta COLPF2_TABLE+21
 
 	lda #2
-	sta EventCounter         ; Identify Stage 2
-	lda #$18
-	sta EventCounter2        ; Prep the instance count.
-	; Fade speed was set earlier. 
+	sta EventCounter         ; Identify Stage 2 
 	bne EndTransitionToDead  ; Nothing else to do.
+	; When the first mourning timer ran out, it was reset to FROG_WAKE_SPEED again, 
+	; so it will be another 2 seconds before Stage 2 can start. 
 
 ; ======== Stage 2 ========
-; Fade the text out on all playfield lines EXCEPT the frog line.
+; Ready to go to the Dead screen.
 TestTransDead2
-	ldx #18
-
-LoopDeadFadeText
-	cpx FrogRow             ; Is X the same as Frog Row?
-	beq SkipDeadFade        ; Yes.  Skip fading this row.
-	ldy COLPF1_TABLE+3,x    ; Get text color. 
-	beq SkipDeadFade        ; If it is 0 now, then do not decrement.
-	dey
-;	sty COLPF1_TABLE+3,x    ; Save text color. 
-SkipDeadFade
-	dex                     ; Next row.
-	bpl LoopDeadFadeText    ; 18 to 0...
-
-	; Fade the empty green grass rows, too.
-	ldy COLPF1_TABLE+2
-	beq SkipFadeGrass1
-	dey 
-	sty COLPF1_TABLE+2
-SkipFadeGrass1
-	ldy COLPF1_TABLE+21
-	beq SkipFadeGrass2
-	dey 
-	sty COLPF1_TABLE+21
-SkipFadeGrass2
-
-; Control loop, exit from stage 2
-	dec EventCounter2        ; Decrement counter.
-	bpl EndTransitionToDead  ; It was not zero before.  So, just exit here. 
-
-TestTransDead3 ; Used up the fading iterations. Go to Dead screen now. 
 	jsr SetupDead            ; Setup for Dead screen (wait for input loop)
 
 EndTransitionToDead
@@ -648,8 +590,8 @@ EventDeadScreen
 	lda #DEAD_CYCLE_SPEED       ; yes.  Reset animation timer.
 	jsr ResetTimers
 
-	inc EventCounter                ; Increment base color 
-	inc EventCounter                ; Twice.  (need to use even numbers.)
+	dec EventCounter                ; Increment base color 
+	dec EventCounter                ; Twice.  (need to use even numbers.)
 	lda EventCounter                ; Get value 
 	and #$0F                        ; Keep this truncated to grey (black) $0 to $F
 	sta EventCounter                ; Save it for next time.
@@ -683,8 +625,6 @@ EndDeadScreen
 	lda CurrentEvent          ; Yeah, redundant to when a key is pressed.
 
 	rts
-
-
 
 
 ; ==========================================================================
