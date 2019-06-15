@@ -22,34 +22,35 @@
 
 ; Note that there is no mention in this code for scrolling the credits
 ; text.  This is entirely handled by the Vertical blank routine.  Every
-; display list is the same length and every Display List ends with an LMS
-; pointing to the Credit text.  The VBI routine updates the current
-; Display List's LMS pointer to the current scroll value.  Since the VBI
-; also controls what display is current it always means whatever is on
-; Display is guaranteed to have the correct scroll value.  It should seem
-; like the credit text is independent of the rest of the display as it will
-; update continuously no matter what else is happening.
+; display list ends with common instructions that show the scrolling 
+; credit text. The VBI routine updates the common Display List's LMS 
+; pointer to the text.  Since the VBI is in control of this on all screens
+; it means every display has continuous, seamless scrolling credit text 
+; even when the display changes, and no matter what else is happening.
 
 ; Screen enumeration states for current processing condition.
 ; Note that the order here does not imply the only order of
 ; movement between screens/event activity.  The enumeration
 ; could be entirely random.
-EVENT_START       = 0  ; Entry Point for New Game setup..
-EVENT_TITLE       = 1  ; Credits and Instructions.
 
-EVENT_TRANS_GAME  = 2  ; Transition animation from Title to Game.
-EVENT_GAME        = 3  ; GamePlay
+EVENT_INIT        = 0  ; One Time initialization.
 
-EVENT_TRANS_WIN   = 4  ; Transition animation from Game to Win.
-EVENT_WIN         = 5  ; Crossed the river!
+EVENT_START       = 1  ; Entry Point for New Game setup.
+EVENT_TITLE       = 2  ; Credits and Instructions.
 
-EVENT_TRANS_DEAD  = 6  ; Transition animation from Game to Dead.
-EVENT_DEAD        = 7  ; Yer Dead!
+EVENT_TRANS_GAME  = 3  ; Transition animation from Title to Game.
+EVENT_GAME        = 4  ; GamePlay
 
-EVENT_TRANS_OVER  = 8  ; Transition animation from Dead to Game Over.
-EVENT_OVER        = 9  ; Game Over.
+EVENT_TRANS_WIN   = 5  ; Transition animation from Game to Win.
+EVENT_WIN         = 6  ; Crossed the river!
 
-EVENT_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
+EVENT_TRANS_DEAD  = 7  ; Transition animation from Game to Dead.
+EVENT_DEAD        = 8  ; Yer Dead!
+
+EVENT_TRANS_OVER  = 9  ; Transition animation from Dead to Game Over.
+EVENT_OVER        = 10  ; Game Over.
+
+EVENT_TRANS_TITLE = 11 ; Transition animation from Game Over to Title.
 
 ; Screen Order/Path
 ;                       +-------------------------+
@@ -61,6 +62,75 @@ EVENT_TRANS_TITLE = 10 ; Transition animation from Game Over to Title.
 ;       |               +-------------------------+              |
 ;       +--------------------------------------------------------+
 
+
+; ==========================================================================
+; The Game Starting Point.  Event Entry 0.
+; Called only once at start.  
+; Transition to Title from here and all other events 
+; will use non-zero events.
+; --------------------------------------------------------------------------
+EventGameInit
+	; Atari initialization stuff...
+
+	lda #AUDCTL_CLOCK_64KHZ    ; Set only this one bit for clock.
+	sta AUDCTL                 ; Global POKEY Audio Control.
+	lda #3                     ; Set SKCTL to 3 to stop possible cassette noise. 
+	sta SKCTL                  ; So say Mapping The Atari and De Re Atari.
+	jsr StopAllSound           ; Zero all AUDC and AUDF
+
+	lda #>CHARACTER_SET        ; Set custom character set.  Global to game, forever.
+	sta CHBAS
+
+	lda #NMI_VBI               ; Turn Off DLI
+	sta NMIEN
+
+	lda #0
+	sta ThisDLI
+
+	lda #<Score_DLI; TITLE_DLI ; Set DLI vector. (will be reset by VBI on screen setup)
+	sta VDSLST
+	lda #>Score_DLI; TITLE_DLI
+	sta VDSLST+1
+	
+	lda #[NMI_DLI|NMI_VBI]     ; Turn On DLIs
+	sta NMIEN
+
+	; Changing the Display List is potentially tricky.  If the update is
+	; interrupted by the Vertical blank, then it could mess up the display
+	; list address and crash the Atari.
+	;
+	; So, this problem is solved by giving responsibility for Display List
+	; changes to a custom Vertical Blank Interrupt. The main code simply
+	; writes a byte to a page 0 location monitored by the Vertical Blank
+	; Interrupt and this directs the interrupt to change the current
+	; display list.  Easy-peasy and never updated at the wrong time.
+
+	ldy #<MyImmediateVBI       ; Add the VBI to the system (Display List dictatorship)
+	ldx #>MyImmediateVBI
+	lda #6                     ; 6 = Immediate VBI
+	jsr SETVBV                 ; Tell OS to set it
+
+	ldy #<MyDeferredVBI        ; Add the VBI to the system (Lazy hippie timers, colors, sound.)
+	ldx #>MyDeferredVBI
+	lda #7                     ; 7 = Deferred VBI
+	jsr SETVBV                 ; Tell OS to set it
+
+	lda #0
+;	sta COLOR4                 ; Border color, 0 is black.
+	sta FlaggedHiScore
+	sta InputStick             ; no input from joystick
+
+;	lda #COLOR_BLACK+$E        ; COLPF3 is white on all screens.
+;	sta COLOR3
+
+	jsr libPmgInit             ; Will also reset SDMACTL settings for P/M DMA
+
+	lda #4                     ; Quick hack to init the scrolling credits.
+	sta HSCROL
+
+	jsr SetupTransitionToTitle ; will set CurrentEvent = EVENT_TRANS_TITLE
+
+	rts                         ; And now ready to go to main game loop . . . .
 
 
 ; ==========================================================================
@@ -315,11 +385,17 @@ EndTransitionToGame
 ; Play the game.
 ; 
 ; Many of the things in Version 02 have become non-events 
-; in Version 03 for the main line code.  The game logic is 
-; now very simple in the main code...
+; in Version 03 for the main line code.  The MAIN game logic is 
+; now very simple due to things moving the VBI...
+; When the input timer allows, get controller input.
+; 2) Process frog Movement per controller.
+; 2.a) Determine exit to Win screen
+; 2.b) Determine exit to Dead screen.
+; All the hard stuff is in the VBI...
+; VBI determines frog death conditions.
 ; VBI scrolls boats.
 ; VBI moves frog if frog is on a boat row.
-; VBI will flag frog death if frog location is bad for frog.
+; VBI animates boat parts.
 ; --------------------------------------------------------------------------
 EventGameScreen
 ; ==========================================================================
@@ -577,7 +653,7 @@ EndTransitionToDead
 
 ; ==========================================================================
 ; Event Process DEAD SCREEN
-; The Activity is in the transition event, based on timer.
+; The Activity duration (FROG_WAKE_SPEED) is in the transition event, based on timer.
 ; Run an animated scroll driven by the data in the sine table.
 ; --------------------------------------------------------------------------
 EventDeadScreen

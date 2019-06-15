@@ -2,105 +2,85 @@
 ; Pet Frogger
 ; (c) November 1983 by John C. Dale, aka Dalesoft
 ; for the Commodore Pet 4032
-;
 ; ==========================================================================
 ; Ported (parodied) to Atari 8-bit computers
 ; by Ken Jennings (if this were 1983, aka FTR Enterprises)
-;
+; ==========================================================================
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019
 ; Version 03, June 2019
-;
-; --------------------------------------------------------------------------
+; ==========================================================================
+
+EVENT_TARGET_TABLE
+	.word EventGameInit-1           ; 0  = EVENT_INIT
+	.word EventScreenStart-1        ; 1  = EVENT_START
+	.word EventTitleScreen-1        ; 2  = EVENT_TITLE
+	.word EventTransitionToGame-1   ; 3  = EVENT_TRANS_GAME
+	.word EventGameScreen-1         ; 4  = EVENT_GAME    
+	.word EventTransitionToWin-1    ; 5  = EVENT_TRANS_WIN 
+	.word EventWinScreen-1          ; 6  = EVENT_WIN      
+	.word EventTransitionToDead-1   ; 7  = EVENT_TRANS_DEAD  
+	.word EventDeadScreen-1         ; 8  = EVENT_DEAD      
+	.word EventTransitionGameOver-1 ; 9  = EVENT_TRANS_OVER 
+	.word EventGameOverScreen-1     ; 10 = EVENT_OVER      
+	.word EventTransitionToTitle-1  ; 11 = EVENT_TRANS_TITLE
+
 
 ; ==========================================================================
-; The Entry Point.
-; Called once on program start.
+; The Game Entry Point where AtariDOS calls for startup.
+; 
+; And the perpetual loop calling the game's event dispatch routine.
+; The code needs this routine as a starting place, so that the 
+; routines called from the subroutine table have a place to return
+; to.  Otherwise the RTS from those routines would be at the 
+; top level and exit the game.
 ; --------------------------------------------------------------------------
-GAMESTART
-	; Atari initialization stuff...
 
-	; Changing the Display List is potentially tricky.  If the update is
-	; interrupted by the Vertical blank, then it could mess up the display
-	; list address and crash the Atari.
-	;
-	; So, this problem is solved by giving responsibility for Display List
-	; changes to a custom Vertical Blank Interrupt. The main code simply
-	; writes a byte to a page 0 location monitored by the Vertical Blank
-	; Interrupt and this directs the interrupt to change the current
-	; display list.  Easy-peasy and never updated at the wrong time.
+GameStart
 
-	lda #AUDCTL_CLOCK_64KHZ    ; Set only this one bit for clock.
-	sta AUDCTL                 ; Global POKEY Audio Control.
-	lda #3                     ; Set SKCTL to 3 to stop possible cassette noise. 
-	sta SKCTL                  ; So say Mapping The Atari and De Re Atari.
-	jsr StopAllSound           ; Zero all AUDC and AUDF
+	jsr GameLoop 
 
-	lda #>CHARACTER_SET        ; Set custom character set.  Global to game, forever.
-	sta CHBAS
+	jmp GameStart ; Do While More Electricity
 
-	lda #NMI_VBI               ; Turn Off DLI
-	sta NMIEN
-
-	lda #0
-	sta ThisDLI
-
-	lda #<Score_DLI; TITLE_DLI ; Set DLI vector. (will be reset by VBI on screen setup)
-	sta VDSLST
-	lda #>Score_DLI; TITLE_DLI
-	sta VDSLST+1
-	
-	lda #[NMI_DLI|NMI_VBI]     ; Turn On DLIs
-	sta NMIEN
-
-	ldy #<MyImmediateVBI       ; Add the VBI to the system (Display List dictatorship)
-	ldx #>MyImmediateVBI
-	lda #6                     ; 6 = Immediate VBI
-	jsr SETVBV                 ; Tell OS to set it
-
-	ldy #<MyDeferredVBI        ; Add the VBI to the system (Lazy hippie timers, colors, sound.)
-	ldx #>MyDeferredVBI
-	lda #7                     ; 7 = Deferred VBI
-	jsr SETVBV                 ; Tell OS to set it
-
-	lda #0
-	sta COLOR4                 ; Border color, 0 is black.
-	sta FlaggedHiScore
-	sta InputStick             ; no input from joystick
-
-	lda #COLOR_BLACK+$E        ; COLPF3 is white on all screens.
-	sta COLOR3
-
-	jsr libPmgInit             ; Will also reset SDMACTL settings for P/M DMA
-
-	lda #4                     ; Quick hack to init the scrolling credits.
-	sta HSCROL
-
-	jsr SetupTransitionToTitle ; will set CurrentEvent = EVENT_TRANS_TITLE
-
-; Ready to go to main game loop . . . .
 
 ; ==========================================================================
 ; GAME LOOP
 ;
-; The main loop for the game... said Capt Obvious.
+; The main event dispatch loop for the game... said Capt Obvious.
 ; Very vaguely like an event loop or state loop across the progressive
-; game states which are (more or less) based on the current mode of
+; game states which are (loosely) based on the current mode of
 ; the display.
 ;
-; Rules:  "Continue" labels for the next screen/event block must
-;         be called with screen value in A.  Therefore, each Event
-;         routine must end by lda CurrentEvent.
+; Each event sets CurrentEvent to change to another event target.
 ; --------------------------------------------------------------------------
 
 GameLoop
-	jsr libScreenWaitFrame    ; Wait for end of frame, start of new frame.
+	jsr libScreenWaitFrame     ; Wait for end of frame, start of new frame.
 
 ; Due to the frame sync above, at this point the code
 ; is running at/near the top of the screen refresh.
 
-	lda CurrentEvent
+	lda CurrentEvent           ; Get the current event
+	asl                        ; Times 2 for size of address
+	tax                        ; Use as index
+
+	lda EVENT_TARGET_TABLE+1,x ; Get routine high byte
+	pha                        ; Push to stack
+	lda EVENT_TARGET_TABLE,x   ; Get routine low byte 
+	pha                        ; Push to stack
+
+	rts                        ; Forces alling the address pushed on the stack.
+
+	; When the called routine ends with rts, it will return to the place 
+	; that called this routine which is up in GameStart.
+
+; ==========================================================================
+; END OF GAME EVENT LOOP
+; --------------------------------------------------------------------------
+
+
+
 
 ; ==========================================================================
 ; TRANSITION TO TITLE
@@ -109,11 +89,11 @@ GameLoop
 ; Stage 2: Brighten line 4 luminance.
 ; Stage 3: Initialize setup for Press Button on Title screen.
 ; --------------------------------------------------------------------------
-ContinueTransitionToTitle
-	cmp #EVENT_TRANS_TITLE
-	bne ContinueStartNewGame
+;ContinueTransitionToTitle
+;	cmp #EVENT_TRANS_TITLE
+;	bne ContinueStartNewGame
 
-	jsr EventTransitionToTitle
+;	jsr EventTransitionToTitle
 
 ; ==========================================================================
 ; Event process SCREEN START/NEW GAME
@@ -124,11 +104,11 @@ ContinueTransitionToTitle
 ; lack of design planning, blah blah.
 ; The title screen has already been presented by Transition To Title.
 ; --------------------------------------------------------------------------
-ContinueStartNewGame
-	cmp #EVENT_START
-	bne ContinueTitleScreen ; EVENT_START=0?  No?
+;ContinueStartNewGame
+;	cmp #EVENT_START
+;	bne ContinueTitleScreen ; EVENT_START=0?  No?
 
-	jsr EventScreenStart
+;	jsr EventScreenStart
 
 ; ==========================================================================
 ; Event Process TITLE SCREEN
@@ -137,11 +117,11 @@ ContinueStartNewGame
 ; 2) Wait for joystick button.
 ; 3) Setup for next transition.
 ; --------------------------------------------------------------------------
-ContinueTitleScreen
-	cmp #EVENT_TITLE
-	bne ContinueTransitionToGame
+;ContinueTitleScreen
+;	cmp #EVENT_TITLE
+;	bne ContinueTransitionToGame
 
-	jsr EventTitleScreen
+;	jsr EventTitleScreen
 
 ; ==========================================================================
 ; Event Process TRANSITION TO GAME SCREEN
@@ -154,11 +134,11 @@ ContinueTitleScreen
 ;          Decrease COLPF1 brightness from top to bottom.
 ;          When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
 ; --------------------------------------------------------------------------
-ContinueTransitionToGame
-	cmp #EVENT_TRANS_GAME
-	bne ContinueGameScreen
+;ContinueTransitionToGame
+;	cmp #EVENT_TRANS_GAME
+;	bne ContinueGameScreen
 
-	jsr EventTransitionToGame
+;	jsr EventTransitionToGame
 
 ; ==========================================================================
 ; Event Process GAME SCREEN
@@ -176,11 +156,11 @@ ContinueTransitionToGame
 ; frog as the frog moves with the boats and remains static relative
 ; to the boats.
 ; --------------------------------------------------------------------------
-ContinueGameScreen
-	cmp #EVENT_GAME
-	bne ContinueTransitionToWin
+;ContinueGameScreen
+;	cmp #EVENT_GAME
+;	bne ContinueTransitionToWin
 
-	jsr EventGameScreen
+;	jsr EventGameScreen
 
 ; ==========================================================================
 ; Event Process TRANSITION TO WIN
@@ -189,22 +169,22 @@ ContinueGameScreen
 ; 2) Display the Frogs SAVED!
 ; 3) Setup to do the Win screen event.
 ; --------------------------------------------------------------------------
-ContinueTransitionToWin
-	cmp #EVENT_TRANS_WIN
-	bne ContinueWinScreen
+;ContinueTransitionToWin
+;	cmp #EVENT_TRANS_WIN
+;	bne ContinueWinScreen
 
-	jsr EventTransitionToWin
+;	jsr EventTransitionToWin
 
 ; ==========================================================================
 ; Event Process WIN SCREEN
 ; Scroll colors on screen while waiting for a button press.
 ; Setup for next transition.
 ; --------------------------------------------------------------------------
-ContinueWinScreen
-	cmp #EVENT_WIN
-	bne ContinueTransitionToDead
+;ContinueWinScreen
+;	cmp #EVENT_WIN
+;	bne ContinueTransitionToDead
 
-	jsr EventWinScreen
+;	jsr EventWinScreen
 
 ; ==========================================================================
 ; Event Process TRANSITION TO DEAD
@@ -215,22 +195,22 @@ ContinueWinScreen
 ; 2) Fade playfield text to black.
 ; 2) Launch the Dead Frog Display.
 ; --------------------------------------------------------------------------
-ContinueTransitionToDead
-	cmp #EVENT_TRANS_DEAD
-	bne ContinueDeadScreen
+;ContinueTransitionToDead
+;	cmp #EVENT_TRANS_DEAD
+;	bne ContinueDeadScreen
 
-	jsr EventTransitionToDead
+;	jsr EventTransitionToDead
 
 ; ==========================================================================
 ; Event Process DEAD SCREEN
 ; The Activity is in the transition event, based on timer.
 ; Run an animated scroll driven by the data in the sine table.
 ; --------------------------------------------------------------------------
-ContinueDeadScreen
-	cmp #EVENT_DEAD
-	bne ContinueTransitionToOver
+;ContinueDeadScreen
+;	cmp #EVENT_DEAD
+;	bne ContinueTransitionToOver
 
-	jsr EventDeadScreen
+;	jsr EventDeadScreen
 
 ; ==========================================================================
 ; Event Process TRANSITION TO OVER
@@ -250,28 +230,28 @@ ContinueDeadScreen
 ;
 ; Not feeling enterprising, so just use the Fade value from the Dead event.
 ; --------------------------------------------------------------------------
-ContinueTransitionToOver
-	cmp #EVENT_TRANS_OVER
-	bne ContinueOverScreen
+;ContinueTransitionToOver
+;	cmp #EVENT_TRANS_OVER
+;	bne ContinueOverScreen
 
-	jsr EventTransitionGameOver
+;	jsr EventTransitionGameOver
 
 
 ; ==========================================================================
 ; Event Process GAME OVER SCREEN
 ; The Activity in the transition area, based on timer.
 ; --------------------------------------------------------------------------
-ContinueOverScreen
-	cmp #EVENT_OVER
-	bne EndGameLoop
+;ContinueOverScreen
+;	cmp #EVENT_OVER
+;	bne EndGameLoop
 
-	jsr EventGameOverScreen
+;	jsr EventGameOverScreen
 
 ; ==========================================================================
 ; END OF GAME EVENT LOOP
 ; --------------------------------------------------------------------------
-EndGameLoop
+;EndGameLoop
 
-	jmp GameLoop     ; rinse, repeat, forever.
+;	jmp GameLoop     ; rinse, repeat, forever.
 
-	rts
+;	rts

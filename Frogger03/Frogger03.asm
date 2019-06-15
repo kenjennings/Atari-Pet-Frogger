@@ -332,12 +332,6 @@ FrogUpdate        .byte 0         ; 0 = no movement.  >0 = Any reason to change 
 
 FrogSafety        .byte 0         ; = 0 When Frog OK.  !0 == Yer Dead.  Can be set by VBI. Main must change shape.
 
-; Eye positions:
-;  - 3 -
-;  0 1 2
-;  - - -
-FrogEyeball       .byte 1         ; Image for the Frog Eyeballs. (1) position is default.
-FrogRefocus       .byte 0         ; Countdown timer to return the eyeballs to the normal position. (1)
 
 FrogsCrossed      .byte 0         ; = Number Of Frogs crossed
 FrogsCrossedIndex .byte 0         ; FrogsCrossed, limit to range of 0 to 13 difficulty, then times 18.  
@@ -354,6 +348,10 @@ WobbleY           .byte 0         ; Index into FROG_WOBBLE_SINE_TABLE for Y coor
 WobOffsetX        .byte 0         ; 84 for Frog. 80 for Tomb.
 WobOffsetY        .byte 0         ; 75 for Frog. XX for Tomb.
 
+
+
+
+; ======== M O R E   M A I N   G L O B A L   S T U F F ======== 
 ; Input, event control, and timers.
 ; FYI: Frame counters are decremented each frame (by the VBI).
 ; Once they decrement to  0 they enable the related activity.
@@ -367,12 +365,15 @@ InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits + trigge
 
 ; Identify the current event target.  This is what drives which timer/event loop
 ; features are in effect.  Value is enumerated from EVENT_LIST table.
-CurrentEvent      .byte $00 ; = identity of current event target.
+CurrentEvent      .byte EVENT_INIT ; = identity of current event target.
 
 ; Event values.  Use for counting things for each pass of a screen/event.
+EventStage        .byte 0 ; An ID for directing multi-part events.
 EventCounter      .byte 0
 EventCounter2     .byte 0 ; Used for other counting, such as long event counting.
 
+; Miscellaneous temporary values as a result of lazy and stupid 
+; subroutine programming. 
 TempWipeColor     .byte 0 ; Used in a color update loop for splash screen.
 SavePF            .byte 0 ; Temp values for SliceColorAndLuma
 SavePFC           .byte 0 ; Temp values for SliceColorAndLuma
@@ -380,6 +381,9 @@ TempSaveColor     .byte 0 ; Nudder temp value
 TempTargetColor   .byte 0 ; an a nudder.
 EverythingMatches .byte 0 ; Logical condition collection indicating all colors examined do match.
 						  ; Bits $10, $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2, COLPF3
+
+
+
 
 ; ======== D L I ======== DLI TABLES
 ; Pointer to current DLI address chain table.  (ThisDLIAddr),Y = DLI routine low byte.
@@ -390,7 +394,7 @@ ThisDLIAddr     .word TITLE_DLI_CHAIN_TABLE  ; by default (VBI corrects this)
 ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
 
 ; For speed reasons (I think)  the next DLI's values are pre-loaded into zero page.
-ColorBak     .byte $00 ; Attempt at optimization to save tya; pha; ldy $, lda $,y
+ColorBak     .byte $00 ; Attempt at optimization to save tya; pha; ldy $, lda $,y....
 ColorPF0     .byte $00   
 ColorPF1     .byte $00   
 ColorPF2     .byte $00   
@@ -423,6 +427,15 @@ CurrentDL        .byte
 ; VBI's Animation counter for scrolling the credit line. when it reaches 0, then scroll.
 ScrollCounter   .byte 2
 CreditHSCROL    .byte 4  ; Fine scrolling the credits
+
+
+; ======== V B I ======== FROG EYEBALL MOVEMENT
+; Eye positions:
+;  - 3 -
+;  0 1 2
+;  - - -
+FrogEyeball       .byte 1         ; Image for the Frog Eyeballs. (1) position is default.
+FrogRefocus       .byte 0         ; Countdown timer to return the eyeballs to the normal position. (1)
 
 
 ; ======== V B I ======== SCROLLING BOAT MANAGEMENT
@@ -609,6 +622,6 @@ SAVEY = $FF
 ; Inform DOS of the program's Auto-Run address...
 ; GAMESTART is in the "Game.asm' file.
 ; --------------------------------------------------------------------------
-	mDiskDPoke DOS_RUN_ADDR, GAMESTART
+	mDiskDPoke DOS_RUN_ADDR, GameStart
 
 	END
