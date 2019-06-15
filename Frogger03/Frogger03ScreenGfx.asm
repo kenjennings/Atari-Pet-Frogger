@@ -773,8 +773,8 @@ bLoopCopyColorsTOver
 GameOverGreyScroll
 	sta COLBK_TABLE,y          ; Set line on screen
 	tax                         ; X = A
-	dex                         ; X = X + 1
-	dex                         ; X = X + 1
+	inx                         ; X = X + 1
+	inx                         ; X = X + 1
 	txa                         ; A = X
 	and #$0F                    ; Keep this truncated to grey (black) $0 to $F
 	iny                         ; Next line on screen.
