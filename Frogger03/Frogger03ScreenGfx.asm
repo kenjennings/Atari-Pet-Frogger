@@ -1836,22 +1836,22 @@ begb_LoopFillBorder
 EraseTomb
 	lda #0
 	ldx FrogPMY            ; Old  Y
-;	ldy #22
-	ldy #23
+	ldy #22
+;	ldy #23
 	
 bLoopET_Erase
-	lda #%10000001
+;	lda #%10000001
 
 	sta PLAYERADR0,x   ; main  1
 
-	lda #0
+;	lda #0
 	sta PLAYERADR1,x   ; main  2
 	sta PLAYERADR2,x ; 
 	sta PLAYERADR3,x ; 
 	sta MISSILEADR,x ; 
 	inx
 	dey
-	bpl bLoopEF_Erase
+	bpl bLoopET_Erase
 
 	rts
 
