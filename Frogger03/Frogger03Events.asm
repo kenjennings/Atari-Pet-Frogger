@@ -652,12 +652,12 @@ EndTransitionToDead
 
 ; ==========================================================================
 ; Event Process DEAD SCREEN
-; 1) While no button, animate the background colors. 
-; 2) If Button Press, then Start fade to black.
-; 2a) Black background for scrolling colors.
-; 2b) Fade background colors behind text.
-; 2c) Fade text colors to black.
-; 3) Determine transition to Game or GameOver.
+; 0a) While no button, animate the background colors. 
+; 0b) If Button Press, then start fade to black.
+; 1) Black background for scrolling colors.
+; 2) Fade background colors behind text.
+; 3) Fade text colors to black.
+; 4) Determine transition to Game or GameOver.
 ; --------------------------------------------------------------------------
 EventDeadScreen
 	lda EventStage              ; Stage 0 is waiting for input
@@ -668,8 +668,7 @@ EventDeadScreen
 
 ProcessDeadScreenInput          ; Button is pressed. 
 	jsr HideButtonPrompt        ; Turn off the prompt
-	lda #1                      ; Start the dead exit stages ...
-	sta EventStage
+	inc EventStage              ; Setup Stage 1 for the screen fading ...
 
 DeadScreenCheckTimers
 	; Check timers.  Animate colors per the stage.
@@ -678,80 +677,60 @@ DeadScreenCheckTimers
 	lda #DEAD_CYCLE_SPEED       ; yes.  Reset animation timer.
 	jsr ResetTimers
 
+	lda EventStage   
+DeadStageZero                   ; Stage 0  cycling the background.
+;	cmp #0
+	bne DeadStageOne            ; non zero is stage 1 or 2 or 3 or ...
 
-DeadStageZero                   ; Stage 0 is waiting for input, cycling the background.
-	lda EventStage              
-	cmp #0
-	bne DeadStageOne
-
-	dec EventCounter            ; Increment base color 
-	dec EventCounter            ; Twice.  (need to use even numbers.)
-	lda EventCounter            ; Get value 
-	and #$0F                    ; Keep this truncated to grey (black) $0 to $F
-	sta EventCounter            ; Save it for next time.
-
-	ldy #1 ; Top 20 lines of screen...
-DeadLoopTopOverGrey
-	jsr GameOverGreyScroll      ; Increments and color stuffing.
-	cpy #21                     ; Reached the 9th line?
-	bne DeadLoopTopOverGrey         ; No, continue looping.
-
-	ldy #27 ; Bottom 20 lines of screen (above prompt and credits.
-DeadLoopBottomOverGrey
-	jsr GameOverGreyScroll      ; Increments and color stuffing.
-	cpy #47                     ; Reached the 23rd line?
-	bne DeadLoopBottomOverGrey      ; No, continue looping.
-	beq EndDeadScreen
+	jsr DeadFrogRain
+	beq EndDeadScreen           ; Stage 1 is set by the input handling earlier.
 
 
-DeadStageOne                    ; Stage 1 is set background black.             
-	cmp #1
-	bne DeadStageTwo
+DeadStageOne ; and Two and Three for the fade out effects.
+	jsr CommonSplashFade ; Do Stage 1, 2, 3.  On exit, expect A = EventStage
 
-	jsr BlackSplashBackground   ; Set background to black.
+;DeadStageOne                    ; Stage 1 is set background black.             
+;	cmp #1
+;	bne DeadStageTwo
 
-	lda #2
-	sta EventStage
-	bne EndDeadScreen
+;	jsr BlackSplashBackground   ; Set non-text background to black.
 
-
-DeadStageTwo                   ; Stage 2 is fading the text background
-	cmp #2
-	bne DeadStageThree
-
-	lda #COLOR_BLACK
-	ldy #21 ; Text lines 21 to 26 ...
-DeadLoopTextBackToBlack
-	sta COLBK_TABLE,y 
-	iny
-	cpy #27                     ; Filling the top
-	bne DeadLoopTextBackToBlack         ; No, continue looping.
-
-	lda #3
-	sta EventStage
-	bne EndDeadScreen
+;	lda #$0e
+;	sta EventCounter ; Luminance matching for fade
+;	lda #2
+;	sta EventStage
+;	bne EndDeadScreen
 
 
-DeadStageThree                   ; Stage 3 is fading the text 
-	cmp #3
-	bne DeadStageFour
+;DeadStageTwo                   ; Stage 2 is fading the text background
+;	cmp #2
+;	bne DeadStageThree
 
-	lda #COLOR_BLACK
-	ldy #21 ; Text lines 21 to 26 ...
-DeadLoopTextToBlack
-	sta COLPF0_TABLE,y 
-	iny
-	cpy #27                     ; Filling the top
-	bne DeadLoopTextToBlack         ; No, continue looping.
+;	jsr FadeSplashTextBackground
+;	bpl EndDeadScreen
 
-	lda #4
-	sta EventStage
-	bne EndDeadScreen
+;	lda #$0e
+;	sta EventCounter ; Luminance matching for fade
+;	lda #3
+;	sta EventStage
+;	bne EndDeadScreen
+
+
+;DeadStageThree                   ; Stage 3 is fading the text 
+;	cmp #3
+;	bne DeadStageFour
+
+;	jsr FadeSplashText
+;	bpl EndDeadScreen
+
+;	lda #4
+;	sta EventStage
+;	bne EndDeadScreen
 
 
 ; The actual end.
-; Evaluate to return to the game, or if game is over.
-DeadStageFour                  ; Stage 3 is fading the text 
+
+DeadStageFour                  ; Evaluate return to game, or game over.
 	cmp #4
 	bne EndDeadScreen
 	

@@ -101,9 +101,18 @@ SetupTransitionToGame
 	lda #24
 	sta EventCounter2       ; Prep the first transition loop.
 
+	lda CurrentDL
+	cmp #DISPLAY_DEAD
+	bne GameStartAtOne
+	lda #2
+	sta EventCounter
+	bne TransitionToGameSetEvent
+
+GameStartAtOne
 	lda #1                  ; First transition stage: Loop from bottom to top
 	sta EventCounter
 
+TransitionToGameSetEvent
 	lda #EVENT_TRANS_GAME  ; Next step is operating the transition animation.
 	sta CurrentEvent
 

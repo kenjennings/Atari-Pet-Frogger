@@ -538,7 +538,43 @@ FlipOffEverything
 
 
 ; ==========================================================================
-; BLACK SPLASH BACKGROUND                                           A  Y  X
+; DEAD FROG RAIN                                                A  Y  X
+; ==========================================================================
+; Dark to light color scroller, moving down the screen.  
+; Apply to only the background lines above and below the text.
+;
+; Uses EventCounter as the current base color.
+; 
+; Stopping this is under the caller's control (button pressed, then 
+; move on to a different animation stage.)
+; --------------------------------------------------------------------------
+
+DeadFrogRain
+
+	dec EventCounter            ; Increment base color 
+	dec EventCounter            ; Twice.  (need to use even numbers.)
+	lda EventCounter            ; Get value 
+	and #$0F                    ; Keep this truncated to grey (black) $0 to $F
+	sta EventCounter            ; Save it for next time.
+
+	ldy #1 ; Top 20 lines of screen...
+DeadLoopTopOverGrey
+	jsr GameOverGreyScroll      ; Increments and color stuffing.
+	cpy #21                     ; Reached the 9th line?
+	bne DeadLoopTopOverGrey         ; No, continue looping.
+
+	ldy #27 ; Bottom 20 lines of screen (above prompt and credits.
+DeadLoopBottomOverGrey
+	jsr GameOverGreyScroll      ; Increments and color stuffing.
+	cpy #47                     ; Reached the 23rd line?
+	bne DeadLoopBottomOverGrey      ; No, continue looping.
+;	beq EndDeadScreen
+	
+	rts
+
+
+; ==========================================================================
+; BLACK SPLASH BACKGROUND                                           A  Y  
 ; ==========================================================================
 ; For the Splash screens, set the background above the text and below the 
 ; text to black.  No gradual fading.
@@ -562,6 +598,165 @@ SplashLoopBottomToBlack
 	bne SplashLoopBottomToBlack      ; No, continue looping.
 
 	rts
+
+
+; ==========================================================================
+; FADE SPLASH TEXT BACKGROUND                                      A  X
+; ==========================================================================
+; For the Splash screens, fade the background of the text to black. 
+; If the current line's luminance matches the reference value, then 
+; decrement it.
+; At the end, decrement the reference value. 
+; when the reference value is 0, then set all to black. 
+; Gradual fade on each pass.
+;
+; Uses EventCounter for the reference luminance.  must start at $0E
+;
+; Returns flags based on Event counter.  BMI means fade finished.
+; --------------------------------------------------------------------------
+
+FadeSplashTextBackground
+
+;	lda #COLOR_BLACK
+	ldx #21 ; Text lines 21 to 26 ...
+LoopTextBackFade
+	lda COLBK_TABLE,x 
+	and #$0F
+	cmp EventCounter
+	bne LoopTextBackInc
+	dec COLBK_TABLE,x 
+	dec COLBK_TABLE,x 
+LoopTextBackInc
+	inx
+	cpx #27                     
+	bne LoopTextBackFade         ; No, continue looping.
+	dec EventCounter
+	dec EventCounter
+	bpl EndFadeSplashTextBackground
+
+	lda #COLOR_BLACK
+	ldx #21 ; Text lines 21 to 26 ...
+LoopTextBackToBlack
+	sta COLBK_TABLE,x 
+	inx
+	cpx #27  
+	bne LoopTextBackToBlack
+
+	lda #$FF   ; Really, really done.
+
+EndFadeSplashTextBackground
+	rts
+
+
+; ==========================================================================
+; FADE SPLASH TEXT                                                  A  X
+; ==========================================================================
+; For the Splash screens, fade the text to black. 
+; If the current line's luminance matches the reference value, then 
+; decrement it.
+; At the end, decrement the reference value. 
+; when the reference value is 0, then set all to black. 
+; Gradual fade on each pass.
+;
+; Uses EventCounter for the reference luminance.  must start at $0E
+;
+; Returns flags based on Event counter.  BMI means fade finished.
+; --------------------------------------------------------------------------
+
+FadeSplashText
+
+;	lda #COLOR_BLACK
+	ldx #21 ; Text lines 21 to 26 ...
+LoopTextFade
+	lda COLPF0_TABLE,x 
+	and #$0F
+	cmp EventCounter
+	bne LoopTextInc
+	dec COLPF0_TABLE,x 
+	dec COLPF0_TABLE,x 
+LoopTextInc
+	inx
+	cpx #27                     
+	bne LoopTextFade         ; No, continue looping.
+	dec EventCounter
+	dec EventCounter
+	bpl EndFadeSplashText
+
+	lda #COLOR_BLACK
+	ldx #21 ; Text lines 21 to 26 ...
+LoopTextToBlack
+	sta COLPF0_TABLE,x 
+	inx
+	cpx #27  
+	bne LoopTextToBlack
+
+	lda #$FF   ; Really, really done.
+
+EndFadeSplashText
+	rts
+
+
+; ==========================================================================
+; COMMON SPASH FADE 123                                           
+; ==========================================================================
+; One set of code to run Stage 1, 2, 3, screen fade results.
+; 1) Black background for scrolling colors.
+; 2) Fade background colors behind text.
+; 3) Fade text colors to black.
+;
+; Expectations:
+; Eventcounter is initialized to $E0 before calling this.
+; EventStage is initialized to 1 to start the first stage.
+; The called is expected to have a use for (to stop calling this)
+; when the EventStage = 4
+;
+; --------------------------------------------------------------------------
+
+CommonSplashFade
+
+	lda EventStage
+
+SplashStageOne                    ; Stage 1 is set background black.             
+	cmp #1
+	bne SplashStageTwo
+
+	jsr BlackSplashBackground     ; Set non-text background to black.
+
+	lda #$0e
+	sta EventCounter              ; Luminance matching for fade
+	inc EventStage                ; Set Stage = 2
+	bne EndCommonSplashFade
+
+
+SplashStageTwo                    ; Stage 2 is fading the text background
+	cmp #2
+	bne SplashStageThree
+
+	jsr FadeSplashTextBackground
+	bpl EndCommonSplashFade
+
+	lda #$0e
+	sta EventCounter              ; Luminance matching for fade
+	inc EventStage                ; Set Stage = 3
+;	sta EventStage
+	bne EndCommonSplashFade
+
+
+SplashStageThree                  ; Stage 3 is fading the text 
+	cmp #3
+	bne EndCommonSplashFade
+
+	jsr FadeSplashText
+	bpl EndCommonSplashFade
+
+	inc EventStage                ; Set Stage = 4
+
+EndCommonSplashFade
+	lda EventStage                ; Make sure A = EventStage on exit.
+
+	rts
+
+
 
 
 ; ==========================================================================

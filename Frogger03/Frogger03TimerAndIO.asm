@@ -40,7 +40,7 @@ WOBBLEY_SPEED    = 3   ; Speed of flying objects on Title and Game Over.
 
 FROG_WAKE_SPEED  = 120 ; Initial delay about 2 sec for frog corpse '*' viewing/mourning
 DEAD_FADE_SPEED  = 4   ; Fade the game screen to black for Dead Frog
-DEAD_CYCLE_SPEED = 6   ; Speed of color animation on Dead screen
+DEAD_CYCLE_SPEED = 5   ; Speed of color animation on Dead screen
 
 WIN_FADE_SPEED   = 4   ; Fade the game screen to black to show Win
 WIN_CYCLE_SPEED  = 5   ; Speed of color animation on Win screen 
@@ -717,11 +717,17 @@ GAME_DLI_BOAT2BOAT  ; DLI sets HS, BK, COLPF3,2,1,0 for the Left Boats.
 	mStart_DLI
 
 	lda NextHSCROL    ; Get boat fine scroll.
-	sta HSCROL        ; Ok to set now as this line does not scroll.
-
+	pha
+	
 	lda ColorBak
 	sta WSYNC
 	sta COLBK
+	
+	pla 
+;	lda NextHSCROL    ; Get boat fine scroll.
+	sta HSCROL        ; Ok to set now as this line does not scroll.
+
+
 
 ; Reset the scrolling water line to normal width
 ;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_NORMAL
@@ -1019,6 +1025,10 @@ LoadAllColors_DLI
 	sta COLPF0
 
 LoadAlmostAllColors_DLI
+	lda ColorBak   ; Get real background color again. (To repair the color for the Beach background)
+	sta WSYNC
+	sta COLBK
+
 	lda ColorPF1   ; Get color Rocks 2
 	sta COLPF1
 	lda ColorPF2   ; Get color Rocks 3 
@@ -1026,9 +1036,7 @@ LoadAlmostAllColors_DLI
 	lda ColorPF3   ; Get color water (needed for fade-in)
 	sta COLPF3
 
-	lda ColorBak   ; Get real background color again. (To repair the color for the Beach background)
-	sta WSYNC
-	sta COLBK
+
 
 SetupAllOnNextLine_DLI
 	iny
