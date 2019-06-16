@@ -270,21 +270,18 @@ SetupTransitionToDead
 
 SetupDead
 
+	jsr RemoveFrogOnScreen   ; Scrape splattered frog off screen.
+;	jsr libScreenWaitFrame
+
 	lda #DEAD_CYCLE_SPEED     ; Animation moving speed.
 	jsr ResetTimers
 	
 	lda #DISPLAY_DEAD        ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
-;	jsr libPmgClearBitmaps   ; Scrape splattered frog off screen.
-	lda #$ff 
-	sta FrogUpdate
-	jsr libScreenWaitFrame
-
-;	jsr RemoveFrogOnScreen   ; Remove the frog (corpse) from the screen
-
 	lda #0                   ; Color cycling index for dead.
 	sta EventCounter
+	sta EventStage          ; Stage 0 is background color scroll.
 
 	lda #EVENT_DEAD         ; Change to dead screen event.
 	sta CurrentEvent
@@ -322,10 +319,8 @@ SetupTransitionToGameOver
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
 
-	lda #$FF               ; Hide the Player/Missile
-	sta FrogUpdate
-	jsr libScreenWaitFrame ; Wait for update to finish.
-;	jsr EraseFrog          ; Specifically zero the object.
+	jsr RemoveFrogOnScreen  ; Hide the Player/Missile
+;	jsr libScreenWaitFrame ; Wait for update to finish.
 
 	lda #EVENT_TRANS_OVER ; Change to transition to Game Over.
 	sta CurrentEvent

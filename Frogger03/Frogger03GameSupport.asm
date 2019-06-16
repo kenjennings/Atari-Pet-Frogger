@@ -24,7 +24,7 @@
 ; Determine if current score is high score
 ; Move the frog up a row.
 ; Automatic, logical frog horizontal movement when boats move.
-; Set boat speed based on number of frogs saved.
+; Set boats' speed based on number of frogs saved.
 ;
 ; --------------------------------------------------------------------------
 

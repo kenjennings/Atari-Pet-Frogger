@@ -224,7 +224,7 @@ TestTransTitle3
 
 EndTransitionToTitle
 	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
-	lda CurrentEvent
+;	lda CurrentEvent
 
 	rts
 
@@ -271,7 +271,7 @@ ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transiti
 	jsr ClearGameScores     ; Zero the score.  And high score if not set.
 
 EndTitleScreen
-	lda CurrentEvent
+;	lda CurrentEvent
 
 	rts
 
@@ -375,7 +375,7 @@ TransGameNextLine            ; All colors match on this line.  Do next line.
 	jsr SetupGame
 
 EndTransitionToGame
-	lda CurrentEvent
+;	lda CurrentEvent
 
 	rts
 
@@ -480,8 +480,7 @@ DoSetupForYerDead
 ;	jsr AutoMoveFrog         ; Move the frog relative to boats.
 
 EndGameScreen
-
-	lda CurrentEvent
+;	lda CurrentEvent
 
 	rts
 
@@ -501,7 +500,7 @@ EventTransitionToWin
 	jsr SetupWin             ; Setup for Wins screen 
 
 EndTransitionToWin
-	lda CurrentEvent
+;	lda CurrentEvent
 
 	rts
 
@@ -578,7 +577,7 @@ ProcessWinScreenInput           ; Button is pressed. Prepare for the screen tran
 	jsr SetupTransitionToGame
 
 EndWinScreen
-	lda CurrentEvent           ; Yeah, redundant to when a key is pressed.
+;	lda CurrentEvent           ; Yeah, redundant to when a key is pressed.
 
 	rts
 
@@ -646,48 +645,116 @@ TestTransDead2
 	jsr SetupDead            ; Setup for Dead screen (wait for input loop)
 
 EndTransitionToDead
-	lda CurrentEvent
+;	lda CurrentEvent
 
 	rts
 
 
 ; ==========================================================================
 ; Event Process DEAD SCREEN
-; The Activity duration (FROG_WAKE_SPEED) is in the transition event, based on timer.
-; Run an animated scroll driven by the data in the sine table.
+; 1) While no button, animate the background colors. 
+; 2) If Button Press, then Start fade to black.
+; 2a) Black background for scrolling colors.
+; 2b) Fade background colors behind text.
+; 2c) Fade text colors to black.
+; 3) Determine transition to Game or GameOver.
 ; --------------------------------------------------------------------------
 EventDeadScreen
-	jsr RunPromptForButton      ; Check button press.
-	bne ProcessDeadScreenInput  ; Button pressed.  Run the dead exit section..
+	lda EventStage              ; Stage 0 is waiting for input
+	bne DeadScreenCheckTimers   ; Not stage 0, skip button check
 
-	; While there is no input, then animate colors.
+	jsr RunPromptForButton      ; Check button press.
+	beq DeadScreenCheckTimers   ; No input, continue with timer checks.
+
+ProcessDeadScreenInput          ; Button is pressed. 
+	jsr HideButtonPrompt        ; Turn off the prompt
+	lda #1                      ; Start the dead exit stages ...
+	sta EventStage
+
+DeadScreenCheckTimers
+	; Check timers.  Animate colors per the stage.
 	lda AnimateFrames           ; Did animation counter reach 0 ?
 	bne EndDeadScreen           ; Nope.  Nothing to do.
 	lda #DEAD_CYCLE_SPEED       ; yes.  Reset animation timer.
 	jsr ResetTimers
 
-	dec EventCounter                ; Increment base color 
-	dec EventCounter                ; Twice.  (need to use even numbers.)
-	lda EventCounter                ; Get value 
-	and #$0F                        ; Keep this truncated to grey (black) $0 to $F
-	sta EventCounter                ; Save it for next time.
+
+DeadStageZero                   ; Stage 0 is waiting for input, cycling the background.
+	lda EventStage              
+	cmp #0
+	bne DeadStageOne
+
+	dec EventCounter            ; Increment base color 
+	dec EventCounter            ; Twice.  (need to use even numbers.)
+	lda EventCounter            ; Get value 
+	and #$0F                    ; Keep this truncated to grey (black) $0 to $F
+	sta EventCounter            ; Save it for next time.
 
 	ldy #1 ; Top 20 lines of screen...
-LoopTopOverGrey
+DeadLoopTopOverGrey
 	jsr GameOverGreyScroll      ; Increments and color stuffing.
 	cpy #21                     ; Reached the 9th line?
-	bne LoopTopOverGrey         ; No, continue looping.
+	bne DeadLoopTopOverGrey         ; No, continue looping.
 
 	ldy #27 ; Bottom 20 lines of screen (above prompt and credits.
-LoopBottomOverGrey
+DeadLoopBottomOverGrey
 	jsr GameOverGreyScroll      ; Increments and color stuffing.
 	cpy #47                     ; Reached the 23rd line?
-	bne LoopBottomOverGrey      ; No, continue looping.
+	bne DeadLoopBottomOverGrey      ; No, continue looping.
 	beq EndDeadScreen
 
-; Button was pressed, so we're done with this event.
+
+DeadStageOne                    ; Stage 1 is set background black.             
+	cmp #1
+	bne DeadStageTwo
+
+	jsr BlackSplashBackground   ; Set background to black.
+
+	lda #2
+	sta EventStage
+	bne EndDeadScreen
+
+
+DeadStageTwo                   ; Stage 2 is fading the text background
+	cmp #2
+	bne DeadStageThree
+
+	lda #COLOR_BLACK
+	ldy #21 ; Text lines 21 to 26 ...
+DeadLoopTextBackToBlack
+	sta COLBK_TABLE,y 
+	iny
+	cpy #27                     ; Filling the top
+	bne DeadLoopTextBackToBlack         ; No, continue looping.
+
+	lda #3
+	sta EventStage
+	bne EndDeadScreen
+
+
+DeadStageThree                   ; Stage 3 is fading the text 
+	cmp #3
+	bne DeadStageFour
+
+	lda #COLOR_BLACK
+	ldy #21 ; Text lines 21 to 26 ...
+DeadLoopTextToBlack
+	sta COLPF0_TABLE,y 
+	iny
+	cpy #27                     ; Filling the top
+	bne DeadLoopTextToBlack         ; No, continue looping.
+
+	lda #4
+	sta EventStage
+	bne EndDeadScreen
+
+
+; The actual end.
 ; Evaluate to return to the game, or if game is over.
-ProcessDeadScreenInput          ; A key is pressed. Prepare for the next screen.
+DeadStageFour                  ; Stage 3 is fading the text 
+	cmp #4
+	bne EndDeadScreen
+	
 	lda NumberOfLives           ; Have we run out of frogs?
 	beq SwitchToGameOver        ; Yes.  Game Over.
 
@@ -698,7 +765,7 @@ SwitchToGameOver
 	jsr SetupTransitionToGameOver
 
 EndDeadScreen
-	lda CurrentEvent          ; Yeah, redundant to when a key is pressed.
+;	lda CurrentEvent          ; Yeah, redundant to when a key is pressed.
 
 	rts
 
@@ -747,7 +814,7 @@ DoneWithTranOver               ; call counter is 0.  go to game over.
 	jsr SetupGameOver
 
 EndTransitionGameOver
-	lda CurrentEvent
+;	lda CurrentEvent
 
 	rts
 
@@ -805,7 +872,7 @@ ProcessGameOverScreenInput      ; a key is pressed. Prepare for the screen trans
 	jsr SetupTransitionToTitle
 
 EndGameOverScreen
-	lda CurrentEvent           ; Yeah, redundant to when a key is pressed.
+;	lda CurrentEvent           ; Yeah, redundant to when a key is pressed.
 
 	rts
 

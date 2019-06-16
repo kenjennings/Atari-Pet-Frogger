@@ -538,6 +538,33 @@ FlipOffEverything
 
 
 ; ==========================================================================
+; BLACK SPLASH BACKGROUND                                           A  Y  X
+; ==========================================================================
+; For the Splash screens, set the background above the text and below the 
+; text to black.  No gradual fading.
+; --------------------------------------------------------------------------
+
+BlackSplashBackground
+
+	lda #COLOR_BLACK
+	ldy #1 ; Top 20 lines of screen...
+SplashLoopTopToBlack
+	sta COLBK_TABLE,y 
+	iny
+	cpy #21                     ; Filling the top
+	bne SplashLoopTopToBlack         ; No, continue looping.
+
+	ldy #27 ; Bottom 20 lines of screen (above prompt and credits.
+SplashLoopBottomToBlack
+	sta COLBK_TABLE,y 
+	iny
+	cpy #47                     ; Reached the 23rd line?
+	bne SplashLoopBottomToBlack      ; No, continue looping.
+
+	rts
+
+
+; ==========================================================================
 ; INCREMENT GAME COLOR                                            A  Y  X
 ; ==========================================================================
 ; Merge the current luminance to the target color.

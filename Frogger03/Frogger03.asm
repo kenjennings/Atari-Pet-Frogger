@@ -620,7 +620,7 @@ SAVEY = $FF
 
 ; ==========================================================================
 ; Inform DOS of the program's Auto-Run address...
-; GAMESTART is in the "Game.asm' file.
+; GameStart is in the "Game.asm' file.
 ; --------------------------------------------------------------------------
 	mDiskDPoke DOS_RUN_ADDR, GameStart
 
