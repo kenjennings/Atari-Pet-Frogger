@@ -46,7 +46,8 @@ EVENT_WIN         = 6  ; Crossed the river!
 
 EVENT_TRANS_DEAD  = 7  ; Transition animation from Game to Dead.
 EVENT_DEAD        = 8  ; Yer Dead!
-
+;EVENT_DEAD_FADE   = 9  ; Transition from Dead to Black. 
+	
 EVENT_TRANS_OVER  = 9  ; Transition animation from Dead to Game Over.
 EVENT_OVER        = 10  ; Game Over.
 
@@ -147,7 +148,7 @@ EventTransitionToTitle
 	lda #TITLE_SPEED           ; yes.  Reset it.
 	jsr ResetTimers
 
-	lda EventCounter           ; What stage are we in?
+	lda EventStage           ; What stage are we in?
 	cmp #1
 	bne TestTransTitle2        ; Not the Title Scroll, try next stage
 
@@ -192,7 +193,7 @@ FinishedNowSetupStage2
 	jsr SetSound
 
 	lda #2                     ; Set stage 2 as next part of Title screen event...
-	sta EventCounter
+	sta EventStage
 	bne EndTransitionToTitle
 
 	; === STAGE 2 ===
@@ -210,7 +211,7 @@ GlowingTitleUnderline
 
 FinishedNowSetupStage3
 	lda #3                    ; Set stage 3 as next part of Title screen event...
-	sta EventCounter
+	sta EventStage
 	bne EndTransitionToTitle
 
 	; === STAGE 3 ===
@@ -224,7 +225,6 @@ TestTransTitle3
 
 EndTransitionToTitle
 	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
-;	lda CurrentEvent
 
 	rts
 
@@ -271,7 +271,6 @@ ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transiti
 	jsr ClearGameScores     ; Zero the score.  And high score if not set.
 
 EndTitleScreen
-;	lda CurrentEvent
 
 	rts
 
@@ -293,7 +292,7 @@ EventTransitionToGame
 	lda #TITLE_WIPE_SPEED    ; yes.  Reset it.
 	jsr ResetTimers
 
-	lda EventCounter         ; What stage are we in?
+	lda EventStage         ; What stage are we in?
 	cmp #1
 	bne TestTransGame2       ; Not the fade out, try next stage
 
@@ -317,7 +316,7 @@ ZeroCOLPF2                   ; FadeColPfToBlack returned 0, so the text (and pix
 	jsr CopyScoreToScreen   ; Make sure the score is updated in Game screen memory.
 	jsr PrintFrogsAndLives  ; And the frog list.
 	lda #2                  ; Go to next phase TestTransGame2
-	sta EventCounter
+	sta EventStage
 	lda #0
 	sta EventCounter2 ; return to 0.
 	beq EndTransitionToGame
@@ -340,7 +339,7 @@ TestTransGame2
 
 	; Finished stage 2, now setup Stage 3
 	lda #3
-	sta EventCounter
+	sta EventStage
 	lda #1
 	sta EventCounter2 ; return to 0.
 	beq EndTransitionToGame
@@ -375,23 +374,23 @@ TransGameNextLine            ; All colors match on this line.  Do next line.
 	jsr SetupGame
 
 EndTransitionToGame
-;	lda CurrentEvent
 
 	rts
 
 
 ; ==========================================================================
 ; Event Process GAME SCREEN
+; ==========================================================================
 ; Play the game.
 ; 
 ; Many of the things in Version 02 have become non-events 
 ; in Version 03 for the main line code.  The MAIN game logic is 
 ; now very simple due to things moving the VBI...
-; When the input timer allows, get controller input.
+; 1) When the input timer allows, get controller input.
 ; 2) Process frog Movement per controller.
 ; 2.a) Determine exit to Win screen
 ; 2.b) Determine exit to Dead screen.
-; All the hard stuff is in the VBI...
+; All the messy stuff is in the VBI...
 ; VBI determines frog death conditions.
 ; VBI scrolls boats.
 ; VBI moves frog if frog is on a boat row.
@@ -470,17 +469,12 @@ EndOfJoystickMoves
 	jsr ToReplayFXWaterOrNot ; Time to replay the water noises?
 	jmp EndGameScreen        ; Done with game loop.
 
-	
+
 DoSetupForYerDead
 	jsr SetupTransitionToDead
 	bne EndGameScreen        ; last action in function is lda/sta a non-zero value.
 
-; VBI does these now.
-;	jsr AnimateBoats         ; Move the boats around.
-;	jsr AutoMoveFrog         ; Move the frog relative to boats.
-
 EndGameScreen
-;	lda CurrentEvent
 
 	rts
 
@@ -500,7 +494,6 @@ EventTransitionToWin
 	jsr SetupWin             ; Setup for Wins screen 
 
 EndTransitionToWin
-;	lda CurrentEvent
 
 	rts
 
@@ -516,75 +509,45 @@ EndTransitionToWin
 ; Setup for next transition.
 ; --------------------------------------------------------------------------
 EventWinScreen
-	jsr RunPromptForButton      ; Check button press.
-	bne ProcessWinScreenInput   ; Button pressed.  Run the Win exit section..
+	lda EventStage              ; Stage 0 is waiting for input
+	bne WinScreenCheckTimers    ; If not stage 0, then no input.
 
+	jsr RunPromptForButton      ; Check button press.
+	beq WinScreenCheckTimers    ; No input.   Do timers.
+
+ProcessWinScreenInput           ; Button is pressed. Prepare for the screen transition.
+	jsr HideButtonPrompt        ; Turn off the prompt
+	inc EventStage              ; Setup Stage 1 for the screen fading ...
+
+WinScreenCheckTimers
 	; While there is no input, then animate colors.
 	lda AnimateFrames           ; Did animation counter reach 0 ?
 	bne EndWinScreen            ; Nope.  Nothing to do.
 	lda #WIN_CYCLE_SPEED        ; yes.  Reset animation timer.
 	jsr ResetTimers
 
-; ======================== T O P ========================  
-; Color scrolling skips the black/grey/white values.  
-; The scrolling uses values 238 to 18 step -4
-	lda EventCounter            ; Get starting value from last frame
-	jsr WinColorScrollUp        ; Subtract 4 and reset to start if needed.
-	sta EventCounter            ; Save it for next time.
+	lda EventStage
+WinStageZero
+	bne WinStageOne
 
-	ldy #1 ; Color the Top 20 lines of screen...
-LoopTopWinScroll
-	sta COLBK_TABLE,y           ; Set color for line on screen
-	jsr WinColorScrollUp        ; Subtract 4 and reset to start if needed.
+	jsr WinRainbow
+	beq EndWinScreen
 
-	iny                         ; Next line on screen.
-	cpy #21                     ; Reached the 20th (21st table entry) line?
-	bne LoopTopWinScroll        ; No, continue looping.
 
-	pha                         ; Save current color to use as start value later.
+WinStageOne ; and Stage Two and Three for the fade out effects.
+	jsr CommonSplashFade ; Do Stage 1, 2, 3.  On exit, expect A = EventStage
 
-; ======================== M I D D L E ========================  
-; Background/COLBK in the text section is static in the color tables.
-; Manipulate current color to make it the "inverse" color for the Text.
-	eor #$F0                    ; Invert color bits for the middle SAVED text.
-	and #$F0                    ; Truncate luminance bits.
-	ora #$02                    ; Start at +2.
+; The actual end.
 
-	ldy #26                     ; Start at bottom of text going backwards.
-bews_LoopTextColors
-	sta COLPF0_TABLE,Y          ; Use as manipulated color for 
-	clc                         ; the six lines of giant label "text."
-	adc #2                      ; brightness:  2, 4, 6, 8, A, C
-	dey
-	cpy #20
-	bne bews_LoopTextColors
+WinStageFour                  ; Evaluate return to game, or game over.
+	cmp #4                     ; Is EventStage == 4?
+	bne EndWinScreen
 
-; ======================== B O T T O M ========================  
-	pla                         ; Get the color back for scrolling the bottom. 
-
-; Color scrolling skips the black/grey/white values.  
-; The scrolling uses values 18 to 238 step +4
-	ldy #27                     ; Bottom 20 lines of screen (above prompt and credits.)
-LoopBottomWinScroll             ; Scroll colors in opposite direction
-	jsr WinColorScrollDown      ; Add 4, and reset to start if needed.
-	sta COLBK_TABLE,y          ; Set color for line on screen
-	iny                         ; Next line on screen.
-	cpy #47                     ; Reached the end, 20th line after text? 
-	bne LoopBottomWinScroll     ; No, continue looping.
-	beq EndWinScreen            ; Yes. Done. Nothing left to do. Exit now. 
-
-ProcessWinScreenInput           ; Button is pressed. Prepare for the screen transition.
 	jsr SetupTransitionToGame
 
 EndWinScreen
-;	lda CurrentEvent           ; Yeah, redundant to when a key is pressed.
 
 	rts
-
-
-
-
-
 
 
 ; ==========================================================================
@@ -603,7 +566,7 @@ EventTransitionToDead
 	lda #FROG_WAKE_SPEED     ; yes.  Reset it. (2 more seconds) to wait for stage 2
 	jsr ResetTimers
 
-	lda EventCounter         ; What stage are we in?
+	lda EventStage         ; What stage are we in?
 	cmp #1
 	bne TestTransDead2       ; Not the Playfield blackout, try next stage
 
@@ -634,7 +597,7 @@ SkipGreyFrog
 ;	sta COLPF2_TABLE+21
 
 	lda #2
-	sta EventCounter         ; Identify Stage 2 
+	sta EventStage         ; Identify Stage 2 
 	bne EndTransitionToDead  ; Nothing else to do.
 	; When the first mourning timer ran out, it was reset to FROG_WAKE_SPEED again, 
 	; so it will be another 2 seconds before Stage 2 can start. 
@@ -645,7 +608,6 @@ TestTransDead2
 	jsr SetupDead            ; Setup for Dead screen (wait for input loop)
 
 EndTransitionToDead
-;	lda CurrentEvent
 
 	rts
 
@@ -686,54 +648,15 @@ DeadStageZero                   ; Stage 0  cycling the background.
 	beq EndDeadScreen           ; Stage 1 is set by the input handling earlier.
 
 
-DeadStageOne ; and Two and Three for the fade out effects.
+DeadStageOne ; and Stage Two and Three for the fade out effects.
 	jsr CommonSplashFade ; Do Stage 1, 2, 3.  On exit, expect A = EventStage
-
-;DeadStageOne                    ; Stage 1 is set background black.             
-;	cmp #1
-;	bne DeadStageTwo
-
-;	jsr BlackSplashBackground   ; Set non-text background to black.
-
-;	lda #$0e
-;	sta EventCounter ; Luminance matching for fade
-;	lda #2
-;	sta EventStage
-;	bne EndDeadScreen
-
-
-;DeadStageTwo                   ; Stage 2 is fading the text background
-;	cmp #2
-;	bne DeadStageThree
-
-;	jsr FadeSplashTextBackground
-;	bpl EndDeadScreen
-
-;	lda #$0e
-;	sta EventCounter ; Luminance matching for fade
-;	lda #3
-;	sta EventStage
-;	bne EndDeadScreen
-
-
-;DeadStageThree                   ; Stage 3 is fading the text 
-;	cmp #3
-;	bne DeadStageFour
-
-;	jsr FadeSplashText
-;	bpl EndDeadScreen
-
-;	lda #4
-;	sta EventStage
-;	bne EndDeadScreen
-
 
 ; The actual end.
 
 DeadStageFour                  ; Evaluate return to game, or game over.
-	cmp #4
+	cmp #4                     ; Is EventStage == 4?
 	bne EndDeadScreen
-	
+
 	lda NumberOfLives           ; Have we run out of frogs?
 	beq SwitchToGameOver        ; Yes.  Game Over.
 
@@ -744,7 +667,6 @@ SwitchToGameOver
 	jsr SetupTransitionToGameOver
 
 EndDeadScreen
-;	lda CurrentEvent          ; Yeah, redundant to when a key is pressed.
 
 	rts
 
@@ -793,7 +715,6 @@ DoneWithTranOver               ; call counter is 0.  go to game over.
 	jsr SetupGameOver
 
 EndTransitionGameOver
-;	lda CurrentEvent
 
 	rts
 
@@ -832,16 +753,6 @@ SkipZeroDeadCycle2
 	cpy #47 ; #21                     ; Reached the 21th line?
 	bne LoopTopDeadSine         ; No, continue looping.
 
-	; ldy #27 ; Bottom 9 lines of screen (above prompt and credits.
-; LoopBottomDeadSine
-	; jsr DeadFrogRedScroll       ; Increments and color stuffing.
-	; cpx #20
-	; bne SkipZeroDeadCycle3
-	; ldx #0
-; SkipZeroDeadCycle3
-	; cpy #47                     ; Reached the 23rd line?
-	; bne LoopBottomDeadSine      ; No, continue looping.
-
 	beq EndGameOverScreen       ; Yes.  Exit now. 
 
 ProcessGameOverScreenInput      ; a key is pressed. Prepare for the screen transition.
@@ -851,7 +762,6 @@ ProcessGameOverScreenInput      ; a key is pressed. Prepare for the screen trans
 	jsr SetupTransitionToTitle
 
 EndGameOverScreen
-;	lda CurrentEvent           ; Yeah, redundant to when a key is pressed.
 
 	rts
 

@@ -38,7 +38,7 @@ TITLE_WIPE_SPEED = 0   ; Title screen to game screen fade speed.
 WOBBLEX_SPEED    = 2   ; Speed of flying objects on Title and Game Over.
 WOBBLEY_SPEED    = 3   ; Speed of flying objects on Title and Game Over.
 
-FROG_WAKE_SPEED  = 120 ; Initial delay about 2 sec for frog corpse '*' viewing/mourning
+FROG_WAKE_SPEED  = 150 ; Initial delay about 2 sec for frog corpse '*' viewing/mourning
 DEAD_FADE_SPEED  = 4   ; Fade the game screen to black for Dead Frog
 DEAD_CYCLE_SPEED = 5   ; Speed of color animation on Dead screen
 

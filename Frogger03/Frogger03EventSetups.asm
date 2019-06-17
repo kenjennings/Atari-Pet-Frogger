@@ -45,7 +45,7 @@ SetupTransitionToTitle
 	jsr EraseFrog            ; Specifically zero the object (from Game Over)
 
 	lda #1
-	sta EventCounter         ; Declare stage 1 behavior for scrolling.
+	sta EventStage         ; Declare stage 1 behavior for scrolling.
 
 	lda #DISPLAY_TITLE       ; Tell VBI to change displays.
 	jsr ChangeScreen         ; Then copy the color tables.
@@ -103,14 +103,18 @@ SetupTransitionToGame
 
 	lda CurrentDL
 	cmp #DISPLAY_DEAD
-	bne GameStartAtOne
-	lda #2
-	sta EventCounter
-	bne TransitionToGameSetEvent
+	beq GameStartAtTwo
+	cmp #DISPLAY_WIN
+	beq GameStartAtTwo
 
 GameStartAtOne
 	lda #1                  ; First transition stage: Loop from bottom to top
-	sta EventCounter
+	sta EventStage
+	bne TransitionToGameSetEvent
+
+GameStartAtTwo
+	lda #2
+	sta EventStage
 
 TransitionToGameSetEvent
 	lda #EVENT_TRANS_GAME  ; Next step is operating the transition animation.
@@ -135,8 +139,6 @@ SetupGame
 	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled on the game screen.
-
-
 
 	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
 	sta FrogPMX
@@ -189,8 +191,6 @@ SetupTransitionToWin
 	lda #DISPLAY_WIN        ; Tell VBI to change screens.
 	jsr ChangeScreen        ; Then copy the color tables.
 
-;	jsr libPmgClearBitmaps  ; Get rid of frog.
-
 	ldx #3                  ; Setup channel 3 to play Ode To Joy for saving the frog.
 	ldy #SOUND_JOY
 	jsr SetSound 
@@ -223,6 +223,9 @@ SetupWin
 	lda #238                ; Color scrolling 238 to 16;  Light to dark. Increment.
 	sta EventCounter
 
+	lda #0
+	sta EventStage          ; Stage 0 is color scrolling and input checking.
+
 	lda #EVENT_WIN         ; Change to wins screen.
 	sta CurrentEvent
 	
@@ -252,7 +255,7 @@ SetupTransitionToDead
 	jsr ResetTimers
 
 	lda #1                  ; Set Stage 1 in the fading control.
-	sta EventCounter
+	sta EventStage
 
 	ldx #3                  ; Setup channel 3 to play funeral dirge for the dead frog.
 	ldy #SOUND_DIRGE
@@ -321,7 +324,7 @@ SetupTransitionToGameOver
 	jsr ResetTimers 
 
 	lda #1                 ; set Stage 1 for fade out.
-	sta EventCounter
+	sta EventStage
 
 	lda #47                ; Set line number for the fade.
 	sta EventCounter2
@@ -329,7 +332,6 @@ SetupTransitionToGameOver
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
 
 	jsr RemoveFrogOnScreen  ; Hide the Player/Missile
-;	jsr libScreenWaitFrame ; Wait for update to finish.
 
 	lda #EVENT_TRANS_OVER ; Change to transition to Game Over.
 	sta CurrentEvent

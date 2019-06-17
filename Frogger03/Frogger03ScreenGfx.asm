@@ -1070,6 +1070,69 @@ ExitWinColorScrollDown
 
 
 ; ==========================================================================
+; WIN RANINBOW
+;
+; Scroll Rainbow colors on screen while waiting for a button press.
+; Scroll up at top. light to dark.  
+; Scroll down at bottom.  Dark to light.
+; Do not use $0x or $Fx  (Min 16, max 238)
+; 
+; Setup for next transition in EventCounter.
+; --------------------------------------------------------------------------
+WinRainbow
+; ======================== T O P ========================  
+; Color scrolling skips the black/grey/white values.  
+; The scrolling uses values 238 to 18 step -4
+	lda EventCounter            ; Get starting value from last frame
+	jsr WinColorScrollUp        ; Subtract 4 and reset to start if needed.
+	sta EventCounter            ; Save it for next time.
+
+	ldy #1 ; Color the Top 20 lines of screen...
+LoopTopWinScroll
+	sta COLBK_TABLE,y           ; Set color for line on screen
+	jsr WinColorScrollUp        ; Subtract 4 and reset to start if needed.
+
+	iny                         ; Next line on screen.
+	cpy #21                     ; Reached the 20th (21st table entry) line?
+	bne LoopTopWinScroll        ; No, continue looping.
+
+	pha                         ; Save current color to use as start value later.
+
+; ======================== M I D D L E ========================  
+; Background/COLBK in the text section is static in the color tables.
+; Manipulate current color to make it the "inverse" color for the Text.
+	eor #$F0                    ; Invert color bits for the middle SAVED text.
+	and #$F0                    ; Truncate luminance bits.
+	ora #$02                    ; Start at +2.
+
+	ldy #26                     ; Start at bottom of text going backwards.
+bews_LoopTextColors
+	sta COLPF0_TABLE,Y          ; Use as manipulated color for 
+	clc                         ; the six lines of giant label "text."
+	adc #2                      ; brightness:  2, 4, 6, 8, A, C
+	dey
+	cpy #20
+	bne bews_LoopTextColors
+
+; ======================== B O T T O M ========================  
+	pla                         ; Get the color back for scrolling the bottom. 
+
+; Color scrolling skips the black/grey/white values.  
+; The scrolling uses values 18 to 238 step +4
+	ldy #27                     ; Bottom 20 lines of screen (above prompt and credits.)
+LoopBottomWinScroll             ; Scroll colors in opposite direction
+	jsr WinColorScrollDown      ; Add 4, and reset to start if needed.
+	sta COLBK_TABLE,y          ; Set color for line on screen
+	iny                         ; Next line on screen.
+	cpy #47                     ; Reached the end, 20th line after text? 
+	bne LoopBottomWinScroll     ; No, continue looping.
+
+EndWinRainbow
+
+	rts
+
+
+; ==========================================================================
 ; SLICE COLOR AND LUMA                                              A  Y
 ; ==========================================================================
 ; Supporting the support function. Decrement Title text colors.
