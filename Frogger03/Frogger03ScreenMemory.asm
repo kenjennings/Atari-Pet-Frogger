@@ -698,10 +698,12 @@ MODE_C_COLPF0
 ; COLOR_ORANGE_GREEN = $E0
 ; COLOR_LITE_ORANGE =  $F0
 
-TITLE_BACK_COLORS ; 25 entries ; Mode 2, text background and border. Also the Gfx background.
+TITLE_BACK_COLORS ; 25 entries 
+	; Mode 2 lines - text background (COLPF2) and border (COLBK). 
+	; Mode 9 lines - the Gfx (COLBK) background.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry. 
 	.by COLOR_BLACK              ; Scores, and blank line
-	.by COLOR_BLUE1        COLOR_PURPLE_BLUE+2      ; Title colors.  Dark to light... 
+	.by COLOR_BLUE1        COLOR_PURPLE_BLUE+2      ; Title pixel colors.  Dark to light... 
 	.by COLOR_PURPLE+4     COLOR_PINK+6             ; Title lines
 	.by COLOR_RED_ORANGE+8 COLOR_ORANGE2+10         ; Title lines
 	.by COLOR_ORANGE1+12                            ; Title lines
@@ -713,23 +715,25 @@ TITLE_BACK_COLORS ; 25 entries ; Mode 2, text background and border. Also the Gf
 	.by COLOR_BLACK                                 ; Space
 	.by COLOR_PINK COLOR_PINK                       ; Controls
 
-TITLE_TEXT_COLORS ; 25 entries ; Mode 2 Text luminance.  Also the Gfx pixel colors.
+TITLE_TEXT_COLORS ; 25 entries 
+	; Mode 2 lines - Text (COLPF1) luminance.  
+	; Mode 9 lines - the Gfx pixel (COLPF0) colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by $0E                                     ; Scores, and blank line
-	.by $EC $DA $C8 $B6 $A4 $92 $C2                 ; title colors. light to dark
-	.by $00                                         ; blank
-	.by $04 $06 $08 $0A $0C $0A $08 $06             ; Instructions
-	.by $00                                         ; blank
-	.by $06 $08 $0a                                 ; Scoring
-	.by $00                                         ; blank
-	.by $08 $0A                                     ; controls
+	.by $0E                               ; Scores, and blank line
+	.by $EC $DA $C8 $B6 $A4 $92 $C2       ; title pixel colors. light to dark
+	.by $00                               ; blank
+	.by $04 $06 $08 $0A $0C $0A $08 $06   ; Instructions
+	.by $00                               ; blank
+	.by $06 $08 $0a                       ; Scoring
+	.by $00                               ; blank
+	.by $08 $0A                           ; controls
 
 
 
 GAME_BACK_COLORS; 22 entries.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by COLOR_BLACK                   ; Scores
-	.by COLOR_BLACK                   ; lives, saved frogs.
+	.by COLOR_BLACK       ; Scores
+	.by COLOR_BLACK       ; lives, saved frogs.
 	
 	.by COLOR_GREEN+6     ; Beach
 	.by COLOR_AQUA+2      ; Water for boats
@@ -753,21 +757,21 @@ GAME_BACK_COLORS; 22 entries.
 
 	.by COLOR_GREEN+6 
 	.by COLOR_AQUA+2      
-	.by COLOR_AQUA+4     ; Beach, boats, boats.
+	.by COLOR_AQUA+4      ; Beach, boats, boats.
 
-	.by COLOR_ORANGE2+6                                    ; one last Beach.
+	.by COLOR_ORANGE2+6   ; one last Beach.
 
 	
 GAME_COLPF0_COLORS; 22 entries
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by COLOR_BLACK                   ; Scores
-	.by COLOR_BLACK                   ; lives, saved frogs.
+	.by COLOR_BLACK       ; Scores
+	.by COLOR_BLACK       ; lives, saved frogs.
 
-	.by COLOR_BLUE1     ; Beach sky
-	.by COLOR_AQUA+4    ; Water top 1 with boats
-	.by COLOR_AQUA+6    ; Water top 2 with boats
+	.by COLOR_BLUE1       ; Beach sky
+	.by COLOR_AQUA+4      ; Water top 1 with boats
+	.by COLOR_AQUA+6      ; Water top 2 with boats
 
-	.by COLOR_AQUA+6    ; Beach sky (water)
+	.by COLOR_AQUA+6      ; Beach sky (water)
 	.by COLOR_BLUE1+4
 	.by COLOR_BLUE1+6     
 	
@@ -792,10 +796,10 @@ GAME_COLPF0_COLORS; 22 entries
 ; beach color and the boats
 GAME_COLPF1_COLORS ; 22 entries
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by COLOR_BLACK+$e                        ; Scores
-	.by COLOR_BLACK+$a                        ; lives, saved frogs.
+	.by COLOR_BLACK+$e       ; Scores
+	.by COLOR_BLACK+$a       ; lives, saved frogs.
 	
-	.by COLOR_GREEN+$8     ; beach 
+	.by COLOR_GREEN+$8       ; beach 
 	.by COLOR_PINK+$a        ; boat
 	.by COLOR_PURPLE+$c      ; boat
 	
@@ -815,53 +819,54 @@ GAME_COLPF1_COLORS ; 22 entries
 	.by COLOR_ORANGE1+$a
 	.by COLOR_ORANGE2+$c
 	
-	.by COLOR_GREEN+$8  ; beach
+	.by COLOR_GREEN+$8       ; beach
 	.by COLOR_RED_ORANGE+$a
 	.by COLOR_PINK+$c
 	
-	.by COLOR_ORANGE2+$8  ; Last beach
+	.by COLOR_ORANGE2+$8     ; Last beach
 
 ; beach color, and the lines on the boat.
-GAME_COLPF2_COLORS ; 24 entries... ?????????????
+GAME_COLPF2_COLORS ; 22 entries.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by COLOR_BLACK                   ; Scores
-	.by COLOR_BLACK                   ; lives, saved frogs.
+	.by COLOR_BLACK            ; Scores
+	.by COLOR_BLACK            ; lives, saved frogs.
 	
-	.by COLOR_GREEN+2                 ; beach
-	.by COLOR_PINK+$4                 ; boat lines
-	.by COLOR_PURPLE+$4               ; boat lines
+	.by COLOR_GREEN+2          ; beach
+	.by COLOR_PINK+$4          ; boat lines
+	.by COLOR_PURPLE+$4        ; boat lines
 	
-	.by COLOR_RED_ORANGE+2            ; beach
+	.by COLOR_RED_ORANGE+2     ; beach
 	.by COLOR_PURPLE_BLUE+$4
 	.by COLOR_BLUE_GREEN+$4
 	
-	.by COLOR_ORANGE2+2               ; beach
+	.by COLOR_ORANGE2+2        ; beach
 	.by COLOR_GREEN+$4
 	.by COLOR_YELLOW_GREEN+$4
 	
-	.by COLOR_RED_ORANGE+2            ; beach
+	.by COLOR_RED_ORANGE+2     ; beach
 	.by COLOR_ORANGE_GREEN+$4
 	.by COLOR_LITE_ORANGE+$4
 	
-	.by COLOR_ORANGE2+2               ; beach
+	.by COLOR_ORANGE2+2        ; beach
 	.by COLOR_ORANGE1+$4
 	.by COLOR_ORANGE2+$4
 	
-	.by COLOR_GREEN+2            ; beach
+	.by COLOR_GREEN+2          ; beach
 	.by COLOR_RED_ORANGE+$4
 	.by COLOR_PINK+$4
 	
-	.by COLOR_ORANGE2+2                 ; last beach
+	.by COLOR_ORANGE2+2        ; last beach
 
-	.by COLOR_BLACK+$0E
-	.by COLOR_BLACK+$0E
+;	.by COLOR_BLACK+$0E
+;	.by COLOR_BLACK+$0E
 
 
-GAME_COLPF3_COLORS ; 22 entries.  Arg!  Tried to avoid this, but it is needed in order to do the fade/wipe
+GAME_COLPF3_COLORS ; 22 entries.  Arg!  Tried to avoid this, but it is needed 
+                   ; in order to do the fade/wipe.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by COLOR_BLACK+$E                        ; Scores
-	.by COLOR_BLACK+$a                        ; lives, saved frogs.
-	
+	.by COLOR_BLACK+$E ; Scores
+	.by COLOR_BLACK+$E ; lives, saved frogs.
+
 	.by COLOR_BLACK+$E ; beach
 	.by COLOR_BLACK+$E
 	.by COLOR_BLACK+$E
@@ -869,41 +874,24 @@ GAME_COLPF3_COLORS ; 22 entries.  Arg!  Tried to avoid this, but it is needed in
 	.by COLOR_BLACK+$E ; beach
 	.by COLOR_BLACK+$E
 	.by COLOR_BLACK+$E
-	
+
 	.by COLOR_BLACK+$E ; beach
 	.by COLOR_BLACK+$E
 	.by COLOR_BLACK+$E
-	
+
 	.by COLOR_BLACK+$E ; beach
 	.by COLOR_BLACK+$E
 	.by COLOR_BLACK+$E
-	
+
 	.by COLOR_BLACK+$E ; beach
 	.by COLOR_BLACK+$E
 	.by COLOR_BLACK+$E
-	
+
 	.by COLOR_BLACK+$E ; beach
 	.by COLOR_BLACK+$E
 	.by COLOR_BLACK+$E
-	
+
 	.by COLOR_BLACK+$E ; Last beach
-
-
-; COLOR_ORANGE1 =      $10
-; COLOR_ORANGE2 =      $20
-; COLOR_RED_ORANGE =   $30
-; COLOR_PINK =         $40
-; COLOR_PURPLE =       $50
-; COLOR_PURPLE_BLUE =  $60
-; COLOR_BLUE1 =        $70
-; COLOR_BLUE2 =        $80
-; COLOR_LITE_BLUE =    $90
-; COLOR_AQUA =         $A0
-; COLOR_BLUE_GREEN =   $B0
-; COLOR_GREEN =        $C0
-; COLOR_YELLOW_GREEN = $D0
-; COLOR_ORANGE_GREEN = $E0
-; COLOR_LITE_ORANGE =  $F0
 
 
 DEAD_BACK_COLORS ; 47 entries.  Gfx background colors.
@@ -943,7 +931,7 @@ WIN_BACK_COLORS ; 47 entries.  Gfx background colors.
 		.by $00                                     ; Top Scroll.
 	.endr
 
-	.by $02 $04 $06 $08 $0A $0C ; Static white background
+	.by $00 $02 $04 $06 $08 $0a ; Static white background
 
 	.rept 20
 		.by $00                                     ; Top Scroll.
@@ -992,7 +980,7 @@ OVER_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
 
 
 ; ==========================================================================
-; Tables listing pointers to all the assets.
+; Tables listing pointers, etc .
 ; --------------------------------------------------------------------------
 
 ; All Display lists fit in one page, so only only byte update is needed.
@@ -1016,14 +1004,7 @@ DISPLAYLIST_GFXLMS_TABLE
 	.byte <FROGDEAD_MEM
 	.byte <GAMEOVER_MEM
 
-DISPLAY_NEEDS_BORDERS_TABLE
-	.byte 0 ; Title, no.
-	.byte 1 ; Game, Yes.
-	.byte 0 ; Saved, No.
-	.byte 0 ; Dead, No.
-	.byte 0 ; Over, No.
-
-DLI_LO_TABLE  ; Address of first chained DLI per each screen.
+DLI_LO_TABLE  ; Address of table pointing to chained DLI for  each screen.
 	.byte <TITLE_DLI_CHAIN_TABLE ; DLI (0) -- Set colors for Scores.
 	.byte <GAME_DLI_CHAIN_TABLE
 	.byte <SPLASH_DLI_CHAIN_TABLE ; FROGSAVED_DLI
@@ -1031,8 +1012,8 @@ DLI_LO_TABLE  ; Address of first chained DLI per each screen.
 	.byte <SPLASH_DLI_CHAIN_TABLE ; GAMEOVER_DLI
 
 DLI_HI_TABLE
-	.byte >TITLE_DLI_CHAIN_TABLE ; DLI sets COLPF1, COLPF2, COLBK for score text. 
-	.byte >GAME_DLI_CHAIN_TABLE  ; DLI sets COLPF1, COLPF2, COLBK for score text. 
+	.byte >TITLE_DLI_CHAIN_TABLE  ; DLI sets COLPF1, COLPF2, COLBK for score text. 
+	.byte >GAME_DLI_CHAIN_TABLE   ; DLI sets COLPF1, COLPF2, COLBK for score text. 
 	.byte >SPLASH_DLI_CHAIN_TABLE ; FROGSAVED_DLI
 	.byte >SPLASH_DLI_CHAIN_TABLE ; FROGDEAD_DLI
 	.byte >SPLASH_DLI_CHAIN_TABLE ; GAMEOVER_DLI
@@ -1043,13 +1024,18 @@ DLI_HI_TABLE
 	; Turn on 5th Player (Missiles COLPF3), Multicolor players, and 
 	; Priority bits %0001 put 5th Player below regular Players. 
 GPRIOR_TABLE
-	.byte MULTICOLOR_PM|%0001              ; Title Screen
-	.byte MULTICOLOR_PM|%0001              ; Game Screen uses P3/M3 to black left and right borders
-	.byte 0                                ; Splash screen SAVED, no P/M
-	.byte FIFTH_PLAYER|MULTICOLOR_PM|%0001 ; Splash screen DEAD - needs P5
-	.byte 0                                ; Splash screen GAMEOVER, no P/M
-	sta GPRIOR
+	.byte GTIA_MODE_DEFAULT|MULTICOLOR_PM|%0001              ; Title Screen ; Frog is Multi-color PM
+	.byte GTIA_MODE_DEFAULT|MULTICOLOR_PM|%0001              ; Game Screen ; (Frog again) Also screen uses P3/M3 as black left and right borders
+	.byte 0                                                  ; Splash screen SAVED, no P/M
+	.byte 0                                                  ; Splash screen DEAD, no P/M
+	.byte GTIA_MODE_DEFAULT|FIFTH_PLAYER|MULTICOLOR_PM|%0001 ; Splash screen GAMEOVER - needs P5 
 
+DISPLAY_NEEDS_BORDERS_TABLE ; I thought it may get used more than once. :-(
+	.byte 0 ; Title, no.
+	.byte 1 ; Game, Yes.
+	.byte 0 ; Saved, No.
+	.byte 0 ; Dead, No.
+	.byte 0 ; Over, No.
 
 TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 	.byte <Score_DLI            ; DLI (0) Text - COLPF1, Black - COLBK COLPF2
@@ -1187,7 +1173,7 @@ COLPF1_TABLE ; Must be big enough to do Title screen.
 COLPF2_TABLE ; Must be big enough to do Title screen.
 	.ds 25
 
-COLPF3_TABLE ; Must be big enough to do Game screen.
+COLPF3_TABLE ; Must be big enough to do Game screen. (22 entries.)
 	.by $0E $0E $0E $0E $0E
 	.by $0E $0E $0E $0E $0E
 	.by $0E $0E $0E $0E $0E
@@ -1209,8 +1195,6 @@ HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row. (21 en
 	.by 0 ; beach
 	.by 10 4
 
-;PXPF_TABLE ; Big enough for game area for Frog.
-;	.ds 22
 
 COLOR_BACK_LO_TABLE
 	.byte <TITLE_BACK_COLORS

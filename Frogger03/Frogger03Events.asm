@@ -692,25 +692,9 @@ EndDeadScreen
 EventTransitionGameOver
 	lda AnimateFrames         ; Did animation counter reach 0 ?
 	bne EndTransitionGameOver ; Nope.  Nothing to do.
-	lda #DEAD_FADE_SPEED      ; yes.  Reset it.
+	lda #GAME_OVER_SPEED      ; yes.  Reset it.
 	jsr ResetTimers
 
-; Fade to black the playfield background...
-; Wipe bottom to top to black.
-	ldx EventCounter2              ; Get the screen row.  Expected to be non-zero.
-	cpx #26                        ; Did this reach the text lines in the middle?
-	bne DoContinueGameOverFadeLoop ; No.
-	ldx #20                        ; Yes, skip over the text lines.
-DoContinueGameOverFadeLoop
-	lda #0                         ; Zero/Black
-	sta COLPF0_TABLE,x             ; Background.
-	sta COLBK_TABLE,x              ; Pixel, if present.
-
-	dex                            ; Next time do the row above,
-	stx EventCounter2              ; and save it.
-	bne EndTransitionGameOver      ; Non zero. Next Loop will continue this Stage.
-
-	; End of fade.  Setup to the Game Over screen. 
 DoneWithTranOver               ; call counter is 0.  go to game over.
 	jsr SetupGameOver
 
@@ -725,40 +709,45 @@ EndTransitionGameOver
 ;
 ; --------------------------------------------------------------------------
 EventGameOverScreen
-	jsr WobbleDeWobble              ; tomb drawing spirograph art on the game over.
-	jsr RunPromptForButton          ; Check button press.
-	bne ProcessGameOverScreenInput  ; Button pressed.  Run the dead exit section.
 
-	; Animate the scrolling.
-	lda AnimateFrames               ; Did animation counter reach 0 ?
-	bne EndGameOverScreen           ; No. Nothing to do.
-	lda #GAME_OVER_SPEED            ; yes.  Reset animation timer.
-	jsr ResetTimers
+	lda EventStage              ; Stage 0 is waiting for input
+	bne OverScreenCheckTimers   ; Not stage 0, skip button check
 
-	ldx EventCounter            ; Get starting color index.
-	inx                         ; Next index. 
-	cpx #20                     ; Did index reach the repeat?
-	bne SkipZeroDeadCycle       ; Nope.
-	ldx #0                      ; Yes, restart at 0.
-SkipZeroDeadCycle
-	stx EventCounter            ; And save for next time.
-
-	ldy #1 ; Top 20 lines of screen...
-LoopTopDeadSine
-	jsr DeadFrogRedScroll       ; Increments and color stuffing.
-	cpx #20
-	bne SkipZeroDeadCycle2
-	ldx #0
-SkipZeroDeadCycle2
-	cpy #47 ; #21                     ; Reached the 21th line?
-	bne LoopTopDeadSine         ; No, continue looping.
-
-	beq EndGameOverScreen       ; Yes.  Exit now. 
+	jsr WobbleDeWobble          ; tomb drawing spirograph art on the game over.  must do every frame.
+	jsr RunPromptForButton      ; Check button press.
+	beq OverScreenCheckTimers   ; No press.  Skip the input section.  continue with timers, color scrolling.
 
 ProcessGameOverScreenInput      ; a key is pressed. Prepare for the screen transition.
-	lda #$FF
-	sta FrogUpdate              ; Tell VBI to erase and stop redrawing the animated object.
-	jsr libScreenWaitFrame      ; Let's wait to the end of the frame to prevent the setup from confusing cleanup.
+	jsr HideButtonPrompt        ; Turn off the prompt
+	inc EventStage              ; Setup Stage 1 for the screen fading ...
+	jsr RemoveFrogOnScreen      ; Tell VBI to erase and stop redrawing the animated object.
+
+OverScreenCheckTimers
+	; Animate the scrolling.
+	lda AnimateFrames           ; Did animation counter reach 0 ?
+	bne EndGameOverScreen       ; No. Nothing to do.
+	lda #GAME_OVER_SPEED        ; yes.  Reset animation timer.
+	jsr ResetTimers
+
+	jsr GameOverRedSine         ; Load up the background colors. 
+
+	lda EventStage   
+OverStageZero                   ; Stage 0  cycling the background.
+;	cmp #0
+	bne OverStageOne            ; non zero is stage 1 or 2 or 3 or ...
+
+	jsr GameOverRedSine         ; Load up the background colors. 
+	beq EndGameOverScreen       ; Yes.  Exit now. 
+
+OverStageOne ; and Stage Two and Three for the fade out effects.
+	jsr CommonSplashFade ; Do Stage 1, 2, 3.  On exit, expect A = EventStage
+
+; The actual end.
+
+OverStage4
+	cmp #4                     ; Is EventStage == 4?
+	bne EndGameOverScreen
+
 	jsr SetupTransitionToTitle
 
 EndGameOverScreen

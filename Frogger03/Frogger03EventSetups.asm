@@ -42,40 +42,42 @@ SetupTransitionToTitle
 	jsr ResetTimers
 
 	jsr HideButtonPrompt     ; Tell VBI the prompt flashing is disabled.
-	jsr EraseFrog            ; Specifically zero the object (from Game Over)
+	jsr RemoveFrogOnScreen   ; Remove the frog (from Game Over) if visible 
+;	jsr EraseFrog            ; Specifically zero the object (from Game Over)
 
 	lda #1
-	sta EventStage         ; Declare stage 1 behavior for scrolling.
+	sta EventStage           ; Declare stage 1 behavior for scrolling.
 
 	lda #DISPLAY_TITLE       ; Tell VBI to change displays.
 	jsr ChangeScreen         ; Then copy the color tables.
 
-	lda #EVENT_TRANS_TITLE  ; Change to Title Screen transition.
+	lda #EVENT_TRANS_TITLE   ; Change to Title Screen transition.
 	sta CurrentEvent
 
-	lda #0                   ; Zero "old" position to trigger Updates to redraw first time.
-	sta FrogPMX
-	sta FrogPMY
-	sta FrogShape            ; 0 is "off"  (it would already be off by default)
+;	lda #0                   ; Zero "old" position to trigger Updates to redraw first time.
+;	sta FrogPMX
+;	sta FrogPMY
+;	sta FrogShape            ; 0 is "off"  (it would already be off by default)
 
 	lda #OFF_FROGX           ; Set new X position to middle of screen.
 	sta WobOffsetX
-	sta FrogNewPMX
+;	sta FrogNewPMX
 
 	lda #OFF_FROGY           ; Set new Y position to origin. (row 18)
 	sta WobOffsetY
-	sta FrogNewPMY
+;	sta FrogNewPMY
 
-	lda #SHAPE_FROG          ; Set new frog shape.
-	sta FrogNewShape
+;	lda #SHAPE_FROG          ; Set new frog shape.
+;	sta FrogNewShape
 
-	lda #1
-	sta FrogEyeball          ; Set default eyeball shape (1 is default/centered)
+;	lda #1
+;	sta FrogEyeball          ; Set default eyeball shape (1 is default/centered)
 
 	jsr WobbleDeWobbleX_Now  ; Force immediate calculation of new X position.
 	jsr WobbleDeWobbleY_Now  ; Force immediate calculation of new Y position.
 
-	sta FrogUpdate           ; and finally enable VBI to start P/M redraw. (>0 is ON)
+	jsr SetFrogOnScreen      ; set Frog shape, set eye position, turn on VBI updates.
+;	sta FrogUpdate           ; and finally enable VBI to start P/M redraw. (>0 is ON)
 
 	rts
 
@@ -148,18 +150,20 @@ SetupGame
 	ldx #18                 ; 18 (dec), number of screen rows of game field.
 	stx FrogNewRow
 	stx FrogRow
-	
+
 	lda FROG_PMY_TABLE,x    ; Get the new Player/Missile Y position based on row number.
 	sta FrogNewPMY          ; Update Frog position on screen. 
 
 	lda #MID_FROGX          ; Set new X position to middle of screen.
 	sta FrogNewPMX
 
-	lda #SHAPE_FROG         ; Set new frog shape.
-	sta FrogNewShape
+	jsr SetFrogOnScreen      ; set Frog shape, set eye position, turn on VBI updates.
 
-	lda #1
-	sta FrogUpdate
+;	lda #SHAPE_FROG         ; Set new frog shape.
+;	sta FrogNewShape
+
+;	lda #1
+;	sta FrogUpdate
 
 	jsr PlayWaterFX         ; Start water noises.  Now.
 
@@ -323,15 +327,15 @@ SetupTransitionToGameOver
 	lda #DEAD_FADE_SPEED   ; Animation moving speed.
 	jsr ResetTimers 
 
-	lda #1                 ; set Stage 1 for fade out.
-	sta EventStage
+;	lda #0                 ; set Stage 1 for fade out.
+;	sta EventStage
 
-	lda #47                ; Set line number for the fade.
-	sta EventCounter2
+;	lda #47                ; Set line number for the fade.
+;	sta EventCounter2
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
 
-	jsr RemoveFrogOnScreen  ; Hide the Player/Missile
+	jsr RemoveFrogOnScreen ; Tell VBI to erase and stop redrawing the animated object.
 
 	lda #EVENT_TRANS_OVER ; Change to transition to Game Over.
 	sta CurrentEvent
@@ -352,28 +356,32 @@ SetupGameOver
 	lda #GAME_OVER_SPEED   ; Animation moving speed.
 	jsr ResetTimers
 
-	lda #DISPLAY_OVER          ; Tell VBI to change screens.
-	jsr ChangeScreen           ; Then copy the color tables.
+	lda #DISPLAY_OVER      ; Tell VBI to change screens.
+	jsr ChangeScreen       ; Then copy the color tables.
 
-	lda #0                     ; base color for sine scroll. 
+	lda #0                 ; base color for sine scroll. 
 	sta EventCounter
+	sta EventStage         ; And set stage 0 for color scroll and waiting for input.
 
-	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
+;	lda #0                 ; Zero "old" position to trigger Updates to redraw first time.
 	sta FrogPMX
 	sta FrogPMY
-	sta FrogShape           ; 0 is "off"  (it would already be off by default)
+	sta FrogShape          ; 0 is "off"  (it would already be off by default)
 
-	lda #OFF_TOMBX          ; Set new X position to middle of screen.
+	lda #OFF_TOMBX         ; Set new X position to middle of screen.
 	sta WobOffsetX
-	sta FrogNewPMX
+;	sta FrogNewPMX
 
 	lda #OFF_TOMBY          ; Set new Y position to origin. (row 18)
 	sta WobOffsetX
-	sta FrogNewPMY
+;	sta FrogNewPMY
 
 	lda #SHAPE_TOMB         ; Set new tomb shape.
 	sta FrogNewShape
-	
+
+	jsr WobbleDeWobbleX_Now  ; Force immediate calculation of new X position.
+	jsr WobbleDeWobbleY_Now  ; Force immediate calculation of new Y position.
+
 	lda #1
 	sta FrogUpdate
 

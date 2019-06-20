@@ -302,11 +302,11 @@
 ; Show the instruction/title screen.
 ; --------------------------------------------------------------------------
 
-DisplayTitleScreen
-	lda #DISPLAY_TITLE   ; Tell VBI to change screens.
-	jsr ChangeScreen     ; Then copy the color tables.
+;DisplayTitleScreen
+;	lda #DISPLAY_TITLE   ; Tell VBI to change screens.
+;	jsr ChangeScreen     ; Then copy the color tables.
 
-	rts
+;	rts
 
 
 ; ==========================================================================
@@ -315,21 +315,21 @@ DisplayTitleScreen
 ; Display the game screen.  (duh)
 ; --------------------------------------------------------------------------
 
-DisplayGameScreen
-	mRegSaveAYX             ; Save A and Y and X, so the caller doesn't need to.
-
-;	jsr SetBoatSpeed       ; Animation speed set by number of saved frogs
-
-	; Display the current score and number of frogs that crossed the river.
-	jsr CopyScoreToScreen
-	jsr PrintFrogsAndLives
-
-	lda #DISPLAY_GAME      ; Tell VBI to change screens.
-	jsr ChangeScreen       ; Then copy the color tables.
-
-	mRegRestoreAYX          ; Restore X, Y and A
-
-	rts
+;DisplayGameScreen
+;	mRegSaveAYX             ; Save A and Y and X, so the caller doesn't need to.
+;
+;;	jsr SetBoatSpeed       ; Animation speed set by number of saved frogs
+;
+;	; Display the current score and number of frogs that crossed the river.
+;	jsr CopyScoreToScreen
+;	jsr PrintFrogsAndLives
+;
+;	lda #DISPLAY_GAME      ; Tell VBI to change screens.
+;	jsr ChangeScreen       ; Then copy the color tables.
+;
+;	mRegRestoreAYX          ; Restore X, Y and A
+;
+;	rts
 
 
 ; ==========================================================================
@@ -349,8 +349,8 @@ MyScore .sb "00000000"
 HiScore .sb "00000000"
 
 CopyScoreToScreen
-	ldx #7
 
+	ldx #7
 DoUpdateScreenScore
 	lda MyScore,x       ; Read from Score buffer
 	sta SCREEN_MYSCORE,x
@@ -372,9 +372,10 @@ DoUpdateScreenScore
 ; --------------------------------------------------------------------------
 
 ClearSavedFrogs
-	lda #INTERNAL_SPACE ; Blank space (zero)
-	ldx #16
 
+	lda #INTERNAL_SPACE ; Blank space (zero)
+
+	ldx #16
 RemoveFroggies
 	sta SCREEN_SAVED,x       ; Write to screen. (second line, 24th position)
 	dex                      ; Decrement number of frogs.
@@ -383,7 +384,6 @@ RemoveFroggies
 	sta FrogsCrossed         ; reset count to 0.
 	sta FrogsCrossedIndex    ; and the base index into difficulty arrays
 	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
-;	jsr SetBoatSpeed         ; just in case
 
 	rts
 
@@ -401,20 +401,21 @@ RemoveFroggies
 ; --------------------------------------------------------------------------
 
 PrintFrogsAndLives
+
 	ldx FrogsCrossed    ; Number of times successfully crossed the rivers.
 	beq WriteLives      ; then nothing to display. Skip to do lives.
 
 	cpx #18             ; Limit saved frogs to the remaining width of screen
 	bcc SavedFroggies
-	ldx #17
 
-SavedFroggies ; Write an alternating pattern of Frog1, Frog2 characters.
+	ldx #17
+SavedFroggies           ; Write an alternating pattern of Frog1, Frog2 characters.
 	lda #I_FROG1        ; On Atari we're using tab/$7f as a frog shape.
-	sta SCREEN_SAVED,x  ; Write to screen. 
+	sta SCREEN_SAVED-1,x  ; Write to screen. 
 	dex                 ; Decrement number of frogs.
 	beq WriteLives      ; Reached 0, stop adding frogs.
 	lda #I_FROG2        ; On Atari we're using del/$7e as a frog shape.
-	sta SCREEN_SAVED,x  ; Write to screen. 
+	sta SCREEN_SAVED-1,x  ; Write to screen. 
 	dex                 ; Decrement number of frogs.
 	bne SavedFroggies   ; then go back and display the next frog counter.
 
@@ -444,6 +445,7 @@ WriteLives
 ; --------------------------------------------------------------------------
 
 ChangeScreen
+
 	jsr HideButtonPrompt              ; Always tell the VBI to stop the prompt.
 
 	sta VBICurrentDL                  ; Tell VBI to change to new display mode.
@@ -499,17 +501,12 @@ LoopChangeScreenWaitForVBI            ; Wait for VBI to signal the values change
 ; --------------------------------------------------------------------------
 
 ZeroCurrentColors
-	ldy #22
+
 	lda #0
+	ldy #22
 
 LoopZeroColors
-	sta COLBK_TABLE,y
-	sta COLPF0_TABLE,y
-	sta COLPF1_TABLE,y
-	sta COLPF2_TABLE,y
-	sta COLPF3_TABLE,y
-
-	dey
+	jsr NukeAllColorsFromOrbitToBeSure ; Sets all colors.  Decrements Y.
 	bpl LoopZeroColors
 
 	jsr HideButtonPrompt
@@ -531,6 +528,7 @@ LoopZeroColors
 ; --------------------------------------------------------------------------
 
 FlipOffEverything
+
 	and EverythingMatches
 	sta EverythingMatches    ; Save the finished flag.  
 	lda #0                   ; So the caller can BEQ
@@ -559,15 +557,15 @@ DeadFrogRain
 
 	ldy #1 ; Top 20 lines of screen...
 DeadLoopTopOverGrey
-	jsr GameOverGreyScroll      ; Increments and color stuffing.
+	jsr DeadFrogGreyScroll      ; Increments and color stuffing.
 	cpy #21                     ; Reached the 9th line?
-	bne DeadLoopTopOverGrey         ; No, continue looping.
+	bne DeadLoopTopOverGrey     ; No, continue looping.
 
 	ldy #27 ; Bottom 20 lines of screen (above prompt and credits.
 DeadLoopBottomOverGrey
-	jsr GameOverGreyScroll      ; Increments and color stuffing.
+	jsr DeadFrogGreyScroll      ; Increments and color stuffing.
 	cpy #47                     ; Reached the 23rd line?
-	bne DeadLoopBottomOverGrey      ; No, continue looping.
+	bne DeadLoopBottomOverGrey  ; No, continue looping.
 ;	beq EndDeadScreen
 	
 	rts
@@ -576,26 +574,71 @@ DeadLoopBottomOverGrey
 ; ==========================================================================
 ; BLACK SPLASH BACKGROUND                                           A  Y  
 ; ==========================================================================
-; For the Splash screens, set the background above the text and below the 
-; text to black.  No gradual fading.
+; For the Splash screens, set the background above the big splash text 
+; and below the text to black.  No gradual fading.
+;
+; On switching to the game screen from a splash screen there is 
+; sometimes flashing of the score line.  This was because splash 
+; screens were not using COLPF1, but the values were still present 
+; from the game and were visible for a moment when the display changes
+; back to the game.  So, for the sake of mental cleanliness the program 
+; nukes the entire set of colors from orbit. Its the only way to be sure.
+;
+; Only on the game over screen also do lines 21 to 26 for the text.
 ; --------------------------------------------------------------------------
 
 BlackSplashBackground
 
 	lda #COLOR_BLACK
-	ldy #1 ; Top 20 lines of screen...
-SplashLoopTopToBlack
-	sta COLBK_TABLE,y 
-	iny
-	cpy #21                     ; Filling the top
-	bne SplashLoopTopToBlack         ; No, continue looping.
 
-	ldy #27 ; Bottom 20 lines of screen (above prompt and credits.
+	ldy #20 ; Top 20 lines of screen...
+SplashLoopTopToBlack                   ; Filling the top
+	jsr NukeAllColorsFromOrbitToBeSure ; Also decrements Y
+	bne SplashLoopTopToBlack           ; Continue looping.  Ends at 0.
+
+	ldx CurrentDL                      ; Only the Game Over display clears the middle.
+	cpx #DISPLAY_OVER                  ; Is it game over?
+	bne ContinueSplashBottomToBlack    ; Nope.  Skip to the bottom
+
+	ldy #26 ; Middle six lines of the text background. 
+SplashLoopMidToBlack
+	sta COLBK_TABLE,y ; only background, because we need to fade text later.
+	dey
+	cpy #20                            ; Filling the middle
+	bne SplashLoopMidToBlack           ; No, continue looping.
+
+ContinueSplashBottomToBlack
+	ldy #46 ; Bottom 20 lines of screen (above prompt and credits.
 SplashLoopBottomToBlack
-	sta COLBK_TABLE,y 
-	iny
-	cpy #47                     ; Reached the 23rd line?
-	bne SplashLoopBottomToBlack      ; No, continue looping.
+	jsr NukeAllColorsFromOrbitToBeSure ; Also decrements Y
+
+	cpy #26                            ; Reached the last line?
+	bne SplashLoopBottomToBlack        ; No, continue looping.
+
+	rts
+
+
+; ==========================================================================
+; NUKE ALL COLORS FROM ORBIT TO BE SURE                               A  Y  
+; ==========================================================================
+; Support function for setting colors.
+; Write the same value to a specific entry in all color tables.
+; Typically, this will be black.
+; Then decrement the Y index.
+;
+; A = the color value to use.
+; Y = the index into the color tables.
+; --------------------------------------------------------------------------
+
+NukeAllColorsFromOrbitToBeSure
+
+	sta COLBK_TABLE,y           ; Zero Background
+	sta COLPF0_TABLE,y          ; Zero pixel (or text)
+	sta COLPF1_TABLE,y          ; Zero text
+	sta COLPF2_TABLE,y          ; Zero something else
+	sta COLPF3_TABLE,y          ; Zero this too
+
+	dey
 
 	rts
 
@@ -645,6 +688,7 @@ LoopTextBackToBlack
 	lda #$FF   ; Really, really done.
 
 EndFadeSplashTextBackground
+
 	rts
 
 
@@ -700,16 +744,18 @@ EndFadeSplashText
 ; COMMON SPASH FADE 123                                           
 ; ==========================================================================
 ; One set of code to run Stage 1, 2, 3, screen fade results.
-; 1) Black background for scrolling colors.
-; 2) Fade background colors behind text.
+; 1) Black background for scrolling colors in one pass.
+; 2) Fade background colors behind text until it reaches 0.
 ; 3) Fade text colors to black.
 ;
 ; Expectations:
-; Eventcounter is initialized to $E0 before calling this.
+;;; EventCounter is initialized to $E0 before calling this.
 ; EventStage is initialized to 1 to start the first stage.
-; The called is expected to have a use for (to stop calling this)
-; when the EventStage = 4
+; The caller is expected to have a use for EventStage = 4 
+; (i.e to stop calling this.) 
 ;
+; The Game Over screen bypasses stage 2 as it finishes blacking its 
+; background during Stage 1.
 ; --------------------------------------------------------------------------
 
 CommonSplashFade
@@ -725,6 +771,11 @@ SplashStageOne                    ; Stage 1 is set background black.
 	lda #$0e
 	sta EventCounter              ; Luminance matching for fade
 	inc EventStage                ; Set Stage = 2
+
+	ldx CurrentDL                 ; The Game Over Display already cleared the entire background
+	cpx #DISPLAY_OVER             ; Is it Game Over? (and stage 2 is not needed?)
+	bne EndCommonSplashFade       ; No. End with Stage 2 as current stage
+	inc EventStage                ; Set Stage = 3
 	bne EndCommonSplashFade
 
 
@@ -738,7 +789,6 @@ SplashStageTwo                    ; Stage 2 is fading the text background
 	lda #$0e
 	sta EventCounter              ; Luminance matching for fade
 	inc EventStage                ; Set Stage = 3
-;	sta EventStage
 	bne EndCommonSplashFade
 
 
@@ -777,6 +827,7 @@ EndCommonSplashFade
 
 ; Such sloppiness....  gah!
 IncrementGameColor      ; Y = current color.   A = target color
+
 	sta TempTargetColor
 	and #$F0            ; Extract target color part (to be joined to current luminance)
 	sta TempSaveColor   ; Keep color
@@ -789,6 +840,7 @@ IncrementGameColor      ; Y = current color.   A = target color
 	iny
 	iny
 	tya                 ; A = new current color.
+	
 SkipIncCurrent
 	rts
 
@@ -913,9 +965,10 @@ CopyBaseColors
 
 
 ; ==========================================================================
-CopyColors_Title
- 	ldx #25 ; Title
 
+CopyColors_Title
+
+ 	ldx #25 ; Title
 bLoopCopyColorsToTitle
 	lda TITLE_BACK_COLORS,x
 	sta COLBK_TABLE,x
@@ -931,15 +984,20 @@ bLoopCopyColorsToTitle
 
 
 ; ==========================================================================
+
 CopyColors_Game
+
 	jsr ZeroCurrentColors ; "Game" starts at black screen and is faded up.
 
 	rts ; ChangeScreen is over.
 
 
-CopyColors_Win
-	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
+; ==========================================================================
 
+
+CopyColors_Win
+
+	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
 bLoopCopyColorsToWin
 	lda WIN_BACK_COLORS,x
 	sta COLBK_TABLE,x
@@ -954,9 +1012,10 @@ bLoopCopyColorsToWin
 
 
 ; ==========================================================================
-CopyColors_Dead
-	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
 
+CopyColors_Dead
+
+	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
 bLoopCopyColorsToDead
 	lda DEAD_BACK_COLORS,x
 	sta COLBK_TABLE,x
@@ -971,9 +1030,10 @@ bLoopCopyColorsToDead
 
 
 ; ==========================================================================
-CopyColors_Over
-	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
 
+CopyColors_Over
+
+	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
 bLoopCopyColorsTOver
 	lda OVER_BACK_COLORS,x
 	sta COLBK_TABLE,x
@@ -988,11 +1048,12 @@ bLoopCopyColorsTOver
 
 
 ; ==========================================================================
-; Redundant code section used for two separate loops in the Game Over event.
+; Redundant code section used for two separate loops in the Dead Frog event.
 ;
 ; --------------------------------------------------------------------------
 
-GameOverGreyScroll
+DeadFrogGreyScroll
+
 	sta COLBK_TABLE,y          ; Set line on screen
 	tax                         ; X = A
 	inx                         ; X = X + 1
@@ -1005,11 +1066,42 @@ GameOverGreyScroll
 
 
 ; ==========================================================================
+; Game Over background color scroll.
+;
+; --------------------------------------------------------------------------
+
+GameOverRedSine
+
+	ldx EventCounter         ; Get starting color index.
+	inx                      ; Next index. 
+	cpx #20                  ; Did index reach the repeat?
+	bne SkipZeroOverCycle    ; Nope.
+	ldx #0                   ; Yes, restart at 0.
+SkipZeroOverCycle
+	stx EventCounter         ; And save for next time.
+
+	ldy #1 ; All the background lines on the screen
+LoopTopOverSine
+	jsr OverRedScroll        ; Increments and color stuffing.
+	cpx #20
+	bne SkipZeroOverCycle2
+	ldx #0
+SkipZeroOverCycle2
+	cpy #47 ;                ; Reached the last line?
+	bne LoopTopOverSine      ; No, continue looping.
+
+;	beq EndGameOverScreen    ; Yes.  Exit now. 
+
+	rts
+
+
+; ==========================================================================
 ; Redundant code section used for two separate loops in the Dead Frog event.
 ;
 ; --------------------------------------------------------------------------
 
-DeadFrogRedScroll
+OverRedScroll
+
 	lda DEAD_COLOR_SINE_TABLE,x ; Get another color
 	sta COLBK_TABLE,y           ; Set line on screen
 	inx                         ; Next color entry
@@ -1037,6 +1129,7 @@ DEAD_COLOR_SINE_TABLE ; 20 entries.
 ; --------------------------------------------------------------------------
 
 WinColorScrollUp
+
 	sec
 	sbc #4                      ; Subtract 4
  	cmp #14                     ; Did it pass the limit (minimum 18, minus 4 == 14)
@@ -1059,6 +1152,7 @@ ExitWinColorScrollUp
 ; --------------------------------------------------------------------------
 
 WinColorScrollDown
+
 	clc
 	adc #4                      ; Add 4
  	cmp #242                    ; Did it pass the limit (max 238, plus 4 == 242)
@@ -1083,33 +1177,33 @@ WinRainbow
 ; ======================== T O P ========================  
 ; Color scrolling skips the black/grey/white values.  
 ; The scrolling uses values 238 to 18 step -4
-	lda EventCounter            ; Get starting value from last frame
-	jsr WinColorScrollUp        ; Subtract 4 and reset to start if needed.
-	sta EventCounter            ; Save it for next time.
+	lda EventCounter        ; Get starting value from last frame
+	jsr WinColorScrollUp    ; Subtract 4 and reset to start if needed.
+	sta EventCounter        ; Save it for next time.
 
 	ldy #1 ; Color the Top 20 lines of screen...
 LoopTopWinScroll
-	sta COLBK_TABLE,y           ; Set color for line on screen
-	jsr WinColorScrollUp        ; Subtract 4 and reset to start if needed.
+	sta COLBK_TABLE,y       ; Set color for line on screen
+	jsr WinColorScrollUp    ; Subtract 4 and reset to start if needed.
 
-	iny                         ; Next line on screen.
-	cpy #21                     ; Reached the 20th (21st table entry) line?
-	bne LoopTopWinScroll        ; No, continue looping.
+	iny                     ; Next line on screen.
+	cpy #21                 ; Reached the 20th (21st table entry) line?
+	bne LoopTopWinScroll    ; No, continue looping.
 
-	pha                         ; Save current color to use as start value later.
+	pha                     ; Save current color to use as start value later.
 
 ; ======================== M I D D L E ========================  
 ; Background/COLBK in the text section is static in the color tables.
 ; Manipulate current color to make it the "inverse" color for the Text.
-	eor #$F0                    ; Invert color bits for the middle SAVED text.
-	and #$F0                    ; Truncate luminance bits.
-	ora #$02                    ; Start at +2.
+	eor #$F0                ; Invert color bits for the middle SAVED text.
+	and #$F0                ; Truncate luminance bits.
+	ora #$02                ; Start at +2.
 
-	ldy #26                     ; Start at bottom of text going backwards.
+	ldy #26                 ; Start at bottom of text going backwards.
 bews_LoopTextColors
-	sta COLPF0_TABLE,Y          ; Use as manipulated color for 
-	clc                         ; the six lines of giant label "text."
-	adc #2                      ; brightness:  2, 4, 6, 8, A, C
+	sta COLPF0_TABLE,Y      ; Use as manipulated color for 
+	clc                     ; the six lines of giant label "text."
+	adc #2                  ; brightness:  2, 4, 6, 8, A, C
 	dey
 	cpy #20
 	bne bews_LoopTextColors
@@ -1119,13 +1213,13 @@ bews_LoopTextColors
 
 ; Color scrolling skips the black/grey/white values.  
 ; The scrolling uses values 18 to 238 step +4
-	ldy #27                     ; Bottom 20 lines of screen (above prompt and credits.)
-LoopBottomWinScroll             ; Scroll colors in opposite direction
-	jsr WinColorScrollDown      ; Add 4, and reset to start if needed.
-	sta COLBK_TABLE,y          ; Set color for line on screen
-	iny                         ; Next line on screen.
-	cpy #47                     ; Reached the end, 20th line after text? 
-	bne LoopBottomWinScroll     ; No, continue looping.
+	ldy #27                 ; Bottom 20 lines of screen (above prompt and credits.)
+LoopBottomWinScroll         ; Scroll colors in opposite direction
+	jsr WinColorScrollDown  ; Add 4, and reset to start if needed.
+	sta COLBK_TABLE,y       ; Set color for line on screen
+	iny                     ; Next line on screen.
+	cpy #47                 ; Reached the end, 20th line after text? 
+	bne LoopBottomWinScroll ; No, continue looping.
 
 EndWinRainbow
 
@@ -1146,6 +1240,7 @@ EndWinRainbow
 ; --------------------------------------------------------------------------
 
 SliceColorAndLuma
+
 	sta SavePF                ; Save the incoming value
 	and #$F0                  ; Mask out the luminance.
 	sta SavePFC               ; Save just the color part.
@@ -1183,6 +1278,7 @@ ExitSliceColorAndLuma
 ; --------------------------------------------------------------------------
 
 FadeColPfToBlack
+
 	ldx EventCounter2         ; Row counter decrementing.
 
 	lda COLPF1_TABLE,x
@@ -1217,6 +1313,7 @@ ExitFadeColPfToBlack          ; Insure we're leaving with 0 for both colors 0.  
 ; --------------------------------------------------------------------------
 
 GreyEachColorTable
+
 	sta TempWipeColor
 
 	lda COLPF0_TABLE+3,x
@@ -1772,6 +1869,7 @@ SetFrogOnScreen
 ; --------------------------------------------------------------------------
 
 RemoveFrogOnScreen
+
 	lda #$FF           ; (<0 is shutdown)
 	sta FrogUpdate     ; Signal VBI to erase and do not redraw. 
 
@@ -1834,6 +1932,7 @@ libPmgInit
 ; -----------------------------------------------------------------------------
 
 libPmgMoveAllZero
+
 	lda #$00                ; 0 position
 	ldx #$03                ; four objects, 3 to 0
 
@@ -1857,6 +1956,7 @@ bLoopZeroPMPosition
 ; -----------------------------------------------------------------------------
 
 libPmgClearBitmaps
+
 	lda #$00
 	tax      ; count 0 to 255.
 
@@ -1881,6 +1981,7 @@ bCBloop
 ; -----------------------------------------------------------------------------
 
 libPmgSetColors
+
 	txa   ; Object number
 	asl   ; Times 2
 	asl   ; Times 4
@@ -1928,6 +2029,7 @@ WOBBLE_SINE_TABLE
 	.by $0c $0f $12 $15 $19 $1c $20 $24 
 
 WobbleDeWobble
+
 	lda AnimateFrames        ; Get the countdown timer for X movement.
 	bne CheckOnAnimateY      ; Not 0.  No X movement.  Go try Y movement.
 
@@ -1952,6 +2054,7 @@ EndWobbleDeWobble
 ; Working parts of the Wobble, callable by others.
 
 WobbleDeWobbleX_Now          ; jsr here to force wobble coordinates
+
 	inc WobbleX              ; Increment Index for X offset
 	lda WobbleX              ; Get new X index
 	and #$3F                 ; Limit to 0 to 63.
@@ -2011,6 +2114,7 @@ WobbleDeWobbleY_Now          ; jsr here to force wobble coordinates
 ; -----------------------------------------------------------------------------
 
 CheckRideTheBoat
+
 	lda FrogSafety               ; Is the frog already dead ?
 	bne ExitCheckRideTheBoat     ; Yes.   No need to check.
 
@@ -2045,6 +2149,7 @@ ExitCheckRideTheBoat
 ; -----------------------------------------------------------------------------
 
 EraseShape
+
 	lda FrogShape       ; Current shape?
 	beq ExitEraseShape  ; 0 is off. Nothing to Erase.
 
@@ -2085,6 +2190,7 @@ ExitEraseShape
 	lda FrogShape  ; return with value for caller.
 	rts
 
+
 ;==============================================================================
 ;											EraseGameBorder  A  X  Y
 ;==============================================================================
@@ -2092,6 +2198,7 @@ ExitEraseShape
 ; -----------------------------------------------------------------------------
 
 EraseGameBorder
+
 	lda #$00
 	sta HPOSP3
 	sta HPOSM3
@@ -2119,6 +2226,7 @@ begb_LoopFillBorder
 ; -----------------------------------------------------------------------------
 
 EraseTomb
+
 	lda #0
 	ldx FrogPMY            ; Old  Y
 	ldy #22
@@ -2169,11 +2277,7 @@ bLoopET_Erase
 
 	; rts
 
-	
-	
-	
-	
-	
+
 ;==============================================================================
 ;											EraseSplat  A  X  Y
 ;==============================================================================
@@ -2181,6 +2285,7 @@ bLoopET_Erase
 ; -----------------------------------------------------------------------------
 
 EraseSplat
+
 	lda #0
 	ldx FrogPMY            ; Old frog Y
 	ldy #10
@@ -2202,6 +2307,7 @@ bLoopES_Erase
 ; -----------------------------------------------------------------------------
 
 EraseFrog
+
 	lda #0
 	ldx FrogPMY            ; Old frog Y
 	ldy #10
@@ -2224,6 +2330,7 @@ bLoopEF_Erase
 ; -----------------------------------------------------------------------------
 
 DrawShape
+
 	lda FrogNewShape
 	beq ExitDrawShape  ; 0 is off.
 
@@ -2318,9 +2425,9 @@ bdgb_LoopFillBorder
 ; -----------------------------------------------------------------------------
 
 DrawTomb
+
 	ldx FrogNewPMY            ; New frog Y
 	ldy #22
-
 bLoopDT_DrawTomb
 	lda PLAYER0_GRAVE_DATA,y
 	sta PLAYERADR0+22,x
@@ -2351,9 +2458,9 @@ bLoopDT_DrawTomb
 ; -----------------------------------------------------------------------------
 
 DrawSplat
-	ldx FrogNewPMY               
-	ldy #10
 
+	ldx FrogNewPMY
+	ldy #10
 bLoopDS_DrawSplatFrog
 	lda PLAYER0_SPLATTER_DATA,y
 	sta PLAYERADR0+10,x
@@ -2375,6 +2482,7 @@ bLoopDS_DrawSplatFrog
 ; -----------------------------------------------------------------------------
 
 DrawFrog
+
 	ldx FrogNewPMY            ; New frog Y
 	ldy #10
 
@@ -2421,6 +2529,7 @@ bLoopDF_DrawFrog
 ; -----------------------------------------------------------------------------
 
 PositionShape
+
 	ldy FrogNewShape       ; Get new shape
 	cpy FrogShape          ; Is it different from the old shape?
 	bne bps_Test0          ; Yes.   Reposition is mandatory.
@@ -2465,6 +2574,7 @@ ExitPositionShape
 ; -----------------------------------------------------------------------------
 
 PositionTomb
+
 	ldx FrogNewPMX            ; New frog X...
 
 	; Do horizontal repositioning.
@@ -2508,6 +2618,7 @@ PositionTomb
 ; -----------------------------------------------------------------------------
 
 PositionSplat
+
 	ldx FrogNewPMX            ; New frog X...
 
 	; Do horizontal repositioning.
@@ -2549,6 +2660,7 @@ bps_SkipZeroP3
 ; -----------------------------------------------------------------------------
 
 PositionFrog
+
 	ldx FrogNewPMX            ; New frog X...
 
 	; Do horizontal repositioning.
@@ -2633,6 +2745,7 @@ bps_DoNoMoveMask
 ; -----------------------------------------------------------------------------
 
 UpdateShapeSpecs
+
 	lda FrogNewPMX       ; New Y coord.
 	sta FrogPMX
 
@@ -2665,6 +2778,7 @@ UpdateShapeSpecs
 ; -----------------------------------------------------------------------------
 
 UpdateShape
+
 	lda FrogUpdate       ; 
 	beq ExitUpdateShape  ; 0 == no movement.  skip all.
 
@@ -2698,6 +2812,7 @@ ExitUpdateShape
 ; -----------------------------------------------------------------------------
 
 ProcessNewShapePosition
+
 	lda FrogNewPMX      ; Is the new X different
 	cmp #MIN_FROGX      ; Is PM X smaller than the minimum?
 	bcs CheckHPOSMax    ; No.  
