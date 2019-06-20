@@ -45,7 +45,7 @@ DEAD_CYCLE_SPEED = 5   ; Speed of color animation on Dead screen
 WIN_FADE_SPEED   = 4   ; Fade the game screen to black to show Win
 WIN_CYCLE_SPEED  = 5   ; Speed of color animation on Win screen 
 
-GAME_OVER_SPEED  = 7  ; Speed of Game over background animation
+GAME_OVER_SPEED  = 4  ; Speed of Game over background animation
 
 
 ; Timer values.  NTSC.
@@ -406,8 +406,17 @@ DoAnimateClock
 ; It is MAIN's job to act when the timer is 0, and reset it if needed.
 DoAnimateClock2
 	lda AnimateFrames2           ; Is animation countdown already 0?
-	beq DoAnimateEyeballs        ; Yes, do not decrement now.
+	beq DoAnimateClock3        ; Yes, do not decrement now.
 	dec AnimateFrames2           ; Minus 1
+
+; ======== Manage Another Main code timer.  Decrement while non-zero. ========
+; It is MAIN's job to act when the timer is 0, and reset it if needed.
+DoAnimateClock3
+	lda AnimateFrames3           ; Is animation countdown already 0?
+	beq EndOfTimers              ; Yes, do not decrement now.
+	dec AnimateFrames3           ; Minus 1
+
+EndOfTimers
 
 ; ======== Manage Frog Eyeball motion ========
 ; If the timer is non-zero, Change eyeball position and force redraw.

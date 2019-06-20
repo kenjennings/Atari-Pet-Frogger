@@ -227,7 +227,8 @@ NextScoreDigit
 	dex                 ; decrement index to score digits.
 	bpl LoopClearScores ; went from 0 to $FF? no, loop for next digit.
 
-	lda #3              ; Reset number of
+;	lda #3              ; Reset number of
+	lda #1              ; Reset number of
 	sta NumberOfLives   ; lives to 3.
 
 ;	lda #0

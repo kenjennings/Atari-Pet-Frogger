@@ -46,8 +46,7 @@ EVENT_WIN         = 6  ; Crossed the river!
 
 EVENT_TRANS_DEAD  = 7  ; Transition animation from Game to Dead.
 EVENT_DEAD        = 8  ; Yer Dead!
-;EVENT_DEAD_FADE   = 9  ; Transition from Dead to Black. 
-	
+
 EVENT_TRANS_OVER  = 9  ; Transition animation from Dead to Game Over.
 EVENT_OVER        = 10  ; Game Over.
 
@@ -70,6 +69,7 @@ EVENT_TRANS_TITLE = 11 ; Transition animation from Game Over to Title.
 ; Transition to Title from here and all other events 
 ; will use non-zero events.
 ; --------------------------------------------------------------------------
+
 EventGameInit
 	; Atari initialization stuff...
 
@@ -143,6 +143,7 @@ EventGameInit
 ; --------------------------------------------------------------------------
 
 EventTransitionToTitle
+
 	lda AnimateFrames          ; Did animation counter reach 0 ?
 	bne EndTransitionToTitle   ; Nope.  Nothing to do.
 	lda #TITLE_SPEED           ; yes.  Reset it.
@@ -238,6 +239,7 @@ EndTransitionToTitle
 ; lack of design planning, blah blah.
 ; The title screen has already been presented by Transition To Title.
 ; --------------------------------------------------------------------------
+
 EventScreenStart            ; This is New Game and Transition to title.
 
 	jsr ClearSavedFrogs     ; Erase the saved frogs from the screen. (Zero the count)
@@ -256,7 +258,9 @@ EventScreenStart            ; This is New Game and Transition to title.
 ; 2) Wait for joystick button.
 ; 3) Setup for next transition.
 ; --------------------------------------------------------------------------
+
 EventTitleScreen
+
 	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
 	jsr RunPromptForButton     ; Blink Prompt to press Joystick button and check input.
 	beq EndTitleScreen         ; Nothing pressed, done with title screen.
@@ -286,7 +290,9 @@ EndTitleScreen
 ;          Decrease COLPF1 brightness from top to bottom.
 ;          When COLPF1 reaches 0 change COLPF2 to COLOR_BLACK.
 ; --------------------------------------------------------------------------
+
 EventTransitionToGame
+
 	lda AnimateFrames        ; Did animation counter reach 0 ?
 	bne EndTransitionToGame  ; Nope.  Nothing to do.
 	lda #TITLE_WIPE_SPEED    ; yes.  Reset it.
@@ -396,10 +402,12 @@ EndTransitionToGame
 ; VBI moves frog if frog is on a boat row.
 ; VBI animates boat parts.
 ; --------------------------------------------------------------------------
+
 EventGameScreen
 ; ==========================================================================
 ; GAME SCREEN - Joystick Input Section
 ; --------------------------------------------------------------------------
+
 	; VBI manages frog falling off the boats.
 	lda FrogSafety           ; Did the VBI flag the Shrodinger's frog is dead?
 	bne DoSetupForYerDead    ; Yes.  No input allowed.  Start the funeral.
@@ -490,7 +498,9 @@ EndGameScreen
 ; 2) Display the Frogs SAVED!
 ; 3) Setup to do the Win screen event.
 ; --------------------------------------------------------------------------
+
 EventTransitionToWin
+
 	jsr SetupWin             ; Setup for Wins screen 
 
 EndTransitionToWin
@@ -508,7 +518,9 @@ EndTransitionToWin
 ; 
 ; Setup for next transition.
 ; --------------------------------------------------------------------------
+
 EventWinScreen
+
 	lda EventStage              ; Stage 0 is waiting for input
 	bne WinScreenCheckTimers    ; If not stage 0, then no input.
 
@@ -561,6 +573,7 @@ EndWinScreen
 ; --------------------------------------------------------------------------
 
 EventTransitionToDead
+
 	lda AnimateFrames        ; Did animation counter reach 0 ? (1.5 sec delay)
 	bne EndTransitionToDead  ; Nope.  Nothing to do.
 	lda #FROG_WAKE_SPEED     ; yes.  Reset it. (2 more seconds) to wait for stage 2
@@ -597,7 +610,7 @@ SkipGreyFrog
 ;	sta COLPF2_TABLE+21
 
 	lda #2
-	sta EventStage         ; Identify Stage 2 
+	sta EventStage           ; Identify Stage 2 
 	bne EndTransitionToDead  ; Nothing else to do.
 	; When the first mourning timer ran out, it was reset to FROG_WAKE_SPEED again, 
 	; so it will be another 2 seconds before Stage 2 can start. 
@@ -621,7 +634,9 @@ EndTransitionToDead
 ; 3) Fade text colors to black.
 ; 4) Determine transition to Game or GameOver.
 ; --------------------------------------------------------------------------
+
 EventDeadScreen
+
 	lda EventStage              ; Stage 0 is waiting for input
 	bne DeadScreenCheckTimers   ; Not stage 0, skip button check
 
@@ -689,7 +704,9 @@ EndDeadScreen
 ;
 ; Not feeling enterprising, so just use the Fade value from the Dead event.
 ; --------------------------------------------------------------------------
+
 EventTransitionGameOver
+
 	lda AnimateFrames         ; Did animation counter reach 0 ?
 	bne EndTransitionGameOver ; Nope.  Nothing to do.
 	lda #GAME_OVER_SPEED      ; yes.  Reset it.
@@ -708,9 +725,15 @@ EndTransitionGameOver
 ; The Activity in the transition area, based on timer.
 ;
 ; --------------------------------------------------------------------------
+
 EventGameOverScreen
 
 	lda EventStage              ; Stage 0 is waiting for input
+	clc
+	adc #$10
+	sta SCREEN_SAVED+8
+	
+	lda EventStage
 	bne OverScreenCheckTimers   ; Not stage 0, skip button check
 
 	jsr WobbleDeWobble          ; tomb drawing spirograph art on the game over.  must do every frame.
@@ -720,6 +743,13 @@ EventGameOverScreen
 ProcessGameOverScreenInput      ; a key is pressed. Prepare for the screen transition.
 	jsr HideButtonPrompt        ; Turn off the prompt
 	inc EventStage              ; Setup Stage 1 for the screen fading ...
+	
+	lda EventStage              ; Stage 0 is waiting for input
+	clc
+	adc #$10
+	sta SCREEN_SAVED+8
+	lda EventStage
+	
 	jsr RemoveFrogOnScreen      ; Tell VBI to erase and stop redrawing the animated object.
 
 OverScreenCheckTimers
@@ -729,10 +759,11 @@ OverScreenCheckTimers
 	lda #GAME_OVER_SPEED        ; yes.  Reset animation timer.
 	jsr ResetTimers
 
-	jsr GameOverRedSine         ; Load up the background colors. 
+
 
 	lda EventStage   
 OverStageZero                   ; Stage 0  cycling the background.
+;	beq EndGameOverScreen       ; Yes.  Exit now.
 ;	cmp #0
 	bne OverStageOne            ; non zero is stage 1 or 2 or 3 or ...
 
@@ -745,7 +776,7 @@ OverStageOne ; and Stage Two and Three for the fade out effects.
 ; The actual end.
 
 OverStage4
-	cmp #4                     ; Is EventStage == 4?
+	cmp #4                      ; Is EventStage == 4?
 	bne EndGameOverScreen
 
 	jsr SetupTransitionToTitle
@@ -753,4 +784,4 @@ OverStage4
 EndGameOverScreen
 
 	rts
-
+Over

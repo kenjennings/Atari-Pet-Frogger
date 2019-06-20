@@ -22,7 +22,6 @@ EVENT_TARGET_TABLE
 	.word EventWinScreen-1          ; 6  = EVENT_WIN      
 	.word EventTransitionToDead-1   ; 7  = EVENT_TRANS_DEAD  
 	.word EventDeadScreen-1         ; 8  = EVENT_DEAD      
-;	.word EventDeadFade-1           ; 9  = EVENT_FADE
 	.word EventTransitionGameOver-1 ; 9  = EVENT_TRANS_OVER 
 	.word EventGameOverScreen-1     ; 10 = EVENT_OVER      
 	.word EventTransitionToTitle-1  ; 11 = EVENT_TRANS_TITLE

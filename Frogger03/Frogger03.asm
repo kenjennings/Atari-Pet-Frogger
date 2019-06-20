@@ -408,7 +408,7 @@ NextHSCROL   .byte $00
 ; Main code acts on value 0.
 AnimateFrames    .byte $00 
 AnimateFrames2   .byte $00
-
+AnimateFrames3   .byte $00  ; WobbleDeWobble
 
 ; ======== V B I ======== MANAGE DISPLAY LISTS
 ; DISPLAY_TITLE = 0

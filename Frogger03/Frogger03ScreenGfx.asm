@@ -636,7 +636,14 @@ NukeAllColorsFromOrbitToBeSure
 	sta COLPF0_TABLE,y          ; Zero pixel (or text)
 	sta COLPF1_TABLE,y          ; Zero text
 	sta COLPF2_TABLE,y          ; Zero something else
+	pha
+	ldx CurrentDL
+	cpx #DISPLAY_OVER
+	bne DoNotUseWhite
+	lda #COLOR_BLACK+$0e
+DoNotUseWhite
 	sta COLPF3_TABLE,y          ; Zero this too
+	pla
 
 	dey
 
@@ -772,10 +779,25 @@ SplashStageOne                    ; Stage 1 is set background black.
 	sta EventCounter              ; Luminance matching for fade
 	inc EventStage                ; Set Stage = 2
 
+	lda EventStage              ; Stage 0 is waiting for input
+	clc
+	adc #$10
+	sta SCREEN_SAVED+8
+	lda EventStage
+	
+
 	ldx CurrentDL                 ; The Game Over Display already cleared the entire background
 	cpx #DISPLAY_OVER             ; Is it Game Over? (and stage 2 is not needed?)
 	bne EndCommonSplashFade       ; No. End with Stage 2 as current stage
 	inc EventStage                ; Set Stage = 3
+	
+	lda EventStage              ; Stage 0 is waiting for input
+	clc
+	adc #$10
+	sta SCREEN_SAVED+8
+	lda EventStage
+	
+	
 	bne EndCommonSplashFade
 
 
@@ -789,6 +811,14 @@ SplashStageTwo                    ; Stage 2 is fading the text background
 	lda #$0e
 	sta EventCounter              ; Luminance matching for fade
 	inc EventStage                ; Set Stage = 3
+	
+	lda EventStage              ; Stage 0 is waiting for input
+	clc
+	adc #$10
+	sta SCREEN_SAVED+8
+	lda EventStage
+	
+	
 	bne EndCommonSplashFade
 
 
@@ -800,6 +830,12 @@ SplashStageThree                  ; Stage 3 is fading the text
 	bpl EndCommonSplashFade
 
 	inc EventStage                ; Set Stage = 4
+	
+	lda EventStage              ; Stage 0 is waiting for input
+	clc
+	adc #$10
+	sta SCREEN_SAVED+8
+	lda EventStage
 
 EndCommonSplashFade
 	lda EventStage                ; Make sure A = EventStage on exit.
@@ -2000,7 +2036,7 @@ libPmgSetColors
 
 
 ; ==========================================================================
-; WOBBLE DE WOBBLE                           A  X  
+; WOBBLE DE WOBBLE                                                 A  X  
 ; ==========================================================================
 ; Frog (etc) Gymnastics.
 ; On the title screen the frog moves in a sine path from  +88 to +160.
@@ -2016,6 +2052,8 @@ libPmgSetColors
 ; The frog Y center position is offset slightly differently from 
 ; the X Center.
 ; This same code is used for the Tomb/gravestone on the GameOver screen.
+;
+; Uses AnimateFrame2 and AnimateFrames3
 ; --------------------------------------------------------------------------
 
 WOBBLE_SINE_TABLE
@@ -2030,11 +2068,11 @@ WOBBLE_SINE_TABLE
 
 WobbleDeWobble
 
-	lda AnimateFrames        ; Get the countdown timer for X movement.
+	lda AnimateFrames3        ; Get the countdown timer for X movement.
 	bne CheckOnAnimateY      ; Not 0.  No X movement.  Go try Y movement.
 
 	lda #WOBBLEX_SPEED       ; Reset the X movement timer.
-	sta AnimateFrames        
+	sta AnimateFrames3        
 
 	jsr WobbleDeWobbleX_Now  ; Do the actual X wobble work.
 
@@ -2049,7 +2087,6 @@ CheckOnAnimateY
 
 EndWobbleDeWobble
 	rts
-
 
 ; Working parts of the Wobble, callable by others.
 
@@ -2066,7 +2103,6 @@ WobbleDeWobbleX_Now          ; jsr here to force wobble coordinates
 	sta FrogNewPMX           ; Tell VBI where to draw the object.
 
 	rts
-
 
 ; Working parts of the Wobble, callable by others.
 
@@ -2247,35 +2283,6 @@ bLoopET_Erase
 	bpl bLoopET_Erase
 
 	rts
-
-
-	
-	
-	; DrawTomb
-	; ldx FrogNewPMY            ; New frog Y
-	; ldy #22
-
-; bLoopDT_DrawTomb
-	; lda PLAYER0_GRAVE_DATA,y
-	; sta PLAYERADR0+22,x
-
-	; lda PLAYER1_GRAVE_DATA,y
-	; sta PLAYERADR1+22,x
-
-	; lda PLAYER2_GRAVE_DATA,y
-	; sta PLAYERADR2+22,x
-
-	; lda PLAYER3_GRAVE_DATA,y
-	; sta PLAYERADR3+22,x
-
-	; lda PLAYER5_GRAVE_DATA,y
-	; sta MISSILEADR+22,x
-
-	; dex
-	; dey
-	; bpl bLoopDT_DrawTomb
-
-	; rts
 
 
 ;==============================================================================

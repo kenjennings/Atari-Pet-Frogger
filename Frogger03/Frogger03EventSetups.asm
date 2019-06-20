@@ -335,7 +335,7 @@ SetupTransitionToGameOver
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
 
-	jsr RemoveFrogOnScreen ; Tell VBI to erase and stop redrawing the animated object.
+;	jsr RemoveFrogOnScreen ; Tell VBI to erase and stop redrawing the animated object.
 
 	lda #EVENT_TRANS_OVER ; Change to transition to Game Over.
 	sta CurrentEvent
