@@ -344,6 +344,12 @@
 ; This stays here and is copied to screen memory, because the math could
 ; temporarily generate a non-numeric character when there is carry, and I
 ; don't want that (possibly) visible on the screen however short it may be.
+; Also, we have run out of adequate page 0 space, so these need to be 
+; declared here, or wherever, doesn't matter... unless someone decides 
+; to put this in a ROM card and then this is a problem.  In that case 
+; there are a lot of things that have to change about screen memory and 
+; other lists. 
+; --------------------------------------------------------------------------
 
 MyScore .sb "00000000"
 HiScore .sb "00000000"
@@ -373,15 +379,15 @@ DoUpdateScreenScore
 
 ClearSavedFrogs
 
-	lda #INTERNAL_SPACE ; Blank space (zero)
+	lda #INTERNAL_SPACE ; Blank space. which also happens to be 0.
 
 	ldx #16
 RemoveFroggies
-	sta SCREEN_SAVED,x       ; Write to screen. (second line, 24th position)
-	dex                      ; Decrement number of frogs.
-	bne RemoveFroggies       ; then go back and display the next frog counter.
+	sta SCREEN_SAVED,x       ; Write to screen 
+	dex                      ; Erase county-counter frog character
+	bpl RemoveFroggies       ; then go back and remove the next frog counter.
 
-	sta FrogsCrossed         ; reset count to 0.
+	sta FrogsCrossed         ; reset count to 0.  (Remember A == space == 0 ?)
 	sta FrogsCrossedIndex    ; and the base index into difficulty arrays
 	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
 
@@ -779,11 +785,11 @@ SplashStageOne                    ; Stage 1 is set background black.
 	sta EventCounter              ; Luminance matching for fade
 	inc EventStage                ; Set Stage = 2
 
-	lda EventStage              ; Stage 0 is waiting for input
-	clc
-	adc #$10
-	sta SCREEN_SAVED+8
-	lda EventStage
+;	lda EventStage              ; Stage 0 is waiting for input
+;	clc
+;	adc #$10
+;	sta SCREEN_SAVED+8
+;	lda EventStage
 	
 
 	ldx CurrentDL                 ; The Game Over Display already cleared the entire background
@@ -791,11 +797,11 @@ SplashStageOne                    ; Stage 1 is set background black.
 	bne EndCommonSplashFade       ; No. End with Stage 2 as current stage
 	inc EventStage                ; Set Stage = 3
 	
-	lda EventStage              ; Stage 0 is waiting for input
-	clc
-	adc #$10
-	sta SCREEN_SAVED+8
-	lda EventStage
+;	lda EventStage              ; Stage 0 is waiting for input
+;	clc
+;	adc #$10
+;	sta SCREEN_SAVED+8
+;	lda EventStage
 	
 	
 	bne EndCommonSplashFade
@@ -812,11 +818,11 @@ SplashStageTwo                    ; Stage 2 is fading the text background
 	sta EventCounter              ; Luminance matching for fade
 	inc EventStage                ; Set Stage = 3
 	
-	lda EventStage              ; Stage 0 is waiting for input
-	clc
-	adc #$10
-	sta SCREEN_SAVED+8
-	lda EventStage
+;	lda EventStage              ; Stage 0 is waiting for input
+;	clc
+;	adc #$10
+;	sta SCREEN_SAVED+8
+;	lda EventStage
 	
 	
 	bne EndCommonSplashFade
@@ -831,11 +837,11 @@ SplashStageThree                  ; Stage 3 is fading the text
 
 	inc EventStage                ; Set Stage = 4
 	
-	lda EventStage              ; Stage 0 is waiting for input
-	clc
-	adc #$10
-	sta SCREEN_SAVED+8
-	lda EventStage
+;	lda EventStage              ; Stage 0 is waiting for input
+;	clc
+;	adc #$10
+;	sta SCREEN_SAVED+8
+;	lda EventStage
 
 EndCommonSplashFade
 	lda EventStage                ; Make sure A = EventStage on exit.

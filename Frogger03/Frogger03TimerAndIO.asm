@@ -58,9 +58,6 @@ GAME_OVER_SPEED  = 4  ; Speed of Game over background animation
 INPUTSCAN_FRAMES = $07 ; previously $09
 
 
-
-
-
 ; PAL Timer values.  PAL ?? guesses...
 ; About 7 keys per second.
 ; KEYSCAN_FRAMES = $07
@@ -309,10 +306,13 @@ MyDeferredVBI
 
 ; ======== Manage Frog Death  ========
 ; Here we are at the end of the frame.  Collision is checked first.  
-; Actual movement processing happens last.
-; If the CURRENT position of the frog is on a moving boat row, 
-; then go collect the collision information with the "safe" area of the boat 
-; (the horizontal lines).
+; The actual movement processing happens last.
+; If the CURRENT row of the frog is on a moving boat row, then go collect 
+; the collision information with the "safe" area of the boat 
+; (the horizontal lines, COLPF2 are the safety color).
+; "Current" from the VBI point of view means the last place the frog was 
+; displayed on the previous frame.  ("New" is where the frog will be 
+; displayed on the next frame.)
 ; The collision check code will flag the death accordingly.
 ; The Flag-Of-Death (FrogSafety) tells the Main code to splatter the frog 
 ; shape, and start the other activities to announce death.
@@ -326,7 +326,7 @@ ManageDeathOfASalesfrog
 	lda MOVING_ROW_STATES,x      ; Is the current Row a boat row?
 	beq EndOfDeathOfASalesfrog   ; No. So skip collision processing. 
 
-	jsr CheckRideTheBoat         ; Make sure the frog is riding the boat.  Otherwise it dies.
+	jsr CheckRideTheBoat         ; Make sure the frog is riding the boat. Otherwise it dies.
 
 EndOfDeathOfASalesfrog
 	sta HITCLR                   ; Always reset the P/M collision bits for next frame.
@@ -351,7 +351,8 @@ ManageBoatScrolling
 ; Common code to each row. 
 ; Loop through rows.
 ; If is is a moving row, then check the row's timer/frame counter.
-; If the timer is over, then reset the timer and fine scroll the row (moving the frog with it as needed.)
+; If the timer is over, then reset the timer, and then fine scroll 
+; the row (also moving the frog with it as needed.)
 LoopBoatScrolling
 	; Need row in X and Y due to different 6502 addressing modes in the timer and scroll functions.
 	tya                           ; A = Y, Current Row 
@@ -390,6 +391,7 @@ EndOfBoatScrolling
 
 
 ; ======== Manage InputScanFrames Delay Counter ========
+; It is MAIN's job to act when the timer is 0, and reset it if needed.
 DoManageInputClock
 	lda InputScanFrames          ; Is input delay already 0?
 	beq DoAnimateClock           ; Yes, do not decrement it again.
@@ -420,14 +422,19 @@ EndOfTimers
 
 ; ======== Manage Frog Eyeball motion ========
 ; If the timer is non-zero, Change eyeball position and force redraw.
+; This nicely multi-tasks the eyes to return to center even if MAIN is 
+; is not doing anything related to the frog.
 DoAnimateEyeballs
 	lda FrogRefocus              ; Is the eye move counter greater than 0?
 	beq EndOfClockChecks         ; No, Nothing else to do here.
 	dec FrogRefocus              ; Subtract 1.
 	bne EndOfClockChecks         ; Has not reached 0, so nothing left to do here.
+	lda FrogShape                ; Maybe the player raced the timer to the next screen...
+	cmp #SHAPE_FROG              ; ... so verify the frog is still displayable.
+	bne EndOfClockChecks         ; Not the frog, so do not animate eyes.
 	lda #1                       ; Inform the Frog renderer  
 	sta FrogEyeball              ; to use the default/centered eyeball.
-	sta FrogUpdate               ; Mandatory redraw.
+	sta FrogUpdate               ; and set mandatory redraw.
 
 EndOfClockChecks
 
@@ -553,40 +560,18 @@ ExitMyDeferredVBI
 		ldy ThisDLI
 	.endm
 
+
 ; Note that the Title screen uses the COLBK table for both COLBK and COLPF2.
 
-
-; This is called on a blank line and the background should already be black.  
-; This just makes sure everything is correct.
-; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
-
-; Save 3 bytes.  Use Score_DLI directly in the DLI address table.  duh.
-
 TITLE_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
-;	jmp Score_DLI
-
-
-; Save 3 bytes.  Use COLPF0_COLBK_DLI directly in the DLI address table.  duh.
-
-; TITLE_DLI_1 ; DLI sets COLBK and COLPF0 for title graphics.
-;	jmp COLPF0_COLBK_DLI
-
-; Save 3 bytes.  Use COLPF0_COLBK_DLI directly in the DLI address table.  duh.
-
-; TITLE_DLI_2 ; DLI sets only COLPF0 for title graphics.
-;	jmp COLPF0_COLBK_DLI
-
 
 TITLE_DLI_BLACKOUT  ; DLI Sets background to Black for blank area.
-;	mStart_DLI
 	pha
-;	jmp SetBlack_DLI
+
 	lda #COLOR_BLACK     ; Black for background and text background.
 	sta WSYNC            ; sync to end of scan line
 	sta COLBK            ; Write new border color.
 	sta COLPF2           ; Write new background color
-
-;	jmp Exit_DLI_WithoutYPrep
 
 	tya
 	pha
@@ -603,62 +588,20 @@ TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to
 TITLE_DLI_TEXTBLOCK
 	mStart_DLI
 
-;	lda COLPF1_TABLE,y   ; Get text color (luminance)
 	lda ColorPf1         ; Get text luminance from zero page.
 	sta COLPF1           ; write new text luminance.
 
-;	lda COLBK_TABLE,y   ; For Text Background.
 	lda ColorBak        ; Get background from zero page.
 	sta WSYNC
 	sta COLBK
 	sta COLPF2
 
-;	jmp Exit_DLI
-
 	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
-
-
-; Save 3 bytes.  Use DLI_SPC1 directly in the DLI address table.  duh.
-
-;TITLE_DLI_SPC1 ; How to solve getting from point A to point B with only a low byte address update
-;	jmp DLI_SPC1
-
 
 
 ;==============================================================================
 ; GAME DLIs
 ;==============================================================================
-
-; This is called on a blank line and the background should already be black.  
-; Since there is no text here (in blank line), it does not matter that COLPF1 is written before WSYNC.
-; Since the game fades the screen COLPF1 must pull from the table.
-
-; SCORES 1
-; GAME_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
-;	jmp Score_DLI
-
-; SCORES 2
-; GAME_DLI_1 ; DLI 1 sets COLPF1 for text. (e.g. for fading)
-;	jmp TITLE_DLI_5
-
-
-; A tiny version of TITLE_DLI_4.
-; DLI sets only COLPF1 text luminance from the table. (e.g. for fading)
-
-;Also apparently not used?
-;
-;GAME_DLI_1 
-;	mStart_DLI
-
-;	lda COLPF1_TABLE,y   ; Get text color (luminance)
-;	sta WSYNC
-;	sta COLPF1           ; write new text luminance.
-
-;;	jmp Exit_DLI
-
-;;	jmp SetupAllOnNextLine_DLI  ; iny, and load all colors.
-
-
 
 ; BEACH 0
 ; Sets colors for the first Beach line. 
@@ -671,8 +614,6 @@ TITLE_DLI_TEXTBLOCK
 ; beach line that follows.
 ; COLBAK's real land color is set last as it is the color used in the 
 ; lower part of the beach characters.
-;
-; Set Wide screen for Beach.
 
 GAME_DLI_BEACH0 
 GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
@@ -686,10 +627,6 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
 	; Make background temporarily match the playfield drawn this on the next line.
 	sta COLBK
 	sta COLPF0
-
-; Make Beach lines full horizontal overscan.  Looks more interesting-er.
-;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_WIDE
-;	sta DMACTL
 
 	tya
 	pha
@@ -715,10 +652,7 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
 ; Therefore, the color of the line is automatically matched to both prior and 
 ; the next lines without changing COLPF0.  (For the fading purpose COLPF0
 ; does need to get reset on the following blank line. 
-
 ; HSCROL is set early for the boats.  Followed by all color registers.
- 
-; Set Wide screen for Beach?
 
 GAME_DLI_BEACH2BOAT ; DLI sets HS, BK, COLPF3,2,1,0 for the Right Boats.
 GAME_DLI_BOAT2BOAT  ; DLI sets HS, BK, COLPF3,2,1,0 for the Left Boats.
@@ -727,80 +661,35 @@ GAME_DLI_BOAT2BOAT  ; DLI sets HS, BK, COLPF3,2,1,0 for the Left Boats.
 
 	lda NextHSCROL    ; Get boat fine scroll.
 	pha
-	
+
 	lda ColorBak
 	sta WSYNC
 	sta COLBK
-	
+
 	pla 
-;	lda NextHSCROL    ; Get boat fine scroll.
 	sta HSCROL        ; Ok to set now as this line does not scroll.
-
-
-
-; Reset the scrolling water line to normal width
-;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_NORMAL
-;	sta WSYNC
-;	sta DMACTL
 
 	jmp LoadAlmostAllBoatColors_DLI ; set colors.  setup next row.
 
 
-
-
-; Boats Left 2, 5, 8, 11 . . . .
-; Sets colors for the Left Boat lines coming from a Right Boat line.
-; This starts on the ModeC line which is followed by one blank scan line 
-; before the Left Boats.
-; The Mode C line uses only COLPF0 to match the previous water, and the 
+; BEACH 3, 6, 9, 12 . . . .
+; Sets colors for the Beach lines coming from a boat line. 
+; This is different from line 0, because the DLI starts with only one scan 
+; line of Mode C pixels (COLPF0) between the boats, and the Beach.
+; The Mode C line uses COLPF0 to match the previous water, with the 
 ; following "sky".
 ; Therefore, the color of the line is automatically matched to both prior and 
 ; the next lines without changing COLPF0.  (For the fading purpose it does 
-; need to get reset on the following blank line. 
-; HSCROL is set early for the boats.  Followed by all color registers.
- 
-; Set Wide screen for Beach?
-
-;GAME_DLI_BOAT2BOAT ; DLI sets HS, BK, COLPF3,2,1,0 for the Left Boats.
-
-;	mStart_DLI
-
-;	lda NextHSCROL    ; Get boat fine scroll.
-;	sta HSCROL        ; Ok to set now as this line does not scroll.
-
-;	lda ColorBak
-;	sta WSYNC
-;	sta COLBK
-
-;	jmp LoadAlmostAllBoatColors_DLI ; set colors.  setup next row.
-
-
-; Make Beach lines full horizontal overscan.  Looks more interesting-er.
-;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_WIDE
-;	sta DMACTL
-
-
-; BEACH 3, 6, 9, 12 . . . .
-; Sets colors for the Beach lines coming from a boat line. 
-; This is different from line 0, because the DLI starts with only one scan line
-; of Mode C pixels (COLPF0) between the boats, and the Beach.
-; The line uses only COLPF0 to match the previous water, and the following "sky".
-; Therefore, the color of the line is automatically matched to both prior and 
-; the next lines without changing COLPF0.  (For the fading purpose it does 
-; need to get set. 
-; Since the beam is in the middle of an already matching color this opearates
-; without WSYNC up front to set all the color registers as quickly as possible. 
+; need to get set. )
+; Since the beam is in the middle of an already matching color this routine 
+; can operate without WSYNC up front to set all the color registers as quickly 
+; as possible. 
 ; COLBAK can be re-set to its beach color last as it is the color used in the 
 ; lower part of the characters.
- 
-; Set Wide screen for Beach?
 
 GAME_DLI_BOAT2BEACH ; DLI sets COLPF1,2,3,COLPF0, BK for the Beach.
 
 	mStart_DLI
-
-	; custom startup to deal with a possible timing problem.
-;	pha 
 
 	lda ColorPF0 ; from Page 0.
 	; Different from BEACH0, because no WSYNC right here.
@@ -809,52 +698,7 @@ GAME_DLI_BOAT2BEACH ; DLI sets COLPF1,2,3,COLPF0, BK for the Beach.
 	sta COLBK
 	sta COLPF0
 
-; Make Beach lines full horizontal overscan.  Looks more interesting-er.
-;	lda #ENABLE_DL_DMA|PM_1LINE_RESOLUTION|ENABLE_PM_DMA|PLAYFIELD_WIDTH_WIDE
-;	sta DMACTL
-
-;	tya
-;	pha
-;	ldy ThisDLI
-
 	jmp LoadAlmostAllColors_DLI
-
-
-; ; BOATS 
-; ; Startup is beachline + 1 blank
-; ; Starts on BEACH line or Blank Line. 
-; ; Therefore setup and sync should have time to work
-; ; and an entire blank scan line follows before the boats.
-; GAME_DLI_3 ; DLI 3 sets COLPF0,1,2,3,BK and HSCROL for Boats.
-; ;	mStart_DLI
-
-	; ; custom startup to deal with a possible timing problem.
-	; pha 
-	; ; for the extra line Get color Rocks (or water color) instead of COLBK
-	; lda ColorBak      ; Get color background;  Page 0.
-	; pha
-	; lda NextHSCROL    ; Get boat fine scroll.
-
-	; sta WSYNC
-	; sta HSCROL
-	; pla
-	; sta COLBK
-
-	; tya
-	; pha
-	; ldy ThisDLI
-
-;	jmp LoadAllColors_DLI
-
-
-
-; GAME_DLI_5 ; Needs to set HSCROL for credits, then call to set text color.  LAST DLI on screen.
-	; mRegSaveAY
-
-; ;	lda CreditHSCROL      ; HScroll for credits.
-; ;	sta HSCROL
-
-	; jmp DLI_SPC2_SetCredits ; Finish by setting text luminance.
 
 
 ;==============================================================================
@@ -921,7 +765,6 @@ SetBlack_DLI
 	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
 
 
-
 ;==============================================================================
 ; EXIT DLI.
 ;==============================================================================
@@ -947,8 +790,6 @@ Exit_DLI
 
 DoNothing_DLI ; In testing mode jump here to not do anything or to stop the DLI chain.
 	rti
-
-
 
 
 ;==============================================================================
@@ -1018,6 +859,7 @@ DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
 
 	rti
 
+
 ;==============================================================================
 ; EXIT DLI.
 ;==============================================================================
@@ -1044,7 +886,6 @@ LoadAlmostAllColors_DLI
 	sta COLPF2
 	lda ColorPF3   ; Get color water (needed for fade-in)
 	sta COLPF3
-
 
 
 SetupAllOnNextLine_DLI

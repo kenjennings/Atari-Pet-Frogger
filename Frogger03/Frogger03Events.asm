@@ -728,50 +728,35 @@ EndTransitionGameOver
 
 EventGameOverScreen
 
-	lda EventStage              ; Stage 0 is waiting for input
-	clc
-	adc #$10
-	sta SCREEN_SAVED+8
-	
 	lda EventStage
-	bne OverScreenCheckTimers   ; Not stage 0, skip button check
+	bne OverScreenCheckTimers ; Not stage 0, skip button check
 
-	jsr WobbleDeWobble          ; tomb drawing spirograph art on the game over.  must do every frame.
-	jsr RunPromptForButton      ; Check button press.
-	beq OverScreenCheckTimers   ; No press.  Skip the input section.  continue with timers, color scrolling.
+	jsr WobbleDeWobble        ; tomb drawing spirograph art on the game over.  must do every frame.
+	jsr RunPromptForButton    ; Check button press.
+	beq OverScreenCheckTimers ; No press.  Skip the input section.  continue with timers, color scrolling.
 
-ProcessGameOverScreenInput      ; a key is pressed. Prepare for the screen transition.
-	jsr HideButtonPrompt        ; Turn off the prompt
-	inc EventStage              ; Setup Stage 1 for the screen fading ...
-	
-	lda EventStage              ; Stage 0 is waiting for input
-	clc
-	adc #$10
-	sta SCREEN_SAVED+8
-	lda EventStage
-	
-	jsr RemoveFrogOnScreen      ; Tell VBI to erase and stop redrawing the animated object.
+ProcessGameOverScreenInput    ; a key is pressed. Prepare for the screen transition.
+	jsr HideButtonPrompt      ; Turn off the prompt
+	inc EventStage            ; Setup Stage 1 for the screen fading ...
+
+	jsr RemoveFrogOnScreen    ; Tell VBI to erase and stop redrawing the animated object.
 
 OverScreenCheckTimers
 	; Animate the scrolling.
-	lda AnimateFrames           ; Did animation counter reach 0 ?
-	bne EndGameOverScreen       ; No. Nothing to do.
-	lda #GAME_OVER_SPEED        ; yes.  Reset animation timer.
+	lda AnimateFrames         ; Did animation counter reach 0 ?
+	bne EndGameOverScreen     ; No. Nothing to do.
+	lda #GAME_OVER_SPEED      ; yes.  Reset animation timer.
 	jsr ResetTimers
 
-
-
 	lda EventStage   
-OverStageZero                   ; Stage 0  cycling the background.
-;	beq EndGameOverScreen       ; Yes.  Exit now.
-;	cmp #0
-	bne OverStageOne            ; non zero is stage 1 or 2 or 3 or ...
+OverStageZero                 ; Stage 0  cycling the background.
+	bne OverStageOne          ; non zero is stage 1 or 2 or 3 or ...
 
-	jsr GameOverRedSine         ; Load up the background colors. 
-	beq EndGameOverScreen       ; Yes.  Exit now. 
+	jsr GameOverRedSine       ; Load up the background colors. 
+	beq EndGameOverScreen     ; Yes.  Exit now. 
 
-OverStageOne ; and Stage Two and Three for the fade out effects.
-	jsr CommonSplashFade ; Do Stage 1, 2, 3.  On exit, expect A = EventStage
+OverStageOne                  ; and Stage Two and Three for the fade out effects.
+	jsr CommonSplashFade      ; Do Stage 1, 2, 3.  On exit, expect A = EventStage, ends at 4
 
 ; The actual end.
 

@@ -327,15 +327,7 @@ SetupTransitionToGameOver
 	lda #DEAD_FADE_SPEED   ; Animation moving speed.
 	jsr ResetTimers 
 
-;	lda #0                 ; set Stage 1 for fade out.
-;	sta EventStage
-
-;	lda #47                ; Set line number for the fade.
-;	sta EventCounter2
-
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
-
-;	jsr RemoveFrogOnScreen ; Tell VBI to erase and stop redrawing the animated object.
 
 	lda #EVENT_TRANS_OVER ; Change to transition to Game Over.
 	sta CurrentEvent
@@ -353,22 +345,22 @@ SetupTransitionToGameOver
 
 SetupGameOver
 
-	lda #GAME_OVER_SPEED   ; Animation moving speed.
+	lda #GAME_OVER_SPEED    ; Animation moving speed.
 	jsr ResetTimers
 
-	lda #DISPLAY_OVER      ; Tell VBI to change screens.
-	jsr ChangeScreen       ; Then copy the color tables.
+	lda #DISPLAY_OVER       ; Tell VBI to change screens.
+	jsr ChangeScreen        ; Then copy the color tables.
 
-	lda #0                 ; base color for sine scroll. 
+	lda #0                  ; base color for sine scroll. 
 	sta EventCounter
-	sta EventStage         ; And set stage 0 for color scroll and waiting for input.
+	sta EventStage          ; And set stage 0 for color scroll and waiting for input.
 
-;	lda #0                 ; Zero "old" position to trigger Updates to redraw first time.
+;	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
 	sta FrogPMX
 	sta FrogPMY
-	sta FrogShape          ; 0 is "off"  (it would already be off by default)
+	sta FrogShape           ; 0 is "off"  (it would already be off by default)
 
-	lda #OFF_TOMBX         ; Set new X position to middle of screen.
+	lda #OFF_TOMBX          ; Set new X position to middle of screen.
 	sta WobOffsetX
 ;	sta FrogNewPMX
 
@@ -379,13 +371,13 @@ SetupGameOver
 	lda #SHAPE_TOMB         ; Set new tomb shape.
 	sta FrogNewShape
 
-	jsr WobbleDeWobbleX_Now  ; Force immediate calculation of new X position.
-	jsr WobbleDeWobbleY_Now  ; Force immediate calculation of new Y position.
+	jsr WobbleDeWobbleX_Now ; Force immediate calculation of new X position.
+	jsr WobbleDeWobbleY_Now ; Force immediate calculation of new Y position.
 
 	lda #1
 	sta FrogUpdate
 
-	lda #EVENT_OVER       ; Change to Game Over screen.
+	lda #EVENT_OVER         ; Change to Game Over screen.
 	sta CurrentEvent
 
 	rts

@@ -349,9 +349,8 @@ WobOffsetX        .byte 0         ; 84 for Frog. 80 for Tomb.
 WobOffsetY        .byte 0         ; 75 for Frog. XX for Tomb.
 
 
-
-
 ; ======== M O R E   M A I N   G L O B A L   S T U F F ======== 
+
 ; Input, event control, and timers.
 ; FYI: Frame counters are decremented each frame (by the VBI).
 ; Once they decrement to  0 they enable the related activity.

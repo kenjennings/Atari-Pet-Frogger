@@ -96,7 +96,7 @@ TITLE_DISPLAYLIST
 	.byte   DL_BLANK_8, DL_BLANK_8|DL_DLI  ; 16 blank scan lines. DLI 0/0 Score_DLI sets COLPF1, COLPF2, COLBK for score text. 
 	.byte   DL_BLANK_4                     ; 4 blank lines. 
 
-	mDL_LMS DL_TEXT_2,SCORE_MEM1           ; (1-8) scores
+	mDL_LMS DL_TEXT_4,SCORE_MEM1           ; (1-8) scores
 	.byte   DL_BLANK_8|DL_DLI              ; (9-16) An empty line. DLI 1/1 COLPF0_COLBK_DLI Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1.
 
 	;                                        Title Graphics...
@@ -205,12 +205,12 @@ GAME_DISPLAYLIST
 	.byte DL_BLANK_4|DL_DLI                                ; 20 blank scan lines.  
 	;                                                                  SCORE DLI 0/0 sets COLPF1, COLPF2/COLBK for score text.
 
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1                    ; (1-8)     Labels for scores 1. 
+	mDL_LMS DL_TEXT_4|DL_DLI,SCORE_MEM1                    ; (1-8)     Labels for scores 1. 
 	;                                                                  SCORE DLI 0/1 sets COLPF1, COLPF2/COLBK for score text.
 
 ; ========== Start
 
-	.byte DL_TEXT_2|DL_DLI                                 ; (9-16)    Labels for Scores 2.
+	.byte DL_TEXT_4|DL_DLI                                 ; (9-16)    Labels for Scores 2.
 	;                                                                  DLI 2/2 sets COLPF0,1,2,3,BK for Beach. (row 18)
 
 ; ========== 1

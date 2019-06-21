@@ -736,8 +736,8 @@ GAME_BACK_COLORS; 22 entries.
 	.by COLOR_BLACK       ; lives, saved frogs.
 	
 	.by COLOR_GREEN+6     ; Beach
-	.by COLOR_AQUA+2      ; Water for boats
-	.by COLOR_AQUA+4      ; Water for boats. 
+	.by COLOR_LITE_BLUE+2      ; Water for boats
+	.by COLOR_LITE_BLUE+4      ; Water for boats. 
 
 	.by COLOR_RED_ORANGE+6
 	.by COLOR_BLUE1+2     
@@ -756,8 +756,8 @@ GAME_BACK_COLORS; 22 entries.
 	.by COLOR_BLUE1+4     ; Beach, boats, boats.
 
 	.by COLOR_GREEN+6 
-	.by COLOR_AQUA+2      
-	.by COLOR_AQUA+4      ; Beach, boats, boats.
+	.by COLOR_BLUE2+2      
+	.by COLOR_BLUE2+4      ; Beach, boats, boats.
 
 	.by COLOR_ORANGE2+6   ; one last Beach.
 
@@ -768,10 +768,10 @@ GAME_COLPF0_COLORS; 22 entries
 	.by COLOR_BLACK       ; lives, saved frogs.
 
 	.by COLOR_BLUE1       ; Beach sky
-	.by COLOR_AQUA+4      ; Water top 1 with boats
-	.by COLOR_AQUA+6      ; Water top 2 with boats
+	.by COLOR_LITE_BLUE+4      ; Water top 1 with boats
+	.by COLOR_LITE_BLUE+6      ; Water top 2 with boats
 
-	.by COLOR_AQUA+6      ; Beach sky (water)
+	.by COLOR_LITE_BLUE+6      ; Beach sky (water)
 	.by COLOR_BLUE1+4
 	.by COLOR_BLUE1+6     
 	
@@ -788,10 +788,10 @@ GAME_COLPF0_COLORS; 22 entries
 	.by COLOR_BLUE1+6 
 	
 	.by COLOR_BLUE1+6     ; Beach sky (water)
-	.by COLOR_AQUA+4
-	.by COLOR_AQUA+6      
+	.by COLOR_BLUE2+4
+	.by COLOR_BLUE2+6      
 	
-	.by COLOR_AQUA+6      ; Beach sky (water)
+	.by COLOR_BLUE2+6      ; Beach sky (water)
 
 ; beach color and the boats
 GAME_COLPF1_COLORS ; 22 entries
