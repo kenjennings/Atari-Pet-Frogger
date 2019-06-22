@@ -564,10 +564,10 @@ DeadFrogRain
 	ldy #1 ; Top 20 lines of screen...
 DeadLoopTopOverGrey
 	jsr DeadFrogGreyScroll      ; Increments and color stuffing.
-	cpy #21                     ; Reached the 9th line?
+	cpy #20                     ; Reached the 9th line?
 	bne DeadLoopTopOverGrey     ; No, continue looping.
 
-	ldy #27 ; Bottom 20 lines of screen (above prompt and credits.
+	ldy #28 ; Bottom 20 lines of screen (above prompt and credits.
 DeadLoopBottomOverGrey
 	jsr DeadFrogGreyScroll      ; Increments and color stuffing.
 	cpy #47                     ; Reached the 23rd line?
