@@ -647,21 +647,47 @@ PLAYFIELD_MEM18 = PLAYFIELD_MEM0+23 ; One last line of Beach
 
 ; Two lines for Scores, lives, and frogs saved.
 
+;SCORE_MEM1 ; Labels for crossings counter, scores, and lives
+;; 1  |Score:00000000               00000000:Hi| SCORE_TXT
+;	.by I_BS I_SC I_SO I_SR I_SE I_CO
+;SCREEN_MYSCORE
+;	.sb "00000000               "
+;SCREEN_HISCORE
+;	.sb "00000000"
+;	.by I_CO I_BH I_SI
+
+;SCORE_MEM2
+;; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
+;	.by I_BF I_SR I_SO I_SG I_SS I_CO
+;SCREEN_LIVES
+;	.sb"0    "
+;	.by I_BF I_SR I_SO I_SG I_SS $00 I_BS I_BA I_SV I_SE I_SD I_CO
+;SCREEN_SAVED
+;	.sb "                 "
+
 SCORE_MEM1 ; Labels for crossings counter, scores, and lives
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
-	.by I_BS I_SC I_SO I_SR I_SE I_CO
+;	.by I_BS I_SC I_SO I_SR I_SE I_CO
+	.sb "     "
+	.by I_CO
 SCREEN_MYSCORE
 	.sb "00000000               "
 SCREEN_HISCORE
 	.sb "00000000"
-	.by I_CO I_BH I_SI
+;	.by I_CO I_BH I_SI
+	.by I_CO 
+	.sb "  "
 
 SCORE_MEM2
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
-	.by I_BF I_SR I_SO I_SG I_SS I_CO
+;	.by I_BF I_SR I_SO I_SG I_SS I_CO
+	.sb "     "
+	.by I_CO
 SCREEN_LIVES
 	.sb"0    "
-	.by I_BF I_SR I_SO I_SG I_SS $00 I_BS I_BA I_SV I_SE I_SD I_CO
+;	.by I_BF I_SR I_SO I_SG I_SS $00 I_BS I_BA I_SV I_SE I_SD I_CO
+	.sb "           "
+	.by I_CO
 SCREEN_SAVED
 	.sb "                 "
 
@@ -894,6 +920,13 @@ GAME_COLPF3_COLORS ; 22 entries.  Arg!  Tried to avoid this, but it is needed
 	.by COLOR_BLACK+$E ; Last beach
 
 
+	
+; This stuff is supposed to set starting state for colors on the displays.
+; This could use some major optimizations.  It should not need all these
+; multiple blocks of 0 color.   Animated displays should animate themselves 
+; naturally from a blank/black background.  Most of this should not be 
+; needed beyond the colors for text, and the background for the text.
+
 DEAD_BACK_COLORS ; 47 entries.  Gfx background colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6
@@ -909,6 +942,7 @@ DEAD_BACK_COLORS ; 47 entries.  Gfx background colors.
 	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14
 	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6
 	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14
+
 
 
 DEAD_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
@@ -1018,7 +1052,7 @@ DLI_HI_TABLE
 	.byte >SPLASH_DLI_CHAIN_TABLE ; FROGDEAD_DLI
 	.byte >SPLASH_DLI_CHAIN_TABLE ; GAMEOVER_DLI
 
-	; GTIA GPRIOR varies by Display.
+	; GTIA GPRIOR varies by Display for the player object.
 	; The VBI will manage the values based on the current Display List.
 	; Tell GTIA the various Player/Missile options and color controls
 	; Turn on 5th Player (Missiles COLPF3), Multicolor players, and 
@@ -1194,6 +1228,62 @@ HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row. (21 en
 	.by 8 6
 	.by 0 ; beach
 	.by 10 4
+
+
+COLPM0_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+COLPM1_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+COLPM2_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+COLPM3_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+SIZEP0_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+SIZEP1_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+SIZEP2_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+SIZEP3_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+SIZEM_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+HPOSP0_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+HPOSP1_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+HPOSP2_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+HPOSP3_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+HPOSM0_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+HPOSM1_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+HPOSM2_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+HPOSM3_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
+GPRIOR_TABLE ; Must be big enough for the score DLIs and the Game Player object
+	.by $00 $00 $00
+
 
 
 COLOR_BACK_LO_TABLE
@@ -1755,4 +1845,86 @@ GRAVE_PMCOLORS_TABLE ; 0, 1, 2, 3
 	.by COLOR_BLACK+$C        ; P1, 
 	.by COLOR_BLACK+$2        ; P2, 
 	.by COLOR_BLACK+$2        ; P3, 
+
+; Farbenwackerdoodle...  P/Ms provide the color text labels 
+; for Scores and Lives.  Why?  Well, originally for Version 02
+; artifact colors were used to make green labels on the score 
+; lines, because the entire display was ANTIC text mode 2.  
+; This treatment followed along to Version 03, because that's 
+; where the source started.  But, this effect is not looking so 
+; wonderful for playtesters using non-composite/non-CRT and 
+; PAL displays.
+;
+; So, the obvious change is using ANTIC Mode 4 for these labels.
+; While this is fine for the labels and even the numbers, this
+; impairs the custom character graphic used to count saved frogs.
+; There's just 4 color clocks in a ANTIC Mode 4 character and its
+; just not possible to render two eyes in a face. So, this still 
+; needs a high-res representation.  So, what to do about the text?
+;
+; We could go to using the custom character set defined for the 
+; title text.  But, then there's only one color available for 
+; these lines.  Boring.  Monotonous compared to everything else 
+; going on.  
+;
+; We could just change the background color to make the Mode 2 
+; text look green, but that affects everything on the line.  I 
+; like the white score numbers (and the frog head counters), but 
+; want different label text on the same line.
+;
+; We could use Player/Missile graphics to hilight just the labels.
+; That would allow tinting them another color.  That's an OK idea,
+; But the hilights covering some text just looks weird to me and 
+; a bit out of place with the workings of everything else on the 
+; display. 
+;
+; Now that we're on the subject of Player/Missile graphics how 
+; about "writing" the labels on the lines using P/M graphics? 
+; Single line resolution, normal width players have pixels one
+; scan line tall, and one color clock wide -- exactly the same 
+; as pixels in ANTIC Mode 4 text.  We need four pixels 
+; horizontally per character, three for the character and one 
+; to provide a gap before the next character.  The four  
+; players and four missile provide a total of 40 pixels, so we 
+; could work 10 characters into this.  One player provides 8
+; pixels, so each player can support 2 characters.
+;
+; Since we're already dealing with multiple VBIs to make the 
+; text lines have different colors then we can just add the 
+; Players and Missiles to this, so they can be colored 
+; and positioned differently for each line. Also, IF the letters 
+; of a word can be isolated to the matching Players with their 
+; Missiles, then the labels can be individually colored which
+; allows effects such as glowing labels when values change.
+;
+; The text on the score line is easy -- "Score" and "Hi". 
+; "Score" requires three Players.  (Or two Players and two 
+; Missiles for "Score" which use fewer color registers.) 
+; "Hi" requires one Player.  
+; 
+; The next line has issues.  Per Version 02 design the labels 
+; are, "Frogs" for number of lives, and "Frogs Saved" for the 
+; count of rescued frogs. This is 15 characters -- more than the 
+; character budget that Player/Missiles will allow. "Frogs" is
+; five characters, so this needs two Players and two Missiles.
+; (Alternatively, this could be changed to "Lives" which has 
+; two letters, "Li", that can be rendered in fewer horizontal 
+; pixels.)  "Frogs Saved" is too big, 10 characters by itself.  
+; It must be truncated. "Saved" is 5 letters needing two Players
+; and two Missiles.  That is the budget for the line.
+; 
+; Now that the Players/Missiles are being re-used they need to 
+; be added to the DLIs to change color, size, horizontal 
+; position, and priority.   Also, the same characteristics must 
+; be reset for the game's main Player object.  Time for more 
+; lookup tables to position all the objects and set colors. This 
+; moves the game's Player object controls into regular memory 
+; (like shadow registers if you think about it), changing all 
+; the code for Player/Missile positions.  Oh, joy.   
+
+
+
+	
+	
+	
 

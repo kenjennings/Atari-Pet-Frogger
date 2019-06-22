@@ -92,11 +92,17 @@ DISPLAY_OVER  = 4
 ; Also, the Title screen will add a flying frog demo, so that's the 
 ; eye candy for Version 03.
 
+; New DLI updates.....  
+; Before score line 1, need to set all PM registers.
+; After score line 1 need a minimal line to burn off the second entry in the tables.
+; Need a line before gfx to set all the regular player's attributes.
+; May need to insert some blanks between lines to allow more time. 
+
 TITLE_DISPLAYLIST
 	.byte   DL_BLANK_8, DL_BLANK_8|DL_DLI  ; 16 blank scan lines. DLI 0/0 Score_DLI sets COLPF1, COLPF2, COLBK for score text. 
 	.byte   DL_BLANK_4                     ; 4 blank lines. 
 
-	mDL_LMS DL_TEXT_4,SCORE_MEM1           ; (1-8) scores
+	mDL_LMS DL_TEXT_2,SCORE_MEM1           ; (1-8) scores
 	.byte   DL_BLANK_8|DL_DLI              ; (9-16) An empty line. DLI 1/1 COLPF0_COLBK_DLI Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1.
 
 	;                                        Title Graphics...
@@ -200,17 +206,25 @@ TITLE_DISPLAYLIST
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
 
+; New DLI updates.....  
+; Before score line 1, need to set all PM registers.
+; After score line 1 need to set everything for line 2.
+; Need a line before gfx to set all the regular player's attributes.
+; May need to insert some blanks between lines to allow more time. 
+; Beach DLI may need to start earlier, run longer, and PM properties 
+; may need to be setup first before playfield.
+
 GAME_DISPLAYLIST
 	.byte DL_BLANK_8, DL_BLANK_8
 	.byte DL_BLANK_4|DL_DLI                                ; 20 blank scan lines.  
 	;                                                                  SCORE DLI 0/0 sets COLPF1, COLPF2/COLBK for score text.
 
-	mDL_LMS DL_TEXT_4|DL_DLI,SCORE_MEM1                    ; (1-8)     Labels for scores 1. 
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1                    ; (1-8)     Labels for scores 1. 
 	;                                                                  SCORE DLI 0/1 sets COLPF1, COLPF2/COLBK for score text.
 
 ; ========== Start
 
-	.byte DL_TEXT_4|DL_DLI                                 ; (9-16)    Labels for Scores 2.
+	.byte DL_TEXT_2|DL_DLI                                 ; (9-16)    Labels for Scores 2.
 	;                                                                  DLI 2/2 sets COLPF0,1,2,3,BK for Beach. (row 18)
 
 ; ========== 1
