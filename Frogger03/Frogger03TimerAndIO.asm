@@ -91,7 +91,7 @@ EndResetTimers
 
 
 ; ==========================================================================
-; CHECK INPUT
+; CHECK INPUT                                                 A  X
 ; ==========================================================================
 ; Check for input from the controller....
 ;
@@ -127,66 +127,57 @@ EndResetTimers
 ; direction and trigger set are 1 bits.  
 ; Resulting Bit values:   
 ; 00011101  OR  "NA NA NA Trigger Right Left NA Up"
+; THEREFORE,
+; STICK   / BITS    / FILTERED / BITS
+; R L D U / 0 0 0 0 / - - - -  / 0 0 0 0  - input is technically impossible 
+; R L D - / 0 0 0 1 / - - - -  / 0 0 0 0  - input is technically impossible 
+; R L - U / 0 0 1 0 / - - - -  / 0 0 0 0  - input is technically impossible 
+; R L - - / 0 0 1 1 / - - - -  / 0 0 0 0  - input is technically impossible 
+; R - D U / 0 1 0 0 / - - - -  / 0 0 0 0  - input is technically impossible 
+; R - D - / 0 1 0 1 / R - - -  / 1 0 0 0  - down ignored 
+; R - - U / 0 1 1 0 / R - - -  / 1 0 0 0  - up must be exclusively up 
+; R - - - / 0 1 1 1 / R - - -  / 1 0 0 0  - right 
+; - L D U / 1 0 0 0 / - - - -  / 0 0 0 0 -  input is technically impossible 
+; - L D - / 1 0 0 1 / - L - -  / 0 1 0 0  - down ignored 
+; - L - U / 1 0 1 0 / - L - -  / 0 1 0 0  - up must be exclusively up 
+; - L - - / 1 0 1 1 / - L - -  / 0 1 0 0  - left  
+; - - D U / 1 1 0 0 / - - - -  / 0 0 0 0  - input is technically impossible 
+; - - D - / 1 1 0 1 / - - - -  / 0 0 0 0  - down ignored 
+; - - - U / 1 1 1 0 / - - - U  / 0 0 0 1  - up is exclusively up 
+; - - - - / 1 1 1 1 / - - - -  / 0 0 0 0  - nothing
 ; --------------------------------------------------------------------------
+
+STICKEMUPORNOT_TABLE
+	.by $00 $00 $00 $00 $00 $08 $08 $08 $00 $04 $04 $04 $00 $00 $01 $00
+
 CheckInput
-	lda InputScanFrames       ; Is input timer delay  0?
-	bne SetNoInput            ; No. thus nothing to scan. (and exit)
+	lda InputScanFrames        ; Is input timer delay  0?
+	bne SetNoInput             ; No. thus nothing to scan. (and exit)
 
-	jsr SetNoInput            ; Make sure the official stick read starts with no input.
-	lda STICK0                ; The OS nicely separates PIA nybbles for us
-
-ChefOfJoystickBits            ; Cook STICK0 into the safe stick directions.  Flip input bits.
-	eor #%00001111            ; Reverse direction bits.
-	and #%00001101            ; Mask out the Down.
-	sta InputStick            ; Save it.
-	beq AddTriggerInput       ; No movement.  Add trigger button if pressed.
-
-; Fix Up+Right Bits
-	and #%00001001            ; Looking at only Up and Right
-	cmp #%00001001            ; Are both bits set ?
-	bne FixUpLeftBits         ; no, go try same for Up and Left.
-	lda InputStick
-	and #%00001100            ; turn off the UP bit.
-	sta InputStick            ; Save it.
-
-FixUpLeftBits
-	lda InputStick
-	and #%00000101            ; Looking at only Up and Left
-	cmp #%00000101            ; Are both bits set ?
-	bne FixLeftRightBits      ; Nope.  Go check if left and right are on.
-	lda InputStick
-	and #%00001100            ; turn off the UP bit.
-	sta InputStick            ; Save it.
-
-FixLeftRightBits              ; Don't allow Left and Right to be on together.
-	lda InputStick
-	and #%00001100            ; Looking at only Up and Left
-	cmp #%00001100            ; Are both bits set ?
-	bne AddTriggerInput       ; Nope.  Go do something else.
-	lda InputStick
-	and #%00000001            ; turn off the Left and Right bits.
-	sta InputStick            ; Save it.
+	ldx STICK0                 ; The OS nicely separates PIA nybbles for us
+	lda STICKEMUPORNOT_TABLE,x ; Convert input into workable, filtered output.
+	sta InputStick             ; Save it.
 
 AddTriggerInput
-	lda STRIG0                ; 0 is button pressed., !0 is not pressed.
-	bne DoneWithBitCookery    ; if non-zero, then no button pressed.
+	lda STRIG0                 ; 0 is button pressed., !0 is not pressed.
+	bne DoneWithBitCookery     ; if non-zero, then no button pressed.
 
-	lda InputStick            ; Return the input value.
-	ora #%00010000            ; Turn on 5th bit/$10 for trigger.
+	lda InputStick             ; Return the input value.
+	ora #%00010000             ; Turn on 5th bit/$10 for trigger.
 	sta InputStick
 
-DoneWithBitCookery            ; Some input was captured?
-	lda InputStick            ; Return the input value?
-	beq ExitCheckInput        ; No, nothing happened here.  Just exit.
+DoneWithBitCookery             ; Some input was captured?
+	lda InputStick             ; Return the input value?
+	beq ExitCheckInput         ; No, nothing happened here.  Just exit.
 
-	lda #INPUTSCAN_FRAMES     ; Because there was input collected, then
-	sta InputScanFrames       ; reset the input timer.
+	lda #INPUTSCAN_FRAMES      ; Because there was input collected, then
+	sta InputScanFrames        ; reset the input timer.
 
 ExitInputCollection ; Input occurred
-	lda #0                    ; Kill the attract mode flag
-	sta ATRACT                ; to prevent color cycling.
+	lda #0                     ; Kill the attract mode flag
+	sta ATRACT                 ; to prevent color cycling.
 
-	lda InputStick            ; Return the input value.
+	lda InputStick             ; Return the input value.
 	rts
 
 SetNoInput

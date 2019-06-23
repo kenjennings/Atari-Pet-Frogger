@@ -564,7 +564,7 @@ DeadFrogRain
 	ldy #1 ; Top 20 lines of screen...
 DeadLoopTopOverGrey
 	jsr DeadFrogGreyScroll      ; Increments and color stuffing.
-	cpy #20                     ; Reached the 9th line?
+	cpy #20                     ; Reached the 19th line?
 	bne DeadLoopTopOverGrey     ; No, continue looping.
 
 	ldy #28 ; Bottom 20 lines of screen (above prompt and credits.
@@ -1229,7 +1229,7 @@ LoopTopWinScroll
 	jsr WinColorScrollUp    ; Subtract 4 and reset to start if needed.
 
 	iny                     ; Next line on screen.
-	cpy #21                 ; Reached the 20th (21st table entry) line?
+	cpy #20                 ; Reached the 19th (20th table entry) line?
 	bne LoopTopWinScroll    ; No, continue looping.
 
 	pha                     ; Save current color to use as start value later.
@@ -1255,7 +1255,7 @@ bews_LoopTextColors
 
 ; Color scrolling skips the black/grey/white values.  
 ; The scrolling uses values 18 to 238 step +4
-	ldy #27                 ; Bottom 20 lines of screen (above prompt and credits.)
+	ldy #28                 ; Bottom 20 lines of screen (above prompt and credits.)
 LoopBottomWinScroll         ; Scroll colors in opposite direction
 	jsr WinColorScrollDown  ; Add 4, and reset to start if needed.
 	sta COLBK_TABLE,y       ; Set color for line on screen
@@ -1953,9 +1953,9 @@ libPmgInit
 	ldx #SHAPE_FROG ; Frog Shape
 	jsr libPmgSetColors
 
-	; Player 5 (the Missiles) is COLPF3, White.
-	lda #COLOR_BLACK+$C
-	sta COLOR3         ; OS shadow for color, no DLI changes.
+;	; Player 5 (the Missiles) is COLPF3, White.
+;	lda #COLOR_BLACK+$C
+;	sta COLOR3         ; OS shadow for color, no DLI changes.
 
 	rts 
 
@@ -1979,17 +1979,36 @@ libPmgInit
 libPmgMoveAllZero
 
 	lda #$00                ; 0 position
-	ldx #$03                ; four objects, 3 to 0
+;	ldx #$03                ; four objects, 3 to 0
 
-bLoopZeroPMPosition
-	sta HPOSP0,x            ; Player positions 3, 2, 1, 0
-	sta SIZEP0,x            ; Player width 3, 2, 1, 0
-	sta HPOSM0,x            ; Missiles 3, 2, 1, 0 just to be sure.
-	sta PCOLOR0,x           ; And black the colors.
-	dex
-	bpl bLoopZeroPMPosition
+;bLoopZeroPMPosition
+;	sta HPOSP0,x            ; Player positions 3, 2, 1, 0
+;	sta SIZEP0,x            ; Player width 3, 2, 1, 0
+;	sta HPOSM0,x            ; Missiles 3, 2, 1, 0 just to be sure.
+;	sta PCOLOR0,x           ; And black the colors.
+;	dex
+;	bpl bLoopZeroPMPosition
 
+	sta COLPM0_TABLE+2
+	sta COLPM1_TABLE+2
+	sta COLPM2_TABLE+2
+	sta COLPM3_TABLE+2
+	sta SIZEP0_TABLE+2
+	sta SIZEP0_TABLE+2
+	sta SIZEP0_TABLE+2
+	sta SIZEP0_TABLE+2
 	sta SIZEM               ; and Missile size 3, 2, 1, 0
+	sta HPOSP0_TABLE+2
+	sta HPOSP1_TABLE+2
+	sta HPOSP2_TABLE+2
+	sta HPOSP3_TABLE+2
+	sta HPOSM0_TABLE+2
+	sta HPOSM1_TABLE+2
+	sta HPOSM2_TABLE+2
+	sta HPOSM3_TABLE+2
+
+	lda #[GTIA_MODE_DEFAULT|%00000001]
+	sta PRIOR_TABLE+2
 
 	rts
 
@@ -1998,6 +2017,10 @@ bLoopZeroPMPosition
 ;											PmgClearBitmaps  A  X
 ;==============================================================================
 ; Zero the bitmaps for all players and missiles
+; 
+; Try to make this called only once at game initialization.
+; All other P/M  use should be otrderly and clean up after itself.
+; Residual P/M pixels are verboten.
 ; -----------------------------------------------------------------------------
 
 libPmgClearBitmaps
@@ -2033,13 +2056,20 @@ libPmgSetColors
 	tax   ; Back into index for referencing from table.
 
 	lda BASE_PMCOLORS_TABLE,x       ; Get color(s) associated to object
-	sta PCOLOR0                     ; Stuff in the Player color registers.
+;	sta PCOLOR0                     ; Stuff in the Player color registers.
+	sta COLPM0_TABLE+2
+
 	lda BASE_PMCOLORS_TABLE+1,x
-	sta PCOLOR1
+;	sta PCOLOR1
+	sta COLPM1_TABLE+2
+
 	lda BASE_PMCOLORS_TABLE+2,x
-	sta PCOLOR2
+;	sta PCOLOR2
+	sta COLPM2_TABLE+2
+
 	lda BASE_PMCOLORS_TABLE+3,x
-	sta PCOLOR3
+;	sta PCOLOR3
+	sta COLPM3_TABLE+2
 
 	rts
 
@@ -2277,6 +2307,8 @@ EraseGameBorder
 	lda #$00
 	sta HPOSP3
 	sta HPOSM3
+;	sta HPOSP3_TABLE+2
+;	sta HPOSM3_TABLE+2
 
 	ldx #177
 
@@ -2432,16 +2464,19 @@ ExitDrawShape
 DrawGameBorder
 
 	lda #$00
-	sta PCOLOR3
-	sta COLOR3
-	sta HPOSP3
-	sta HPOSM3
+;	sta PCOLOR3
+;	sta COLOR3
+;	sta HPOSP3
+;	sta HPOSM3
+	sta COLPM3_TABLE+2
 
 	lda #PM_SIZE_QUAD
-	sta SIZEP3
+;	sta SIZEP3
+	sta SIZEP3_TABLE+2
 
 	lda #%11000000
-	sta SIZEM
+;	sta SIZEM
+	sta SIZEM_TABLE+2
 
 	ldx #177
 bdgb_LoopFillBorder
@@ -2456,10 +2491,12 @@ bdgb_LoopFillBorder
 	bne bdgb_LoopFillBorder
 
 	lda #[PLAYFIELD_RIGHT_EDGE_NORMAL+1]
-	sta HPOSP3
+;	sta HPOSP3
+	sta HPOSP3_TABLE+2
 
 	lda #[PLAYFIELD_LEFT_EDGE_NORMAL-8]
-	sta HPOSM3
+;	sta HPOSM3
+	sta HPOSM3_TABLE+2
 
 	rts
 
