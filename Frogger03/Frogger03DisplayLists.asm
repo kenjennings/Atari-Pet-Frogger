@@ -100,10 +100,16 @@ DISPLAY_OVER  = 4
 
 TITLE_DISPLAYLIST
 	.byte   DL_BLANK_8, DL_BLANK_8|DL_DLI  ; 16 blank scan lines. DLI 0/0 Score_DLI sets COLPF1, COLPF2, COLBK for score text. 
-	.byte   DL_BLANK_4                     ; 4 blank lines. 
+;	.byte   DL_BLANK_4                     ; 4 blank lines. 
+	.byte DL_BLANK_2    
 
 	mDL_LMS DL_TEXT_2,SCORE_MEM1           ; (1-8) scores
+	
+	.byte DL_BLANK_2
+	
 	.byte   DL_BLANK_8|DL_DLI              ; (9-16) An empty line. DLI 1/1 COLPF0_COLBK_DLI Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1.
+
+ 
 
 	;                                        Title Graphics...
 	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1     ; (17-20)   DLI 2/2 COLPF0_COLBK_DLI Set COLPF0 for Line 2
@@ -215,12 +221,15 @@ TITLE_DISPLAYLIST
 ; may need to be setup first before playfield.
 
 GAME_DISPLAYLIST
-	.byte DL_BLANK_8, DL_BLANK_8
-	.byte DL_BLANK_4|DL_DLI                                ; 20 blank scan lines.  
+	.byte DL_BLANK_8, DL_BLANK_8|DL_DLI
+	.byte DL_BLANK_2                                ; 20 blank scan lines.  
 	;                                                                  SCORE DLI 0/0 sets COLPF1, COLPF2/COLBK for score text.
-
+	
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1                    ; (1-8)     Labels for scores 1. 
 	;                                                                  SCORE DLI 0/1 sets COLPF1, COLPF2/COLBK for score text.
+	
+	.byte DL_BLANK_1                                       ; ()      
+
 
 ; ========== Start
 
@@ -229,7 +238,7 @@ GAME_DISPLAYLIST
 
 ; ========== 1
 
-	.byte DL_BLANK_1                                       ; (17)      Blank before Beach for time.
+	.byte DL_BLANK_2                                       ; (17)      Blank before Beach for time.
 	
 PF_LMS0 = [* + 1]                                          ;           Plus 1 is the address of the display list LMS
 	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM0                ; (18-25)   Beach. 

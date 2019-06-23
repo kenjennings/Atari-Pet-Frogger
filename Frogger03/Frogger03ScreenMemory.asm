@@ -1074,7 +1074,7 @@ DISPLAY_NEEDS_BORDERS_TABLE ; I thought it may get used more than once. :-(
 	.byte 0 ; Over, No.
 
 TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte <Score_DLI            ; DLI (0) Text - COLPF1, Black - COLBK COLPF2
+	.byte <Score1_DLI            ; DLI (0) Text - COLPF1, Black - COLBK COLPF2
 	.byte <COLPF0_COLBK_DLI     ; DLI (1) Table - COLBK, Pixels - COLPF0
 	.byte <COLPF0_COLBK_DLI     ; DLI 2   Table - COLBK, Pixels - COLPF0
 	.byte <COLPF0_COLBK_DLI     ; DLI 3   Table - COLBK, Pixels - COLPF0
@@ -1104,8 +1104,8 @@ TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 
 
 GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
-	.byte <Score_DLI            ; DLI (0)   SCORES   - COLBK,                 COLPF1
-	.byte <Score_DLI            ; DLI (1)   SCORES   - COLBK,                 COLPF1
+	.byte <Score1_DLI            ; DLI (0)   SCORES   - COLBK,                 COLPF1
+	.byte <Score2_DLI            ; DLI (1)   SCORES   - COLBK,                 COLPF1
 	
 	.byte <GAME_DLI_BEACH0      ; DLI (2)   Beach 18 - COLBK,         COLPF0, COLPF1, COLPF2, COLPF3.
 	.byte <GAME_DLI_BEACH2BOAT  ; DLI (3)   Boats 17 - COLBK, HSCROL, COLPF0, COLPF1, COLPF2, COLPF3
@@ -1233,58 +1233,58 @@ HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row. (21 en
 
 
 COLPM0_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by COLOR_BLUE2+4 COLOR_PURPLE+4 $00
 
 COLPM1_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by COLOR_BLUE2+4 COLOR_PURPLE+4 $00
 
 COLPM2_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by COLOR_PINK+4 COLOR_GREEN+4 $00
 
 COLPM3_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by $00 COLOR_GREEN+4 $00
 
 SIZEP0_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL $00
 
 SIZEP1_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL $00
 
 SIZEP2_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL $00
 
 SIZEP3_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL $00
 
 SIZEM_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL $00
 
 HPOSP0_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by PLAYFIELD_LEFT_EDGE_NORMAL+1 PLAYFIELD_LEFT_EDGE_NORMAL+1 $00
 
 HPOSP1_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+9] [PLAYFIELD_LEFT_EDGE_NORMAL+9] $00
 
 HPOSP2_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by [PLAYFIELD_RIGHT_EDGE_NORMAL-7]  [PLAYFIELD_RIGHT_EDGE_NORMAL-90] $00
 
 HPOSP3_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by $00 [PLAYFIELD_RIGHT_EDGE_NORMAL-82] $00
 
 HPOSM0_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+19] [PLAYFIELD_LEFT_EDGE_NORMAL+19] $00
 
 HPOSM1_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+17] [PLAYFIELD_LEFT_EDGE_NORMAL+17] $00
 
 HPOSM2_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by $00 [PLAYFIELD_RIGHT_EDGE_NORMAL-72] $00
 
 HPOSM3_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by $00 [PLAYFIELD_RIGHT_EDGE_NORMAL-74] $00
 
 PRIOR_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 $00 $00
+	.by [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|%00000001] $00
 
 
 
@@ -1924,9 +1924,88 @@ GRAVE_PMCOLORS_TABLE ; 0, 1, 2, 3
 ; (like shadow registers if you think about it), changing all 
 ; the code for Player/Missile positions.  Oh, joy.   
 
+P0TEXT_TABLE ; 15 bytes 
+	.by $E0 $8E $E8 $28 $28 $EE $00 $00 $00 $e0 $8e $c8 $88 $88 $88 
+; XX XX XX .. .. .. .. .. - $E0
+; XX .. .. .. XX XX XX .. - $8E 
+; XX XX XX .. XX .. .. .. - $E8 
+; .. .. XX .. XX .. .. .. - $28 
+; .. .. XX .. XX .. .. .. - $28 
+; XX XX XX .. XX XX XX .. - $EE 
+; .. .. .. .. .. .. .. .. - $00 
+; .. .. .. .. .. .. .. .. - $00 
+; XX XX XX .. .. .. .. .. - $e0 
+; XX .. .. .. XX XX XX .. - $8e 
+; XX XX .. .. XX .. .. .. - $c8 
+; XX .. .. .. XX .. .. .. - $88 
+; XX .. .. .. XX .. .. .. - $88 
+; XX .. .. .. XX .. .. .. - $88 
 
+P1TEXT_TABLE ; 15 bytes 
+	.by $00 $EE $A8 $A8 $A8 $E8 $00 $00 $00 $00 $EE $A8 $AA $AA $EE
+; .. .. .. .. .. .. .. .. - $00 
+; XX XX XX .. XX XX XX .. - $EE 
+; XX .. XX .. XX .. .. .. - $A8 
+; XX .. XX .. XX .. .. .. - $A8 
+; XX .. XX .. XX .. .. .. - $A8 
+; XX XX XX .. XX .. .. .. - $E8 
+; .. .. .. .. .. .. .. .. - $00 
+; .. .. .. .. .. .. .. .. - $00 
+; .. .. .. .. .. .. .. .. - $00 
+; XX XX XX .. XX XX XX .. - $EE 
+; XX .. XX .. XX .. .. .. - $A8 
+; XX .. XX .. XX .. XX .. - $AA 
+; XX .. XX .. XX .. XX .. - $AA 
+; XX XX XX .. XX XX XX .. - $EE 
 
-	
-	
-	
+P2TEXT_TABLE ; 15 bytes 
+	.by $A0 $A8 $E8 $A8 $A8 $A8 $00 $00 $00 $E0 $8E $EA $2E $2A $EA
+; XX .. XX .. .. .. .. .. - $A0 
+; XX .. XX .. XX .. .. .. - $A8 
+; XX XX XX .. XX .. .. .. - $E8 
+; XX .. XX .. XX .. .. .. - $A8 
+; XX .. XX .. XX .. .. .. - $A8 
+; XX .. XX .. XX .. .. .. - $A8 
+; .. .. .. .. .. .. .. .. - $00 
+; .. .. .. .. .. .. .. .. - $00 
+; XX XX XX .. .. .. .. .. - $E0
+; XX .. .. .. XX XX XX .. - $8E 
+; XX XX XX .. XX .. XX .. - $EA 
+; .. .. XX .. XX XX XX .. - $2E 
+; .. .. XX .. XX .. XX .. - $2A 
+; XX XX XX .. XX .. XX .. - $EA
+
+P3TEXT_TABLE ; 15 bytes 
+	.by $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $AE $A8 $AC $A8 $4E
+; .. .. .. .. .. .. .. .. - $00 
+; .. .. .. .. .. .. .. .. - $00 
+; .. .. .. .. .. .. .. .. - $00 
+; .. .. .. .. .. .. .. .. - $00 
+; .. .. .. .. .. .. .. .. - $00 
+; .. .. .. .. .. .. .. .. - $00 
+; .. .. .. .. .. .. .. .. - $00 
+; .. .. .. .. .. .. .. .. - $00 
+; .. .. .. .. .. .. .. .. - $00 
+; XX .. XX .. XX XX XX .. - $AE 
+; XX .. XX .. XX .. .. .. - $A8 
+; XX .. XX .. XX XX .. .. - $AC 
+; XX .. XX .. XX .. .. .. - $A8 
+; .. XX .. .. XX XX XX .. - $4E
+
+MTEXT_TABLE ; 15 bytes (Each byte has 2 bits for m3 m2 m1 m0...)
+	.by $00 $0E $08 $0C $08 $0E $00 $00 $00 $00 $CE $A8 $AE $A2 $CE
+; .. .. .. .. .. .. .. .. - $00
+; .. .. .. .. XX XX XX .. - $0E 
+; .. .. .. .. XX .. .. .. - $08 
+; .. .. .. .. XX XX .. .. - $0C 
+; .. .. .. .. XX .. .. .. - $08 
+; .. .. .. .. XX XX XX .. - $0E 
+; .. .. .. .. .. .. .. .. - $00
+; .. .. .. .. .. .. .. .. - $00
+; .. .. .. .. .. .. .. .. - $00
+; XX XX .. .. XX XX XX .. - $CE 
+; XX .. XX .. XX .. .. .. - $A8 
+; XX .. XX .. XX XX XX .. - $AE 
+; XX .. XX .. .. .. XX .. - $A2 
+; XX XX .. .. XX XX XX .. - $CE 
 

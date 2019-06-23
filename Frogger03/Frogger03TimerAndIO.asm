@@ -621,6 +621,9 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
 	pha 
 	; for the extra scan line get the sky color for the Beach 
 	; (usually prior water color) instead of COLBK.
+	
+	jsr LoadPmSpecs2 
+	
 	lda ColorPF0 ; from Page 0.
 	sta WSYNC
 	; Top of the line is sky or blue water from row above.   
@@ -732,37 +735,103 @@ COLPF0_COLBK_DLI
 
 
 ;==============================================================================
-; SCORE DLI                                                            A 
+; SCORE 1 DLI                                                            A 
 ;==============================================================================
-; Used on multiple screens.  JMP here.
-; This is called on a blank line and the background should already be black.  
-; Since there is no text here (in blank line), it does not matter that 
-; COLPF1 is written before WSYNC.
-; Since the game fades the screen COLPF1 must pull from the table.
+; Used on Title and Game displays.  
+; This is called on a blank before the text line. 
+; The VBI should have loaded up the Page zero staged colors. 
+; Only ColorPF1 matters for the playfielld as the background and border will 
+; be forced to black. 
+; This also sets Player/Missile parameters for P0,P1,P2, M0 and M1 to show 
+; the "Score" and "Hi" text.
+; Since all of this takes place in the blank space then it does not 
+; matter that there is no WSYNC.  
 ; -----------------------------------------------------------------------------
 
-Score_DLI
-	pha
+Score1_DLI
+	mStart_DLI
 
 	lda ColorPF1         ; Get text color (luminance)
-	pha                  ; Save for after WSYNC
+	sta COLPF1           ; write new text color.
 
-SetBlack_DLI
 	lda #COLOR_BLACK     ; Black for background and text background.
-	sta WSYNC            ; sync to end of scan line
 	sta COLBK            ; Write new border color.
 	sta COLPF2           ; Write new background color
-	pla
-	sta COLPF1           ; write new text color.
+
+	jsr LoadPMSpecs0     ; Load the first table entry into 
 
 ; Finish by loading the next DLI's colors.  The second score line preps the Beach.
 ; This is redundant (useless) (time-wasting) work when not on the game display, 
 ; but this is also not damaging.
-	tya
-	pha
-	ldy ThisDLI
+;	tya
+;	pha
+;	ldy ThisDLI
 
 	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
+
+
+;==============================================================================
+; SCORE 2 DLI                                                            A 
+;==============================================================================
+; Used on Game displays.  
+; This is called on a blank before the text line. 
+; The VBI should have loaded up the Page zero staged colors. 
+; Only ColorPF1 matters for the playfielld as the background and border will 
+; be forced to black. 
+; This also sets Player/Missile parameters for P0,P1,P2, M0 and M1 to show 
+; the "Score" and "Hi" text.
+; Since all of this takes place in the blank space then it does not 
+; matter that there is no WSYNC.  
+; -----------------------------------------------------------------------------
+
+Score2_DLI
+	mStart_DLI
+
+	lda ColorPF1         ; Get text color (luminance)
+	sta COLPF1           ; write new text color.
+
+;	lda #COLOR_BLACK     ; Black for background and text background.
+;	sta COLBK            ; Write new border color.
+;	sta COLPF2           ; Write new background color
+
+	jsr LoadPMSpecs1     ; Load the first table entry into 
+
+; Finish by loading the next DLI's colors.  The second score line preps the Beach.
+; This is redundant (useless) (time-wasting) work when not on the game display, 
+; but this is also not damaging.
+;	tya
+;	pha
+;	ldy ThisDLI
+
+	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
+
+
+
+
+
+
+;Score_DLI
+;	pha
+
+;	lda ColorPF1         ; Get text color (luminance)
+;	pha                  ; Save for after WSYNC
+
+;SetBlack_DLI
+;	lda #COLOR_BLACK     ; Black for background and text background.
+;	sta WSYNC            ; sync to end of scan line
+;	sta COLBK            ; Write new border color.
+;	sta COLPF2           ; Write new background color
+;	pla
+;	sta COLPF1           ; write new text color.
+
+; Finish by loading the next DLI's colors.  The second score line preps the Beach.
+; This is redundant (useless) (time-wasting) work when not on the game display, 
+; but this is also not damaging.
+;	tya
+;	pha
+;	ldy ThisDLI
+
+;	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
 
 
 ;==============================================================================
@@ -861,13 +930,11 @@ DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
 
 
 ;==============================================================================
-; EXIT DLI.
+; LOAD COLORS
 ;==============================================================================
-; Common code called/jumped to by most DLIs.
+; Common code called/jumped to by DLIs.
 ; JMP here is 3 byte instruction to execute 11 bytes of common DLI closure.
-; Update the interrupt pointer to the address of the next DLI.
-; Increment the DLI counter used to index the various tables.
-; Restore registers and exit.
+; Load the staged values, store in the color registers.
 ; -----------------------------------------------------------------------------
 
 LoadAllColors_DLI
@@ -938,4 +1005,154 @@ SetupAllColors
 	sta ColorBak
 
 	rts
+
+
+;==============================================================================
+; LOAD PM SPECS 0                                                       A 
+;==============================================================================
+; Called by Score 1 DLI.
+; Load the table entry 0 values for P0,P1,P2,M0,M1 to the P/M registers.
+; -----------------------------------------------------------------------------
+LoadPmSpecs0
+
+	lda PRIOR_TABLE
+	sta PRIOR
+
+	lda HPOSP0_TABLE
+	sta HPOSP0
+	lda COLPM0_TABLE 
+	sta COLPM0
+	lda SIZEP0_TABLE
+	sta SIZEP0
+
+	lda HPOSP1_TABLE
+	sta HPOSP1
+	lda COLPM1_TABLE 
+	sta COLPM1
+	lda SIZEP1_TABLE
+	sta SIZEP1
+
+	lda HPOSP2_TABLE
+	sta HPOSP2
+	lda COLPM2_TABLE 
+	sta COLPM2
+	lda SIZEP2_TABLE
+	sta SIZEP2
+
+	lda SIZEM_TABLE
+	sta SIZEM
+	lda HPOSM0_TABLE
+	sta HPOSM0
+	lda HPOSM1_TABLE
+	sta HPOSM1
+
+	rts
+
+
+;==============================================================================
+; LOAD PM SPECS 1                                                       A 
+;==============================================================================
+; Called by Score 2 DLI.
+; Load the table entry 1 values for P0,P1,P2,P3,M0,M1,M2,M3 to the P/M registers.
+; -----------------------------------------------------------------------------
+LoadPmSpecs1
+
+	lda PRIOR_TABLE+1
+	sta PRIOR
+
+	lda HPOSP0_TABLE+1
+	sta HPOSP0
+	lda COLPM0_TABLE+1
+	sta COLPM0
+	lda SIZEP0_TABLE+1
+	sta SIZEP0
+
+	lda HPOSP1_TABLE+1
+	sta HPOSP1
+	lda COLPM1_TABLE+1 
+	sta COLPM1
+	lda SIZEP1_TABLE+1
+	sta SIZEP1
+
+	lda HPOSP2_TABLE+1
+	sta HPOSP2
+	lda COLPM2_TABLE+1 
+	sta COLPM2
+	lda SIZEP2_TABLE+1
+	sta SIZEP2
+
+	lda HPOSP3_TABLE+1
+	sta HPOSP3
+	lda COLPM3_TABLE+1 
+	sta COLPM3
+	lda SIZEP3_TABLE+1
+	sta SIZEP3
+
+	lda SIZEM_TABLE+1
+	sta SIZEM
+	lda HPOSM0_TABLE+1
+	sta HPOSM0
+	lda HPOSM1_TABLE+1
+	sta HPOSM1
+	lda HPOSM2_TABLE+1
+	sta HPOSM2
+	lda HPOSM3_TABLE+1
+	sta HPOSM3
+
+	rts
+
+
+;==============================================================================
+; LOAD PM SPECS 2                                                       A 
+;==============================================================================
+; Called on Title, Game, and Game Over displays.
+; Load the table entry 2 values for P0,P1,P2,P3,M0,M1,M2,M3 to the P/M registers.
+; -----------------------------------------------------------------------------
+LoadPmSpecs2
+
+	lda PRIOR_TABLE+2
+	sta PRIOR
+
+	lda HPOSP0_TABLE+2
+	sta HPOSP0
+	lda COLPM0_TABLE+2
+	sta COLPM0
+	lda SIZEP0_TABLE+2
+	sta SIZEP0
+
+	lda HPOSP1_TABLE+2
+	sta HPOSP1
+	lda COLPM1_TABLE+2 
+	sta COLPM1
+	lda SIZEP1_TABLE+2
+	sta SIZEP1
+
+	lda HPOSP2_TABLE+2
+	sta HPOSP2
+	lda COLPM2_TABLE+2 
+	sta COLPM2
+	lda SIZEP2_TABLE+2
+	sta SIZEP2
+
+	lda HPOSP3_TABLE+2
+	sta HPOSP3
+	lda COLPM3_TABLE+2 
+	sta COLPM3
+	lda SIZEP3_TABLE+2
+	sta SIZEP3
+
+	lda SIZEM_TABLE+2
+	sta SIZEM
+	lda HPOSM0_TABLE+2
+	sta HPOSM0
+	lda HPOSM1_TABLE+2
+	sta HPOSM1
+	lda HPOSM2_TABLE+2
+	sta HPOSM2
+	lda HPOSM3_TABLE+2
+	sta HPOSM3
+
+	rts
+
+
 

@@ -1931,6 +1931,9 @@ libPmgInit
 	; clear all bitmap images
 	jsr libPmgClearBitmaps
 
+	; Load text labels into P/M memory
+	jsr LoadPMGTextLines
+
 	; Tell ANTIC where P/M memory is located for DMA to GTIA
 	lda #>PMADR
 	sta PMBASE
@@ -2039,6 +2042,36 @@ libPmgSetColors
 	sta PCOLOR3
 
 	rts
+
+
+; ==========================================================================
+; LOAD PMG TEXT LINES                                                 A  X  
+; ==========================================================================
+; Load the Text labels the the scores, lives, and saved frogs into 
+; the Player/Missile memory.
+; --------------------------------------------------------------------------
+
+LoadPMGTextLines
+
+	ldx #14
+
+bLPTL_LoadBytes
+	lda P0TEXT_TABLE,x
+	sta PLAYERADR0+27,x
+	lda P1TEXT_TABLE,x
+	sta PLAYERADR1+27,x
+	lda P2TEXT_TABLE,x
+	sta PLAYERADR2+27,x
+	lda P3TEXT_TABLE,x
+	sta PLAYERADR3+27,x
+	lda MTEXT_TABLE,x
+	sta MISSILEADR+27,x
+
+	dex
+	bpl bLPTL_LoadBytes
+
+	rts
+
 
 
 ; ==========================================================================
