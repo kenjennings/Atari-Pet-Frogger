@@ -102,10 +102,17 @@ EndResetTimers
 ; STICK0 Joystick bits that matter:  
 ; ----1111  OR  "NA NA NA NA Right Left Down Up".
 ; A zero value bit means joystick is pushed in that direction.
+; Note that 1 bit means no input and 0 bit means the direction
+; is pressed.  For logical reasons I want to reverse this and 
+; turn it into 1 bit means input.
 ; 
-; Wow, but this became a sloppy mess of bit flogging.
-; But it does replace several functions of key reading shenanigans.
-; Description of the over-engineered bit twiddling below:
+; This originally was a sloppy mess of dozens of bit flogging.
+; But it replaces several functions of key reading shenanigans.
+; The new version eliminates a lot of that original bit mashing
+; with a simple lookup table. The only extra part now is adding 
+; the trigger to the input information.
+;
+; Description of the bit twiddling below:
 ; 
 ; Cook the bits to turn on the directions we care about and zero the other
 ; bits, therefore, if resulting stick value is 0 then it means no input.
@@ -125,6 +132,7 @@ EndResetTimers
 ;
 ; Return  A  with InputStick value of cooked Input bits where the 
 ; direction and trigger set are 1 bits.  
+;
 ; Resulting Bit values:   
 ; 00011101  OR  "NA NA NA Trigger Right Left NA Up"
 ; THEREFORE,
@@ -726,6 +734,28 @@ COLPF0_COLBK_DLI
 
 
 ;==============================================================================
+; SCORE TITLE  DLI                                                       A 
+;==============================================================================
+; Used on Title and Game displays.  
+; This is called on a blank before the text line. 
+; The VBI should have loaded up the Page zero staged colors. 
+; Only ColorPF1 matters for the playfielld as the background and border will 
+; be forced to black. 
+; This also sets Player/Missile parameters for P0,P1,P2, M0 and M1 to show 
+; the "Score" and "Hi" text.
+; Since all of this takes place in the blank space then it does not 
+; matter that there is no WSYNC.  
+; -----------------------------------------------------------------------------
+
+Score_Title_DLI
+	mStart_DLI
+
+	jsr Score_Title_With_PMG
+
+	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
+
+
+;==============================================================================
 ; SCORE 1 DLI                                                            A 
 ;==============================================================================
 ; Used on Title and Game displays.  
@@ -796,33 +826,6 @@ Score2_DLI
 
 	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
 
-
-
-
-
-
-;Score_DLI
-;	pha
-
-;	lda ColorPF1         ; Get text color (luminance)
-;	pha                  ; Save for after WSYNC
-
-;SetBlack_DLI
-;	lda #COLOR_BLACK     ; Black for background and text background.
-;	sta WSYNC            ; sync to end of scan line
-;	sta COLBK            ; Write new border color.
-;	sta COLPF2           ; Write new background color
-;	pla
-;	sta COLPF1           ; write new text color.
-
-; Finish by loading the next DLI's colors.  The second score line preps the Beach.
-; This is redundant (useless) (time-wasting) work when not on the game display, 
-; but this is also not damaging.
-;	tya
-;	pha
-;	ldy ThisDLI
-
-;	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
 
 
 ;==============================================================================
@@ -959,6 +962,7 @@ SetupAllColors_DLI
 
 ; Called by Beach 2 Boat
 LoadAlmostAllBoatColors_DLI
+
 	lda ColorPF1   
 	sta COLPF1
 	lda ColorPF2   
@@ -1091,6 +1095,39 @@ LoadPmSpecs1
 	sta HPOSM3
 
 	rts
+
+
+
+;==============================================================================
+; SCORE TITLE WITH PMG                                                       A 
+;==============================================================================
+; Called on Title display
+; Set the score playfield colors.   
+; Set the scoreline player/missiles.
+; WAIT until after the text line.
+; Then fall through to set all the main playfield P/M object values.
+; -----------------------------------------------------------------------------
+
+Score_Title_With_PMG
+
+	lda ColorPF1         ; Get text color (luminance)
+	sta COLPF1           ; write new text color.
+
+	lda #COLOR_BLACK     ; Black for background and text background.
+	sta COLBK            ; Write new border color.
+	sta COLPF2           ; Write new background color
+
+	jsr LoadPmSpecs0
+
+	sta wsync
+	sta wsync
+	sta wsync
+	sta wsync
+	sta wsync
+	sta wsync
+	sta wsync
+	sta wsync
+	sta wsync
 
 
 ;==============================================================================

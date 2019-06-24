@@ -2662,34 +2662,46 @@ PositionTomb
 
 	; Do horizontal repositioning.
 	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
-	stx HPOSP0 ; + 0 is shadow on left
+;	stx HPOSP0 ; + 0 is shadow on left
+	stx HPOSP0_TABLE+2
 	inx
 	inx
-	stx HPOSM0 ; + 2 is p5 left part of tombstone
+;	stx HPOSM0 ; + 2 is p5 left part of tombstone
+	stx HPOSM0_TABLE+2
 	inx
 	inx
-	stx HPOSP3 ; + 4 is part of RIP
+;	stx HPOSP3 ; + 4 is part of RIP
+	stx HPOSP3_TABLE+2
 	inx
-	stx HPOSP2 ; + 5 is rest of the RIP
+;	stx HPOSP2 ; + 5 is rest of the RIP
+	stx HPOSP2_TABLE+2
 	inx
 	inx
-	stx HPOSP1 ; + 7 right side of tombstone
-
+;	stx HPOSP1 ; + 7 right side of tombstone
+	stx HPOSP1_TABLE+2
+	
 	ldx #0     ; Remove these other parts from visible display
-	stx HPOSM3 ;  0 is p5 off 
-	stx HPOSM2 ;  2 is p5 off 
-	stx HPOSM1 ;  4 is p5 off 
-
+;	stx HPOSM3 ;  0 is p5 off 
+	stx HPOSM3_TABLE+2
+;	stx HPOSM2 ;  2 is p5 off 
+	stx HPOSM2_TABLE+2
+;	stx HPOSM1 ;  4 is p5 off 
+	stx HPOSM1_TABLE+2
+	
 	; Bonus extra...  
 	; Force set  Player/Missile sizes
 	ldx #PM_SIZE_NORMAL ; aka $00
-	stx SIZEP0 ; Tombstone shadow
-	stx SIZEP1 ; Frog parts 2
-	stx SIZEP2 ; Frog colored iris
-	stx SIZEP3 ; Frog mouth
+;	stx SIZEP0 ; Tombstone shadow
+	stx SIZEP0_TABLE+2
+;	stx SIZEP1 ; Frog parts 2
+	stx SIZEP1_TABLE+2
+;	stx SIZEP2 ; Frog colored iris
+	stx SIZEP2_TABLE+2
+;	stx SIZEP3 ; Frog mouth
+	stx SIZEP3_TABLE+2
 	ldx #PM_SIZE_QUAD
-	stx SIZEM  ; Missile 0 is left size of tombstone
-
+;	stx SIZEM  ; Missile 0 is left size of tombstone
+	stx SIZEM_TABLE+2
 	rts
 
 
@@ -2706,31 +2718,42 @@ PositionSplat
 
 	; Do horizontal repositioning.
 	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
-	stx HPOSP0 ; + 0 is splat parts 1
+;	stx HPOSP0 ; + 0 is splat parts 1
+	stx HPOSP0_TABLE+2
 	inx
-	stx HPOSP1 ; + 1 is splat parts 2
-
+;	stx HPOSP1 ; + 1 is splat parts 2
+	stx HPOSP1_TABLE+2
+	
 	ldx #0     ; Remove these other parts from visible display
 
 	lda CurrentDL
 	cmp #DISPLAY_GAME
 	beq bps_SkipZeroP3  ; Do not remove P3 on the game screen.
 
-	stx HPOSP3 ;  0 is off
-	stx HPOSM3 ;  0 is p5 off
-
+;	stx HPOSP3 ;  0 is off
+	stx HPOSP3_TABLE+2
+;	stx HPOSM3 ;  0 is p5 off
+	stx HPOSM3_TABLE+2
+	
 bps_SkipZeroP3
-	stx HPOSP2 ;  0 is p5 off
-	stx HPOSM2 ;  0 is p5 off
-	stx HPOSM1 ;  0 is p5 off
-	stx HPOSM0 ;  0 is p5 off
+;	stx HPOSP2 ;  0 is p5 off
+	stx HPOSP2_TABLE+2
+;	stx HPOSM2 ;  0 is p5 off
+	stx HPOSM2_TABLE+2
+;	stx HPOSM1 ;  0 is p5 off
+	stx HPOSM1_TABLE+2
+;	stx HPOSM0 ;  0 is p5 off
+	stx HPOSM0_TABLE+2
 
 	; Bonus extra...  
 	; Force set  Player/Missile sizes
 	ldx #PM_SIZE_NORMAL ; aka $00
-	stx SIZEP0 ; Splat parts 1
-	stx SIZEP1 ; Splat parts 2
-	stx SIZEP2 ; Splat parts 2
+;	stx SIZEP0 ; Splat parts 1
+	stx SIZEP0_TABLE+2
+;	stx SIZEP1 ; Splat parts 2
+	stx SIZEP1_TABLE+2
+;	stx SIZEP2 ; Splat parts 2
+	stx SIZEP2_TABLE+2
 
 	rts
 
@@ -2748,75 +2771,43 @@ PositionFrog
 
 	; Do horizontal repositioning.
 	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
-	stx HPOSP0 ; + 0 is frog parts 1
-;	stx HPOSP3 ; + 0 is frog mouth
-;	stx HPOSM3 ; + 0 is p5 frog eye balls
+;	stx HPOSP0 ; + 0 is frog parts 1
+	stx HPOSP0_TABLE+2
 	inx
-	stx HPOSP1 ; + 1 is frog parts 2
-	stx HPOSP2 ; + 0 is frog eye iris
-;	inx
-;	stx HPOSM2 ; + 2 is p5 frog eye balls
-;	inx
-;	inx
-;	stx HPOSM1 ; + 4 is p5 frog eye balls
-;	inx
-;	inx
-;	stx HPOSM0 ; + 5 is p5 frog eye balls
+;	stx HPOSP1 ; + 1 is frog parts 2
+	stx HPOSP1_TABLE+2
+;	stx HPOSP2 ; + 0 is frog eye iris
+	stx HPOSP2_TABLE+2
 
 	ldx #0     ; Remove these other parts from visible display
 	lda CurrentDL
 	cmp #DISPLAY_GAME
 	beq bps_DoNoMoveMask
 
-	stx HPOSP3 ; On the game screen these need to stay to mask the left/right borders.
-	stx HPOSM3
+;	stx HPOSP3 ; On the game screen these need to stay to mask the left/right borders.
+	stx HPOSP3_TABLE+2
+;	stx HPOSM3
+	stx HPOSM3_TABLE+2
 
 bps_DoNoMoveMask 
-	stx HPOSM2 ;  0 is off
-	stx HPOSM1 ;  0 is off
-	stx HPOSM0 ;  0 is off
+;	stx HPOSM2 ;  0 is off
+	stx HPOSM2_TABLE+2
+;	stx HPOSM1 ;  0 is off
+	stx HPOSM1_TABLE+2
+;	stx HPOSM0 ;  0 is off
+	stx HPOSM0_TABLE+2
 
 	; Bonus extra...  
 	; Force set  Player/Missile sizes
-	lda #PM_SIZE_NORMAL ; aka $00
-	sta SIZEP0 ; Frog parts 1
-	sta SIZEP1 ; Frog parts 2
-	sta SIZEP2 ; Frog eyeball 
-
-;	sta SIZEP3 ; Frog mouth
-;	sta SIZEM  ; Eyeballs are Missile/P5 showing through the holes in head. (All need to be set 0)
+	ldx #PM_SIZE_NORMAL ; aka $00
+;	stx SIZEP0 ; Frog parts 1
+	stx SIZEP0_TABLE+2
+;	stx SIZEP1 ; Frog parts 2
+	stx SIZEP1_TABLE+2
+;	stx SIZEP2 ; rog eyeball 
+	stx SIZEP2_TABLE+2
 
 	rts
-
-
-;==============================================================================
-;											UpdateFrog  A  X  Y
-;==============================================================================
-; Complete redisplay of the frog.  
-; Erase old Frog position if needed.
-; Load frog into PM Memory at the new position.
-; Update current position == new position.
-; Y positioning different from X positioning, since it must reload memory.
-; -----------------------------------------------------------------------------
-; UpdateFrog
-	; ldx FrogNewPMY         ; New frog Y...
-	; cpx FrogPMY            ; ...is different from Old frog Y?
-	; beq bUFSkipFrogRedraw  ; No.  Skip erase/redraw.
-
-	; jsr UpdateFrogY
-
-; bUFSkipFrogRedraw
-	; ldx FrogNewPMX            ; New frog X...
-	; cpx FrogPMX               ; ...is different from Old frog X?
-	; beq bUFSkipFrogReposition ; No.  Skip horizontal position update.
-
-	; jsr UpdateFrogX
-
-
-; bUFSkipFrogReposition
-	; rts
-
-
 
 
 ;==============================================================================
