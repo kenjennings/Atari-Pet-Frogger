@@ -258,6 +258,7 @@ VBISetupDisplay
 
 	lda GPRIOR_TABLE,x          ; Title/Game/Splash displays use P/M objects differently.
 	sta GPRIOR
+	sta PRIOR_TABLE+2           ; This is clumsy here.   maybe it goes in the draw shape.
 
 	stx CurrentDL               ; Let Main know this is now the current screen.
 	lda #$FF                    ; Turn off the signal from Main to change screens.
@@ -734,17 +735,46 @@ COLPF0_COLBK_DLI
 
 
 ;==============================================================================
+; COLPF0_COLBK_TITLE_DLI                                                     A
+;==============================================================================
+; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
+; same display list structure and DLIs.  
+; Sets background color and the COLPF0 pixel color.  
+; Table driven.  
+; Perfectly re-usable for anywhere Map Mode 9 or Blank instructions are 
+; being managed.  In the case of blank lines you just don't see the pixel 
+; color change, so it does not matter what is in the COLPF0 color table. 
+; -----------------------------------------------------------------------------
+
+COLPF0_COLBK_TITLE_DLI
+	mStart_DLI
+
+	jmp DO_COLPF0_COLBK_TITLE_DLI
+	
+;	lda COLPF0_TABLE,y   ; Get pixels color
+;	pha
+;	lda COLBK_TABLE,y    ; Get background color
+;	sta WSYNC
+;	sta COLBK            ; Set background
+;	pla
+;	sta COLPF0           ; Set pixels.
+
+;	jmp Exit_DLI
+
+
+
+
+;==============================================================================
 ; SCORE TITLE  DLI                                                       A 
 ;==============================================================================
-; Used on Title and Game displays.  
+; Used on Title displays.  
 ; This is called on a blank before the text line. 
 ; The VBI should have loaded up the Page zero staged colors. 
 ; Only ColorPF1 matters for the playfielld as the background and border will 
 ; be forced to black. 
 ; This also sets Player/Missile parameters for P0,P1,P2, M0 and M1 to show 
 ; the "Score" and "Hi" text.
-; Since all of this takes place in the blank space then it does not 
-; matter that there is no WSYNC.  
+; Then it WSYNCs until after the first score line, and forces all HPOS to 0.
 ; -----------------------------------------------------------------------------
 
 Score_Title_DLI
@@ -758,7 +788,7 @@ Score_Title_DLI
 ;==============================================================================
 ; SCORE 1 DLI                                                            A 
 ;==============================================================================
-; Used on Title and Game displays.  
+; Used on Game displays.  
 ; This is called on a blank before the text line. 
 ; The VBI should have loaded up the Page zero staged colors. 
 ; Only ColorPF1 matters for the playfielld as the background and border will 
@@ -1097,7 +1127,6 @@ LoadPmSpecs1
 	rts
 
 
-
 ;==============================================================================
 ; SCORE TITLE WITH PMG                                                       A 
 ;==============================================================================
@@ -1116,19 +1145,52 @@ Score_Title_With_PMG
 	lda #COLOR_BLACK     ; Black for background and text background.
 	sta COLBK            ; Write new border color.
 	sta COLPF2           ; Write new background color
-
+	
 	jsr LoadPmSpecs0
-
-	sta wsync
-	sta wsync
-	sta wsync
-	sta wsync
+	
+	sta wsync ; Skip some scan lines to pass the top line of scrore labels.
 	sta wsync
 	sta wsync
 	sta wsync
 	sta wsync
 	sta wsync
 
+	jsr libSetPmgHPOSZero  ; Remove second line of P/M labels from display.
+
+	rts
+
+
+
+;==============================================================================
+; COLPF0_COLBK_TITLE_DLI                                                     A
+;==============================================================================
+; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
+; same display list structure and DLIs.  
+; Sets background color and the COLPF0 pixel color.  
+; Table driven.  
+; Perfectly re-usable for anywhere Map Mode 9 or Blank instructions are 
+; being managed.  In the case of blank lines you just don't see the pixel 
+; color change, so it does not matter what is in the COLPF0 color table. 
+; -----------------------------------------------------------------------------
+
+DO_COLPF0_COLBK_TITLE_DLI
+
+	lda COLPF0_TABLE,y   ; Get pixels color
+	pha
+	lda COLBK_TABLE,y    ; Get background color
+	sta WSYNC
+	sta COLBK            ; Set background
+	pla
+	sta COLPF0           ; Set pixels.
+
+	jsr LoadPmSpecs2
+
+	jmp Exit_DLI
+
+
+
+
+; Fall through to next routine to load animated player.
 
 ;==============================================================================
 ; LOAD PM SPECS 2                                                       A 

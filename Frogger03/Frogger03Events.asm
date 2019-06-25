@@ -126,6 +126,7 @@ EventGameInit
 
 	jsr libPmgInit             ; Will also reset SDMACTL settings for P/M DMA
 
+
 	lda #4                     ; Quick hack to init the scrolling credits.
 	sta HSCROL
 

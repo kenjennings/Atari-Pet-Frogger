@@ -1926,8 +1926,10 @@ RemoveFrogOnScreen
 
 libPmgInit
 	; get all Players/Missiles off screen.
-	jsr libPmgMoveAllZero
+;	jsr libPmgMoveAllZero
 
+	jsr libPmgAllZero
+	
 	; clear all bitmap images
 	jsr libPmgClearBitmaps
 
@@ -1953,22 +1955,41 @@ libPmgInit
 	ldx #SHAPE_FROG ; Frog Shape
 	jsr libPmgSetColors
 
-;	; Player 5 (the Missiles) is COLPF3, White.
-;	lda #COLOR_BLACK+$C
-;	sta COLOR3         ; OS shadow for color, no DLI changes.
-
 	rts 
 
 
 ;==============================================================================
-;											PmgMoveAllZero  A  X
+;											SetPmgHPOSZero  A  X
+;==============================================================================
+; Zero the hardware HPOS registers.
+;
+; Useful for DLI which needs to remove Players from the screen.
+; With no other changes (i.e. the size,) this is sufficient to remove 
+; visibility for all Player/Missile overlay objects 
+; -----------------------------------------------------------------------------
+
+libSetPmgHPOSZero
+
+	lda #$00                ; 0 position
+
+	sta HPOSP0
+	sta HPOSP1
+	sta HPOSP2
+	sta HPOSP3
+	sta HPOSM0
+	sta HPOSM1
+	sta HPOSM2
+	sta HPOSM3
+
+	rts
+
+
+;==============================================================================
+;											PmgAllZero  A  X
 ;==============================================================================
 ; Simple hardware reset of all Player/Missile registers.
 ; Typically used only at program startup to zero everything
 ; and prevent any screen glitchiness on startup.
-;
-; Also useful when the program wants to turn off the current 
-; player image.
 ;
 ; Reset all Players and Missiles horizontal positions to 0, so
 ; that none are visible no matter the size or bitmap contents.
@@ -1976,39 +1997,24 @@ libPmgInit
 ; Also reset sizes to zero.
 ; -----------------------------------------------------------------------------
 
-libPmgMoveAllZero
+libPmgAllZero
 
 	lda #$00                ; 0 position
-;	ldx #$03                ; four objects, 3 to 0
+	ldx #$03                ; four objects, 3 to 0
 
-;bLoopZeroPMPosition
-;	sta HPOSP0,x            ; Player positions 3, 2, 1, 0
-;	sta SIZEP0,x            ; Player width 3, 2, 1, 0
-;	sta HPOSM0,x            ; Missiles 3, 2, 1, 0 just to be sure.
-;	sta PCOLOR0,x           ; And black the colors.
-;	dex
-;	bpl bLoopZeroPMPosition
+bLoopZeroPMPosition
+	sta HPOSP0,x            ; Player positions 3, 2, 1, 0
+	sta SIZEP0,x            ; Player width 3, 2, 1, 0
+	sta HPOSM0,x            ; Missiles 3, 2, 1, 0 just to be sure.
+	sta PCOLOR0,x           ; And black the colors.
+	dex
+	bpl bLoopZeroPMPosition
 
-	sta COLPM0_TABLE+2
-	sta COLPM1_TABLE+2
-	sta COLPM2_TABLE+2
-	sta COLPM3_TABLE+2
-	sta SIZEP0_TABLE+2
-	sta SIZEP0_TABLE+2
-	sta SIZEP0_TABLE+2
-	sta SIZEP0_TABLE+2
-	sta SIZEM               ; and Missile size 3, 2, 1, 0
-	sta HPOSP0_TABLE+2
-	sta HPOSP1_TABLE+2
-	sta HPOSP2_TABLE+2
-	sta HPOSP3_TABLE+2
-	sta HPOSM0_TABLE+2
-	sta HPOSM1_TABLE+2
-	sta HPOSM2_TABLE+2
-	sta HPOSM3_TABLE+2
+	sta SIZEM
 
 	lda #[GTIA_MODE_DEFAULT|%00000001]
-	sta PRIOR_TABLE+2
+;	sta PRIOR
+	sta GPRIOR
 
 	rts
 
@@ -2077,11 +2083,11 @@ libPmgSetColors
 ; ==========================================================================
 ; LOAD PMG TEXT LINES                                                 A  X  
 ; ==========================================================================
-; Load the Text labels the the scores, lives, and saved frogs into 
+; Load the Text labels for the the scores, lives, and saved frogs into 
 ; the Player/Missile memory.
 ; --------------------------------------------------------------------------
 
-LoadPMGTextLines
+LoadPmgTextLines
 
 	ldx #14
 
@@ -2102,6 +2108,40 @@ bLPTL_LoadBytes
 
 	rts
 
+
+;==============================================================================
+;											SetPmgAllZero  A  X
+;==============================================================================
+; Zero the table entries for the animated object on screen.
+;
+; -----------------------------------------------------------------------------
+
+SetPmgAllZero
+
+	lda #$00                ; 0 position
+
+	sta COLPM0_TABLE+2
+	sta COLPM1_TABLE+2
+	sta COLPM2_TABLE+2
+	sta COLPM3_TABLE+2
+	sta SIZEP0_TABLE+2
+	sta SIZEP0_TABLE+2
+	sta SIZEP0_TABLE+2
+	sta SIZEP0_TABLE+2
+	sta SIZEM_TABLE+2               ; and Missile size 3, 2, 1, 0
+	sta HPOSP0_TABLE+2
+	sta HPOSP1_TABLE+2
+	sta HPOSP2_TABLE+2
+	sta HPOSP3_TABLE+2
+	sta HPOSM0_TABLE+2
+	sta HPOSM1_TABLE+2
+	sta HPOSM2_TABLE+2
+	sta HPOSM3_TABLE+2
+
+	lda #[GTIA_MODE_DEFAULT|%00000001]
+	sta PRIOR_TABLE+2
+
+	rts
 
 
 ; ==========================================================================
@@ -2624,7 +2664,7 @@ PositionShape
 bps_Test0
 	cmp #SHAPE_OFF
 	bne bps_Test1
-	jsr libPmgMoveAllZero ; Zero all P/M HPOS, and sizes.
+;	jsr libPmgMoveAllZero ; Zero all P/M HPOS, and sizes.
 	jmp ExitPositionShape
 
 bps_Test1

@@ -1074,8 +1074,8 @@ DISPLAY_NEEDS_BORDERS_TABLE ; I thought it may get used more than once. :-(
 	.byte 0 ; Over, No.
 
 TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte <Score1_DLI            ; DLI (0) Text - COLPF1, Black - COLBK COLPF2
-	.byte <COLPF0_COLBK_DLI     ; DLI (1) Table - COLBK, Pixels - COLPF0
+	.byte <Score_Title_DLI      ; DLI (0) Text - COLPF1, Black - COLBK COLPF2
+	.byte <COLPF0_COLBK_TITLE_DLI     ; DLI (1) Table - COLBK, Pixels - COLPF0
 	.byte <COLPF0_COLBK_DLI     ; DLI 2   Table - COLBK, Pixels - COLPF0
 	.byte <COLPF0_COLBK_DLI     ; DLI 3   Table - COLBK, Pixels - COLPF0
 	.byte <COLPF0_COLBK_DLI     ; DLI 4   Table - COLBK, Pixels - COLPF0

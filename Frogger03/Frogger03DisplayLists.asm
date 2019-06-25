@@ -99,15 +99,16 @@ DISPLAY_OVER  = 4
 ; May need to insert some blanks between lines to allow more time. 
 
 TITLE_DISPLAYLIST
-	.byte   DL_BLANK_8, DL_BLANK_8|DL_DLI  ; 16 blank scan lines. DLI 0/0 Score_DLI sets COLPF1, COLPF2, COLBK for score text. 
-;	.byte   DL_BLANK_4                     ; 4 blank lines. 
-	.byte DL_BLANK_2    
+	.byte DL_BLANK_8        ; 8 scan lines 
+	.byte DL_BLANK_8 ; 8 blank scan lines.  DLI 0/0 Score_DLI sets COLPF1, COLPF2, COLBK for score text. set P/M position
+;	.byte DL_BLANK_4        ; 4 blank lines. 
+	.byte DL_BLANK_2|DL_DLI    
 
 	mDL_LMS DL_TEXT_2,SCORE_MEM1           ; (1-8) scores
 	
 	.byte DL_BLANK_2
 	
-	.byte   DL_BLANK_8|DL_DLI              ; (9-16) An empty line. DLI 1/1 COLPF0_COLBK_DLI Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1.
+	.byte   DL_BLANK_8|DL_DLI              ; (9-16) An empty line. DLI 1/1 COLPF0_COLBK_DLI Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1. 
 
  
 
