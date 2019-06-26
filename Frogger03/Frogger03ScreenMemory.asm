@@ -1138,7 +1138,7 @@ GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
 ; All three graphics screens use the same list.
 ; Basically, the background color is updated per every line
 SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte <COLPF0_COLBK_DLI     ; DLI (0)  ; VBI uses for initializing DLI.
+	.byte <COLPF0_COLBK_TITLE_DLI     ; DLI (0)  ; VBI uses for initializing DLI.
 
 	.byte <COLPF0_COLBK_DLI     ; DLI (1)  1
 	.byte <COLPF0_COLBK_DLI     ; DLI (2)  2
@@ -1232,61 +1232,187 @@ HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row. (21 en
 	.by 10 4
 
 
-COLPM0_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by COLOR_BLUE2+4 COLOR_PURPLE+4 $00
+; The current display uses the following values for Players/missiles 
+; which are sliced by DLIs into three parts on the screen.
+; 1) the Top score line labels.
+; 2) the lives and saved frogs line of text labels.
+; 3) The animated object.  Frog on the Title and game screen.  Tomb on the Game over.
+; Some displays do not show all the components.
 
-COLPM1_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by COLOR_BLUE2+4 COLOR_PURPLE+4 $00
+PLAYER_MISSILE_BASE_SPECS
 
-COLPM2_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by COLOR_PINK+4 COLOR_GREEN+4 $00
+COLPM0_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
+COLPM1_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
+COLPM2_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
+COLPM3_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
 
-COLPM3_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 COLOR_GREEN+4 $00
+SIZEP0_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
+SIZEP1_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
+SIZEP2_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
+SIZEP3_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
+SIZEM_TABLE    .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
 
-SIZEP0_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by PM_SIZE_NORMAL PM_SIZE_NORMAL $00
+HPOSP0_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
+HPOSP1_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
+HPOSP2_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
+HPOSP3_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
 
-SIZEP1_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by PM_SIZE_NORMAL PM_SIZE_NORMAL $00
+HPOSM0_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
+HPOSM1_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
+HPOSM2_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
+HPOSM3_TABLE   .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
 
-SIZEP2_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by PM_SIZE_NORMAL PM_SIZE_NORMAL $00
-
-SIZEP3_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by PM_SIZE_NORMAL PM_SIZE_NORMAL $00
-
-SIZEM_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by PM_SIZE_NORMAL PM_SIZE_NORMAL $00
-
-HPOSP0_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by PLAYFIELD_LEFT_EDGE_NORMAL+1 PLAYFIELD_LEFT_EDGE_NORMAL+1 $00
-
-HPOSP1_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by [PLAYFIELD_LEFT_EDGE_NORMAL+9] [PLAYFIELD_LEFT_EDGE_NORMAL+9] $00
-
-HPOSP2_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by [PLAYFIELD_RIGHT_EDGE_NORMAL-7]  [PLAYFIELD_RIGHT_EDGE_NORMAL-90] $00
-
-HPOSP3_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 [PLAYFIELD_RIGHT_EDGE_NORMAL-82] $00
-
-HPOSM0_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by [PLAYFIELD_LEFT_EDGE_NORMAL+19] [PLAYFIELD_LEFT_EDGE_NORMAL+19] $00
-
-HPOSM1_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by [PLAYFIELD_LEFT_EDGE_NORMAL+17] [PLAYFIELD_LEFT_EDGE_NORMAL+17] $00
-
-HPOSM2_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 [PLAYFIELD_RIGHT_EDGE_NORMAL-72] $00
-
-HPOSM3_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by $00 [PLAYFIELD_RIGHT_EDGE_NORMAL-74] $00
-
-PRIOR_TABLE ; Must be big enough for the score DLIs and the Game Player object
-	.by [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|%00000001] $00
+PRIOR_TABLE    .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
 
 
+; Given a Display number, these are the values for the Player/Missiles 
+; tables above.  Multiply Display number (0 to 4) times sizeof the pile 
+; of table entries (54 bytes).  Or maybe just look it up from a table.
+
+TITLE_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object
+	.by COLOR_BLUE2+4 $00 COLOR_GREEN+$4 ; COLPM0_TABLE 
+	.by COLOR_BLUE2+4 $00 COLOR_GREEN+$2 ; COLPM1_TABLE 
+	.by COLOR_PINK+4  $00 COLOR_BLACK+$E ; COLPM2_TABLE 
+	.by $00           $00 COLOR_BLACK    ; COLPM3_TABLE 
+	
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP0_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP1_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP2_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP3_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEM_TABLE 
+	
+	.by PLAYFIELD_LEFT_EDGE_NORMAL      $00 $00 ; HPOSP0_TABLE 
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+8]  $00 $00 ; HPOSP1_TABLE 
+	.by [PLAYFIELD_RIGHT_EDGE_NORMAL-7] $00 $00 ; HPOSP2_TABLE 
+	.by $00                             $00 $00 ; HPOSP3_TABLE 
+	
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+19] $00 $00 ; HPOSM0_TABLE 
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+17] $00 $00 ; HPOSM1_TABLE 
+	.by $00                             $00 $00 ; HPOSM2_TABLE 
+	.by $00                             $00 $00 ; HPOSM3_TABLE
+
+	.by [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|MULTICOLOR_PM|%0001] ; PRIOR_TABLE 
+
+GAME_BASE_PMG_TABLE
+	.by COLOR_BLUE2+4 COLOR_PURPLE+4 COLOR_GREEN+$4 ; COLPM0_TABLE 
+	.by COLOR_BLUE2+4 COLOR_PURPLE+4 COLOR_GREEN+$2 ; COLPM1_TABLE 
+	.by COLOR_PINK+4  COLOR_GREEN+4  COLOR_BLACK+$E ; COLPM2_TABLE 
+	.by $00           COLOR_GREEN+4  COLOR_BLACK    ; COLPM3_TABLE 
+	
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP0_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP1_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP2_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_QUAD   ; SIZEP3_TABLE ; Borders
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL %11000000      ; SIZEM_TABLE  ; Borders
+	
+	.by PLAYFIELD_LEFT_EDGE_NORMAL      PLAYFIELD_LEFT_EDGE_NORMAL       $00 ; HPOSP0_TABLE 
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+8]  [PLAYFIELD_LEFT_EDGE_NORMAL+8]   $00 ; HPOSP1_TABLE 
+	.by [PLAYFIELD_RIGHT_EDGE_NORMAL-7] [PLAYFIELD_RIGHT_EDGE_NORMAL-90] $00 ; HPOSP2_TABLE 
+	.by $00                             [PLAYFIELD_RIGHT_EDGE_NORMAL-82] [PLAYFIELD_RIGHT_EDGE_NORMAL+1] ; HPOSP3_TABLE 
+	
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+19] [PLAYFIELD_LEFT_EDGE_NORMAL+19]  $00 ; HPOSM0_TABLE 
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+17] [PLAYFIELD_LEFT_EDGE_NORMAL+17]  $00 ; HPOSM1_TABLE 
+	.by $00                             [PLAYFIELD_RIGHT_EDGE_NORMAL-73] $00 ; HPOSM2_TABLE 
+	.by $00                             [PLAYFIELD_RIGHT_EDGE_NORMAL-75] [PLAYFIELD_LEFT_EDGE_NORMAL-8] ; HPOSM3_TABLE
+
+	.by [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|MULTICOLOR_PM|%0001] ; PRIOR_TABLE 
+
+WIN_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object
+	.by $00 $00 COLOR_GREEN+$4 ; COLPM0_TABLE 
+	.by $00 $00 COLOR_GREEN+$2 ; COLPM1_TABLE 
+	.by $00 $00 COLOR_BLACK+$E ; COLPM2_TABLE 
+	.by $00 $00 COLOR_BLACK    ; COLPM3_TABLE 
+	
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP0_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP1_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP2_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP3_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEM_TABLE 
+	
+	.by $00 $00 $00 ; HPOSP0_TABLE ; After switching to Win Display, restore Frog HPOS
+	.by $00 $00 $00 ; HPOSP1_TABLE 
+	.by $00 $00 $00 ; HPOSP2_TABLE 
+	.by $00 $00 $00 ; HPOSP3_TABLE 
+	
+	.by $00 $00 $00 ; HPOSM0_TABLE 
+	.by $00 $00 $00 ; HPOSM1_TABLE 
+	.by $00 $00 $00 ; HPOSM2_TABLE 
+	.by $00 $00 $00 ; HPOSM3_TABLE
+
+	.by [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|MULTICOLOR_PM|%0001] ; PRIOR_TABLE 
+
+DEAD_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object (nothing on screen)
+	.by $00 $00 $00 ; COLPM0_TABLE 
+	.by $00 $00 $00 ; COLPM1_TABLE 
+	.by $00 $00 $00 ; COLPM2_TABLE 
+	.by $00 $00 $00    ; COLPM3_TABLE 
+	
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP0_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP1_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP2_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP3_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEM_TABLE 
+	
+	.by $00 $00 $00 ; HPOSP0_TABLE ; After switching to Win Display, restore Frog HPOS
+	.by $00 $00 $00 ; HPOSP1_TABLE 
+	.by $00 $00 $00 ; HPOSP2_TABLE 
+	.by $00 $00 $00 ; HPOSP3_TABLE 
+	
+	.by $00 $00 $00 ; HPOSM0_TABLE 
+	.by $00 $00 $00 ; HPOSM1_TABLE 
+	.by $00 $00 $00 ; HPOSM2_TABLE 
+	.by $00 $00 $00 ; HPOSM3_TABLE
+
+	.by [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|%00000001] ; PRIOR_TABLE 
+
+OVER_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object
+	.by $00 $00 COLOR_BLACK+$4 ; COLPM0_TABLE 
+	.by $00 $00 COLOR_BLACK+$C ; COLPM1_TABLE 
+	.by $00 $00 COLOR_BLACK+$2 ; COLPM2_TABLE 
+	.by $00 $00 COLOR_BLACK+$2 ; COLPM3_TABLE 
+	
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP0_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP1_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP2_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP3_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEM_TABLE 
+	
+	.by $00 $00 $00 ; HPOSP0_TABLE ; After switching to Win Display, restore Frog HPOS
+	.by $00 $00 $00 ; HPOSP1_TABLE 
+	.by $00 $00 $00 ; HPOSP2_TABLE 
+	.by $00 $00 $00 ; HPOSP3_TABLE 
+	
+	.by $00 $00 $00 ; HPOSM0_TABLE 
+	.by $00 $00 $00 ; HPOSM1_TABLE 
+	.by $00 $00 $00 ; HPOSM2_TABLE 
+	.by $00 $00 $00 ; HPOSM3_TABLE
+
+	.by [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|MULTICOLOR_PM|%0001] ; PRIOR_TABLE 
+
+
+MANAGE_SCORE_COLORS_TABLE  ; For each #DISPLAY, are the scores visible?
+	.by 1 1 0 0 0 
+
+MANAGE_LIVES_COLORS_TABLE  ; For each #DISPLAY, are the Lives visible?
+	.by 0 1 0 0 0 
+
+
+; On changing a display load up the Player/Missile tables 
+; from the bulk value at these pointers:
+
+BASE_PMG_LO_TABLE
+	.byte <TITLE_BASE_PMG_TABLE
+	.byte <GAME_BASE_PMG_TABLE
+	.byte <WIN_BASE_PMG_TABLE
+	.byte <DEAD_BASE_PMG_TABLE
+	.byte <OVER_BASE_PMG_TABLE
+
+BASE_PMG_HI_TABLE
+	.byte >TITLE_BASE_PMG_TABLE
+	.byte >GAME_BASE_PMG_TABLE
+	.byte >WIN_BASE_PMG_TABLE
+	.byte >DEAD_BASE_PMG_TABLE
+	.byte >OVER_BASE_PMG_TABLE
 
 COLOR_BACK_LO_TABLE
 	.byte <TITLE_BACK_COLORS
@@ -1824,6 +1950,7 @@ PLAYER5_GRAVE_DATA; Missile 0
 	.by $00 $00 $00 $00 $00 $01 $03 $03
 	.by $03 $03 $03 $03 $03 $03 $03 $03
 	.by $03 $03 $03 $03 $03 $03 $03
+
 
 BASE_PMCOLORS_TABLE ; When "off", and so multiplication for frog = 1 works.
 	.by 0 0 0 0

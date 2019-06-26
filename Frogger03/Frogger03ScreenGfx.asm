@@ -471,7 +471,7 @@ ChangeScreen
 	; draw or erase the borders accordingly.
 
 bCSCheckScreenBorders
-	lda DISPLAY_NEEDS_BORDERS_TABLE,y ; Does this display need the P/m graphics borders? 
+	lda DISPLAY_NEEDS_BORDERS_TABLE,y ; Does this display need the P/M graphics borders? 
 	beq bCSNoBorders                  ; If it is 0 it is not needed.  Erase it this.
 	jsr DrawGameBorder                ; Game screen needs left and right sides masked.
 	jmp bCSContinueUpdate
@@ -488,9 +488,10 @@ LoopChangeScreenWaitForVBI            ; Wait for VBI to signal the values change
 	beq LoopChangeScreenWaitForVBI    ; Yes. Keep looping.
 
 	; The VBI has changed the display and loaded page zero pointers.
-	; Now update the DLI color tables.
 	tay
-	jsr CopyBaseColors
+	jsr CopyBaseColors    ; Now update the DLI color tables.
+
+	jsr CopyPMGBase       ; And update the base player/missile data.
 
 	rts
 
@@ -642,11 +643,13 @@ NukeAllColorsFromOrbitToBeSure
 	sta COLPF0_TABLE,y          ; Zero pixel (or text)
 	sta COLPF1_TABLE,y          ; Zero text
 	sta COLPF2_TABLE,y          ; Zero something else
+
 	pha
 	ldx CurrentDL
 	cpx #DISPLAY_OVER
 	bne DoNotUseWhite
 	lda #COLOR_BLACK+$0e
+
 DoNotUseWhite
 	sta COLPF3_TABLE,y          ; Zero this too
 	pla
@@ -1351,6 +1354,7 @@ ExitFadeColPfToBlack          ; Insure we're leaving with 0 for both colors 0.  
 ; base color is that is passed in the A register. 
 ;
 ; Uses TempWipeColor in page 0.
+; X = current Row
 ; A = color to use.
 ; --------------------------------------------------------------------------
 
@@ -2012,7 +2016,7 @@ bLoopZeroPMPosition
 
 	sta SIZEM
 
-	lda #[GTIA_MODE_DEFAULT|%00000001]
+	lda #[GTIA_MODE_DEFAULT|%0001]
 ;	sta PRIOR
 	sta GPRIOR
 
@@ -2138,8 +2142,28 @@ SetPmgAllZero
 	sta HPOSM2_TABLE+2
 	sta HPOSM3_TABLE+2
 
-	lda #[GTIA_MODE_DEFAULT|%00000001]
+	lda #[GTIA_MODE_DEFAULT|%0001]
 	sta PRIOR_TABLE+2
+
+	rts
+
+
+;==============================================================================
+;														CopyPmgBase  A  Y
+;==============================================================================
+; Bulk copy the base values for the current display to the working table.
+;
+; -----------------------------------------------------------------------------
+
+CopyPmgBase
+
+	ldy #53
+
+bCPB_loop
+	lda (BasePmgAddr),y
+	sta PLAYER_MISSILE_BASE_SPECS,y
+	dey
+	bpl bCPB_loop
 
 	rts
 
@@ -2345,10 +2369,10 @@ ExitEraseShape
 EraseGameBorder
 
 	lda #$00
-	sta HPOSP3
-	sta HPOSM3
-;	sta HPOSP3_TABLE+2
-;	sta HPOSM3_TABLE+2
+;	sta HPOSP3
+;	sta HPOSM3
+	sta HPOSP3_TABLE+2
+	sta HPOSM3_TABLE+2
 
 	ldx #177
 
@@ -2490,6 +2514,8 @@ ExitDrawShape
 	lda FrogNewShape ; return value to caller.
 	rts
 
+
+; Bulk copy for PMG specs may eliminate much of this.
 ;==============================================================================
 ;											DrawGameBorder  A  X  Y
 ;==============================================================================
@@ -2503,20 +2529,20 @@ ExitDrawShape
 
 DrawGameBorder
 
-	lda #$00
-;	sta PCOLOR3
-;	sta COLOR3
-;	sta HPOSP3
-;	sta HPOSM3
-	sta COLPM3_TABLE+2
+;	lda #$00
+;;	sta PCOLOR3
+;;	sta COLOR3
+;;	sta HPOSP3
+;;	sta HPOSM3
+;	sta COLPM3_TABLE+2
 
-	lda #PM_SIZE_QUAD
-;	sta SIZEP3
-	sta SIZEP3_TABLE+2
+;	lda #PM_SIZE_QUAD
+;;	sta SIZEP3
+;	sta SIZEP3_TABLE+2
 
-	lda #%11000000
-;	sta SIZEM
-	sta SIZEM_TABLE+2
+;	lda #%11000000
+;;	sta SIZEM
+;	sta SIZEM_TABLE+2
 
 	ldx #177
 bdgb_LoopFillBorder
@@ -2524,19 +2550,19 @@ bdgb_LoopFillBorder
 	sta PLAYERADR3+43,x
 
 	lda MISSILEADR+43,x
-	ora #$C0
+	ora #$C0 ; or %11000000
 	sta MISSILEADR+43,x
 
 	dex
 	bne bdgb_LoopFillBorder
 
-	lda #[PLAYFIELD_RIGHT_EDGE_NORMAL+1]
-;	sta HPOSP3
-	sta HPOSP3_TABLE+2
+;	lda #[PLAYFIELD_RIGHT_EDGE_NORMAL+1]
+;;	sta HPOSP3
+;	sta HPOSP3_TABLE+2
 
-	lda #[PLAYFIELD_LEFT_EDGE_NORMAL-8]
-;	sta HPOSM3
-	sta HPOSM3_TABLE+2
+;	lda #[PLAYFIELD_LEFT_EDGE_NORMAL-8]
+;;	sta HPOSM3
+;	sta HPOSM3_TABLE+2
 
 	rts
 
@@ -2720,28 +2746,29 @@ PositionTomb
 ;	stx HPOSP1 ; + 7 right side of tombstone
 	stx HPOSP1_TABLE+2
 	
-	ldx #0     ; Remove these other parts from visible display
-;	stx HPOSM3 ;  0 is p5 off 
-	stx HPOSM3_TABLE+2
-;	stx HPOSM2 ;  2 is p5 off 
-	stx HPOSM2_TABLE+2
-;	stx HPOSM1 ;  4 is p5 off 
-	stx HPOSM1_TABLE+2
+;	ldx #0     ; Remove these other parts from visible display
+;;	stx HPOSM3 ;  0 is p5 off 
+;	stx HPOSM3_TABLE+2
+;;	stx HPOSM2 ;  2 is p5 off 
+;	stx HPOSM2_TABLE+2
+;;	stx HPOSM1 ;  4 is p5 off 
+;	stx HPOSM1_TABLE+2
 	
-	; Bonus extra...  
-	; Force set  Player/Missile sizes
-	ldx #PM_SIZE_NORMAL ; aka $00
-;	stx SIZEP0 ; Tombstone shadow
-	stx SIZEP0_TABLE+2
-;	stx SIZEP1 ; Frog parts 2
-	stx SIZEP1_TABLE+2
-;	stx SIZEP2 ; Frog colored iris
-	stx SIZEP2_TABLE+2
-;	stx SIZEP3 ; Frog mouth
-	stx SIZEP3_TABLE+2
-	ldx #PM_SIZE_QUAD
-;	stx SIZEM  ; Missile 0 is left size of tombstone
-	stx SIZEM_TABLE+2
+;	; Bonus extra...  
+;	; Force set  Player/Missile sizes
+;	ldx #PM_SIZE_NORMAL ; aka $00
+;;	stx SIZEP0 ; Tombstone shadow
+;	stx SIZEP0_TABLE+2
+;;	stx SIZEP1 ; Frog parts 2
+;	stx SIZEP1_TABLE+2
+;;	stx SIZEP2 ; Frog colored iris
+;	stx SIZEP2_TABLE+2
+;;	stx SIZEP3 ; Frog mouth
+;	stx SIZEP3_TABLE+2
+;	ldx #PM_SIZE_QUAD
+;;	stx SIZEM  ; Missile 0 is left size of tombstone
+;	stx SIZEM_TABLE+2
+
 	rts
 
 
@@ -2764,36 +2791,36 @@ PositionSplat
 ;	stx HPOSP1 ; + 1 is splat parts 2
 	stx HPOSP1_TABLE+2
 	
-	ldx #0     ; Remove these other parts from visible display
+;	ldx #0     ; Remove these other parts from visible display
 
-	lda CurrentDL
-	cmp #DISPLAY_GAME
-	beq bps_SkipZeroP3  ; Do not remove P3 on the game screen.
+;	lda CurrentDL
+;	cmp #DISPLAY_GAME
+;	beq bps_SkipZeroP3  ; Do not remove P3 on the game screen.
 
-;	stx HPOSP3 ;  0 is off
-	stx HPOSP3_TABLE+2
-;	stx HPOSM3 ;  0 is p5 off
-	stx HPOSM3_TABLE+2
+;;	stx HPOSP3 ;  0 is off
+;	stx HPOSP3_TABLE+2
+;;	stx HPOSM3 ;  0 is p5 off
+;	stx HPOSM3_TABLE+2
 	
-bps_SkipZeroP3
-;	stx HPOSP2 ;  0 is p5 off
-	stx HPOSP2_TABLE+2
-;	stx HPOSM2 ;  0 is p5 off
-	stx HPOSM2_TABLE+2
-;	stx HPOSM1 ;  0 is p5 off
-	stx HPOSM1_TABLE+2
-;	stx HPOSM0 ;  0 is p5 off
-	stx HPOSM0_TABLE+2
+;bps_SkipZeroP3
+;;	stx HPOSP2 ;  0 is p5 off
+;	stx HPOSP2_TABLE+2
+;;	stx HPOSM2 ;  0 is p5 off
+;	stx HPOSM2_TABLE+2
+;;	stx HPOSM1 ;  0 is p5 off
+;	stx HPOSM1_TABLE+2
+;;	stx HPOSM0 ;  0 is p5 off
+;	stx HPOSM0_TABLE+2
 
-	; Bonus extra...  
-	; Force set  Player/Missile sizes
-	ldx #PM_SIZE_NORMAL ; aka $00
-;	stx SIZEP0 ; Splat parts 1
-	stx SIZEP0_TABLE+2
-;	stx SIZEP1 ; Splat parts 2
-	stx SIZEP1_TABLE+2
-;	stx SIZEP2 ; Splat parts 2
-	stx SIZEP2_TABLE+2
+;	; Bonus extra...  
+;	; Force set  Player/Missile sizes
+;	ldx #PM_SIZE_NORMAL ; aka $00
+;;	stx SIZEP0 ; Splat parts 1
+;	stx SIZEP0_TABLE+2
+;;	stx SIZEP1 ; Splat parts 2
+;	stx SIZEP1_TABLE+2
+;;	stx SIZEP2 ; Splat parts 2
+;	stx SIZEP2_TABLE+2
 
 	rts
 
@@ -2819,33 +2846,33 @@ PositionFrog
 ;	stx HPOSP2 ; + 0 is frog eye iris
 	stx HPOSP2_TABLE+2
 
-	ldx #0     ; Remove these other parts from visible display
-	lda CurrentDL
-	cmp #DISPLAY_GAME
-	beq bps_DoNoMoveMask
+;	ldx #0     ; Remove these other parts from visible display
+;	lda CurrentDL
+;	cmp #DISPLAY_GAME
+;	beq bps_DoNoMoveMask
 
-;	stx HPOSP3 ; On the game screen these need to stay to mask the left/right borders.
-	stx HPOSP3_TABLE+2
-;	stx HPOSM3
-	stx HPOSM3_TABLE+2
+;;	stx HPOSP3 ; On the game screen these need to stay to mask the left/right borders.
+;	stx HPOSP3_TABLE+2
+;;	stx HPOSM3
+;	stx HPOSM3_TABLE+2
 
-bps_DoNoMoveMask 
-;	stx HPOSM2 ;  0 is off
-	stx HPOSM2_TABLE+2
-;	stx HPOSM1 ;  0 is off
-	stx HPOSM1_TABLE+2
-;	stx HPOSM0 ;  0 is off
-	stx HPOSM0_TABLE+2
+;bps_DoNoMoveMask 
+;;	stx HPOSM2 ;  0 is off
+;	stx HPOSM2_TABLE+2
+;;	stx HPOSM1 ;  0 is off
+;	stx HPOSM1_TABLE+2
+;;	stx HPOSM0 ;  0 is off
+;	stx HPOSM0_TABLE+2
 
-	; Bonus extra...  
-	; Force set  Player/Missile sizes
-	ldx #PM_SIZE_NORMAL ; aka $00
+;	; Bonus extra...  
+;	; Force set  Player/Missile sizes
+;	ldx #PM_SIZE_NORMAL ; aka $00
 ;	stx SIZEP0 ; Frog parts 1
-	stx SIZEP0_TABLE+2
-;	stx SIZEP1 ; Frog parts 2
-	stx SIZEP1_TABLE+2
-;	stx SIZEP2 ; rog eyeball 
-	stx SIZEP2_TABLE+2
+;	stx SIZEP0_TABLE+2
+;;	stx SIZEP1 ; Frog parts 2
+;	stx SIZEP1_TABLE+2
+;;	stx SIZEP2 ; rog eyeball 
+;	stx SIZEP2_TABLE+2
 
 	rts
 

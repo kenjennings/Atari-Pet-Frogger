@@ -246,7 +246,33 @@ NextScoreDigit
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
+
+Add100ToScore
+
+	lda #1            ; Represents "200" Since we don't need to add to the tens and ones columns.
+	sta ScoreToAdd    ; Save to add 1
+	ldx #5            ; Offset from start of "00000*00" to do the adding.
+	stx NumberOfChars ; Position offset in score.
+	jsr AddToScore    ; Deal with score update.
+
+	lda #COLOR_BLUE2+$F ; Glow the score label.  VBI will decrement it.
+	sta COLPM0_TABLE
+	sta COLPM1_TABLE
+
+	rts
+
+
+
+; ==========================================================================
+; ADD 500 TO SCORE
+;
+; Add 500 to score.  (duh.)
+;
+; Uses A, X
+; --------------------------------------------------------------------------
+
 Add500ToScore
+
 	lda #5            ; Represents "500" Since we don't need to add to the tens and ones columns.
 	sta ScoreToAdd    ; Save to add 1
 	ldx #5            ; Offset from start of "00000*00" to do the adding.
@@ -256,8 +282,11 @@ Add500ToScore
 	inc FrogsCrossed         ; Add to frogs successfully crossed the rivers.
 	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
 
-	rts
+	lda #COLOR_BLUE2+$F ; Glow the score label.  VBI will decrement it.
+	sta COLPM0_TABLE
+	sta COLPM1_TABLE
 
+	rts
 
 
 ; ==========================================================================
@@ -267,12 +296,18 @@ Add500ToScore
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
+
 Add10ToScore
+
 	lda #1            ; Represents "10" Since we don't need to add to the ones column.
 	sta ScoreToAdd    ; Save to add 1
 	ldx #6            ; Offset from start of "000000*0" to do the adding.
 	stx NumberOfChars ; Position offset in score.
 	jsr AddToScore    ; Deal with score update.
+
+	lda #COLOR_BLUE2+$F ; Glow the score label.  VBI will decrement it.
+	sta COLPM0_TABLE
+	sta COLPM1_TABLE
 
 	rts
 
@@ -285,7 +320,9 @@ Add10ToScore
 ;
 ; A, Y, X registers  are preserved.
 ; --------------------------------------------------------------------------
+
 AddToScore
+
 	mRegSaveAYX          ; Save A, X, and Y.
 
 	ldx NumberOfChars    ; index into "00000000" to add score.
@@ -323,7 +360,9 @@ ExitAddToScore           ; All done.
 ;
 ; A  and  X  used.
 ; --------------------------------------------------------------------------
+
 HighScoreOrNot
+
 	ldx #0
 
 CompareScoreToHighScore
@@ -346,10 +385,47 @@ CopyNewHighScore                ; It is a high score.
 	cpx #7                      ; Copy until the remaining 7 digits are done.
 	bne CopyNewHighScore
 
+	lda #COLOR_PINK+$F         ; Glow the high score label.  VBI will decrement it.
+	sta COLPM2_TABLE
+
 	lda #$FF
 	sta FlaggedHiScore         ; Flag the high score. Score must have changed to get here.
 
 ExitHighScoreOrNot
+	rts
+
+
+; ==========================================================================
+; DEC THIS COLOR OR NOT
+;
+; Support code to optimize the tedium of managing four colors in 
+; seven memory locations.
+;
+; Given a color value in A, determine if it is a color (not 0) 
+; and if the value is not 4.
+; If it can be decremented, then subtract 1.
+;
+; Return result in CPU Flags.  0 = Do Not.   !0 = Do decrement.
+;
+; A   is the color to test/update.
+; X   ia used for temporary storage and decrementing.
+; --------------------------------------------------------------------------
+
+DecThisColorOrNot
+
+	tax                        ; Save original value.
+	beq ReallyExitFromDecColor ; If 0, then done, no need to restore.
+
+	and #$0F                   ; Remove color component
+	cmp #$04                   ; Is luminance 4?
+	beq ExitDecThisColorOrNot  ; No.  
+
+	dex                        ; Decrement saved value.
+
+ExitDecThisColorOrNot
+	txa                        ; Get original value.  Unless it was decremented, then it is different.
+
+ReallyExitFromDecColor
 	rts
 
 
@@ -362,7 +438,9 @@ ExitHighScoreOrNot
 ;
 ; Uses A
 ; -------------------------------------------------------------------------- 
+
 MultiplyFrogsCrossed
+
 	lda FrogsCrossed
 	cmp #MAX_FROG_SPEED+1         ; Number of difficulty levels. 0 to 10 OK.  11 not so much
 	bcc SkipLimitCrossed
@@ -394,7 +472,9 @@ SkipLimitCrossed
 ;
 ; Uses A
 ; -------------------------------------------------------------------------- 
+
 MakeDifficultyPointers
+
 	lda #<BOAT_FRAMES
 	clc
 	adc FrogsCrossedIndex

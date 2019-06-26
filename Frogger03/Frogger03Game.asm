@@ -70,7 +70,7 @@ GameLoop
 	lda EVENT_TARGET_TABLE,x   ; Get routine low byte 
 	pha                        ; Push to stack
 
-	rts                        ; Forces alling the address pushed on the stack.
+	rts                        ; Forces calling the address pushed on the stack.
 
 	; When the called routine ends with rts, it will return to the place 
 	; that called this routine which is up in GameStart.

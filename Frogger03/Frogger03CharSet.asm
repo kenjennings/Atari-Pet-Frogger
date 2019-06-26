@@ -41,7 +41,7 @@
 ; COLPF0 = Water color (from line above)
 ; COLPF1 = Rock 1 main color
 ; COLPF2 = Sand background (darker) 
-; COLPF3 = White (rock hilight) 
+; COLPF3 = Rock 2 (lighter)
 ; --------------------------------------------------------------------------
 
 I_BOAT_LF    = $02 ; ", boat, left, front,       animated (2 images)

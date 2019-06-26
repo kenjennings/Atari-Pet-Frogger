@@ -230,7 +230,7 @@ SetupWin
 	lda #0
 	sta EventStage          ; Stage 0 is color scrolling and input checking.
 
-	lda #EVENT_WIN         ; Change to wins screen.
+	lda #EVENT_WIN          ; Change to wins screen.
 	sta CurrentEvent
 	
 	rts

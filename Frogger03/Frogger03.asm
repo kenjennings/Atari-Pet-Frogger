@@ -381,6 +381,7 @@ TempTargetColor   .byte 0 ; an a nudder.
 EverythingMatches .byte 0 ; Logical condition collection indicating all colors examined do match.
 						  ; Bits $10, $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2, COLPF3
 
+BasePmgAddr       .word $00 ; Pointer to base table per the current display.  Set by VBI.  Used by Main.
 
 
 

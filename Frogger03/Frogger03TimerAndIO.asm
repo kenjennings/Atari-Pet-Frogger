@@ -256,9 +256,14 @@ VBISetupDisplay
 	lda DLI_HI_TABLE,x
 	sta ThisDLIAddr+1
 
-	lda GPRIOR_TABLE,x          ; Title/Game/Splash displays use P/M objects differently.
-	sta GPRIOR
-	sta PRIOR_TABLE+2           ; This is clumsy here.   maybe it goes in the draw shape.
+	lda BASE_PMG_LO_TABLE,x     ; Copy PMG Settings table base address
+	sta BasePmgAddr
+	lda BASE_PMG_HI_TABLE,x
+	sta BasePmgAddr+1
+
+;	lda GPRIOR_TABLE,x          ; Title/Game/Splash displays use P/M objects differently.
+;	sta GPRIOR
+;	sta PRIOR_TABLE+2           ; This is clumsy here.   maybe it goes in the draw shape.
 
 	stx CurrentDL               ; Let Main know this is now the current screen.
 	lda #$FF                    ; Turn off the signal from Main to change screens.
@@ -456,6 +461,45 @@ SimplyUpdatePosition
 	jsr ProcessNewShapePosition ; limit object to screen.  redraw the object.
 
 NoFrogUpdate
+
+
+; ======== Fade Score Label Text  ========
+; Game will brighten text label when changing a value.
+; Here we detect if a change needs to be made, and then 
+; decrement the color if so.  All colors end at luminance
+; value $04.  Luminance $00 means no further consideration.
+ManageScoredFades
+	ldx CurrentDL
+	lda MANAGE_SCORE_COLORS_TABLE,x
+	beq EndManageScoreFades
+
+DoFadeScore
+	lda COLPM0_TABLE      ; Get Color.
+	jsr DecThisColorOrNot ; Can it be decremented?
+	sta COLPM0_TABLE      ; Re-Save Color
+	sta COLPM1_TABLE      ; Second half of the same object is same color
+
+DoFadeHiScore
+	lda COLPM2_TABLE      ; Get Color.
+	jsr DecThisColorOrNot ; Can it be decremented?
+	sta COLPM2_TABLE      ; Re-Save Color 
+
+DoFadeLives
+	lda MANAGE_LIVES_COLORS_TABLE,x
+	beq EndManageScoreFades
+
+	lda COLPM0_TABLE+1  ; Get Color.
+	jsr DecThisColorOrNot ; Can it be decremented?
+	sta COLPM0_TABLE+1  ; Re-Save Color
+	sta COLPM1_TABLE+1  ; Second half of the same object is same color
+
+DoFadeSaved
+	lda COLPM2_TABLE+1  ; Get Color.
+	jsr DecThisColorOrNot ; Can it be decremented?
+	sta COLPM2_TABLE+1  ; Re-Save Color
+	sta COLPM3_TABLE+1  ; Second half of the same object is same color
+
+EndManageScoreFades
 
 
 ; ======== Animate Boat Components ========
@@ -1160,7 +1204,6 @@ Score_Title_With_PMG
 	rts
 
 
-
 ;==============================================================================
 ; COLPF0_COLBK_TITLE_DLI                                                     A
 ;==============================================================================
@@ -1188,16 +1231,13 @@ DO_COLPF0_COLBK_TITLE_DLI
 	jmp Exit_DLI
 
 
-
-
-; Fall through to next routine to load animated player.
-
 ;==============================================================================
 ; LOAD PM SPECS 2                                                       A 
 ;==============================================================================
 ; Called on Title, Game, and Game Over displays.
 ; Load the table entry 2 values for P0,P1,P2,P3,M0,M1,M2,M3 to the P/M registers.
 ; -----------------------------------------------------------------------------
+
 LoadPmSpecs2
 
 	lda PRIOR_TABLE+2
@@ -1243,6 +1283,4 @@ LoadPmSpecs2
 	sta HPOSM3
 
 	rts
-
-
 
