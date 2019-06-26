@@ -334,7 +334,7 @@ ManageDeathOfASalesfrog
 	jsr CheckRideTheBoat         ; Make sure the frog is riding the boat. Otherwise it dies.
 
 EndOfDeathOfASalesfrog
-	sta HITCLR                   ; Always reset the P/M collision bits for next frame.
+;	sta HITCLR                   ; Always reset the P/M collision bits for next frame.
 
 
 ; ======== Manage Boat fine scrolling ========
@@ -665,8 +665,12 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
 	pha 
 	; for the extra scan line get the sky color for the Beach 
 	; (usually prior water color) instead of COLBK.
+;	lda #$0F
+;	sta COLBK
 	
 	jsr LoadPmSpecs2 
+	
+	sta HITCLR
 	
 	lda ColorPF0 ; from Page 0.
 	sta WSYNC
@@ -678,6 +682,7 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
 	tya
 	pha
 	ldy ThisDLI
+	sty WSYNC
 
 	jmp LoadAlmostAllColors_DLI
 
@@ -1115,6 +1120,9 @@ LoadPmSpecs0
 	lda HPOSM1_TABLE
 	sta HPOSM1
 
+;	lda #$0F
+;	sta COLBK
+	
 	rts
 
 
@@ -1228,6 +1236,8 @@ DO_COLPF0_COLBK_TITLE_DLI
 
 	jsr LoadPmSpecs2
 
+;	sta HITCLR
+	
 	jmp Exit_DLI
 
 

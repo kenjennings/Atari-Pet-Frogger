@@ -2091,21 +2091,23 @@ libPmgSetColors
 ; the Player/Missile memory.
 ; --------------------------------------------------------------------------
 
+PMGLABEL_OFFSET=24
+
 LoadPmgTextLines
 
 	ldx #14
 
 bLPTL_LoadBytes
 	lda P0TEXT_TABLE,x
-	sta PLAYERADR0+27,x
+	sta PLAYERADR0+PMGLABEL_OFFSET,x
 	lda P1TEXT_TABLE,x
-	sta PLAYERADR1+27,x
+	sta PLAYERADR1+PMGLABEL_OFFSET,x
 	lda P2TEXT_TABLE,x
-	sta PLAYERADR2+27,x
+	sta PLAYERADR2+PMGLABEL_OFFSET,x
 	lda P3TEXT_TABLE,x
-	sta PLAYERADR3+27,x
+	sta PLAYERADR3+PMGLABEL_OFFSET,x
 	lda MTEXT_TABLE,x
-	sta MISSILEADR+27,x
+	sta MISSILEADR+PMGLABEL_OFFSET,x
 
 	dex
 	bpl bLPTL_LoadBytes
@@ -2366,6 +2368,8 @@ ExitEraseShape
 ; Erase Shape in Missile memory.
 ; -----------------------------------------------------------------------------
 
+BORDER_OFFSET=41
+
 EraseGameBorder
 
 	lda #$00
@@ -2374,15 +2378,15 @@ EraseGameBorder
 	sta HPOSP3_TABLE+2
 	sta HPOSM3_TABLE+2
 
-	ldx #177
+	ldx #178
 
 begb_LoopFillBorder
 	lda #$00
-	sta PLAYERADR3+43,x
+	sta PLAYERADR3+BORDER_OFFSET,x
 	
-	lda MISSILEADR+43,x
+	lda MISSILEADR+BORDER_OFFSET,x
 	and #%00111111
-	sta MISSILEADR+43,x
+	sta MISSILEADR+BORDER_OFFSET,x
 
 	dex
 	bne begb_LoopFillBorder
@@ -2544,14 +2548,14 @@ DrawGameBorder
 ;;	sta SIZEM
 ;	sta SIZEM_TABLE+2
 
-	ldx #177
+	ldx #178
 bdgb_LoopFillBorder
 	lda #$C0
-	sta PLAYERADR3+43,x
+	sta PLAYERADR3+BORDER_OFFSET,x
 
-	lda MISSILEADR+43,x
+	lda MISSILEADR+BORDER_OFFSET,x
 	ora #$C0 ; or %11000000
-	sta MISSILEADR+43,x
+	sta MISSILEADR+BORDER_OFFSET,x
 
 	dex
 	bne bdgb_LoopFillBorder

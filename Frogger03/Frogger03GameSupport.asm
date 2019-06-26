@@ -116,7 +116,7 @@ BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 MOVING_ROW_STATES ; 19 entries describing boat directions. Beach (0), Right (1), Left (FF) directions.
 	.by 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0
 
-PM_OFFS=26 ; offset to line up P/M Vertical Y line to Playfield scan line
+PM_OFFS=25 ; offset to line up P/M Vertical Y line to Playfield scan line
 
 FROG_PMY_TABLE ; 19 entries providing Frog Y position for each row.  (Each row is no longer equal size.)
 	.by [ 17+PM_OFFS] [ 26+PM_OFFS] [ 36+PM_OFFS]  ; Beach, Boat Right, Boat Left
