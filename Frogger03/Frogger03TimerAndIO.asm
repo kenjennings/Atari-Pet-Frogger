@@ -106,32 +106,35 @@ EndResetTimers
 ; is pressed.  For logical reasons I want to reverse this and 
 ; turn it into 1 bit means input.
 ; 
-; This originally was a sloppy mess of dozens of bit flogging.
-; But it replaces several functions of key reading shenanigans.
+; The original version of this was an obscenely ill-conceived,
+; sloppy mess of dozens of bit floggings and comparisons.
 ; The new version eliminates a lot of that original bit mashing
-; with a simple lookup table. The only extra part now is adding 
+; with a simple lookup table. The only extra part now is adding
 ; the trigger to the input information.
 ;
 ; Description of the bit twiddling below:
-; 
-; Cook the bits to turn on the directions we care about and zero the other
-; bits, therefore, if resulting stick value is 0 then it means no input.
-; - Down input is ignored (masked out).
-; - Since up movement is the most likely to result in death the up movement
-;    must be exclusively up.  If a horizontal movement is also on at the
-;    same time then the up movement will be masked out.
 ;
-; Arcade controllers with individual buttons would allow accidentally 
-; (or intentionally) pushing both left and right directions at the same 
-; time.  To avoid unnecessary fiddling with the frog in this situation 
-; eliminate both motions if both are engaged.
+; Cook the bits to turn on the directions we care about and zero
+; the other bits, therefore, if resulting stick value is 0 then 
+; it means no input.
+; - Down input is ignored (masked out).
+; - Since up movement is the most likely to result in death the 
+;   up movement must be exclusively up.  If a horizontal 
+;   movement is also on at the same time then the up movement 
+;   will be masked out.
+;
+; Arcade controllers with individual buttons would allow 
+; accidentally (or intentionally) pushing both left and right 
+; directions at the same time.  To avoid unnecessary fiddling 
+; with the frog in this situation eliminate both motions if both
+; are engaged.
 ;
 ; STRIG0 Button
 ; 0 is button pressed., !0 is not pressed.
 ; If STRIG0 input then set bit $10 (OR ---1----  for trigger.
 ;
-; Return  A  with InputStick value of cooked Input bits where the 
-; direction and trigger set are 1 bits.  
+; Return  A  with InputStick value of cooked Input bits where 
+; the direction and trigger set are 1 bits.  
 ;
 ; Resulting Bit values:   
 ; 00011101  OR  "NA NA NA Trigger Right Left NA Up"
@@ -170,18 +173,18 @@ AddTriggerInput
 	lda STRIG0                 ; 0 is button pressed., !0 is not pressed.
 	bne DoneWithBitCookery     ; if non-zero, then no button pressed.
 
-	lda InputStick             ; Return the input value.
-	ora #%00010000             ; Turn on 5th bit/$10 for trigger.
-	sta InputStick
+	lda InputStick             ; The current stick input value.
+	ora #%00010000             ; Turn on 5th bit/$10 for the trigger.
+	sta InputStick             ; Save it.  (fall through for return..)
 
 DoneWithBitCookery             ; Some input was captured?
 	lda InputStick             ; Return the input value?
 	beq ExitCheckInput         ; No, nothing happened here.  Just exit.
 
 	lda #INPUTSCAN_FRAMES      ; Because there was input collected, then
-	sta InputScanFrames        ; reset the input timer.
+	sta InputScanFrames        ; Reset the input timer.
 
-ExitInputCollection ; Input occurred
+ExitInputCollection            ; Input occurred
 	lda #0                     ; Kill the attract mode flag
 	sta ATRACT                 ; to prevent color cycling.
 
@@ -190,7 +193,8 @@ ExitInputCollection ; Input occurred
 
 SetNoInput
 	lda #0
-	sta InputStick
+	sta InputStick             ; Force no data for input.
+
 ExitCheckInput
 	rts
 
@@ -420,8 +424,15 @@ DoAnimateClock2
 ; It is MAIN's job to act when the timer is 0, and reset it if needed.
 DoAnimateClock3
 	lda AnimateFrames3           ; Is animation countdown already 0?
-	beq EndOfTimers              ; Yes, do not decrement now.
+	beq DoAnimateClock4         ; Yes, do not decrement now.
 	dec AnimateFrames3           ; Minus 1
+	
+; ======== Manage Another Main code timer.  Decrement while non-zero. ========
+; It is MAIN's job to act when the timer is 0, and reset it if needed.
+DoAnimateClock4
+	lda AnimateFrames4           ; Is animation countdown already 0?
+	beq EndOfTimers              ; Yes, do not decrement now.
+	dec AnimateFrames4           ; Minus 1
 
 EndOfTimers
 
@@ -485,7 +496,7 @@ DoFadeHiScore
 	sta COLPM2_TABLE      ; Re-Save Color 
 
 DoFadeLives
-	lda MANAGE_LIVES_COLORS_TABLE,x
+	lda MANAGE_LIVES_COLORS_TABLE,x ; Is this a thing to do on this display.
 	beq EndManageScoreFades
 
 	lda COLPM0_TABLE+1  ; Get Color.
@@ -793,6 +804,9 @@ COLPF0_COLBK_DLI
 ; Perfectly re-usable for anywhere Map Mode 9 or Blank instructions are 
 ; being managed.  In the case of blank lines you just don't see the pixel 
 ; color change, so it does not matter what is in the COLPF0 color table. 
+;
+; The first DLI on the title screen needs to do extra work 
+; on the player/missile data, so I needed another DLI here.
 ; -----------------------------------------------------------------------------
 
 COLPF0_COLBK_TITLE_DLI
@@ -1226,17 +1240,20 @@ Score_Title_With_PMG
 
 DO_COLPF0_COLBK_TITLE_DLI
 
+	jsr LoadPmSpecs2 
+	
 	lda COLPF0_TABLE,y   ; Get pixels color
 	pha
 	lda COLBK_TABLE,y    ; Get background color
+
 	sta WSYNC
+	sta WSYNC
+	
 	sta COLBK            ; Set background
 	pla
 	sta COLPF0           ; Set pixels.
 
-	jsr LoadPmSpecs2
-
-;	sta HITCLR
+;	jmp LoadAlmostAllColors_DLI
 	
 	jmp Exit_DLI
 

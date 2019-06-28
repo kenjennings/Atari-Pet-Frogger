@@ -41,6 +41,11 @@ SetupTransitionToTitle
 	lda #TITLE_SPEED         ; Animation moving speed.
 	jsr ResetTimers
 
+	lda #$FF
+	sta AnimateFrames4       ; Title screen flashing.
+	lda #0
+	sta EventCounter2        ; First label (score flashes)
+
 	jsr HideButtonPrompt     ; Tell VBI the prompt flashing is disabled.
 	jsr RemoveFrogOnScreen   ; Remove the frog (from Game Over) if visible 
 ;	jsr EraseFrog            ; Specifically zero the object (from Game Over)
@@ -100,7 +105,7 @@ SetupTransitionToGame
 	lda #$FF               ; Remove the animated thing from display.
 	sta FrogUpdate         ; This cause VBI to erase and not redraw.
 
-	lda #24
+	lda #25
 	sta EventCounter2       ; Prep the first transition loop.
 
 	lda CurrentDL

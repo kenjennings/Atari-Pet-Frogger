@@ -127,8 +127,8 @@ EventGameInit
 	jsr libPmgInit             ; Will also reset SDMACTL settings for P/M DMA
 
 
-	lda #4                     ; Quick hack to init the scrolling credits.
-	sta HSCROL
+;	lda #4                     ; Quick hack to init the scrolling credits.
+;	sta HSCROL
 
 	jsr SetupTransitionToTitle ; will set CurrentEvent = EVENT_TRANS_TITLE
 
@@ -263,6 +263,47 @@ EventScreenStart            ; This is New Game and Transition to title.
 EventTitleScreen
 
 	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
+
+
+	lda AnimateFrames4         ; Did the timer expire?
+	bne CheckTitleInput        ; No, continue with input section.
+
+	lda #30                    ; Reset the timer to 1 second.
+	sta AnimateFrames4          
+
+	inc EventCounter2          ; Toggle the EventCounter 0, 1, 0, 1
+	lda EventCounter2
+	and #$03
+	sta EventCounter2
+	bne DoFlashHi              ; On 1, 2, 34 test for the Hi score label.
+
+	lda #COLOR_BLUE2+$0F      ; 0 is flash Score label.
+	sta COLPM0_TABLE
+	sta COLPM1_TABLE
+	bne CheckTitleInput
+
+DoFlashHi                     ; 1 is flash the hi score label
+	cmp #1
+	bne DoFlashSaved 
+	lda #COLOR_PINK+$0F      ; Flash Hi score label.
+	sta COLPM2_TABLE
+	bne CheckTitleInput
+	
+DoFlashSaved                  ; 2 is flash the saved frogs label
+	cmp #2
+	bne DoFlashLives
+	lda #COLOR_GREEN+$0F
+	sta COLPM2_TABLE+1
+	sta COLPM3_TABLE+1
+	bne CheckTitleInput
+
+DoFlashLives
+	lda #COLOR_PURPLE+$0F      ; Flash Lives label.
+	sta COLPM0_TABLE+1
+	sta COLPM1_TABLE+1
+
+
+CheckTitleInput
 	jsr RunPromptForButton     ; Blink Prompt to press Joystick button and check input.
 	beq EndTitleScreen         ; Nothing pressed, done with title screen.
 
@@ -317,6 +358,8 @@ ZeroCOLPF2                   ; FadeColPfToBlack returned 0, so the text (and pix
 	sta COLBK_TABLE,x
 
 	dec EventCounter2
+	lda EventCounter2
+	cmp #2
 	bne EndTransitionToGame ; 1 is the last entry. 0 is stop looping.
 
 	; Finished stage 1, now setup Stage 2

@@ -98,20 +98,30 @@ DISPLAY_OVER  = 4
 ; Need a line before gfx to set all the regular player's attributes.
 ; May need to insert some blanks between lines to allow more time. 
 
-TITLE_DISPLAYLIST
-	.byte DL_BLANK_8        ; 8 scan lines 
-	.byte DL_BLANK_4 ; 8 blank scan lines.  DLI 0/0 Score_DLI sets COLPF1, COLPF2, COLBK for score text. set P/M position
-;	.byte DL_BLANK_4        ; 4 blank lines. 
-	.byte DL_BLANK_2    
-	.byte DL_BLANK_1|DL_DLI
-	
-	mDL_LMS DL_TEXT_2,SCORE_MEM1           ; (1-8) scores
-	
-	.byte DL_BLANK_4
-	
-	.byte   DL_BLANK_8|DL_DLI              ; (9-16) An empty line. DLI 1/1 COLPF0_COLBK_DLI Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1. 
 
- 
+TITLE_DISPLAYLIST
+	.byte DL_BLANK_8, DL_BLANK_4|DL_DLI
+	.byte DL_BLANK_3                                ; 20 blank scan lines.  
+	
+	
+;	mDL_LMS DL_TEXT_2,SCORE_MEM1           ; (1-8) scores
+
+;	.byte DL_BLANK_4
+
+;	.byte DL_BLANK_8|DL_DLI              ; (9-16) An empty line. DLI 1/1 COLPF0_COLBK_DLI Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1. 
+
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1                    ; (1-8)     Labels for scores 1. 
+	;                                                                  SCORE DLI 0/1 sets COLPF1, COLPF2/COLBK for score text.
+	
+	.byte DL_BLANK_1                                       ; ()      
+
+
+; ========== Start
+
+	.byte DL_TEXT_2|DL_DLI                                 ; (9-16)    Labels for Scores 2.
+	;                                                                  DLI 2/2 sets COLPF0,1,2,3,BK for Beach. (
+
+	.byte DL_BLANK_3                                       ; (17)      Blank before Beach for time.
 
 	;                                        Title Graphics...
 	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1     ; (17-20)   DLI 2/2 COLPF0_COLBK_DLI Set COLPF0 for Line 2

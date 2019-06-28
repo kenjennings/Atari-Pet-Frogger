@@ -724,10 +724,11 @@ MODE_C_COLPF0
 ; COLOR_ORANGE_GREEN = $E0
 ; COLOR_LITE_ORANGE =  $F0
 
-TITLE_BACK_COLORS ; 25 entries 
+TITLE_BACK_COLORS ; 26 entries 
 	; Mode 2 lines - text background (COLPF2) and border (COLBK). 
 	; Mode 9 lines - the Gfx (COLBK) background.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry. 
+	.by COLOR_BLACK              ; Scores, and blank line
 	.by COLOR_BLACK              ; Scores, and blank line
 	.by COLOR_BLUE1        COLOR_PURPLE_BLUE+2      ; Title pixel colors.  Dark to light... 
 	.by COLOR_PURPLE+4     COLOR_PINK+6             ; Title lines
@@ -741,11 +742,12 @@ TITLE_BACK_COLORS ; 25 entries
 	.by COLOR_BLACK                                 ; Space
 	.by COLOR_PINK COLOR_PINK                       ; Controls
 
-TITLE_TEXT_COLORS ; 25 entries 
+TITLE_TEXT_COLORS ; 26 entries 
 	; Mode 2 lines - Text (COLPF1) luminance.  
 	; Mode 9 lines - the Gfx pixel (COLPF0) colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by $0E                               ; Scores, and blank line
+	.by $0a                               ; Scores, and blank line
 	.by $EC $DA $C8 $B6 $A4 $92 $C2       ; title pixel colors. light to dark
 	.by $00                               ; blank
 	.by $04 $06 $08 $0A $0C $0A $08 $06   ; Instructions
@@ -1074,8 +1076,9 @@ DISPLAY_NEEDS_BORDERS_TABLE ; I thought it may get used more than once. :-(
 	.byte 0 ; Over, No.
 
 TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte <Score_Title_DLI      ; DLI (0) Text - COLPF1, Black - COLBK COLPF2
-	.byte <COLPF0_COLBK_TITLE_DLI     ; DLI (1) Table - COLBK, Pixels - COLPF0
+	.byte <Score1_DLI            ; DLI (0)   SCORES   - COLBK,                 COLPF1
+	.byte <Score2_DLI            ; DLI (1)   SCORES   - COLBK,                 COLPF1
+	.byte <COLPF0_COLBK_TITLE_DLI ; DLI 2   Table - COLBK, Pixels - COLPF0
 	.byte <COLPF0_COLBK_DLI     ; DLI 2   Table - COLBK, Pixels - COLPF0
 	.byte <COLPF0_COLBK_DLI     ; DLI 3   Table - COLBK, Pixels - COLPF0
 	.byte <COLPF0_COLBK_DLI     ; DLI 4   Table - COLBK, Pixels - COLPF0
@@ -1139,7 +1142,6 @@ GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
 ; Basically, the background color is updated per every line
 SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 	.byte <COLPF0_COLBK_TITLE_DLI     ; DLI (0)  ; VBI uses for initializing DLI.
-
 	.byte <COLPF0_COLBK_DLI     ; DLI (1)  1
 	.byte <COLPF0_COLBK_DLI     ; DLI (2)  2
 	.byte <COLPF0_COLBK_DLI     ; DLI (3)  3
@@ -1204,10 +1206,10 @@ COLPF0_TABLE ; Must be big enough to do splash screens. +1 for entry 0
 	.ds 47
 
 COLPF1_TABLE ; Must be big enough to do Title screen. 
-	.ds 25
+	.ds 26
 
 COLPF2_TABLE ; Must be big enough to do Title screen.
-	.ds 25
+	.ds 26
 
 COLPF3_TABLE ; Must be big enough to do Game screen. (22 entries.)
 	.by $0E $0E $0E $0E $0E
@@ -1270,10 +1272,10 @@ PRIOR_TABLE    .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
 ; of table entries (54 bytes).  Or maybe just look it up from a table.
 
 TITLE_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object
-	.by COLOR_BLUE2+4 $00 COLOR_GREEN+$4 ; COLPM0_TABLE 
-	.by COLOR_BLUE2+4 $00 COLOR_GREEN+$2 ; COLPM1_TABLE 
-	.by COLOR_PINK+4  $00 COLOR_BLACK+$E ; COLPM2_TABLE 
-	.by $00           $00 COLOR_BLACK    ; COLPM3_TABLE 
+	.by COLOR_BLUE2+4 COLOR_PURPLE+4 COLOR_GREEN+$4 ; COLPM0_TABLE 
+	.by COLOR_BLUE2+4 COLOR_PURPLE+4 COLOR_GREEN+$2 ; COLPM1_TABLE 
+	.by COLOR_PINK+4  COLOR_GREEN+4  COLOR_BLACK+$E ; COLPM2_TABLE 
+	.by $00           COLOR_GREEN+4  COLOR_BLACK    ; COLPM3_TABLE 
 	
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP0_TABLE 
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP1_TABLE 
@@ -1281,15 +1283,15 @@ TITLE_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP3_TABLE 
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEM_TABLE 
 	
-	.by PLAYFIELD_LEFT_EDGE_NORMAL      $00 $00 ; HPOSP0_TABLE 
-	.by [PLAYFIELD_LEFT_EDGE_NORMAL+8]  $00 $00 ; HPOSP1_TABLE 
-	.by [PLAYFIELD_RIGHT_EDGE_NORMAL-7] $00 $00 ; HPOSP2_TABLE 
-	.by $00                             $00 $00 ; HPOSP3_TABLE 
+	.by PLAYFIELD_LEFT_EDGE_NORMAL      PLAYFIELD_LEFT_EDGE_NORMAL       $00 ; HPOSP0_TABLE 
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+8]  [PLAYFIELD_LEFT_EDGE_NORMAL+8]   $00 ; HPOSP1_TABLE 
+	.by [PLAYFIELD_RIGHT_EDGE_NORMAL-7] [PLAYFIELD_RIGHT_EDGE_NORMAL-91] $00 ; HPOSP2_TABLE 
+	.by $00                             [PLAYFIELD_RIGHT_EDGE_NORMAL-83] $00 ; HPOSP3_TABLE 
 	
-	.by [PLAYFIELD_LEFT_EDGE_NORMAL+18] $00 $00 ; HPOSM0_TABLE 
-	.by [PLAYFIELD_LEFT_EDGE_NORMAL+16] $00 $00 ; HPOSM1_TABLE 
-	.by $00                             $00 $00 ; HPOSM2_TABLE 
-	.by $00                             $00 $00 ; HPOSM3_TABLE
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+18] [PLAYFIELD_LEFT_EDGE_NORMAL+18]  $00 ; HPOSM0_TABLE 
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+16] [PLAYFIELD_LEFT_EDGE_NORMAL+16]  $00 ; HPOSM1_TABLE 
+	.by $00                             [PLAYFIELD_RIGHT_EDGE_NORMAL-73] $00 ; HPOSM2_TABLE 
+	.by $00                             [PLAYFIELD_RIGHT_EDGE_NORMAL-75] $00 ; HPOSM3_TABLE
 
 	.by [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|MULTICOLOR_PM|%0001] ; PRIOR_TABLE 
 
@@ -1345,7 +1347,7 @@ DEAD_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object (nothing on scree
 	.by $00 $00 $00 ; COLPM0_TABLE 
 	.by $00 $00 $00 ; COLPM1_TABLE 
 	.by $00 $00 $00 ; COLPM2_TABLE 
-	.by $00 $00 $00    ; COLPM3_TABLE 
+	.by $00 $00 $00 ; COLPM3_TABLE 
 	
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP0_TABLE 
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP1_TABLE 
@@ -1394,7 +1396,7 @@ MANAGE_SCORE_COLORS_TABLE  ; For each #DISPLAY, are the scores visible?
 	.by 1 1 0 0 0 
 
 MANAGE_LIVES_COLORS_TABLE  ; For each #DISPLAY, are the Lives visible?
-	.by 0 1 0 0 0 
+	.by 1 1 0 0 0 
 
 
 ; On changing a display load up the Player/Missile tables 

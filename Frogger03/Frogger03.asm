@@ -409,6 +409,7 @@ NextHSCROL   .byte $00
 AnimateFrames    .byte $00 
 AnimateFrames2   .byte $00
 AnimateFrames3   .byte $00  ; WobbleDeWobble
+AnimateFrames4   .byte $00  ; Title Label flash
 
 ; ======== V B I ======== MANAGE DISPLAY LISTS
 ; DISPLAY_TITLE = 0
@@ -551,16 +552,16 @@ SOUND_DURATION3 .byte $00
 ; Having one, common Display List code pointing to the scrolling text 
 ; also eliminates any possibility of the text glitching when switching 
 ; between displays.   
-BOTTOM_OF_DISPLAY                                 ; Prior to this DLI SPC1 set colors and HSCROL
-	mDL_LMS DL_TEXT_2,ANYBUTTON_MEM               ; (+0 to +7)   Prompt to start game.
-	.by DL_BLANK_1|DL_DLI                         ; (+8)         DLI SPC2, set COLBK/COLPF2/COLPF1 for scrolling text.
+BOTTOM_OF_DISPLAY                    ; Prior to this DLI SPC1 set colors and HSCROL
+	mDL_LMS DL_TEXT_2,ANYBUTTON_MEM  ; (+0 to +7)   Prompt to start game.
+	.by DL_BLANK_1|DL_DLI            ; (+8)         DLI SPC2, set COLBK/COLPF2/COLPF1 for scrolling text.
 DL_SCROLLING_CREDIT
 SCROLL_CREDIT_LMS = [* + 1]
 	mDL_LMS DL_TEXT_2|DL_HSCROLL,SCROLLING_CREDIT ; (+9 to +16)  The perpetrators identified
 ; Note that as long as the system VBI is functioning the address 
 ; provided for JVB does not matter at all.  The system VBI will update
 ; ANTIC after this using the address in the shadow registers (SDLST)
-	mDL_JVB TITLE_DISPLAYLIST                     ; Restart display.
+	mDL_JVB TITLE_DISPLAYLIST        ; Restart display.
 
 
 ; In the event stupid programming tricks means some things can't be saved on 
