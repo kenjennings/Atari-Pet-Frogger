@@ -264,14 +264,29 @@ EventTitleScreen
 
 	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
 
+	lda EventStage
+	bne bETS_CheckStrobeTimer  ; stage is >0, so title treatment is over.
 
+	lda SOUND_CONTROL3         ; Is channel 3 busy?
+	beq bETS_EndTitleAnimation ; No. Stop the title animation.
+	lda #$FF                   ; Channel 3 is playing sound, so animate.
+	jsr TitleRender            ; and -1  means draw the random masked title.
+	jmp bETS_CheckStrobeTimer
+
+bETS_EndTitleAnimation
+	lda #1                     ; Draw the title, as solid and stop animation.
+	sta EventStage             ; Stage 1 is always skip the title drawing.
+	jsr TitleRender            ; and 1 also means draw the solid title.
+	jmp bETS_CheckStrobeTimer  ; No. Yes.  Don't do anything.
+
+bETS_CheckStrobeTimer
 	lda AnimateFrames4         ; Did the timer expire?
 	bne CheckTitleInput        ; No, continue with input section.
 
 	lda #30                    ; Reset the timer to 1 second.
 	sta AnimateFrames4          
 
-	inc EventCounter2          ; Toggle the EventCounter 0, 1, 0, 1
+	inc EventCounter2          ; Iterate the EventCounter 0, 1, 2, 3, 0, 1, 2....
 	lda EventCounter2
 	and #$03
 	sta EventCounter2

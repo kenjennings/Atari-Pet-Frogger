@@ -310,26 +310,48 @@
 
 
 ; ==========================================================================
-; DISPLAY GAME SCREEN
+; TITLE RENDER
 ; ==========================================================================
-; Display the game screen.  (duh)
+; Copy the title image to the screen memory. 
+; Acculumator determines behavior.
+;
+; A == 0  Clear the Title.
+; A == 1  Copy Title as is.
+; A == -1 Use random value, mask with Title Image.
 ; --------------------------------------------------------------------------
 
-;DisplayGameScreen
-;	mRegSaveAYX             ; Save A and Y and X, so the caller doesn't need to.
-;
-;;	jsr SetBoatSpeed       ; Animation speed set by number of saved frogs
-;
-;	; Display the current score and number of frogs that crossed the river.
-;	jsr CopyScoreToScreen
-;	jsr PrintFrogsAndLives
-;
-;	lda #DISPLAY_GAME      ; Tell VBI to change screens.
-;	jsr ChangeScreen       ; Then copy the color tables.
-;
-;	mRegRestoreAYX          ; Restore X, Y and A
-;
-;	rts
+TitleRender
+
+	ldx #59
+
+	cmp #0
+	beq bTZ_LoopClearTitle
+	bpl bTZ_loopRandomTitle
+
+bTZ_loopCopyTitle
+	lda TITLE_GFX,x
+	sta TITLE_MEM1,x
+	dex
+	bpl bTZ_loopCopyTitle
+
+	rts
+
+bTZ_LoopClearTitle
+	lda TITLE_GFX,x
+	sta TITLE_MEM1,x
+	dex
+	bpl bTZ_LoopClearTitle
+
+	rts
+
+bTZ_loopRandomTitle
+	lda RANDOM
+	and TITLE_GFX,x
+	sta TITLE_MEM1,x
+	dex
+	bpl bTZ_loopRandomTitle
+
+	rts
 
 
 ; ==========================================================================
@@ -381,11 +403,11 @@ ClearSavedFrogs
 
 	lda #INTERNAL_SPACE ; Blank space. which also happens to be 0.
 
-	ldx #16
+	ldx #20
 RemoveFroggies
-	sta SCREEN_SAVED,x       ; Write to screen 
+	sta SCREEN_SAVED-1,x     ; Write to screen 
 	dex                      ; Erase county-counter frog character
-	bpl RemoveFroggies       ; then go back and remove the next frog counter.
+	bne RemoveFroggies       ; then go back and remove the next frog counter.
 
 	sta FrogsCrossed         ; reset count to 0.  (Remember A == space == 0 ?)
 	sta FrogsCrossedIndex    ; and the base index into difficulty arrays
@@ -405,32 +427,56 @@ RemoveFroggies
 ; 1  |0000000:Score                 Hi:0000000| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
 ; --------------------------------------------------------------------------
+; New:
+; 1  |Score:0000000                 0000000:Hi| SCORE_TXT
+; 2  |Frogs:ooo     OOOOOOOOOOOOOOOOOOOO:Saved| SCORE_TXT
+; --------------------------------------------------------------------------
 
 PrintFrogsAndLives
 
 	ldx FrogsCrossed    ; Number of times successfully crossed the rivers.
 	beq WriteLives      ; then nothing to display. Skip to do lives.
 
-	cpx #18             ; Limit saved frogs to the remaining width of screen
+	ldy #20             ; Start printing right to left from end of field.
+
+	cpx #21             ; Limit saved frogs to the remaining width of screen
 	bcc SavedFroggies
 
-	ldx #17
+	ldx #20
+
 SavedFroggies           ; Write an alternating pattern of Frog1, Frog2 characters.
 	lda #I_FROG1        ; On Atari we're using tab/$7f as a frog shape.
-	sta SCREEN_SAVED-1,x  ; Write to screen. 
+	sta SCREEN_SAVED-1,y  ; Write to screen. 
+	dey
 	dex                 ; Decrement number of frogs.
 	beq WriteLives      ; Reached 0, stop adding frogs.
 	lda #I_FROG2        ; On Atari we're using del/$7e as a frog shape.
-	sta SCREEN_SAVED-1,x  ; Write to screen. 
+	sta SCREEN_SAVED-1,y  ; Write to screen. 
+	dey
 	dex                 ; Decrement number of frogs.
 	bne SavedFroggies   ; then go back and display the next frog counter.
 
 WriteLives
-	lda NumberOfLives   ; Get number of lives.
-	clc                 ; Add to value for
-	adc #INTERNAL_0     ; Atari internal code for '0'
-	sta SCREEN_LIVES    ; Write to screen. *7th char on second line.)
+	ldx NumberOfLives   ; Get number of lives.
+	beq EndPrintFrogsAndLives
+	ldy #0
 
+LoopWriteLives
+;	clc                 ; Add to value for
+;	adc #INTERNAL_0     ; Atari internal code for '0'
+;	sta SCREEN_LIVES    ; Write to screen. *7th char on second line.)
+	lda #I_FROG1        ; On Atari we're using tab/$7f as a frog shape.
+	sta SCREEN_LIVES,y  ; Write to screen. 
+	iny
+	dex                 ; Decrement number of frogs.
+	beq EndPrintFrogsAndLives ; Reached 0, stop adding frogs.
+	lda #I_FROG2        ; On Atari we're using del/$7e as a frog shape.
+	sta SCREEN_LIVES,y  ; Write to screen. 
+	iny
+	dex                 ; Decrement number of frogs.
+	bne LoopWriteLives   ; then go back and display the next number of frogs.
+
+EndPrintFrogsAndLives
 	rts
 
 

@@ -101,69 +101,55 @@ DISPLAY_OVER  = 4
 
 TITLE_DISPLAYLIST
 	.byte DL_BLANK_8, DL_BLANK_4|DL_DLI
-	.byte DL_BLANK_3                                ; 20 blank scan lines.  
-	
-	
-;	mDL_LMS DL_TEXT_2,SCORE_MEM1           ; (1-8) scores
+	.byte DL_BLANK_3                       ; 20 blank scan lines.  
 
-;	.byte DL_BLANK_4
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1    ; (1-8)     Labels for scores 1. 
+	;                                                  SCORE DLI 0/1 sets COLPF1, COLPF2/COLBK for score text.
+	.byte DL_BLANK_1                       ; (9)
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM2   ; (10-17)    Labels for Scores 2.
+	;                                                  DLI 2/2 sets COLPF0,1,2,3,BK for Beach.
 
-;	.byte DL_BLANK_8|DL_DLI              ; (9-16) An empty line. DLI 1/1 COLPF0_COLBK_DLI Set GREEN background (COLBAK) and Map mode 9 color (COLPF0) for Line1. 
-
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1                    ; (1-8)     Labels for scores 1. 
-	;                                                                  SCORE DLI 0/1 sets COLPF1, COLPF2/COLBK for score text.
-	
-	.byte DL_BLANK_1                                       ; ()      
-
-
-; ========== Start
-
-	.byte DL_TEXT_2|DL_DLI                                 ; (9-16)    Labels for Scores 2.
-	;                                                                  DLI 2/2 sets COLPF0,1,2,3,BK for Beach. (
-
-	.byte DL_BLANK_3                                       ; (17)      Blank before Beach for time.
+	.byte DL_BLANK_3                       ; (19-20)      Blank before Title graphics
 
 	;                                        Title Graphics...
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1     ; (17-20)   DLI 2/2 COLPF0_COLBK_DLI Set COLPF0 for Line 2
-	.byte   DL_MAP_9|DL_DLI                ; (21-24)   DLI 2/3 COLPF0_COLBK_DLI Set COLPF0 for Line 3
-	.byte   DL_MAP_9|DL_DLI                ; (25-28)   DLI 2/4 COLPF0_COLBK_DLI Set COLPF0 for Line 4
-	.byte   DL_MAP_9|DL_DLI                ; (29-32)   DLI 2/5 COLPF0_COLBK_DLI Set COLPF0 for Line 5
-	.byte   DL_MAP_9|DL_DLI                ; (33-36)   DLI 2/6 COLPF0_COLBK_DLI Set COLPF0 for Line 6
-	.byte   DL_MAP_9|DL_DLI                ; (37-40)   DLI 2/7 COLPF0_COLBK_DLI Set COLPF0 for underlines
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1     ; (21-24)   DLI 2/2 COLPF0_COLBK_DLI Set COLPF0 for Line 2
+	.byte   DL_MAP_9|DL_DLI                ; (25-28)   DLI 2/3 COLPF0_COLBK_DLI Set COLPF0 for Line 3
+	.byte   DL_MAP_9|DL_DLI                ; (29-32)   DLI 2/4 COLPF0_COLBK_DLI Set COLPF0 for Line 4
+	.byte   DL_MAP_9|DL_DLI                ; (33-36)   DLI 2/5 COLPF0_COLBK_DLI Set COLPF0 for Line 5
+	.byte   DL_MAP_9|DL_DLI                ; (37-40)   DLI 2/6 COLPF0_COLBK_DLI Set COLPF0 for Line 6
+	.byte   DL_MAP_9|DL_DLI                ; (41-44)   DLI 2/7 COLPF0_COLBK_DLI Set COLPF0 for underlines
 
-	.byte   DL_BLANK_2                     ; (41-42)   An empty line.      2
-	.byte   DL_MAP_9                       ; (43-46)   Underlines        + 4
-	.byte   DL_BLANK_2|DL_DLI              ; (47-48)   An empty line.    + 2 = 8 
+	.byte   DL_BLANK_2                     ; (45-46)   An empty line.      2
+	.byte   DL_MAP_9                       ; (47-50)   Underlines        + 4
+	.byte   DL_BLANK_2|DL_DLI              ; (51-52)   An empty line.    + 2 = 8 
 	;                                                  DLI 3/8 TITLE_DLI_3 set BLACK for COLBK.
 
-	.byte   DL_BLANK_8|DL_DLI              ; (49-56)   DLI 4/9 TITLE_DLI_4 set AQUA for COLBK and COLPF2, and set COLPF1
+	.byte   DL_BLANK_8|DL_DLI              ; (55-62)   DLI 4/9 TITLE_DLI_4 set AQUA for COLBK and COLPF2, and set COLPF1
 
 	;                                        Basic Instructions... 
 	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1 ; (57-64)   DLI 5/10 TITLE_DLI_5 set COLPF1 text
 	.byte   DL_TEXT_2|DL_DLI               ; (65-72)   DLI 5/11 TITLE_DLI_5 set COLPF1 text
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM3 ; (73-80)   DLI 5/12 TITLE_DLI_5 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (73-80)   DLI 5/12 TITLE_DLI_5 set COLPF1 text
 	.byte   DL_TEXT_2|DL_DLI               ; (81-88)   DLI 5/13 TITLE_DLI_5 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (89-96)   DLI 5/14 TITLE_DLI_5 set COLPF1 text
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM5 ; (89-96)   DLI 5/14 TITLE_DLI_5 set COLPF1 text
 	.byte   DL_TEXT_2|DL_DLI               ; (97-104)  DLI 5/15 TITLE_DLI_5 set COLPF1 text
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM7 ; (105-112) DLI 5/16 TITLE_DLI_5 set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI               ; (105-112) DLI 5/16 TITLE_DLI_5 set COLPF1 text
 	.byte   DL_TEXT_2|DL_DLI               ; (113-120) DLI 3/17 TITLE_DLI_3 set BLACK for COLBK
 
-	.byte   DL_BLANK_8|DL_DLI              ; (121-128) DLI 4/18 TITLE_DLI_4 set ORANGE2 for COLBK and COLPF2, set COLPF1 text   
+	.byte   DL_BLANK_8|DL_DLI              ; (121-128) DLI 4/18 TITLE_DLI_4 set ORANGE2 for COLBK and COLPF2, set COLPF1 text
+
 	;                                      ; Scoring.  
 	.byte   DL_TEXT_2|DL_DLI               ; (129-136) DLI 5/19 TITLE_DLI_5 set COLPF1 text
 	.byte   DL_TEXT_2|DL_DLI               ; (137-144) DLI 5/20 TITLE_DLI_5 set COLPF1 text
-
-	.byte   DL_TEXT_2|DL_DLI               ; (145-152) DLI 3/21 TITLE_DLI_3 set BLACK for COLBK
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM3  ; (145-152) DLI 3/21 TITLE_DLI_3 set BLACK for COLBK
 
 	.byte   DL_BLANK_8|DL_DLI              ; (153-160) An empty line. DLI 4/22 TITLE_DLI_4 set PINK for COLBK and COLPF2, and set COLPF1 text
 
 	;                                        Game Controls...
 	.byte   DL_TEXT_2|DL_DLI               ; (161-168) DLI 5/23 TITLE_DLI_5 set COLPF1 text
-
-	mDL_LMS DL_TEXT_2|DL_DLI,CONTROLS_MEM2 ; (169-176) DLI 3/24 TITLE_DLI_3 set BLACK for COLBK
+	.byte   DL_TEXT_2|DL_DLI               ; (169-176) DLI 3/24 TITLE_DLI_3 set BLACK for COLBK
 
 	.byte   DL_BLANK_8|DL_DLI              ; (177-184) An empty line.  DLI SPC1/25 sets COLBK, COLPF2, COLPF1 colors.
-
 	.byte   DL_BLANK_1                     ; (185)     One extra to line up credit with the same line on the game screen 
 
 	mDL_JMP BOTTOM_OF_DISPLAY              ; (186-193, 194, 195-202) End of display.  See Page 0 for this evil.
@@ -245,7 +231,7 @@ GAME_DISPLAYLIST
 
 ; ========== Start
 
-	.byte DL_TEXT_2|DL_DLI                                 ; (9-16)    Labels for Scores 2.
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM2                                 ; (9-16)    Labels for Scores 2.
 	;                                                                  DLI 2/2 sets COLPF0,1,2,3,BK for Beach. (row 18)
 
 ; ========== 1

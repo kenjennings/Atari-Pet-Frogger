@@ -45,13 +45,15 @@ SetupTransitionToTitle
 	sta AnimateFrames4       ; Title screen flashing.
 	lda #0
 	sta EventCounter2        ; First label (score flashes)
+	sta EventStage           ; Drawing Title.
+	jsr TitleRender          ; 0 is erase title.
 
 	jsr HideButtonPrompt     ; Tell VBI the prompt flashing is disabled.
 	jsr RemoveFrogOnScreen   ; Remove the frog (from Game Over) if visible 
 ;	jsr EraseFrog            ; Specifically zero the object (from Game Over)
 
 	lda #1
-	sta EventStage           ; Declare stage 1 behavior for scrolling.
+	sta EventStage           ; Declare stage 1 behavior for Title Screen.
 
 	lda #DISPLAY_TITLE       ; Tell VBI to change displays.
 	jsr ChangeScreen         ; Then copy the color tables.
