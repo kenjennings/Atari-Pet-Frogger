@@ -222,6 +222,9 @@ TestTransTitle3
 	cmp #3
 	bne EndTransitionToTitle  ; Really shouldn't get to that point
 
+	lda #0 
+	sta EventStage
+
 	lda #EVENT_START         ; Yes, change to event to start new game.
 	sta CurrentEvent
 
@@ -263,61 +266,29 @@ EventScreenStart            ; This is New Game and Transition to title.
 EventTitleScreen
 
 	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
+	jsr FlashTitleLabels       ; Cycle the label flashing.
 
 	lda EventStage
-	bne bETS_CheckStrobeTimer  ; stage is >0, so title treatment is over.
+	bne bETS_Stage1  ; stage is >0, so title treatment is over.
+
+; =============== Stage 0 ; Animating Logo only while sound runs
 
 	lda SOUND_CONTROL3         ; Is channel 3 busy?
 	beq bETS_EndTitleAnimation ; No. Stop the title animation.
+
+bETS_RandomizeLogo
 	lda #$FF                   ; Channel 3 is playing sound, so animate.
 	jsr TitleRender            ; and -1  means draw the random masked title.
-	jmp bETS_CheckStrobeTimer
+	jmp bETS_Stage1
 
 bETS_EndTitleAnimation
 	lda #1                     ; Draw the title, as solid and stop animation.
 	sta EventStage             ; Stage 1 is always skip the title drawing.
 	jsr TitleRender            ; and 1 also means draw the solid title.
-	jmp bETS_CheckStrobeTimer  ; No. Yes.  Don't do anything.
 
-bETS_CheckStrobeTimer
-	lda AnimateFrames4         ; Did the timer expire?
-	bne CheckTitleInput        ; No, continue with input section.
+; =============== Stage 1
 
-	lda #30                    ; Reset the timer to 1 second.
-	sta AnimateFrames4          
-
-	inc EventCounter2          ; Iterate the EventCounter 0, 1, 2, 3, 0, 1, 2....
-	lda EventCounter2
-	and #$03
-	sta EventCounter2
-	bne DoFlashHi              ; On 1, 2, 34 test for the Hi score label.
-
-	lda #COLOR_BLUE2+$0F      ; 0 is flash Score label.
-	sta COLPM0_TABLE
-	sta COLPM1_TABLE
-	bne CheckTitleInput
-
-DoFlashHi                     ; 1 is flash the hi score label
-	cmp #1
-	bne DoFlashSaved 
-	lda #COLOR_PINK+$0F      ; Flash Hi score label.
-	sta COLPM2_TABLE
-	bne CheckTitleInput
-	
-DoFlashSaved                  ; 2 is flash the saved frogs label
-	cmp #2
-	bne DoFlashLives
-	lda #COLOR_GREEN+$0F
-	sta COLPM2_TABLE+1
-	sta COLPM3_TABLE+1
-	bne CheckTitleInput
-
-DoFlashLives
-	lda #COLOR_PURPLE+$0F      ; Flash Lives label.
-	sta COLPM0_TABLE+1
-	sta COLPM1_TABLE+1
-
-
+bETS_Stage1 
 CheckTitleInput
 	jsr RunPromptForButton     ; Blink Prompt to press Joystick button and check input.
 	beq EndTitleScreen         ; Nothing pressed, done with title screen.

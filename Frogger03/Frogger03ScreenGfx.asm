@@ -310,6 +310,59 @@
 
 
 ; ==========================================================================
+; FLASH TITLE LABELS
+; ==========================================================================
+; Based on timer set high luminance colors for different screen labels.
+; The VBI will reduce the brightness back to normal over time.
+;
+; AnimateFrames4 == timer to set the next label color
+; EventCounter2  == number of label to change, 0, 1, 2, 3, 0, 1, 2, 3...
+; --------------------------------------------------------------------------
+
+FlashTitleLabels
+
+	lda AnimateFrames4         ; Did the timer expire?
+	bne EndFlashTitleLabels    ; No, nothing else to do.
+
+	lda #30                    ; Reset the timer.
+	sta AnimateFrames4          
+
+	inc EventCounter2          ; Iterate the EventCounter 0, 1, 2, 3, 0, 1, 2....
+	lda EventCounter2
+	and #$03
+	sta EventCounter2
+	bne DoFlashHi              ; On 1, 2, 3 go to next nest.
+
+	lda #COLOR_BLUE2+$0F      ; 0 is flash Score label.
+	sta COLPM0_TABLE
+	sta COLPM1_TABLE
+	bne EndFlashTitleLabels
+
+DoFlashHi                     ; 1 is flash the hi score label
+	cmp #1
+	bne DoFlashSaved 
+	lda #COLOR_PINK+$0F      ; Flash Hi score label.
+	sta COLPM2_TABLE
+	bne EndFlashTitleLabels
+	
+DoFlashSaved                  ; 2 is flash the Saved frogs label
+	cmp #2
+	bne DoFlashLives
+	lda #COLOR_GREEN+$0F
+	sta COLPM2_TABLE+1
+	sta COLPM3_TABLE+1
+	bne EndFlashTitleLabels
+
+DoFlashLives
+	lda #COLOR_PURPLE+$0F      ; 3 is flash Frog lives label.
+	sta COLPM0_TABLE+1
+	sta COLPM1_TABLE+1
+
+EndFlashTitleLabels
+	rts
+
+
+; ==========================================================================
 ; TITLE RENDER
 ; ==========================================================================
 ; Copy the title image to the screen memory. 
@@ -326,7 +379,7 @@ TitleRender
 
 	cmp #0
 	beq bTZ_LoopClearTitle
-	bpl bTZ_loopRandomTitle
+	bmi bTZ_loopRandomTitle
 
 bTZ_loopCopyTitle
 	lda TITLE_GFX,x
@@ -337,7 +390,6 @@ bTZ_loopCopyTitle
 	rts
 
 bTZ_LoopClearTitle
-	lda TITLE_GFX,x
 	sta TITLE_MEM1,x
 	dex
 	bpl bTZ_LoopClearTitle

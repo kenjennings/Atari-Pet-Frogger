@@ -825,6 +825,34 @@ COLPF0_COLBK_TITLE_DLI
 ;	jmp Exit_DLI
 
 
+;==============================================================================
+; SPLASH_PMGSPECS0_DLI                                                     A
+;==============================================================================
+; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
+; same display list structure and DLIs.  
+;
+; The first DLI on the title screen needs to do extra work 
+; on the player/missile data, so I needed another DLI here.
+; -----------------------------------------------------------------------------
+
+SPLASH_PMGSPECS0_DLI
+
+	mStart_DLI
+
+	lda COLPF0_TABLE,y   ; Get pixels color
+	pha
+	lda COLBK_TABLE,y    ; Get background color
+	sta WSYNC
+	sta COLBK            ; Set background
+	pla
+	sta COLPF0           ; Set pixels.
+
+	jsr LoadPMSpecs0     ; Load the first table entry into 
+
+	jmp Exit_DLI
+
+
+;	mStart_DLI
 
 
 ;==============================================================================

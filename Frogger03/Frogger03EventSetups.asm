@@ -41,7 +41,7 @@ SetupTransitionToTitle
 	lda #TITLE_SPEED         ; Animation moving speed.
 	jsr ResetTimers
 
-	lda #$FF
+	lda #60
 	sta AnimateFrames4       ; Title screen flashing.
 	lda #0
 	sta EventCounter2        ; First label (score flashes)
