@@ -1062,7 +1062,7 @@ DISPLAY_NEEDS_BORDERS_TABLE ; I thought it may get used more than once. :-(
 TITLE_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 	.byte <Score1_DLI            ; DLI (0)   SCORES   - COLBK,                 COLPF1
 	.byte <Score2_DLI            ; DLI (1)   SCORES   - COLBK,                 COLPF1
-	.byte <COLPF0_COLBK_TITLE_DLI ; DLI 2   Table - COLBK, Pixels - COLPF0
+	.byte <SPLASH_PMGSPECS2_DLI ; DLI 2   Table - COLBK, Pixels - COLPF0
 	.byte <COLPF0_COLBK_DLI     ; DLI 2   Table - COLBK, Pixels - COLPF0
 	.byte <COLPF0_COLBK_DLI     ; DLI 3   Table - COLBK, Pixels - COLPF0
 	.byte <COLPF0_COLBK_DLI     ; DLI 4   Table - COLBK, Pixels - COLPF0
@@ -1125,13 +1125,14 @@ GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
 ; All three graphics screens use the same list.
 ; Basically, the background color is updated per every line
 SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte <SPLASH_PMGSPECS0_DLI ; DLI (0)  ; VBI uses for initializing DLI.
+	.byte <SPLASH_PMGZERO_DLI ; DLI (0)  ; VBI uses for initializing DLI.
+	.byte <COLPF0_COLBK_DLI
 	.byte <COLPF0_COLBK_DLI     ; DLI (1)  1
 	.byte <COLPF0_COLBK_DLI     ; DLI (2)  2
 	.byte <COLPF0_COLBK_DLI     ; DLI (3)  3
 	.byte <COLPF0_COLBK_DLI     ; DLI (4)  4
 	.byte <COLPF0_COLBK_DLI     ; DLI (5)  5
-	.byte <COLPF0_COLBK_DLI     ; DLI (6)  6
+	.byte <SPLASH_PMGSPECS2_DLI ; DLI (6)  6 ; And position players
 	.byte <COLPF0_COLBK_DLI     ; DLI (7)  7
 	.byte <COLPF0_COLBK_DLI     ; DLI (8)  8
 	.byte <COLPF0_COLBK_DLI     ; DLI (9)  9
@@ -1184,10 +1185,10 @@ SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 ; COLPF3 is white all the time.
 
 COLBK_TABLE ; Must be big enough to do splash screens. +1 for entry 0
-	.ds 47
+	.ds 48
 
 COLPF0_TABLE ; Must be big enough to do splash screens. +1 for entry 0
-	.ds 47
+	.ds 48
 
 COLPF1_TABLE ; Must be big enough to do Title screen. 
 	.ds 26

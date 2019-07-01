@@ -616,11 +616,21 @@ ExitMyDeferredVBI
 	.endm
 
 
+;==============================================================================
+; TITLE DLIs
+;==============================================================================
+
+;==============================================================================
+; TITLE_DLI_BLACKOUT                                             
+;==============================================================================
+; DLI Sets background to Black for blank areas.
+;
 ; Note that the Title screen uses the COLBK table for both COLBK and COLPF2.
+; -----------------------------------------------------------------------------
 
 TITLE_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
-
 TITLE_DLI_BLACKOUT  ; DLI Sets background to Black for blank area.
+
 	pha
 
 	lda #COLOR_BLACK     ; Black for background and text background.
@@ -635,12 +645,18 @@ TITLE_DLI_BLACKOUT  ; DLI Sets background to Black for blank area.
 	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
 
 
-; Since there is no text in blank lines, it does not matter that COLPF1 is written before WSYNC.
-; Also, since text characters are not defined to the top/bottom edge of the character it is 
-; safe to change COLPF1 in a sloppy way.
+;==============================================================================
+; TITLE_DLI_TEXTBLOCK                                             
+;==============================================================================
+; Since there is no text in blank lines, it does not matter that COLPF1 is 
+; written before WSYNC.
+; Also, since text characters are not defined to the top/bottom edge of the 
+; character it is  safe to change COLPF1 in a sloppy way.
+; -----------------------------------------------------------------------------
 
 TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to start a text block.
 TITLE_DLI_TEXTBLOCK
+
 	mStart_DLI
 
 	lda ColorPf1         ; Get text luminance from zero page.
@@ -658,6 +674,9 @@ TITLE_DLI_TEXTBLOCK
 ; GAME DLIs
 ;==============================================================================
 
+;==============================================================================
+; GAME_DLI_BEACH0                                               
+;==============================================================================
 ; BEACH 0
 ; Sets colors for the first Beach line. 
 ; This is a little different from the other transitions to Beaches.  
@@ -669,11 +688,13 @@ TITLE_DLI_TEXTBLOCK
 ; beach line that follows.
 ; COLBAK's real land color is set last as it is the color used in the 
 ; lower part of the beach characters.
+; -----------------------------------------------------------------------------
 
 GAME_DLI_BEACH0 
 GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
-	; custom startup to deal with a possible timing problem.
-	pha 
+
+	pha   	; custom startup to deal with a possible timing problem.
+
 	; for the extra scan line get the sky color for the Beach 
 	; (usually prior water color) instead of COLBK.
 ;	lda #$0F
@@ -681,7 +702,7 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
 	
 	jsr LoadPmSpecs2 
 	
-	sta HITCLR
+	sta HITCLR                  ; The one and only time this DLI is called.
 	
 	lda ColorPF0 ; from Page 0.
 	sta WSYNC
@@ -698,14 +719,18 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
 	jmp LoadAlmostAllColors_DLI
 
 
+;==============================================================================
+; GAME_DLI_BEACH2BOAT 
+; GAME_DLI_BOAT2BOAT                                                 
+;==============================================================================
 ; After much hackery, code gymnastics, and refactoring, these two 
 ; routines for boats now work out to the same code.
-
+;
 ; Boats Right 1, 4, 7, 10 . . . .
 ; Sets colors for the Boat lines coming from a Beach line.
 ; This starts on the Beach line which is followed by one blank scan line 
 ; before the Right Boats.
-
+;
 ; Boats Left 2, 5, 8, 11 . . . .
 ; Sets colors for the Left Boat lines coming from a Right Boat line.
 ; This starts on the ModeC line which is followed by one blank scan line 
@@ -716,6 +741,7 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
 ; the next lines without changing COLPF0.  (For the fading purpose COLPF0
 ; does need to get reset on the following blank line. 
 ; HSCROL is set early for the boats.  Followed by all color registers.
+; -----------------------------------------------------------------------------
 
 GAME_DLI_BEACH2BOAT ; DLI sets HS, BK, COLPF3,2,1,0 for the Right Boats.
 GAME_DLI_BOAT2BOAT  ; DLI sets HS, BK, COLPF3,2,1,0 for the Left Boats.
@@ -735,6 +761,9 @@ GAME_DLI_BOAT2BOAT  ; DLI sets HS, BK, COLPF3,2,1,0 for the Left Boats.
 	jmp LoadAlmostAllBoatColors_DLI ; set colors.  setup next row.
 
 
+;==============================================================================
+; GAME_DLI_BOAT2BEACH                                                     
+;==============================================================================
 ; BEACH 3, 6, 9, 12 . . . .
 ; Sets colors for the Beach lines coming from a boat line. 
 ; This is different from line 0, because the DLI starts with only one scan 
@@ -749,6 +778,7 @@ GAME_DLI_BOAT2BOAT  ; DLI sets HS, BK, COLPF3,2,1,0 for the Left Boats.
 ; as possible. 
 ; COLBAK can be re-set to its beach color last as it is the color used in the 
 ; lower part of the characters.
+; -----------------------------------------------------------------------------
 
 GAME_DLI_BOAT2BEACH ; DLI sets COLPF1,2,3,COLPF0, BK for the Beach.
 
@@ -781,39 +811,9 @@ GAME_DLI_BOAT2BEACH ; DLI sets COLPF1,2,3,COLPF0, BK for the Beach.
 ; -----------------------------------------------------------------------------
 
 COLPF0_COLBK_DLI
-	mStart_DLI
+;	mStart_DLI
 
-	lda COLPF0_TABLE,y   ; Get pixels color
-	pha
-	lda COLBK_TABLE,y    ; Get background color
-	sta WSYNC
-	sta COLBK            ; Set background
-	pla
-	sta COLPF0           ; Set pixels.
-
-	jmp Exit_DLI
-
-
-;==============================================================================
-; COLPF0_COLBK_TITLE_DLI                                                     A
-;==============================================================================
-; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
-; same display list structure and DLIs.  
-; Sets background color and the COLPF0 pixel color.  
-; Table driven.  
-; Perfectly re-usable for anywhere Map Mode 9 or Blank instructions are 
-; being managed.  In the case of blank lines you just don't see the pixel 
-; color change, so it does not matter what is in the COLPF0 color table. 
-;
-; The first DLI on the title screen needs to do extra work 
-; on the player/missile data, so I needed another DLI here.
-; -----------------------------------------------------------------------------
-
-COLPF0_COLBK_TITLE_DLI
-	mStart_DLI
-
-	jmp DO_COLPF0_COLBK_TITLE_DLI
-	
+	jmp DO_COLPF0_COLBK_DLI
 ;	lda COLPF0_TABLE,y   ; Get pixels color
 ;	pha
 ;	lda COLBK_TABLE,y    ; Get background color
@@ -823,6 +823,21 @@ COLPF0_COLBK_TITLE_DLI
 ;	sta COLPF0           ; Set pixels.
 
 ;	jmp Exit_DLI
+
+
+;==============================================================================
+; SPLASH_PMGZERO_DLI                                                     A
+;==============================================================================
+; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
+; same display list structure and DLIs.  
+;
+; The first DLI on the title screen needs to do extra work 
+; on the player/missile data, so I needed another DLI here.
+; -----------------------------------------------------------------------------
+
+SPLASH_PMGZERO_DLI
+
+	jmp DO_SPLASH_PMGZERO_DLI
 
 
 ;==============================================================================
@@ -837,22 +852,54 @@ COLPF0_COLBK_TITLE_DLI
 
 SPLASH_PMGSPECS0_DLI
 
-	mStart_DLI
-
-	lda COLPF0_TABLE,y   ; Get pixels color
-	pha
-	lda COLBK_TABLE,y    ; Get background color
-	sta WSYNC
-	sta COLBK            ; Set background
-	pla
-	sta COLPF0           ; Set pixels.
-
-	jsr LoadPMSpecs0     ; Load the first table entry into 
-
-	jmp Exit_DLI
-
-
+	jmp DO_SPLASH_PMGSPECS0_DLI
+	
 ;	mStart_DLI
+
+;	lda COLPF0_TABLE,y   ; Get pixels color
+;	pha
+;	lda COLBK_TABLE,y    ; Get background color
+;	sta WSYNC
+;	sta COLBK            ; Set background
+;	pla
+;	sta COLPF0           ; Set pixels.
+
+;	jsr LoadPMSpecs2     ; Load the first table entry into 
+
+;	jmp Exit_DLI
+
+
+;==============================================================================
+; SPLASH_PMGSPECS2_DLI
+; COLPF0_COLBK_TITLE_DLI                                                     A
+;==============================================================================
+; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
+; same display list structure and DLIs.  
+; Sets background color and the COLPF0 pixel color.  
+; Table driven.  
+; Perfectly re-usable for anywhere Map Mode 9 or Blank instructions are 
+; being managed.  In the case of blank lines you just don't see the pixel 
+; color change, so it does not matter what is in the COLPF0 color table. 
+;
+; The first DLI on the title screen needs to do extra work 
+; on the player/missile data, so I needed another DLI here.
+; -----------------------------------------------------------------------------
+
+SPLASH_PMGSPECS2_DLI
+;COLPF0_COLBK_TITLE_DLI
+;	mStart_DLI
+
+	jmp DO_SPLASH_PMGSPECS2_DLI ; DO_COLPF0_COLBK_TITLE_DLI
+	
+;	lda COLPF0_TABLE,y   ; Get pixels color
+;	pha
+;	lda COLBK_TABLE,y    ; Get background color
+;	sta WSYNC
+;	sta COLBK            ; Set background
+;	pla
+;	sta COLPF0           ; Set pixels.
+
+;	jmp Exit_DLI
 
 
 ;==============================================================================
@@ -959,10 +1006,10 @@ Score2_DLI
 ; Restore registers and exit.
 ; -----------------------------------------------------------------------------
 
-Exit_DLI_WithoutYPrep ; Called by code that did not save Y
-	tya
-	pha
-	ldy ThisDLI
+;Exit_DLI_WithoutYPrep ; Called by code that did not save Y
+;	tya
+;	pha
+;	ldy ThisDLI
 
 Exit_DLI
 	lda (ThisDLIAddr), y ; update low byte for next chained DLI.
@@ -1106,7 +1153,9 @@ LoadAlmostAllBoatColors_DLI
 ; (Because for some reason Altirra is glitching the game screen, but 
 ; Atari800 seems OK.)
 ; -----------------------------------------------------------------------------
+
 SetupAllColors
+
 	lda COLPF0_TABLE,y   ; Get color Rocks 1   
 	sta ColorPF0
 	lda COLPF1_TABLE,y   ; Get color Rocks 2
@@ -1121,6 +1170,153 @@ SetupAllColors
 	sta ColorBak
 
 	rts
+
+
+;==============================================================================
+; SCORE TITLE WITH PMG                                                       A 
+;==============================================================================
+; Called on Title display
+; Set the score playfield colors.   
+; Set the scoreline player/missiles.
+; WAIT until after the text line.
+; Then fall through to set all the main playfield P/M object values.
+; -----------------------------------------------------------------------------
+
+Score_Title_With_PMG
+
+	lda ColorPF1         ; Get text color (luminance)
+	sta COLPF1           ; write new text color.
+
+	lda #COLOR_BLACK     ; Black for background and text background.
+	sta COLBK            ; Write new border color.
+	sta COLPF2           ; Write new background color
+	
+	jsr LoadPmSpecs0
+	
+	sta wsync ; Skip some scan lines to pass the top line of scrore labels.
+	sta wsync
+	sta wsync
+	sta wsync
+	sta wsync
+	sta wsync
+
+	jsr libSetPmgHPOSZero  ; Remove second line of P/M labels from display.
+
+	rts
+
+
+;==============================================================================
+; DO_COLPF0_COLBK_DLI                                                     A
+;==============================================================================
+; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
+; same display list structure and DLIs.  
+; Sets background color and the COLPF0 pixel color.  
+; Table driven.  
+; Perfectly re-usable for anywhere Map Mode 9 or Blank instructions are 
+; being managed.  In the case of blank lines you just don't see the pixel 
+; color change, so it does not matter what is in the COLPF0 color table. 
+; -----------------------------------------------------------------------------
+
+DO_COLPF0_COLBK_DLI
+
+	mStart_DLI
+
+	lda COLPF0_TABLE,y   ; Get pixels color
+	pha
+	lda COLBK_TABLE,y    ; Get background color
+
+;	sta WSYNC
+	sta WSYNC
+	
+	sta COLBK            ; Set background
+	pla
+	sta COLPF0           ; Set pixels.
+
+	jmp Exit_DLI
+
+
+;==============================================================================
+; DO_SPLASH_PMGZERO_DLI                                              A
+;==============================================================================
+; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
+; same display list structure and DLIs.  
+; Sets PM HPOS to 0 for all objects.
+; This is needed early on splash screens because the first group of 
+; objects extend below the first colored background lines.   This causes
+; bits of the PMG text labels to appear on the splash screen.
+; -----------------------------------------------------------------------------
+
+DO_SPLASH_PMGZERO_DLI
+
+	mStart_DLI
+
+	jsr libSetPmgHPOSZero 
+
+	jmp Exit_DLI
+
+
+
+;==============================================================================
+; DO_SPLASH_PMGSPECS0_DLI                                              A
+;==============================================================================
+; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
+; same display list structure and DLIs.  
+; Sets background color and the COLPF0 pixel color.  
+; Table driven.  
+; Perfectly re-usable for anywhere Map Mode 9 or Blank instructions are 
+; being managed.  In the case of blank lines you just don't see the pixel 
+; color change, so it does not matter what is in the COLPF0 color table. 
+; -----------------------------------------------------------------------------
+
+DO_SPLASH_PMGSPECS0_DLI
+
+	mStart_DLI
+
+	lda COLPF0_TABLE,y   ; Get pixels color
+	pha
+	lda COLBK_TABLE,y    ; Get background color
+
+;	sta WSYNC
+	sta WSYNC
+	
+	sta COLBK            ; Set background
+	pla
+	sta COLPF0           ; Set pixels.
+
+	jsr LoadPmSpecs0 
+
+	jmp Exit_DLI
+
+
+;==============================================================================
+; DO_SPLASH_PMGSPECS2_DLI                                               A
+;==============================================================================
+; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
+; same display list structure and DLIs.  
+; Sets background color and the COLPF0 pixel color.  
+; Table driven.  
+; Perfectly re-usable for anywhere Map Mode 9 or Blank instructions are 
+; being managed.  In the case of blank lines you just don't see the pixel 
+; color change, so it does not matter what is in the COLPF0 color table. 
+; -----------------------------------------------------------------------------
+
+DO_SPLASH_PMGSPECS2_DLI
+
+	mStart_DLI
+
+	lda COLPF0_TABLE,y   ; Get pixels color
+	pha
+	lda COLBK_TABLE,y    ; Get background color
+	
+	sta WSYNC
+	
+	sta COLBK            ; Set background
+	pla
+	sta COLPF0           ; Set pixels.
+
+	jsr LoadPMSpecs2     ; Load the first table entry into 
+
+	jmp Exit_DLI
 
 
 ;==============================================================================
@@ -1155,16 +1351,24 @@ LoadPmSpecs0
 	lda SIZEP2_TABLE
 	sta SIZEP2
 
+	lda HPOSP3_TABLE
+	sta HPOSP3
+	lda COLPM3_TABLE 
+	sta COLPM3
+	lda SIZEP3_TABLE
+	sta SIZEP3
+	
 	lda SIZEM_TABLE
 	sta SIZEM
 	lda HPOSM0_TABLE
 	sta HPOSM0
 	lda HPOSM1_TABLE
 	sta HPOSM1
+	lda HPOSM2_TABLE
+	sta HPOSM2
+	lda HPOSM3_TABLE
+	sta HPOSM3
 
-;	lda #$0F
-;	sta COLBK
-	
 	rts
 
 
@@ -1219,71 +1423,6 @@ LoadPmSpecs1
 	sta HPOSM3
 
 	rts
-
-
-;==============================================================================
-; SCORE TITLE WITH PMG                                                       A 
-;==============================================================================
-; Called on Title display
-; Set the score playfield colors.   
-; Set the scoreline player/missiles.
-; WAIT until after the text line.
-; Then fall through to set all the main playfield P/M object values.
-; -----------------------------------------------------------------------------
-
-Score_Title_With_PMG
-
-	lda ColorPF1         ; Get text color (luminance)
-	sta COLPF1           ; write new text color.
-
-	lda #COLOR_BLACK     ; Black for background and text background.
-	sta COLBK            ; Write new border color.
-	sta COLPF2           ; Write new background color
-	
-	jsr LoadPmSpecs0
-	
-	sta wsync ; Skip some scan lines to pass the top line of scrore labels.
-	sta wsync
-	sta wsync
-	sta wsync
-	sta wsync
-	sta wsync
-
-	jsr libSetPmgHPOSZero  ; Remove second line of P/M labels from display.
-
-	rts
-
-
-;==============================================================================
-; COLPF0_COLBK_TITLE_DLI                                                     A
-;==============================================================================
-; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
-; same display list structure and DLIs.  
-; Sets background color and the COLPF0 pixel color.  
-; Table driven.  
-; Perfectly re-usable for anywhere Map Mode 9 or Blank instructions are 
-; being managed.  In the case of blank lines you just don't see the pixel 
-; color change, so it does not matter what is in the COLPF0 color table. 
-; -----------------------------------------------------------------------------
-
-DO_COLPF0_COLBK_TITLE_DLI
-
-	jsr LoadPmSpecs2 
-	
-	lda COLPF0_TABLE,y   ; Get pixels color
-	pha
-	lda COLBK_TABLE,y    ; Get background color
-
-	sta WSYNC
-	sta WSYNC
-	
-	sta COLBK            ; Set background
-	pla
-	sta COLPF0           ; Set pixels.
-
-;	jmp LoadAlmostAllColors_DLI
-	
-	jmp Exit_DLI
 
 
 ;==============================================================================
