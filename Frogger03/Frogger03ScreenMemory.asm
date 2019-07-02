@@ -418,7 +418,7 @@ SCROLLING_CREDIT   ; 40+52+62+57+40 == 251 ; almost a page, how nice.
 	.sb "t.  Original program for CBM PET 4032 wr" ; 40 
 	.sb "itten by John C. Dale.  Atari 8-bit comp" ; 40 
 	.sb "uter port by Ken Jennings, V03, July 201" ; 40
-	.sb "9.  Special thanks to blank and Philsan." ; 40 
+	.sb "9.  Special thanks to blank and Philsan.  " ; 42
 
 END_OF_CREDITS
 	.sb "PET FROGGER (c) November 1983 by Dales" ATASCII_HEART "f" ; 40 
@@ -1124,12 +1124,12 @@ GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
 ; All three graphics screens use the same list.
 ; Basically, the background color is updated per every line
 SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
-	.byte <SPLASH_PMGZERO_DLI ; DLI (0)  ; VBI uses for initializing DLI.
+	.byte <SPLASH_PMGZERO_DLI ; DLI (0)  ; VBI uses 0 for initializing DLI.
 	.byte <COLPF0_COLBK_DLI
-	.byte <SPLASH_PMGSPECS2_DLI ; DLI (1)  1
+	.byte <COLPF0_COLBK_DLI ; DLI (1)  1
 	.byte <COLPF0_COLBK_DLI     ; DLI (2)  2
 	.byte <COLPF0_COLBK_DLI     ; DLI (3)  3
-	.byte <COLPF0_COLBK_DLI     ; DLI (4)  4
+	.byte <SPLASH_PMGSPECS2_DLI     ; DLI (4)  4
 	.byte <COLPF0_COLBK_DLI     ; DLI (5)  5
 	.byte <COLPF0_COLBK_DLI     ; DLI (6)  6 ; And position players
 	.byte <COLPF0_COLBK_DLI     ; DLI (7)  7
