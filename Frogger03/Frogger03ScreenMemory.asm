@@ -2,17 +2,15 @@
 ; Pet Frogger
 ; (c) November 1983 by John C. Dale, aka Dalesoft
 ; for the Commodore Pet 4032
-;
 ; ==========================================================================
 ; Ported (parodied) to Atari 8-bit computers
 ; by Ken Jennings (if this were 1983, aka FTR Enterprises)
-;
+; ==========================================================================
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019
-; Version 03, June 2019
-;
-; --------------------------------------------------------------------------
+; Version 03, July 2019
+; ==========================================================================
 
 ; ==========================================================================
 ; Screen Memory
@@ -412,19 +410,20 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 ; Now:
 SCROLLING_CREDIT   ; 40+52+62+57+40 == 251 ; almost a page, how nice.
-BLANK_MEM ; Blank text also used for blanks in other places.
-	.sb "                                        " ; 40
+;BLANK_MEM ; Blank text also used for blanks in other places.
+;	.sb "                                        " ; 40
 
 ; The perpetrators identified...
-	.sb "    PET FROGGER    (c) November 1983 by Dales" ATASCII_HEART "ft.   " ; 52
-
-	.sb "Original program for CBM PET 4032 written by John C. Dale.    " ; 62
-
-	.sb "Atari 8-bit computer port by Ken Jennings, V03, June 2019" ; 57
+	.sb "PET FROGGER (c) November 1983 by Dales" ATASCII_HEART "f" ; 40 
+	.sb "t.  Original program for CBM PET 4032 wr" ; 40 
+	.sb "itten by John C. Dale.  Atari 8-bit comp" ; 40 
+	.sb "uter port by Ken Jennings, V03, July 201" ; 40
+	.sb "9.  Special thanks to blank and Philsan." ; 40 
 
 END_OF_CREDITS
-EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
-	.sb "                                        " ; 40
+	.sb "PET FROGGER (c) November 1983 by Dales" ATASCII_HEART "f" ; 40 
+;EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
+;	.sb "                                        " ; 40
 
 
 	.align $0100 ; Realign to next page.
@@ -1127,12 +1126,12 @@ GAME_DLI_CHAIN_TABLE    ; Low byte update to next DLI from the title display
 SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 	.byte <SPLASH_PMGZERO_DLI ; DLI (0)  ; VBI uses for initializing DLI.
 	.byte <COLPF0_COLBK_DLI
-	.byte <COLPF0_COLBK_DLI     ; DLI (1)  1
+	.byte <SPLASH_PMGSPECS2_DLI ; DLI (1)  1
 	.byte <COLPF0_COLBK_DLI     ; DLI (2)  2
 	.byte <COLPF0_COLBK_DLI     ; DLI (3)  3
 	.byte <COLPF0_COLBK_DLI     ; DLI (4)  4
 	.byte <COLPF0_COLBK_DLI     ; DLI (5)  5
-	.byte <SPLASH_PMGSPECS2_DLI ; DLI (6)  6 ; And position players
+	.byte <COLPF0_COLBK_DLI     ; DLI (6)  6 ; And position players
 	.byte <COLPF0_COLBK_DLI     ; DLI (7)  7
 	.byte <COLPF0_COLBK_DLI     ; DLI (8)  8
 	.byte <COLPF0_COLBK_DLI     ; DLI (9)  9
@@ -1185,16 +1184,16 @@ SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 ; COLPF3 is white all the time.
 
 COLBK_TABLE ; Must be big enough to do splash screens. +1 for entry 0
-	.ds 48
+	.ds 49
 
 COLPF0_TABLE ; Must be big enough to do splash screens. +1 for entry 0
-	.ds 48
+	.ds 49
 
 COLPF1_TABLE ; Must be big enough to do Title screen. 
-	.ds 26
+	.ds 27
 
 COLPF2_TABLE ; Must be big enough to do Title screen.
-	.ds 26
+	.ds 27
 
 COLPF3_TABLE ; Must be big enough to do Game screen. (22 entries.)
 	.by $0E $0E $0E $0E $0E

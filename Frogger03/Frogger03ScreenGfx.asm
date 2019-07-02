@@ -2,17 +2,15 @@
 ; Pet Frogger
 ; (c) November 1983 by John C. Dale, aka Dalesoft
 ; for the Commodore Pet 4032
-;
 ; ==========================================================================
 ; Ported (parodied) to Atari 8-bit computers
 ; by Ken Jennings (if this were 1983, aka FTR Enterprises)
-;
+; ==========================================================================
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019
-; Version 03, June 2019
-;
-; --------------------------------------------------------------------------
+; Version 03, July 2019
+; ==========================================================================
 
 ; ==========================================================================
 ; SCREEN GRAPHICS
@@ -1003,6 +1001,7 @@ SkipIncCurrent
 ; --------------------------------------------------------------------------
 
 IncrementTableColors
+
 	lda #%00011111       ; Flags indicate nothing matches yet.
 	sta EverythingMatches
 
@@ -1648,6 +1647,7 @@ ExitBoatCharacterAnimation
 ; -----------------------------------------------------------------------------
 
 BoatCsetCopy8
+
 	ldy #0
 
 	lda (VBIPointer1),y
@@ -1698,6 +1698,7 @@ BoatCsetCopy8
 ; --------------------------------------------------------------------------
 
 FineScrollTheCreditLine          ; scroll the text identifying the perpetrators
+
 	dec CreditHSCROL             ; Subtract one color clock from the left (aka fine scroll).
 	bne ExitScrollTheCredits     ; It is not yet 0.  Nothing else to do here.
 
@@ -1743,6 +1744,7 @@ BOAT_HS_TABLE
 ; --------------------------------------------------------------------------
 
 RightBoatFineScrolling
+
 	; Easier to push the frog first before the actual fine scrolling.
 	cpy FrogRow             ; Are we on the frog's row?
 	bne DoFineScrollRight   ; No.  Continue with boat scroll.
@@ -1789,6 +1791,7 @@ EndOfRightBoat
 ; --------------------------------------------------------------------------
 
 LeftBoatFineScrolling
+
 	; Easier to push the frog first before the actual fine scrolling.
 	cpy FrogRow             ; Are we on the frog's row?
 	bne DoFineScrollLeft    ; No.  Continue with boat scroll.
@@ -1837,6 +1840,7 @@ EndOfLeftBoat
 ; --------------------------------------------------------------------------
 
 HideButtonPrompt
+
 	pha                     ; Save whatever is here.
 
 	lda #0                  ; 0 == off
@@ -1853,6 +1857,7 @@ HideButtonPrompt
 ; Flip the fade up/fade down state.
 
 TogglePressAButtonState
+
 	lda PressAButtonState    ; Get button state
 	eor #$FF                 ; Invert the value
 	sta PressAButtonState    ; Save new value.
@@ -1879,6 +1884,7 @@ TogglePressAButtonState
 ; --------------------------------------------------------------------------
 
 ToggleButtonPrompt
+
 	lda #BLINK_SPEED            ; Text Fading speed for prompt
 	sta PressAButtonFrames      ; Reset the frame counter.
 
