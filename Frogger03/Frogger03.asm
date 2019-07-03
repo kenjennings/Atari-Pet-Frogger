@@ -466,6 +466,8 @@ TempSaveColor     .byte 0 ; Nudder temp value
 TempTargetColor   .byte 0 ; an a nudder.
 EverythingMatches .byte 0 ; Logical condition collection indicating all colors examined do match.
 						  ; Bits $10, $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2, COLPF3
+MainPointer1      .word 0 ; Random use for Main code.
+MainPointer2      .word 0 ; Random use for Main code.
 
 BasePmgAddr       .word $00 ; Pointer to base table per the current display.  Set by VBI.  Used by Main.
 
@@ -674,7 +676,7 @@ SAVEY = $FF
 	.by "Player/Missile Frog. "
 	.by "Customized Display Lists and DLIs. "
 	.by "Most game logic moved to VBI. **"
-	.by "Special Thanks to play testers "
+	.by "Special Thanks to playtesters "
 	.by "-The Doctor-, Philsan, and Faicuai.**"
 
 

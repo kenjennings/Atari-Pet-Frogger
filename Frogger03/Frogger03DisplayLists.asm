@@ -75,6 +75,7 @@ DISPLAY_WIN   = 2
 DISPLAY_DEAD  = 3
 DISPLAY_OVER  = 4
 
+MAX_DISPLAYS  = 5
 
 ; Version 01, and 02  used graphics control characters in Antic Text 
 ; Mode 2 for the title.  Version 03 uses 6 lines of Map Mode 9 in place 

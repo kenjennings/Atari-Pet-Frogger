@@ -905,7 +905,7 @@ GAME_COLPF3_COLORS ; 22 entries.  Arg!  Tried to avoid this, but it is needed
 	.by COLOR_BLACK+$E ; Last beach
 
 
-	
+
 ; This stuff is supposed to set starting state for colors on the displays.
 ; This could use some major optimizations.  It should not need all these
 ; multiple blocks of 0 color.   Animated displays should animate themselves 
@@ -913,9 +913,9 @@ GAME_COLPF3_COLORS ; 22 entries.  Arg!  Tried to avoid this, but it is needed
 ; needed beyond the colors for text, and the background for the text.
 
 DEAD_BACK_COLORS ; 48 entries.  Gfx background colors.
-	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by 0 ; Entry needed for PM/graphics reset
-	
+	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry. ; 0
+	.by 0 ; Entry needed for PM/graphics reset                                           ; 1
+
 	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6  ; 2...5
 	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14 ; 6...9
 	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6  ; 10..13
@@ -1203,17 +1203,24 @@ COLPF0_TABLE ; Must be big enough to do splash screens. +1 for entry 0
 	.ds 49
 
 COLPF1_TABLE ; Must be big enough to do Title screen. 
-	.ds 27
+	.ds 49
 
 COLPF2_TABLE ; Must be big enough to do Title screen.
-	.ds 27
+	.ds 49
 
 COLPF3_TABLE ; Must be big enough to do Game screen. (22 entries.)
 	.by $0E $0E $0E $0E $0E
 	.by $0E $0E $0E $0E $0E
 	.by $0E $0E $0E $0E $0E
 	.by $0E $0E $0E $0E $0E
-	.by $0E $0E
+	.by $0E $0E ; Should end here at 22.   
+	; But, In case of generic clear code, continue to 49
+	.by $0E $0E $0E
+	.by $0E $0E $0E $0E $0E
+	.by $0E $0E $0E $0E $0E
+	.by $0E $0E $0E $0E $0E
+	.by $0E $0E $0E $0E $0E
+	.by $0E $0E $0E $0E 
 
 HSCROL_TABLE ; Must be big enough to do Game screen up to  last boat row. (21 entries)
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.

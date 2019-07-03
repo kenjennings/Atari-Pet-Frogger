@@ -600,13 +600,13 @@ LoopChangeScreenWaitForVBI            ; Wait for VBI to signal the values change
 ; ZERO CURRENT COLORS                                                 A  Y
 ; ==========================================================================
 ; Force all the colors in the current tables to black.
-; Used before Fade up to game screen.
+; Used to insure black screen BEFORE  fading up the Game screen.
 ; --------------------------------------------------------------------------
 
 ZeroCurrentColors
 
 	lda #0
-	ldy #22
+	ldy #21
 
 LoopZeroColors
 	jsr NukeAllColorsFromOrbitToBeSure ; Sets all colors.  Decrements Y.
@@ -658,16 +658,16 @@ DeadFrogRain
 	and #$0F                    ; Keep this truncated to grey (black) $0 to $F
 	sta EventCounter            ; Save it for next time.
 
-	ldy #1 ; Top 20 lines of screen...
+	ldy #2 ; Top 20 lines of screen...
 DeadLoopTopOverGrey
 	jsr DeadFrogGreyScroll      ; Increments and color stuffing.
-	cpy #20                     ; Reached the 19th line?
+	cpy #21                     ; Reached the 19th line?
 	bne DeadLoopTopOverGrey     ; No, continue looping.
 
-	ldy #28 ; Bottom 20 lines of screen (above prompt and credits.
+	ldy #29 ; Bottom 20 lines of screen (above prompt and credits.)
 DeadLoopBottomOverGrey
 	jsr DeadFrogGreyScroll      ; Increments and color stuffing.
-	cpy #47                     ; Reached the 23rd line?
+	cpy #48                     ; Reached the 23rd line?
 	bne DeadLoopBottomOverGrey  ; No, continue looping.
 ;	beq EndDeadScreen
 	
@@ -703,19 +703,19 @@ SplashLoopTopToBlack                   ; Filling the top
 	cpx #DISPLAY_OVER                  ; Is it game over?
 	bne ContinueSplashBottomToBlack    ; Nope.  Skip to the bottom
 
-	ldy #26 ; Middle six lines of the text background. 
+	ldy #27 ; Middle six lines of the text background. 
 SplashLoopMidToBlack
 	sta COLBK_TABLE,y ; only background, because we need to fade text later.
 	dey
-	cpy #20                            ; Filling the middle
+	cpy #21                            ; Filling the middle
 	bne SplashLoopMidToBlack           ; No, continue looping.
 
 ContinueSplashBottomToBlack
-	ldy #46 ; Bottom 20 lines of screen (above prompt and credits.
+	ldy #47 ; Bottom 20 lines of screen (above prompt and credits.
 SplashLoopBottomToBlack
 	jsr NukeAllColorsFromOrbitToBeSure ; Also decrements Y
 
-	cpy #26                            ; Reached the last line?
+	cpy #28                            ; Reached the last line?
 	bne SplashLoopBottomToBlack        ; No, continue looping.
 
 	rts
@@ -762,7 +762,7 @@ DoNotUseWhite
 ; If the current line's luminance matches the reference value, then 
 ; decrement it.
 ; At the end, decrement the reference value. 
-; when the reference value is 0, then set all to black. 
+; When the reference value is 0, then set all to black. 
 ; Gradual fade on each pass.
 ;
 ; Uses EventCounter for the reference luminance.  must start at $0E
@@ -772,32 +772,34 @@ DoNotUseWhite
 
 FadeSplashTextBackground
 
-;	lda #COLOR_BLACK
-	ldx #21 ; Text lines 21 to 26 ...
-LoopTextBackFade
-	lda COLBK_TABLE,x 
-	and #$0F
-	cmp EventCounter
-	bne LoopTextBackInc
-	dec COLBK_TABLE,x 
-	dec COLBK_TABLE,x 
-LoopTextBackInc
-	inx
-	cpx #27                     
-	bne LoopTextBackFade         ; No, continue looping.
-	dec EventCounter
-	dec EventCounter
-	bpl EndFadeSplashTextBackground
+	ldx #22                         ; Text lines 22 to 27 ...
+bFSTB_LoopTextBackFade
+	lda COLBK_TABLE,x               ; Get the color
+	and #$0F                        ; Mask out color. Keep only the luminance.
+	cmp EventCounter                ; Compare to target luminance
+	bne bFSTB_LoopTextBackInc       ; not the same, so skip it.
+	dec COLBK_TABLE,x               ; The same.  Decrement luminance
+	dec COLBK_TABLE,x               ; Decrement luminance again.
 
+bFSTB_LoopTextBackInc
+	inx                             ; Go to the next line
+	cpx #28                         ; There yet?
+	bne bFSTB_LoopTextBackFade      ; No, continue looping.
+
+	dec EventCounter                ; Reduce target luminance,
+	dec EventCounter                ; and again.
+	bpl EndFadeSplashTextBackground ; 0 is legit.  Only finish here on negative something.
+
+	; Now that luminance for all is 0, force all to black.
 	lda #COLOR_BLACK
-	ldx #21 ; Text lines 21 to 26 ...
-LoopTextBackToBlack
-	sta COLBK_TABLE,x 
+	ldx #22                         ; Text lines 22 to 27 ...
+bFSTB_LoopTextBackToBlack
+	sta COLBK_TABLE,x               ; Zero/black it.
 	inx
-	cpx #27  
-	bne LoopTextBackToBlack
+	cpx #28  
+	bne bFSTB_LoopTextBackToBlack   ; do while more rows to black out.
 
-	lda #$FF   ; Really, really done.
+	lda #$FF                        ; Let the caller know - Really, really done.
 
 EndFadeSplashTextBackground
 
@@ -808,6 +810,8 @@ EndFadeSplashTextBackground
 ; FADE SPLASH TEXT                                                  A  X
 ; ==========================================================================
 ; For the Splash screens, fade the text to black. 
+; The same basic operations as FadeSplashTextBackground above, but this is
+; for COLPF0 instead of COLBK.
 ; If the current line's luminance matches the reference value, then 
 ; decrement it.
 ; At the end, decrement the reference value. 
@@ -821,39 +825,41 @@ EndFadeSplashTextBackground
 
 FadeSplashText
 
-;	lda #COLOR_BLACK
-	ldx #21 ; Text lines 21 to 26 ...
-LoopTextFade
-	lda COLPF0_TABLE,x 
-	and #$0F
-	cmp EventCounter
-	bne LoopTextInc
-	dec COLPF0_TABLE,x 
-	dec COLPF0_TABLE,x 
-LoopTextInc
-	inx
-	cpx #27                     
-	bne LoopTextFade         ; No, continue looping.
-	dec EventCounter
-	dec EventCounter
+	ldx #22                         ; Text lines 22 to 27 ...
+bFST_LoopTextFade
+	lda COLPF0_TABLE,x              ; Get the color
+	and #$0F                        ; Mask out color.  Keep the luminance.
+	cmp EventCounter                ; Compare to target luminance
+	bne bFST_LoopTextInc            ; Not the same, so skip it.
+	dec COLPF0_TABLE,x              ; The same luma, so decrement it.
+	dec COLPF0_TABLE,x              ; Decrement again.
+
+bFST_LoopTextInc
+	inx                             ; Go to the next line.
+	cpx #28                         ; Reached the end?
+	bne bFST_LoopTextFade           ; No, continue looping.
+
+	dec EventCounter                ; Reduce target luminance,
+	dec EventCounter                ; and again.
 	bpl EndFadeSplashText
 
+	; Now that luminance are 0, then force all to black.
 	lda #COLOR_BLACK
-	ldx #21 ; Text lines 21 to 26 ...
-LoopTextToBlack
-	sta COLPF0_TABLE,x 
+	ldx #22                         ; Text lines 22 to 27 ...
+bFST_LoopTextToBlack
+	sta COLPF0_TABLE,x              ; Zero/black it.
 	inx
-	cpx #27  
-	bne LoopTextToBlack
+	cpx #28  
+	bne bFST_LoopTextToBlack        ; Do while more rows to black out.
 
-	lda #$FF   ; Really, really done.
+	lda #$FF                        ; Let the caller know - Really, really done.
 
 EndFadeSplashText
 	rts
 
 
 ; ==========================================================================
-; COMMON SPASH FADE 123                                           
+; COMMON SPLASH FADE 123                                           
 ; ==========================================================================
 ; One set of code to run Stage 1, 2, 3, screen fade results.
 ; 1) Black background for scrolling colors in one pass.
@@ -864,7 +870,7 @@ EndFadeSplashText
 ;;; EventCounter is initialized to $E0 before calling this.
 ; EventStage is initialized to 1 to start the first stage.
 ; The caller is expected to have a use for EventStage = 4 
-; (i.e to stop calling this.) 
+; (i.e to stop calling this part.) 
 ;
 ; The Game Over screen bypasses stage 2 as it finishes blacking its 
 ; background during Stage 1.
@@ -884,70 +890,42 @@ SplashStageOne                    ; Stage 1 is set background black.
 	sta EventCounter              ; Luminance matching for fade
 	inc EventStage                ; Set Stage = 2
 
-;	lda EventStage              ; Stage 0 is waiting for input
-;	clc
-;	adc #$10
-;	sta SCREEN_SAVED+8
-;	lda EventStage
-	
-
 	ldx CurrentDL                 ; The Game Over Display already cleared the entire background
 	cpx #DISPLAY_OVER             ; Is it Game Over? (and stage 2 is not needed?)
 	bne EndCommonSplashFade       ; No. End with Stage 2 as current stage
 	inc EventStage                ; Set Stage = 3
-	
-;	lda EventStage              ; Stage 0 is waiting for input
-;	clc
-;	adc #$10
-;	sta SCREEN_SAVED+8
-;	lda EventStage
-	
-	
+
 	bne EndCommonSplashFade
 
 
 SplashStageTwo                    ; Stage 2 is fading the text background
 	cmp #2
-	bne SplashStageThree
+	bne SplashStageThree          ; Not Stage 2.
 
-	jsr FadeSplashTextBackground
-	bpl EndCommonSplashFade
+	jsr FadeSplashTextBackground  ; Like it says, Fade Splash Text Background
+	bpl EndCommonSplashFade       ; Not negative return means we're done for this pass.
 
-	lda #$0e
+	lda #$0e                      ; Negative return.
 	sta EventCounter              ; Luminance matching for fade
 	inc EventStage                ; Set Stage = 3
-	
-;	lda EventStage              ; Stage 0 is waiting for input
-;	clc
-;	adc #$10
-;	sta SCREEN_SAVED+8
-;	lda EventStage
-	
-	
+
 	bne EndCommonSplashFade
 
 
 SplashStageThree                  ; Stage 3 is fading the text 
 	cmp #3
-	bne EndCommonSplashFade
+	bne EndCommonSplashFade       ; Not stage 3.  So why did the caller call this?
 
-	jsr FadeSplashText
-	bpl EndCommonSplashFade
+	jsr FadeSplashText            ; Like it says, Fade Splash Text 
+	bpl EndCommonSplashFade       ; Not negative return means we're done for this pass.
 
-	inc EventStage                ; Set Stage = 4
-	
-;	lda EventStage              ; Stage 0 is waiting for input
-;	clc
-;	adc #$10
-;	sta SCREEN_SAVED+8
-;	lda EventStage
+	inc EventStage                ; Negative return.  Set Stage = 4
+
 
 EndCommonSplashFade
 	lda EventStage                ; Make sure A = EventStage on exit.
 
 	rts
-
-
 
 
 ; ==========================================================================
@@ -1086,107 +1064,202 @@ bDoneWithEverything
 ; ==========================================================================
 ; Copy the base colors for the current display.
 ;
-; Y  is the DISPLAY_* value (defined elsewhere) for the desired display.
+; Base colors means the background, COLPF0 for pixels for Mode 9 graphics, 
+; and COLPF1 for text on Mode 2 text lines.
+;
+; Game screen uses all color registers and its setup is custom, so here
+; the colors are simply left black for the game screen.
+;
+; Y  =  is the DISPLAY_* value (defined elsewhere) for the desired display.
 ; --------------------------------------------------------------------------
 
+;COPY_BASE_LO_TABLE
+;	.byte <[GenericCopyBaseColors-1]  ; 0  = DISPLAY_TITLE
+;	.byte <[ZeroCurrentColors-1] ; 1  = DISPLAY_GAME  ; "Game" starts at black screen and is faded up.
+;	.byte <[CopyColors_Win-1]    ; 2  = DISPLAY_WIN
+;	.byte <[CopyColors_Dead-1]   ; 3  = DISPLAY_DEAD
+;	.byte <[CopyColors_Over-1]   ; 4  = DISPLAY_OVER
+
+;COPY_BASE_HI_TABLE
+;	.byte >[GenericCopyBaseColors-1]  ; 0  = DISPLAY_TITLE
+;	.byte >[ZeroCurrentColors-1] ; 1  = DISPLAY_GAME  ; "Game" starts at black screen and is faded up.
+;	.byte >[CopyColors_Win-1]    ; 2  = DISPLAY_WIN
+;	.byte >[CopyColors_Dead-1]   ; 3  = DISPLAY_DEAD
+;	.byte >[CopyColors_Over-1]   ; 4  = DISPLAY_OVER
+
+COPY_BASE_SIZE_TABLE ; Starting point at end of table to copy. (Game screen is 0, for custom)
+	.by 25 0 47 47 47
+
+
 CopyBaseColors
-	; I'm so lazy.  Not bothering to be clever.
-	; Just this or that or that or that...
-	; Y was assigned the display number.
-	beq CopyColors_Title ; 0 == DISPLAY_TITLE
-	dey
-	beq CopyColors_Game  ; 1 == DISPLAY_GAME
-	dey
-	beq CopyColors_Win   ; 2 == DISPLAY_WIN
-	dey
-	beq CopyColors_Dead  ; 3 == DISPLAY_DEAD
-	dey
-	beq CopyColors_Over  ; 4 == DISPLAY_OVER
+	cpy #MAX_DISPLAYS         ; 5.
+	bcs EndCopyBaseColors     ; 5 or more is invalid display number. Exit.
 
-	rts                  ; Will never get here, but makes me feel better.
+	cpy #DISPLAY_GAME         ; Is it the Game screen?
+	bne bCBC_SkipGameScreen   ; Nope, do the usual (below).
+	jmp ZeroCurrentColors     ; Jmp instead of Jsr will return to the original caller
+
+bCBC_SkipGameScreen
+	lda COLOR_BACK_LO_TABLE,y ; Get Pointer to background colors
+	sta MainPointer1
+	lda COLOR_BACK_HI_TABLE,y
+	sta MainPointer1+1
+	
+	lda COLOR_TEXT_LO_TABLE,y ; Get Pointer to "text"/foreground colors.
+	sta MainPointer2
+	lda COLOR_TEXT_HI_TABLE,y
+	sta MainPointer2+1
+
+	lda COPY_BASE_SIZE_TABLE,y ; How many times to loop? 
+	tay                        ; Looping this many times...
+ 
+bCBC_LoopCopyColors
+	lda (MainPointer1),y       ; TITLE_BACK_COLORS,x
+	sta COLBK_TABLE,y
+
+	lda (MainPointer2),y       ; TITLE_TEXT_COLORS,x
+	sta COLPF1_TABLE,y         ; Title screen has "text" using ANTIC Mode 2
+	sta COLPF0_TABLE,y         ; All displays use COLPF0 for pixel graphics colors.
+
+	dey
+	bne bCBC_LoopCopyColors   ; Do while more colors. (Note 0 entry is actually not needed, so not used.)
+
+
+;	lda COPY_BASE_LO_TABLE,y   ; Get routine high byte
+;	pha                        ; Push to stack
+;	lda COPY_BASE_HI_TABLE,y   ; Get routine low byte 
+;	pha                        ; Push to stack
+
+	; Dis here be mind bending...  
+	; If the arguments were incorrect then this rts returns whence it came.   
+	; However, if the code above pushes an address, then this rts "returns" 
+	; to the routine on the stack and then the rts in that routine will 
+	; return to the caller of this routine.
+EndCopyBaseColors
+	rts                  
 
 
 ; ==========================================================================
 
-CopyColors_Title
+;CopyColors_Title
 
- 	ldx #25 ; Title
-bLoopCopyColorsToTitle
-	lda TITLE_BACK_COLORS,x
-	sta COLBK_TABLE,x
+ ;	ldx #25 ; Title
+;bLoopCopyColorsToTitle
+;	lda TITLE_BACK_COLORS,x
+;	sta COLBK_TABLE,x
 
-	lda TITLE_TEXT_COLORS,x
-	sta COLPF1_TABLE,x
-	sta COLPF0_TABLE,x ; Only for Title, the COLPF0 graphics colors are in the text colors list.
+;	lda TITLE_TEXT_COLORS,x
+;	sta COLPF1_TABLE,x
+;	sta COLPF0_TABLE,x ; Only for Title, the COLPF0 graphics colors are in the text colors list.
+
+;	dex
+;	bne bLoopCopyColorsToTitle
+
+;	rts  ;
+
+
+; ==========================================================================
+
+;CopyColors_Game
+
+;	jsr ZeroCurrentColors 
+
+;	rts ; 
+
+
+; ==========================================================================
+
+
+;CopyColors_Win
+
+;	ldx #47 ; Dead, Win, Over have only background and COLPF0 lists.
+;bLoopCopyColorsToWin
+;	lda WIN_BACK_COLORS,x
+;	sta COLBK_TABLE,x
+
+;	lda WIN_COLPF0_COLORS,x ; 
+;	sta COLPF0_TABLE,x
+
+;	dex
+;	bne bLoopCopyColorsToWin
+
+;	rts ; 
+
+
+; ==========================================================================
+
+;CopyColors_Dead
+
+;	ldx #47 ; Dead, Win, Over have only background and COLPF0 lists.
+;bLoopCopyColorsToDead
+;	lda DEAD_BACK_COLORS,x
+;	sta COLBK_TABLE,x
+
+;	lda DEAD_COLPF0_COLORS,x
+;	sta COLPF0_TABLE,x
+
+;	dex
+;	bne bLoopCopyColorsToDead
+
+;	rts ; 
+
+
+; ==========================================================================
+
+;CopyColors_Over
+
+;	ldx #47 ; Dead, Win, Over have only background and COLPF0 lists.
+;bLoopCopyColorsTOver
+;	lda OVER_BACK_COLORS,x
+;	sta COLBK_TABLE,x
+
+;	lda OVER_COLPF0_COLORS,x
+;	sta COLPF0_TABLE,x
+
+;	dex
+;	bne bLoopCopyColorsTOver
+;
+;	rts ;
+
+
+; ==========================================================================
+; GENERIC COPY BASE COLORS                                          A  Y
+; ==========================================================================
+; Copy the base colors for the current display.
+;
+; Base colors means the background, COLPF0 for pixels for Mode 9 graphics, 
+; and COLPF1 for text on Mode 2 text lines.
+;
+; The Game screen uses all color registers and its setup is custom which 
+; means this routine is not called for the Game screen.
+;
+; Note this copies "TEXT" values to COLPF0 and COLP1.  COLPF1 is only used
+; on the title screen. This is a non-issue for the other screens.
+; 
+; The caller was expected to set some page Zero variables:
+; MainPointer1 is the address of the background color table.
+; MainPointer2 is the address of the text color table.
+;
+; Y  =  is the DISPLAY_* value (defined elsewhere) for the desired display.
+; --------------------------------------------------------------------------
+
+GenericCopyBaseColors
+
+	lda COPY_BASE_SIZE_TABLE,y ; Main code should have validated display.
+	tay                        ; Looping this many times...
+ 
+bGCBC_LoopCopyColors
+	lda (MainPointer1),y       ; TITLE_BACK_COLORS,x
+	sta COLBK_TABLE,y
+
+	lda (MainPointer2),y       ; TITLE_TEXT_COLORS,x
+	sta COLPF1_TABLE,y         ; Title screen has "text" using ANTIC Mode 2
+	sta COLPF0_TABLE,y         ; All displays use COLPF0 graphics colors.
 
 	dex
-	bne bLoopCopyColorsToTitle
+	bne bGCBC_LoopCopyColors
 
-	rts  ; ChangeScreen is over.
-
-
-; ==========================================================================
-
-CopyColors_Game
-
-	jsr ZeroCurrentColors ; "Game" starts at black screen and is faded up.
-
-	rts ; ChangeScreen is over.
-
-
-; ==========================================================================
-
-
-CopyColors_Win
-
-	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
-bLoopCopyColorsToWin
-	lda WIN_BACK_COLORS,x
-	sta COLBK_TABLE,x
-
-	lda WIN_COLPF0_COLORS,x ; 
-	sta COLPF0_TABLE,x
-
-	dex
-	bne bLoopCopyColorsToWin
-
-	rts ; ChangeScreen is over.
-
-
-; ==========================================================================
-
-CopyColors_Dead
-
-	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
-bLoopCopyColorsToDead
-	lda DEAD_BACK_COLORS,x
-	sta COLBK_TABLE,x
-
-	lda DEAD_COLPF0_COLORS,x
-	sta COLPF0_TABLE,x
-
-	dex
-	bne bLoopCopyColorsToDead
-
-	rts ; ChangeScreen is over.
-
-
-; ==========================================================================
-
-CopyColors_Over
-
-	ldx #46 ; Dead, Win, Over have only background and COLPF0 lists.
-bLoopCopyColorsTOver
-	lda OVER_BACK_COLORS,x
-	sta COLBK_TABLE,x
-
-	lda OVER_COLPF0_COLORS,x
-	sta COLPF0_TABLE,x
-
-	dex
-	bne bLoopCopyColorsTOver
-
-	rts ; ChangeScreen is over.
+	rts
 
 
 ; ==========================================================================
@@ -1222,14 +1295,14 @@ GameOverRedSine
 SkipZeroOverCycle
 	stx EventCounter         ; And save for next time.
 
-	ldy #1 ; All the background lines on the screen
+	ldy #2 ; All the background lines on the screen
 LoopTopOverSine
 	jsr OverRedScroll        ; Increments and color stuffing.
 	cpx #20
 	bne SkipZeroOverCycle2
 	ldx #0
 SkipZeroOverCycle2
-	cpy #47 ;                ; Reached the last line?
+	cpy #48 ;                ; Reached the last line?
 	bne LoopTopOverSine      ; No, continue looping.
 
 ;	beq EndGameOverScreen    ; Yes.  Exit now. 
@@ -1323,7 +1396,7 @@ WinRainbow
 	jsr WinColorScrollUp    ; Subtract 4 and reset to start if needed.
 	sta EventCounter        ; Save it for next time.
 
-	ldy #1 ; Color the Top 20 lines of screen...
+	ldy #2 ; Color the Top 20 lines of screen...
 LoopTopWinScroll
 	sta COLBK_TABLE,y       ; Set color for line on screen
 	jsr WinColorScrollUp    ; Subtract 4 and reset to start if needed.
@@ -1341,13 +1414,13 @@ LoopTopWinScroll
 	and #$F0                ; Truncate luminance bits.
 	ora #$02                ; Start at +2.
 
-	ldy #26                 ; Start at bottom of text going backwards.
+	ldy #27                 ; Start at bottom of text going backwards.
 bews_LoopTextColors
 	sta COLPF0_TABLE,Y      ; Use as manipulated color for 
 	clc                     ; the six lines of giant label "text."
 	adc #2                  ; brightness:  2, 4, 6, 8, A, C
 	dey
-	cpy #20
+	cpy #21
 	bne bews_LoopTextColors
 
 ; ======================== B O T T O M ========================  
@@ -1355,12 +1428,12 @@ bews_LoopTextColors
 
 ; Color scrolling skips the black/grey/white values.  
 ; The scrolling uses values 18 to 238 step +4
-	ldy #28                 ; Bottom 20 lines of screen (above prompt and credits.)
+	ldy #29                 ; Bottom 20 lines of screen (above prompt and credits.)
 LoopBottomWinScroll         ; Scroll colors in opposite direction
 	jsr WinColorScrollDown  ; Add 4, and reset to start if needed.
 	sta COLBK_TABLE,y       ; Set color for line on screen
 	iny                     ; Next line on screen.
-	cpy #47                 ; Reached the end, 20th line after text? 
+	cpy #48                 ; Reached the end, 20th line after text? 
 	bne LoopBottomWinScroll ; No, continue looping.
 
 EndWinRainbow
@@ -1540,7 +1613,7 @@ DoBoatCharacterAnimation
 	sta VBIPointer2+1
 	jsr BoatCsetCopy8                ; Copy the 8 bytes to the character set via the pointers set up.
 
-; Part 2 for Right Front Boat.
+; Zero, Part 2 for Right Front Boat.
 
 	cpx #2                           ; Frame 2 and 6 have new images at front of boat.
 	beq bCopyRightFrontBoat          ; Yes, this is 2. Copy new image
@@ -1593,7 +1666,7 @@ TestBoaty2
 	sta VBIPointer2+1
 	jsr BoatCsetCopy8                ; Copy the 8 bytes to the character set via the pointers set up.
 
-; Part 2 for Left Front Boat.
+; Two, Part 2 for Left Front Boat.
 
 	cpx #2                           ; Frame 2 and 6 have new images at front of boat.
 	beq bCopyLeftFrontBoat           ; Yes, this is 2. Copy new image
@@ -1615,9 +1688,6 @@ bCopyLeftFrontBoat
 ; Three is Left Back Boat.
 
 TestBoaty3
-;	cmp #3
-;	bne EndOfBoatness               ; Process of Elimination.  Only 3 should be possible. 
-
 	lda LEFT_BOAT_WAKE_LOW,x        ; Get pointer for the data for this frame 
 	sta VBIPointer1
 	lda LEFT_BOAT_WAKE_HIGH,x
