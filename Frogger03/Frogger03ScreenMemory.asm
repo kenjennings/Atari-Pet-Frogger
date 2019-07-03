@@ -415,10 +415,10 @@ SCROLLING_CREDIT   ; 40+52+62+57+40 == 251 ; almost a page, how nice.
 
 ; The perpetrators identified...
 	.sb "PET FROGGER (c) November 1983 by Dales" ATASCII_HEART "f" ; 40 
-	.sb "t.  Original program for CBM PET 4032 wr" ; 40 
-	.sb "itten by John C. Dale.  Atari 8-bit comp" ; 40 
-	.sb "uter port by Ken Jennings, V03, July 201" ; 40
-	.sb "9.  Special thanks to blank and Philsan.  " ; 42
+	.sb "t for CBM PET 4032 written by John C. Da" ; 40 
+	.sb "le.  Atari 8-bit computer port by Ken Je" ; 40
+	.sb "nnings, V03, July 2019.  Special thanks " ; 40
+	.sb "to testers -The Doctor-, Philsan, and Faicuai.       " ; 53
 
 END_OF_CREDITS
 	.sb "PET FROGGER (c) November 1983 by Dales" ATASCII_HEART "f" ; 40 
@@ -912,28 +912,34 @@ GAME_COLPF3_COLORS ; 22 entries.  Arg!  Tried to avoid this, but it is needed
 ; naturally from a blank/black background.  Most of this should not be 
 ; needed beyond the colors for text, and the background for the text.
 
-DEAD_BACK_COLORS ; 47 entries.  Gfx background colors.
+DEAD_BACK_COLORS ; 48 entries.  Gfx background colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
-	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6
-	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14
-	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6
-	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14
-	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4   $00 ; COLOR_BLACK+6
-
-	.by COLOR_GREEN COLOR_GREEN+2 COLOR_GREEN+4 COLOR_GREEN+6 COLOR_GREEN+8 COLOR_GREEN+10 
-
-	.by $00 ; COLOR_BLACK+8 
+	.by 0 ; Entry needed for PM/graphics reset
 	
- 	.by COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14
-	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6
-	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14
-	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6
-	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14
+	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6  ; 2...5
+	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14 ; 6...9
+	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6  ; 10..13
+	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14 ; 14..17
+	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4                 ; 18..20
+	
+	.by $00 ; 21
+
+	.by COLOR_GREEN COLOR_GREEN+2 COLOR_GREEN+4 COLOR_GREEN+6 COLOR_GREEN+8 COLOR_GREEN+10 ; 22..27
+
+	.by $00 ; 28
+	
+ 	.by COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14                ; 29..31
+	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6  ; 32..35
+	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14 ; 36..39
+	.by COLOR_BLACK+0  COLOR_BLACK+2  COLOR_BLACK+4  COLOR_BLACK+6  ; 40..43
+	.by COLOR_BLACK+8  COLOR_BLACK+10 COLOR_BLACK+12 COLOR_BLACK+14 ; 44..47
 
 
 
-DEAD_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
+DEAD_COLPF0_COLORS ; 48 entries.  Gfx pixel colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
+	.by 0 ; Entry needed for PM/graphics reset
+	
 	.rept 20
 		.by $00                                     ; Top Scroll.
 	.endr
@@ -945,8 +951,9 @@ DEAD_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
 	.endr
 
 
-WIN_BACK_COLORS ; 47 entries.  Gfx background colors.
+WIN_BACK_COLORS ; 48 entries.  Gfx background colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
+	.by 0 ; Entry needed for PM/graphics reset
 	; Do not use $0x or $Fx for base color.
 	.rept 20
 		.by $00                                     ; Top Scroll.
@@ -959,8 +966,10 @@ WIN_BACK_COLORS ; 47 entries.  Gfx background colors.
 	.endr
 
 
-WIN_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
+WIN_COLPF0_COLORS ; 48 entries.  Gfx pixel colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
+	.by 0 ; Entry needed for PM/graphics reset
+	
 	.rept 20
 		.by $00                                     ; Top Scroll.
 	.endr
@@ -972,8 +981,10 @@ WIN_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
 	.endr
 
 
-OVER_BACK_COLORS  ; 47 entries.  Gfx background colors.
+OVER_BACK_COLORS  ; 48 entries.  Gfx background colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
+	.by 0 ; Entry needed for PM/graphics reset
+	
 	.rept 20
 		.by $00                                     ; Top Scroll.
 	.endr
@@ -984,8 +995,10 @@ OVER_BACK_COLORS  ; 47 entries.  Gfx background colors.
 		.by $00                                     ; Bottom Scroll
 	.endr
 
-OVER_COLPF0_COLORS ; 47 entries.  Gfx pixel colors.
+OVER_COLPF0_COLORS ; 48 entries.  Gfx pixel colors.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
+	.by 0 ; Entry needed for PM/graphics reset
+	
 	.rept 20
 		.by $00                                     ; Top Scroll.
 	.endr

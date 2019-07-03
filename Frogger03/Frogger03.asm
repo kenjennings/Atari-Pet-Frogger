@@ -14,6 +14,7 @@
 
 ; ==========================================================================
 ; Version 00. November 2018
+;
 ; As much of the Pet code is used as possible.
 ; In most places only the barest minimum of changes are made to deal with
 ; the differences on the Atari.  Notable changes:
@@ -27,14 +28,14 @@
 ;   ASCII/ATASCII values.
 ; * Direct keyboard scanning is different requiring Atari to clear the
 ;   OS value in order to get the next character.  Also, key codes are
-;   different on the Atari (and not ASCII or Internal codes.)
+;   different on the Atari (and not the same as ASCII or Internal codes.)
 ; * Given the differences in clock speed and frame rates between the
-;   UK Pet 4032 the game is intended for and the NTSC Atari to which it is
-;   ported the timing values in the delays are altered to scale the game
-;   speed more like the original on the Pet.
+;   UK Pet 4032 and the NTSC Atari the ported timing values have to be 
+;   altered and the ultimate speed/rates are just guesswork.
 ;
 ; --------------------------------------------------------------------------
 ; Version 01.  December 2018
+;
 ; Atari-specific optimizations, though limited.  Most of the program
 ; still could assemble on a Pet (with changes for values and registers).
 ; The only doubt I have is monitoring for the start of a frame where the
@@ -51,6 +52,7 @@
 ;
 ; --------------------------------------------------------------------------
 ; Version 02.  February 2019
+;
 ; The design principle continues to maintain the original presentation
 ; of a full screen of basic text.  (In Atari terms, this is ANTIC mode 2,
 ; or OS mode 0).  Everything else in the game is subject to Atari-fication.
@@ -81,7 +83,12 @@
 ;
 ; --------------------------------------------------------------------------
 ; Version 03.  March 2019
-; Changing features to make game appear smoother, slicker looking...
+;
+; The design principle is to keep the play action as close as possible
+; to the original version as well as enhance the graphics presentation
+; as much as possible while still retaining layout as close as possible
+; to the original.  Changing features to make game appear smoother, 
+; slicker looking...
 ; * Horizontal fine scrolling the continuously scrolling credits line.
 ; * Halved the time for notes in Ode 2 Joy as it plays so long it 
 ;   starts to sound like a funeral dirge.
@@ -110,6 +117,7 @@
 ; differences between Atari and Pet, and the code considerations:
 ;
 ; Version 00 commentary. . . . . . . . . . . . . . . . . . . . . . . .
+;
 ; It appears text printing on the Pet treats the screen like a typewriter.
 ; "Right" cursor movement the Pet uses to move through the full line
 ; width will cause the cursor to wrap around to the next line.  "Down" also
@@ -162,14 +170,15 @@
 ; --------------------------------------------------------------------------
 ;
 ; Version 01 commentary. . . . . . . . . . . . . . . . . . . . . . . .
+;
 ; "Printing" via standard OS I/O has been completely replaced by direct
 ; writes to screen memory.  This greatly speeds up the game screen
 ; and title screen presentation.
 ;
 ; Having entirely rewritten the game logic, the new modular nature
 ; made it easy to add new screens and to manage animated transitions
-; between screens.  There are new screens with huge text built of
-; graphic control characters for when a frog dies, a frog is saved,
+; between screens.  There are new splash screens with huge text built 
+; of graphic control characters for when a frog dies, a frog is saved,
 ; and when the game is over.
 ;
 ; The high score is maintained in real-time with the player's score.
@@ -191,11 +200,93 @@
 ; --------------------------------------------------------------------------
 ;
 ; Version 02 commentary. . . . . . . . . . . . . . . . . . . . . . . .
+;
 ; Adding color was essentially trivial.  A table-driven Display List
 ; Interrupt routine sets a new background color and text luminance value
 ; for each of the 25 text lines. A Vertical Blank interrupt enforces the
 ; DLI state to start at 0 for every frame.  A rough prototype showing
 ; colorized displays was added to Version 01 code in just a few hours.
+;
+; Now that there is a VBI running various other timing controls can be
+; formally put into the VBI rather than using looping code that detects
+; the start of a TV frame.
+;
+; Further use of the color indirection will eliminate the need to maintain
+; and write normal text and inverse text in screen memory to make blinking
+; text.  The game can simply update the colors for that line of text to
+; make it appear to blink.
+;
+; Given the Atari's significant graphics indirection capabilities there is
+; no need to draw a screen to present it.  The data to supply the graphics
+; is already in memory.  Properly arranging the data will allow the Atari
+; to display the data directly as screen data.  This eliminates the need
+; to have separate data and screen memory, and also eliminates the need
+; for the supporting code to copy the data to the screen.
+;
+; Aaaand, the Atari has more than one way to do this.  First, we could
+; update the LMS addresses in the Display List to point to each line of
+; data for screen memory.  Changing the screen (or just the screen
+; contents) is reduced to writing a two-byte pointer for each line in the
+; Display List instead of writing 40 bytes for each line to screen memory.
+; And where there are blank lines or otherwise duplicate data the LMS can
+; point to the same screen data for each line.
+;
+; The other way to do this is to have a separate Display List for each
+; screen.  This reduces changing the screen to writing one address for
+; the entire screen.
+;
+; We're mixing these two methods.  Each screen will have its own Display
+; List with color tables.  Change the display list pointer and the entire
+; screen changes.  The game screen will also use updates to the LMS
+; for each moving boat line to coarse scroll the boat data without moving
+; the boats in screen memory.
+;
+; Since the frog must move in screen memory, there still must be separate
+; data for each line of boats and beaches.  In a future version when the
+; frog is a Player/Missile object independent from screen data then it
+; will be possible to reduce the boats to one line for left and one for
+; right and re-use the data for each set of lines.
+;
+; --------------------------------------------------------------------------
+; Version 03 commentary. . . . . . . . . . . . . . . . . . . . . . . .
+;
+; Many Atrifications added in this go-round...
+;
+; The title screen has an animated frog done with player/missile graphics.
+; This is the same player image (and same nimation methods) as used for 
+; the main game.
+;
+; Also, the title graphics are now actual graphics instead of chracters.
+; The graphics mode uses the same sized pixels as the 1/4 sized squares
+; in the graphics character version, but now require only half the 
+; memory used for the character version while providing real, complete
+; color control.
+; 
+; Some small changes were made to the directions/documentation text on
+; the title screen.  Each line has different luminance for the text
+; providing a gradient-like effect.  
+;
+; The credits line now fine scrolls and is visible perpetually, so it 
+; appears the program is always multi-tasking (which is not actually
+; a completely truthful implication.)
+;
+; A big change to the main and game screens are the score lines and 
+; lives/saved frog information is present on both screens.  The 
+; text labels are now independently colored, and so can be made to 
+; do a strobe effect used as the attract mode on the title screen and
+; during the game when a value changes.  This has the appearance that
+; the text labels are ANTIC Mode 4 text, but this is not so.  The 
+; text lines are still ANTIC Mode 2 text lines, because I wanted the 
+; extra precision to continue using the frog head graphics to count
+; saved frogs.   So, how is the text colored?  They are Player/Missile 
+; graphics that provide (up to) 10 characters for each text line.
+; A display list interrupt colors and repositions the player/missile 
+; graphics between score lines, and then afterwards updates the player 
+; information again to provide the animated shapes on the Title, Game,
+; and Game Over screens.  
+;
+;
+;
 ;
 ; Now that there is a VBI running various other timing controls can be
 ; formally put into the VBI rather than using looping code that detects
@@ -236,9 +327,6 @@
 ; frog is a Player/Missile object independent from screen data then it
 ; will be possible to reduce the boats to one line for left and one for
 ; right and re-use the data for each set of lines.
-;
-; --------------------------------------------------------------------------
-; Version 03 commentary. . . . . . . . . . . . . . . . . . . . . . . .
 ; 
 ; --------------------------------------------------------------------------
 
@@ -580,13 +668,14 @@ SAVEY = $FF
 	.by "** Thanks to the Word (John 1:1), Creator of heaven, and earth, and "
 	.by "semiconductor chemistry and physics which makes all this fun possible. "
 	.by "** Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. "
-	.by "** Atari port by Ken Jennings, June 2019, Version 03. "
+	.by "** Atari port by Ken Jennings, July 2019, Version 03. "
 	.by "** Improved graphics for the playfield and frog. "
 	.by "Fine Scrolling Boats. Custom character set for boats. "
 	.by "Player/Missile Frog. "
 	.by "Customized Display Lists and DLIs. "
 	.by "Most game logic moved to VBI. **"
-	.by "Special Thanks to play testers blank and blank. **"
+	.by "Special Thanks to play testers "
+	.by "-The Doctor-, Philsan, and Faicuai.**"
 
 
 ; ==========================================================================

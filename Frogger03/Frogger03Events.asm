@@ -687,7 +687,8 @@ DeadStageZero                   ; Stage 0  cycling the background.
 ;	cmp #0
 	bne DeadStageOne            ; non zero is stage 1 or 2 or 3 or ...
 
-	jsr DeadFrogRain
+;	jsr DeadFrogRain
+	lda #0
 	beq EndDeadScreen           ; Stage 1 is set by the input handling earlier.
 
 
