@@ -290,6 +290,9 @@
 ;    +----------------------------------------+
 
 
+STATUS_LUMA=6 ; Base luminance for the status text.
+
+
 ; ==========================================================================
 ; D I S P L A Y S   A N D   P L A Y F I E L D 
 ; ==========================================================================
@@ -601,17 +604,31 @@ LoopChangeScreenWaitForVBI            ; Wait for VBI to signal the values change
 ; ==========================================================================
 ; Force all the colors in the current tables to black.
 ; Used to insure black screen BEFORE  fading up the Game screen.
+; Note that we do not want to zero colors for the status lines 
+; on the Game screen.
 ; --------------------------------------------------------------------------
 
 ZeroCurrentColors
 
-	lda #0
-	ldy #21
+	ldy #21  
 
 LoopZeroColors
+	lda #0
 	jsr NukeAllColorsFromOrbitToBeSure ; Sets all colors.  Decrements Y.
-	bpl LoopZeroColors
 
+	lda CurrentDL
+	cmp #DISPLAY_GAME
+	bne bZCC_CheckZero
+	cpy #2
+	beq ExitZeroCurrentColors
+	bne LoopZeroColors
+
+bZCC_CheckZero
+	cpy #$FF
+	beq ExitZeroCurrentColors
+	bne LoopZeroColors
+
+ExitZeroCurrentColors
 	jsr HideButtonPrompt
 
 	rts
@@ -694,7 +711,7 @@ BlackSplashBackground
 
 	lda #COLOR_BLACK
 
-	ldy #20 ; Top 20 lines of screen...
+	ldy #21 ; Top 20 lines of screen...
 SplashLoopTopToBlack                   ; Filling the top
 	jsr NukeAllColorsFromOrbitToBeSure ; Also decrements Y
 	bne SplashLoopTopToBlack           ; Continue looping.  Ends at 0.
@@ -715,7 +732,7 @@ ContinueSplashBottomToBlack
 SplashLoopBottomToBlack
 	jsr NukeAllColorsFromOrbitToBeSure ; Also decrements Y
 
-	cpy #28                            ; Reached the last line?
+	cpy #27                            ; Reached the last line?
 	bne SplashLoopBottomToBlack        ; No, continue looping.
 
 	rts
@@ -1243,23 +1260,23 @@ EndCopyBaseColors
 ; Y  =  is the DISPLAY_* value (defined elsewhere) for the desired display.
 ; --------------------------------------------------------------------------
 
-GenericCopyBaseColors
+;GenericCopyBaseColors
 
-	lda COPY_BASE_SIZE_TABLE,y ; Main code should have validated display.
-	tay                        ; Looping this many times...
+;	lda COPY_BASE_SIZE_TABLE,y ; Main code should have validated display.
+;	tay                        ; Looping this many times...
  
-bGCBC_LoopCopyColors
-	lda (MainPointer1),y       ; TITLE_BACK_COLORS,x
-	sta COLBK_TABLE,y
+;bGCBC_LoopCopyColors
+;	lda (MainPointer1),y       ; TITLE_BACK_COLORS,x
+;	sta COLBK_TABLE,y
 
-	lda (MainPointer2),y       ; TITLE_TEXT_COLORS,x
-	sta COLPF1_TABLE,y         ; Title screen has "text" using ANTIC Mode 2
-	sta COLPF0_TABLE,y         ; All displays use COLPF0 graphics colors.
+;	lda (MainPointer2),y       ; TITLE_TEXT_COLORS,x
+;	sta COLPF1_TABLE,y         ; Title screen has "text" using ANTIC Mode 2
+;	sta COLPF0_TABLE,y         ; All displays use COLPF0 graphics colors.
 
-	dex
-	bne bGCBC_LoopCopyColors
+;	dex
+;	bne bGCBC_LoopCopyColors
 
-	rts
+;	rts
 
 
 ; ==========================================================================
@@ -1521,7 +1538,7 @@ ExitFadeColPfToBlack          ; Insure we're leaving with 0 for both colors 0.  
 ; chosen color. 
 ;
 ; Grey doesn't necessarily mean grey. It would be whatever the chosen 
-; base color is that is passed in the A register. 
+; base color is which is passed in the A register. 
 ;
 ; Uses TempWipeColor in page 0.
 ; X = current Row

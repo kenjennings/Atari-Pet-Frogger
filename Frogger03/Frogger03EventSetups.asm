@@ -119,7 +119,13 @@ GameStartAtOne
 	sta EventStage
 	bne TransitionToGameSetEvent
 
-GameStartAtTwo
+GameStartAtTwo ; Coming here from WIN will end up with black text.
+	; Fix this first. 
+	lda GAME_COLPF1_COLORS+1
+	sta COLPF1_TABLE+1
+	lda GAME_COLPF1_COLORS+2
+	sta COLPF1_TABLE+2
+	; setup for fade in Game screen.
 	lda #2
 	sta EventStage
 

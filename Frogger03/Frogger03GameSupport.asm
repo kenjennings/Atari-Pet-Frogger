@@ -400,7 +400,7 @@ ExitHighScoreOrNot
 ; seven memory locations.
 ;
 ; Given a color value in A, determine if it is a color (not 0) 
-; and if the value is not 4.
+; and if the luminance value is not 6.
 ; If it can be decremented, then subtract 1.
 ;
 ; Return result in CPU Flags.  0 = Do Not.   !0 = Do decrement.
@@ -415,7 +415,7 @@ DecThisColorOrNot
 	beq ReallyExitFromDecColor ; If 0, then done, no need to restore.
 
 	and #$0F                   ; Remove color component
-	cmp #$04                   ; Is luminance 4?
+	cmp #STATUS_LUMA           ; Is luminance 6?
 	beq ExitDecThisColorOrNot  ; No.  
 
 	dex                        ; Decrement saved value.

@@ -250,83 +250,54 @@
 ; --------------------------------------------------------------------------
 ; Version 03 commentary. . . . . . . . . . . . . . . . . . . . . . . .
 ;
-; Many Atrifications added in this go-round...
+; Many Atarifications added in this go-round...
 ;
 ; The title screen has an animated frog done with player/missile graphics.
-; This is the same player image (and same nimation methods) as used for 
+; This is the same player image (and same animation methods) as used for 
 ; the main game.
 ;
-; Also, the title graphics are now actual graphics instead of chracters.
-; The graphics mode uses the same sized pixels as the 1/4 sized squares
-; in the graphics character version, but now require only half the 
-; memory used for the character version while providing real, complete
-; color control.
+; Also, the title graphics are now actual graphics instead of characters.
+; The graphics mode uses the same sized pixels as the 1/4 character-sized 
+; squares in the graphics character version, but now requires only half 
+; the memory used for the character version while providing real, 
+; complete color control.
 ; 
-; Some small changes were made to the directions/documentation text on
-; the title screen.  Each line has different luminance for the text
-; providing a gradient-like effect.  
+; Some small changes were made to the directions/documentation text on the
+; title screen.  Each line has different luminance for the text providing 
+; a gradient-like effect.  
 ;
-; The credits line now fine scrolls and is visible perpetually, so it 
-; appears the program is always multi-tasking (which is not actually
-; a completely truthful implication.)
+; The credits line now fine scrolls and is visible perpetually, giving the
+; appears the program is always multi-tasking (which is not a completely 
+; truthful implication.)
 ;
 ; A big change to the main and game screens are the score lines and 
 ; lives/saved frog information is present on both screens.  The 
 ; text labels are now independently colored, and so can be made to 
-; do a strobe effect used as the attract mode on the title screen and
-; during the game when a value changes.  This has the appearance that
-; the text labels are ANTIC Mode 4 text, but this is not so.  The 
-; text lines are still ANTIC Mode 2 text lines, because I wanted the 
-; extra precision to continue using the frog head graphics to count
+; do a strobe effect which is uses during the attract mode on the title 
+; screen and during the game when a value changes.  This has the 
+; appearance that the text labels are ANTIC Mode 4 text, but this is not
+; so.  The text lines are still ANTIC Mode 2 text lines, because I wanted 
+; the extra precision to continue using the frog head graphics to count
 ; saved frogs.   So, how is the text colored?  They are Player/Missile 
-; graphics that provide (up to) 10 characters for each text line.
-; A display list interrupt colors and repositions the player/missile 
-; graphics between score lines, and then afterwards updates the player 
-; information again to provide the animated shapes on the Title, Game,
-; and Game Over screens.  
+; graphics that provide (up to) 10 characters for each text line.  A 
+; display list interrupt provides colors and repositions the 
+; player/missile graphics between score lines, and then afterwards updates
+; the player information again to provide the animated shapes on the 
+; Title, Game, and Game Over screens.  
 ;
+; The VBI basically runs almost the entire game -- the boats fine and 
+; coarse scrolling, animating the boat images, animating score label 
+; colors, moving the frog player, playing the sound sequences, and 
+; running the credits line fine scrolling.
 ;
+; The main code handles the input, determines the next location for the 
+; frog, and initiates changing screen modes and running the event loops
+; and changing event stages.  Almost nothing.  Most of the time the main 
+; code is just waiting for the frame counter to change.
 ;
-;
-; Now that there is a VBI running various other timing controls can be
-; formally put into the VBI rather than using looping code that detects
-; the start of a TV frame.
-;
-; Further use of the color indirection will eliminate the need to maintain
-; and write normal text and inverse text in screen memory to make blinking
-; text.  The game can simply update the colors for that line of text to
-; make it appear to blink.
-;
-; Given the Atari's significant graphics indirection capabilities there is
-; no need to draw a screen to present it.  The data to supply the graphics
-; is already in memory.  Properly arranging the data will allow the Atari
-; to display the data directly as screen data.  This eliminates the need
-; to have separate data and screen memory, and also eliminates the need
-; for the supporting code to copy the data to the screen.
-;
-; Aaaand, the Atari has more than one way to do this.  First, we could
-; update the LMS addresses in the Display List to point to each line of
-; data for screen memory.  Changing the screen (or just the screen
-; contents) is reduced to writing a two-byte pointer for each line in the
-; Display List instead of writing 40 bytes for each line to screen memory.
-; And where there are blank lines or otherwise duplicate data the LMS can
-; point to the same screen data for each line.
-;
-; The other way to do this is to have a separate Display List for each
-; screen.  This reduces changing the screen to writing one address for
-; the entire screen.
-;
-; We're mixing these two methods.  Each screen will have its own Display
-; List with color tables.  Change the display list pointer and the entire
-; screen changes.  The game screen will also use updates to the  LMS
-; for each moving boat line to coarse scroll the boat data without moving
-; the boats in screen memory.
-;
-; Since the frog must move in screen memory, there still must be separate
-; data for each line of boats and beaches.  In a future version when the
-; frog is a Player/Missile object independent from screen data then it
-; will be possible to reduce the boats to one line for left and one for
-; right and re-use the data for each set of lines.
+; The main code is restructured as a legitimate jump table based on the 
+; current event target ID.  This cut out miles of code of silly event 
+; ID checking.
 ; 
 ; --------------------------------------------------------------------------
 

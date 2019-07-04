@@ -541,11 +541,11 @@ SCORING_MEM2
 
 SCORING_MEM3
 ; 17 |   500 points for each rescued frog.    | INSTXT_2
-	.sb "   500 points for each rescued frog.    "                            ; + 40 == 40
+	.sb "   500 points for each saved frog.      "                            ; + 40 == 40
 
 CONTROLS_MEM1 ; Game Controls
 ; 19 |Use joystick control to jump forward,   | INSTXT_3
-	.sb "Use joystick controller to move         "                            ; + 40 == 80
+	.sb "Use the joystick controller to move     "                            ; + 40 == 80
 
 CONTROLS_MEM2
 ; 20 |left, and right.                        | INSTXT_3
@@ -959,7 +959,7 @@ WIN_BACK_COLORS ; 48 entries.  Gfx background colors.
 		.by $00                                     ; Top Scroll.
 	.endr
 
-	.by $00 $02 $04 $06 $08 $0a ; Static white background
+	.by $02 $04 $06 $08 $0a $0C ; Static white background
 
 	.rept 20
 		.by $00                                     ; Top Scroll.
@@ -1276,10 +1276,10 @@ PRIOR_TABLE    .by $00 $00 $00 ; Each row: Scores, Lives, Animated object
 ; of table entries (54 bytes).  Or maybe just look it up from a table.
 
 TITLE_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object
-	.by COLOR_BLUE2+4 COLOR_PURPLE+4 COLOR_GREEN+$4 ; COLPM0_TABLE 
-	.by COLOR_BLUE2+4 COLOR_PURPLE+4 COLOR_GREEN+$2 ; COLPM1_TABLE 
-	.by COLOR_PINK+4  COLOR_GREEN+4  COLOR_BLACK+$E ; COLPM2_TABLE 
-	.by $00           COLOR_GREEN+4  COLOR_BLACK    ; COLPM3_TABLE 
+	.by COLOR_BLUE2+STATUS_LUMA COLOR_PURPLE+STATUS_LUMA COLOR_GREEN+$4 ; COLPM0_TABLE 
+	.by COLOR_BLUE2+STATUS_LUMA COLOR_PURPLE+STATUS_LUMA COLOR_GREEN+$2 ; COLPM1_TABLE 
+	.by COLOR_PINK+STATUS_LUMA  COLOR_GREEN+STATUS_LUMA  COLOR_BLACK+$E ; COLPM2_TABLE 
+	.by $00                     COLOR_GREEN+STATUS_LUMA  COLOR_BLACK    ; COLPM3_TABLE 
 	
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP0_TABLE 
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP1_TABLE 
@@ -1300,10 +1300,10 @@ TITLE_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object
 	.by [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|%00000001] [GTIA_MODE_DEFAULT|MULTICOLOR_PM|%0001] ; PRIOR_TABLE 
 
 GAME_BASE_PMG_TABLE
-	.by COLOR_BLUE2+4 COLOR_PURPLE+4 COLOR_GREEN+$4 ; COLPM0_TABLE 
-	.by COLOR_BLUE2+4 COLOR_PURPLE+4 COLOR_GREEN+$2 ; COLPM1_TABLE 
-	.by COLOR_PINK+4  COLOR_GREEN+4  COLOR_BLACK+$E ; COLPM2_TABLE 
-	.by $00           COLOR_GREEN+4  COLOR_BLACK    ; COLPM3_TABLE 
+	.by COLOR_BLUE2+STATUS_LUMA COLOR_PURPLE+STATUS_LUMA COLOR_GREEN+$4 ; COLPM0_TABLE 
+	.by COLOR_BLUE2+STATUS_LUMA COLOR_PURPLE+STATUS_LUMA COLOR_GREEN+$2 ; COLPM1_TABLE 
+	.by COLOR_PINK+STATUS_LUMA  COLOR_GREEN+STATUS_LUMA  COLOR_BLACK+$E ; COLPM2_TABLE 
+	.by $00                     COLOR_GREEN+STATUS_LUMA  COLOR_BLACK    ; COLPM3_TABLE 
 	
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP0_TABLE 
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP1_TABLE 

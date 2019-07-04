@@ -119,8 +119,8 @@ EventGameInit
 	sta FlaggedHiScore
 	sta InputStick             ; no input from joystick
 
-;	lda #COLOR_BLACK+$E        ; COLPF3 is white on all screens.
-;	sta COLOR3
+	lda #COLOR_BLACK+$E        ; COLPF3 is white on all screens. it is up to DLIs to modify.
+	sta COLOR3
 
 	jsr libPmgInit             ; Will also reset SDMACTL settings for P/M DMA
 
@@ -372,10 +372,11 @@ TestTransGame2
 ;	jsr ZeroCurrentColors    ; But, insure the screen starts black.
 
 	; Finished stage 2, now setup Stage 3
+	
 	lda #3
 	sta EventStage
-	lda #1
-	sta EventCounter2 ; return to 0.
+	lda #2
+	sta EventCounter2 
 	beq EndTransitionToGame
 
 	; === STAGE 3 ===
@@ -687,7 +688,7 @@ DeadStageZero                   ; Stage 0  cycling the background.
 ;	cmp #0
 	bne DeadStageOne            ; non zero is stage 1 or 2 or 3 or ...
 
-;	jsr DeadFrogRain
+	jsr DeadFrogRain
 	lda #0
 	beq EndDeadScreen           ; Stage 1 is set by the input handling earlier.
 
