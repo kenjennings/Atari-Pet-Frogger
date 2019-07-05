@@ -144,7 +144,9 @@ FROG_PMY_TABLE ; 19 entries providing Frog Y position for each row.  (Each row i
 ;
 ; Returns Row number, and Z flag indicates game can continue.
 ; --------------------------------------------------------------------------
+
 FrogMoveUp
+
 	jsr Add10ToScore     ; 10 points for moving forward.
 
 	ldx FrogRow          ; Get the current Row number
@@ -164,6 +166,7 @@ FrogMoveUp
 ; (coordinates, and current shape index.)
 ; FrogPMY, FrogPMX, FrogShape, FrogNewPMY, FrogNewPMX, FrogNewShape
 ; --------------------------------------------------------------------------
+
 ZeroFrogPageZero
 
 	ldx #5
@@ -193,6 +196,7 @@ bPMAZClearCoords
 ;
 ; A is the Eye position.
 ; --------------------------------------------------------------------------
+
 FrogEyeFocus
 
 	sta FrogEyeball ; Set the eyeball shape.
@@ -209,7 +213,9 @@ FrogEyeFocus
 ; If a high score is flagged, then do not clear high score.
 ; And some other things at game start.
 ; --------------------------------------------------------------------------
+
 ClearGameScores
+
 	ldx #$07            ; 8 digits. 7 to 0
 	lda #INTERNAL_0     ; Atari internal code for "0"
 
@@ -225,9 +231,15 @@ NextScoreDigit
 	dex                 ; decrement index to score digits.
 	bpl LoopClearScores ; went from 0 to $FF? no, loop for next digit.
 
-;	lda #3              ; Reset number of
-	lda #1              ; Reset number of
+	lda #COLOR_BLUE2+$F ; Glow the score label.  VBI will decrement it.
+	sta COLPM0_TABLE
+	sta COLPM1_TABLE
+
+	lda #3              ; Reset number of
 	sta NumberOfLives   ; lives to 3.
+	lda #COLOR_PURPLE+$F; Flash the Lives counter label.
+	sta COLPM0_TABLE+1
+	sta COLPM1_TABLE+1
 
 ;	lda #0
 ;	sta FrogsCrossed         ; Zero the number of successful crossings.
@@ -240,49 +252,60 @@ NextScoreDigit
 ; ==========================================================================
 ; ADD 500 TO SCORE
 ;
-; Add 500 to score.  (duh.)
+; Add 500 to score.  (duh.)   Due to successful frog crossing.
+;
+; isn't it interesting how the boats keep moving while main has this 
+; routine locked into waiting for sound to complete.
+; Uses A, X
+; --------------------------------------------------------------------------
+
+Add500ToScore
+
+	inc FrogsCrossed        ; Add to frogs successfully crossed the rivers.
+	lda #COLOR_GREEN+$F     ; Glow the Saved label.  VBI will decrement it.
+	sta COLPM2_TABLE+1      ; S a - - d
+	sta COLPM3_TABLE+1      ; - - v e d
+	jsr PrintFrogsAndLives  ; update the head count
+
+	ldy #5 
+
+bA5TS_loop
+	jsr Add100ToScore       ; What it says.  +100
+	jsr PlayBling           ; Sound per each 100 point award.
+	jsr CopyScoreToScreen   ; Update the screen information
+
+ba5TS_AudioPause            ; Wait for audio to finish.
+	lda SOUND_CONTROL1      ; Is channel 1 still busy?
+	bne ba5TS_AudioPause    ; Yes.  Do While more electricity.
+
+	dey
+	bne bA5TS_loop          ;  Loop 5 times for 500 points.
+
+	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
+
+	rts
+
+
+; ==========================================================================
+; ADD 100 TO SCORE
+;
+; Add 100 to score.  (duh.) 
+; (Preserve  A X Y , because this is called from a loop elsewhere)
 ;
 ; Uses A, X
 ; --------------------------------------------------------------------------
 
 Add100ToScore
 
-	lda #1            ; Represents "200" Since we don't need to add to the tens and ones columns.
+	mRegSaveAYX          ; Save A, X, and Y.
+
+	lda #1            ; Represents "100" Since we don't need to add to the tens and ones columns.
 	sta ScoreToAdd    ; Save to add 1
 	ldx #5            ; Offset from start of "00000*00" to do the adding.
 	stx NumberOfChars ; Position offset in score.
 	jsr AddToScore    ; Deal with score update.
 
-	lda #COLOR_BLUE2+$F ; Glow the score label.  VBI will decrement it.
-	sta COLPM0_TABLE
-	sta COLPM1_TABLE
-
-	rts
-
-
-
-; ==========================================================================
-; ADD 500 TO SCORE
-;
-; Add 500 to score.  (duh.)
-;
-; Uses A, X
-; --------------------------------------------------------------------------
-
-Add500ToScore
-
-	lda #5            ; Represents "500" Since we don't need to add to the tens and ones columns.
-	sta ScoreToAdd    ; Save to add 1
-	ldx #5            ; Offset from start of "00000*00" to do the adding.
-	stx NumberOfChars ; Position offset in score.
-	jsr AddToScore    ; Deal with score update.
-
-	inc FrogsCrossed         ; Add to frogs successfully crossed the rivers.
-	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
-
-	lda #COLOR_BLUE2+$F ; Glow the score label.  VBI will decrement it.
-	sta COLPM0_TABLE
-	sta COLPM1_TABLE
+	mRegRestoreAYX       ; Restore Y, X, and A
 
 	rts
 
@@ -302,10 +325,6 @@ Add10ToScore
 	ldx #6            ; Offset from start of "000000*0" to do the adding.
 	stx NumberOfChars ; Position offset in score.
 	jsr AddToScore    ; Deal with score update.
-
-	lda #COLOR_BLUE2+$F ; Glow the score label.  VBI will decrement it.
-	sta COLPM0_TABLE
-	sta COLPM1_TABLE
 
 	rts
 
@@ -343,7 +362,11 @@ EvaluateCarry            ; (re)evaluate if carry occurred for the current positi
 	bne EvaluateCarry    ; This cannot go from $FF to 0, so it must be not zero.
 
 ExitAddToScore           ; All done.
-	jsr HighScoreOrNot   ; If My score is high score, then copy to high score.
+	lda #COLOR_BLUE2+$F ; Glow the score label.  VBI will decrement it.
+	sta COLPM0_TABLE
+	sta COLPM1_TABLE
+	
+	jsr HighScoreOrNot   ; If My score is high score, then copy to high score. (and glow it if needed.)
 
 	mRegRestoreAYX       ; Restore Y, X, and A
 
@@ -491,4 +514,3 @@ MakeDifficultyPointers
 
 	rts
 
-	

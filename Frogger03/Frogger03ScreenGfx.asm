@@ -466,6 +466,10 @@ RemoveFroggies
 	sta FrogsCrossedIndex    ; and the base index into difficulty arrays
 	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
 
+	lda #COLOR_GREEN+$F     ; Glow the Saved label.  VBI will decrement it.
+	sta COLPM2_TABLE+1      ; S a - - d
+	sta COLPM3_TABLE+1      ; - - v e d
+
 	rts
 
 
@@ -510,14 +514,15 @@ SavedFroggies           ; Write an alternating pattern of Frog1, Frog2 character
 	bne SavedFroggies   ; then go back and display the next frog counter.
 
 WriteLives
+	ldy #0
+	sty SCREEN_LIVES   ; Hackitty hack.  The code below does not remove 
+	sty SCREEN_LIVES+1 ; missing/dead frogs.  oops.
+	sty SCREEN_LIVES+2 ; 
+	
 	ldx NumberOfLives   ; Get number of lives.
 	beq EndPrintFrogsAndLives
-	ldy #0
 
 LoopWriteLives
-;	clc                 ; Add to value for
-;	adc #INTERNAL_0     ; Atari internal code for '0'
-;	sta SCREEN_LIVES    ; Write to screen. *7th char on second line.)
 	lda #I_FROG1        ; On Atari we're using tab/$7f as a frog shape.
 	sta SCREEN_LIVES,y  ; Write to screen. 
 	iny
@@ -527,7 +532,7 @@ LoopWriteLives
 	sta SCREEN_LIVES,y  ; Write to screen. 
 	iny
 	dex                 ; Decrement number of frogs.
-	bne LoopWriteLives   ; then go back and display the next number of frogs.
+	bne LoopWriteLives  ; then go back and display the next number of frogs.
 
 EndPrintFrogsAndLives
 	rts
@@ -551,18 +556,18 @@ EndPrintFrogsAndLives
 
 ChangeScreen
 
-	jsr HideButtonPrompt              ; Always tell the VBI to stop the prompt.
-
 	sta VBICurrentDL                  ; Tell VBI to change to new display mode.
 
-	; While waiting for the DLI to do its part, lets do something useful.
+	jsr HideButtonPrompt              ; Always tell the VBI to stop the prompt. (This preserves A)
+
+	; While waiting for the VBI to do its part, lets do something useful.
 	; Display Win, Display Dead and Display Game Over are the same display lists.  
 	; The only difference is the LMS to point to the big text.
 	; So, reassign that here.
 	pha                               ; Save Display number for later.
 	tay
 	lda DISPLAYLIST_GFXLMS_TABLE,y    ; Get the new address.
-	beq bCSCheckScreenBorders         ; If it is 0 it is not for the update.  Skip this.
+;	beq bCSCheckScreenBorders         ; If it is 0 it is not for the update.  Skip this.
 	sta GFX_LMS                       ; Save in the Win/Dead/Over display list.
 
 	; ALSO, the Game screen needs the mask borders on the left and right sides

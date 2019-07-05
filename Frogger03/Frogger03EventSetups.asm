@@ -200,9 +200,6 @@ SetupTransitionToWin
 
 	jsr Add500ToScore
 
-	jsr CopyScoreToScreen   ; Update the screen information
-	jsr PrintFrogsAndLives
-
 	lda #DISPLAY_WIN        ; Tell VBI to change screens.
 	jsr ChangeScreen        ; Then copy the color tables.
 
@@ -259,10 +256,13 @@ SetupWin
 
 SetupTransitionToDead
 
-	jsr SetSplatteredOnScreen ; splat the frog:
+	jsr SetSplatteredOnScreen  ; splat the frog:
 
-	dec NumberOfLives       ; subtract a life.
-	jsr CopyScoreToScreen   ; Update the screen information
+	dec NumberOfLives          ; subtract a life.
+	lda #COLOR_PURPLE+$F       ; Flash the Lives counter label.
+	sta COLPM0_TABLE+1
+	sta COLPM1_TABLE+1
+	jsr CopyScoreToScreen      ; Update the screen information
 	jsr PrintFrogsAndLives
 
 ;	inc FrogSafety          ; Schrodinger knows the frog is dead.

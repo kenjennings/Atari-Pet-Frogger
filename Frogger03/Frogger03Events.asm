@@ -299,6 +299,7 @@ ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transiti
 	; last game score as soon as the title transition animation completed.
 	; Therefore resetting the score is deferred until leaving the Title.
 	jsr ClearGameScores     ; Zero the score.  And high score if not set.
+	jsr PrintFrogsAndLives  ; Update the screen memory.
 
 EndTitleScreen
 

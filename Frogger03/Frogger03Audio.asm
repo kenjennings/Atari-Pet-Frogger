@@ -22,21 +22,23 @@
 ; Game sound allocation:
 ; Channel 0 - title slide, light saber
 ; Channel 1 - light saber
-; Channel 2 - Frog movement bump.
+; Channel 2 - Frog movement bump.  Point award.  music.
 ; Channel 3 - Ambient water noise, music.
 ; --------------------------------------------------------------------------
 
-SOUND_OFF   = 0
-SOUND_TINK  = 1
-SOUND_SLIDE = 2
-SOUND_HUM_A = 3
-SOUND_HUM_B = 4
-SOUND_DIRGE = 5
-SOUND_THUMP = 6
-SOUND_JOY   = 7
-SOUND_WATER = 8
+SOUND_OFF     = 0
+SOUND_TINK    = 1
+SOUND_SLIDE   = 2
+SOUND_HUM_A   = 3
+SOUND_HUM_B   = 4
+SOUND_DIRGE   = 5
+SOUND_THUMP   = 6
+SOUND_JOY     = 7
+SOUND_WATER   = 8
+SOUND_ENGINES = 9
+SOUND_BLING   = 10 
 
-SOUND_MAX   = 8
+SOUND_MAX   = 10
 
 ; ======== The world's most inept sound system. ========
 ;
@@ -87,9 +89,19 @@ SOUND_ENTRY_TINK ; Press A Button.
 
 	.byte $A0,0,0,0
 
+SOUND_ENTRY_BLING ; Press A Button.
+	.byte $Aa,25,1,1
+	.byte $A8,25,1,1
+	.byte $A6,25,1,1
+	.byte $A4,25,1,1
+	.byte $A1,25,1,1
+	.byte $A0,0,3,1
+	
+	.byte $A0,0,0,0
+
 	; Maybe if I thought about it for a while I could do a 
 	; ramp/counting feature in the sound entry control byte 
-	; in less than 100-ish bytes of code which is abpout how 
+	; in less than 100-ish bytes of code which is about how 
 	; much space this table occupies. 
 SOUND_ENTRY_SLIDE ; Title logo lines slide right to left
 	.byte $02,50,1,1 ; 1 == 2 frames per wait.
@@ -133,7 +145,7 @@ SOUND_ENTRY_SLIDE ; Title logo lines slide right to left
 
 	.byte $00,$00,0,0
 
-	
+
 SOUND_ENTRY_HUMMER_A ; one-half of Atari light saber
 	.byte $A9,$FF,30,1
 	.byte $A8,$FF,7,1
@@ -331,7 +343,16 @@ SOUND_ENTRY_ODE2JOY ; Beethoven's Ode To Joy when a frog is saved
 	.byte $A0,$00,0,0
 
 
-SOUND_ENTRY_WATER ; Water sloshing noises
+SOUND_ENTRY_WATER    ; Water sloshing noises
+	.byte $82,1,75,1 ; several full seconds 
+	.byte $83,2,75,1 ; of different sounds 
+	.byte $81,3,75,1 ; at different volumes.
+	.byte $84,4,75,1
+	.byte $82,5,75,1
+	.byte $81,2,75,255 ; End.  Do not stop sound.
+
+
+SOUND_ENTRY_ENGINES  ; Engine sounds noises
 	.byte $82,1,75,1 ; several full seconds 
 	.byte $83,2,75,1 ; of different sounds 
 	.byte $81,3,75,1 ; at different volumes.
@@ -351,6 +372,8 @@ SOUND_FX_LO_TABLE
 	.byte <SOUND_ENTRY_THUMP
 	.byte <SOUND_ENTRY_ODE2JOY
 	.byte <SOUND_ENTRY_WATER
+	.byte <SOUND_ENTRY_ENGINES
+	.byte <SOUND_ENTRY_BLING
 
 SOUND_FX_HI_TABLE
 	.byte >SOUND_ENTRY_OFF
@@ -362,7 +385,10 @@ SOUND_FX_HI_TABLE
 	.byte >SOUND_ENTRY_THUMP
 	.byte >SOUND_ENTRY_ODE2JOY
 	.byte >SOUND_ENTRY_WATER
-
+	.byte >SOUND_ENTRY_ENGINES
+	.byte >SOUND_ENTRY_BLING
+	
+	
 
 
 ; ==========================================================================
@@ -378,7 +404,9 @@ SOUND_FX_HI_TABLE
 ; X = sound channel to assign.
 ; Y = sound number to use. (values declared at beginning of Audio.asm.) 
 ; --------------------------------------------------------------------------
+
 ToPlayFXScrollOrNot
+
 	lda SOUND_CONTROL3      ; Is channel 3 busy?
 	bne ExitToPlayFXScroll  ; Yes.  Don't do anything.
 
@@ -405,7 +433,9 @@ ExitToPlayFXScroll
 ; X = sound channel to assign.
 ; Y = sound number to use. (values declared at beginning of Audio.asm.) 
 ; --------------------------------------------------------------------------
+
 ToReplayFXWaterOrNot
+
 	lda SOUND_CONTROL3      ; Is channel 3 busy?
 	bne ExitPlayWaterFX     ; Yes.  Don't do anything.
 
@@ -423,7 +453,7 @@ ExitPlayWaterFX
 ; -------------------------------------------------------------------------- 
 ; Play Thump for jumping frog
 ;
-; Main routine to play the frog movement sound. 
+; Main routine uses this to play the frog movement sound. 
 ; This needs to be introduced where the main code is dependent on 
 ; the CPU flags for determining outcomes. Therefore, to prevent disrupting 
 ; the logic flow due to flag changes this routine is wrapped in the macros 
@@ -432,11 +462,37 @@ ExitPlayWaterFX
 ; 
 ; Uses A, X, Y, but preserves all registers on entry/exit.
 ; --------------------------------------------------------------------------
+
 PlayThump
+
 	mRegSave                   ; Macro: save CPU flags, and A, X, Y
 
 	ldx #2                     ; Setup channel 2 to play frog bump.
 	ldy #SOUND_THUMP
+	jsr SetSound 
+
+	mRegRestore                ; Macro: Restore Y, X, A, and CPU flags
+
+	rts
+
+
+; ==========================================================================
+; PlayBling                                                      *  *  *
+; -------------------------------------------------------------------------- 
+; Play Bling for each 100 points awarded for saved frog
+;
+; Main routine uses this to play the bling sound for every 
+; 100 points added to the score when a frog is saved. 
+; 
+; Uses A, X, Y, but preserves all registers on entry/exit.
+; --------------------------------------------------------------------------
+
+PlayBling
+
+	mRegSave                   ; Macro: save CPU flags, and A, X, Y
+
+	ldx #1                     ; Setup channel 1 to play ding a ling.
+	ldy #SOUND_BLING
 	jsr SetSound 
 
 	mRegRestore                ; Macro: Restore Y, X, A, and CPU flags
@@ -456,7 +512,9 @@ PlayThump
 ; Uses A, X
 ; X = sound channel to assign.
 ; --------------------------------------------------------------------------
+
 StopAllSound
+
 	ldx #3               ; Channel 3, 2, 1, 0
 	lda #255             ; Tell VBI to silence channel.
 
@@ -487,7 +545,9 @@ LoopStopSound
 ; X = sound channel to assign. (0 to 3, not 1 to 4)
 ; Y = sound number to use. (values declared at beginning of Audio.asm.) 
 ; --------------------------------------------------------------------------
+
 SetSound
+
 	lda #0
 	sta SOUND_CONTROL,X     ; Tell VBI to stop working POKEY channel X
 
@@ -539,6 +599,7 @@ SetSound
 ; --------------------------------------------------------------------------
 
 SoundService
+
 	ldx #3
 LoopSoundServiceControl
 	lda SOUND_CONTROL,x

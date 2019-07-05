@@ -474,7 +474,7 @@ TITLE_GFX  ;
 
 ANYBUTTON_MEM ; Prompt to start game.
 ; 24 |   Press joystick button to continue.   | INSTXT_4 
-	.sb "   Press joystick button to continue.   "                             ; +40 == 234
+	.sb " Press the joystick button to continue. "                             ; +40 == 234
 
 
 	.align $0100
