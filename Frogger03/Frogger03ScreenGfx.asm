@@ -224,29 +224,29 @@
 ; Revised V03 Title Screen and Instructions:
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
-; 2  |                                        |
+; 2  |Frogs:0       00000000000000000000:Saved| SCORE_TXT
 ; 3  |              PET FROGGER               | TITLE
 ; 4  |              PET FROGGER               | TITLE
 ; 5  |              PET FROGGER               | TITLE
 ; 6  |              --- -------               | TITLE
 ; 7  |                                        |
-; 8  |Help the frogs escape from Doc Hopper's | INSTXT_1
-; 9  |frog legs fast food franchise! But, the | INSTXT_1
+; 8  |Help the frogs escape evil Doc Hopper's | INSTXT_1
+; 9  |Frog Legs Fast Food Franchise! But, the | INSTXT_1
 ; 10 |frogs must cross piranha-infested rivers| INSTXT_1
 ; 11 |to reach freedom. You have three chances| INSTXT_1
 ; 12 |to prove your frog management skills by | INSTXT_1
 ; 13 |directing frogs to jump on boats in the | INSTXT_1
-; 14 |rivers like this:  <QQQQ]  Land only on | INSTXT_1
-; 15 |the seats in the boats ('Q').           | INSTXT_1
+; 14 |rivers. Land in the middle of the boats.| INSTXT_1
+; 15 |Do not fall off or jump in the river.   | INSTXT_1
 ; 16 |                                        |
 ; 17 |Scoring:                                | INSTXT_2
 ; 18 |    10 points for each jump forward.    | INSTXT_2
-; 19 |   500 points for each rescued frog.    | INSTXT_2
+; 19 |   500 points for each saved frog.      | INSTXT_2
 ; 20 |                                        |
-; 21 |Use joystick control to jump forward,   | INSTXT_3
-; 22 |left, and right.                        | INSTXT_3
+; 21 |Use the joystick control to jump        | INSTXT_3
+; 22 |forward, left, and right.               | INSTXT_3
 ; 23 |                                        |
-; 24 |   Press joystick button to continue.   | ANYBUTTON_MEM
+; 24 | Press the joystick button to continue. | ANYBUTTON_MEM
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
 
@@ -263,28 +263,28 @@
 ; to the starting position. 
 ;    +----------------------------------------+
 ; 1  |Score:00000000               00000000:Hi| SCORE_TXT
-; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
+; 2  |Frogs:0       00000000000000000000:Saved| SCORE_TXT
 ; 3  |                                        | 
 ; 4  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_1
-; 5  |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        | ; Boats Right
+; 5  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        | ; Boats Right
 ; 6  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        | ; Boats Left
 ; 7  |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_2
-; 8  |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 8  |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
 ; 9  |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 10 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_3
-; 11 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 11 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
 ; 12 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 13 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_4
-; 14 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 14 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
 ; 15 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 16 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_5
-; 17 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 17 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
 ; 18 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 19 |BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB| TEXT1_6
-; 20 |[[QQQQQ1        [[QQQQQ1        [[QQQQQ1        [[QQQQQ1        |
+; 20 |[[QQQQQ>        [[QQQQQ>        [[QQQQQ>        [[QQQQQ>        |
 ; 21 |<QQQQQ]]        <QQQQQ]]        <QQQQQ]]        <QQQQQ]]        |
 ; 22 |BBBBBBBBBBBBBBBBBBBOBBBBBBBBBBBBBBBBBBBB| TEXT2
-; 23 |                                        | 
+; 23 |                                        |
 ; 24 |                                        |
 ; 25 |(c) November 1983 by DalesOft  Written b| SCROLLING CREDIT
 ;    +----------------------------------------+
@@ -2966,7 +2966,7 @@ PositionTomb
 ;;	stx SIZEP3 ; Frog mouth
 ;	stx SIZEP3_TABLE+2
 ;	ldx #PM_SIZE_QUAD
-;;	stx SIZEM  ; Missile 0 is left size of tombstone
+;	stx SIZEM  ; Missile 0 is left size of tombstone
 ;	stx SIZEM_TABLE+2
 
 	rts

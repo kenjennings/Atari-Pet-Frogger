@@ -71,7 +71,9 @@ INPUTSCAN_FRAMES = $07 ; previously $09
 ;
 ; A  is the time to set for animation.
 ; --------------------------------------------------------------------------
+
 ResetTimers
+
 	sta AnimateFrames
 
 	pha ; preserve it for caller.
@@ -105,7 +107,7 @@ EndResetTimers
 ; turn it into 1 bit means input.
 ; 
 ; The original version of this was an obscenely ill-conceived,
-; sloppy mess of dozens of bit floggings and comparisons.
+; sloppy mess of a dozen bit floggings and comparisons.
 ; The new version eliminates a lot of that original bit mashing
 ; with a simple lookup table. The only extra part now is adding
 ; the trigger to the input information.
@@ -113,8 +115,8 @@ EndResetTimers
 ; Description of the bit twiddling below:
 ;
 ; Cook the bits to turn on the directions we care about and zero
-; the other bits, therefore, if resulting stick value is 0 then 
-; it means no input.
+; the other bits, therefore, if the resulting stick value is 0 then 
+; it means no input, which is an easier evaluation.
 ; - Down input is ignored (masked out).
 ; - Since up movement is the most likely to result in death the 
 ;   up movement must be exclusively up.  If a horizontal 
@@ -160,6 +162,7 @@ STICKEMUPORNOT_TABLE
 	.by $00 $00 $00 $00 $00 $08 $08 $08 $00 $04 $04 $04 $00 $00 $01 $00
 
 CheckInput
+
 	lda InputScanFrames        ; Is input timer delay  0?
 	bne SetNoInput             ; No. thus nothing to scan. (and exit)
 
@@ -206,6 +209,7 @@ ExitCheckInput
 ;==============================================================================
 
 libScreenWaitFrame
+
 	pha                ; Save A, so caller is not disturbed.
 	lda RTCLOK60       ; Read the jiffy clock incremented during vertical blank.
 
@@ -1312,7 +1316,7 @@ DO_SPLASH_PMGSPECS2_DLI
 	pla
 	sta COLPF0           ; Set pixels.
 
-	jsr LoadPMSpecs2     ; Load the first table entry into 
+	jsr LoadPmSpecs2     ; Load the first table entry into 
 
 	jmp Exit_DLI
 
