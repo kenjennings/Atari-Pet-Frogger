@@ -267,10 +267,6 @@ VBISetupDisplay
 	lda BASE_PMG_HI_TABLE,x
 	sta BasePmgAddr+1
 
-;	lda GPRIOR_TABLE,x          ; Title/Game/Splash displays use P/M objects differently.
-;	sta GPRIOR
-;	sta PRIOR_TABLE+2           ; This is clumsy here.   maybe it goes in the draw shape.
-
 	stx CurrentDL               ; Let Main know this is now the current screen.
 	lda #$FF                    ; Turn off the signal from Main to change screens.
 	sta VBICurrentDL
@@ -286,7 +282,7 @@ VBIResetDLIChain
 	sty ThisDLI 
 	; This means indexed pulls from the color tables are +1 from the current DLI.
 
-; Stage colors and hscrol for first DLI into page 0 
+; Stage colors and HSCROL for first DLI into page 0 
 ; to make selecting these faster during the DLI.
 	jsr SetupAllColors
 
@@ -352,6 +348,7 @@ EndOfDeathOfASalesfrog
 ; Done.   
 ; Scrolling is practically free.  
 ; It may be easier only on an Amiga.
+
 ManageBoatScrolling
 	lda CurrentDL                 ; Get current display list
 	cmp #DISPLAY_GAME             ; Is this the Game display?
@@ -364,6 +361,7 @@ ManageBoatScrolling
 ; If is is a moving row, then check the row's timer/frame counter.
 ; If the timer is over, then reset the timer, and then fine scroll 
 ; the row (also moving the frog with it as needed.)
+
 LoopBoatScrolling
 	; Need row in X and Y due to different 6502 addressing modes in the timer and scroll functions.
 	tya                           ; A = Y, Current Row 
@@ -403,6 +401,7 @@ EndOfBoatScrolling
 
 ; ======== Manage InputScanFrames Delay Counter ========
 ; It is MAIN's job to act when the timer is 0, and reset it if needed.
+
 DoManageInputClock
 	lda InputScanFrames          ; Is input delay already 0?
 	beq DoAnimateClock           ; Yes, do not decrement it again.
@@ -410,6 +409,7 @@ DoManageInputClock
 
 ; ======== Manage Main code's timer.  Decrement while non-zero. ========
 ; It is MAIN's job to act when the timer is 0, and reset it if needed.
+
 DoAnimateClock
 	lda AnimateFrames            ; Is animation countdown already 0?
 	beq DoAnimateClock2          ; Yes, do not decrement now.
@@ -417,6 +417,7 @@ DoAnimateClock
 
 ; ======== Manage Another Main code timer.  Decrement while non-zero. ========
 ; It is MAIN's job to act when the timer is 0, and reset it if needed.
+
 DoAnimateClock2
 	lda AnimateFrames2           ; Is animation countdown already 0?
 	beq DoAnimateClock3        ; Yes, do not decrement now.
@@ -424,6 +425,7 @@ DoAnimateClock2
 
 ; ======== Manage Another Main code timer.  Decrement while non-zero. ========
 ; It is MAIN's job to act when the timer is 0, and reset it if needed.
+
 DoAnimateClock3
 	lda AnimateFrames3           ; Is animation countdown already 0?
 	beq DoAnimateClock4         ; Yes, do not decrement now.
@@ -431,6 +433,7 @@ DoAnimateClock3
 	
 ; ======== Manage Another Main code timer.  Decrement while non-zero. ========
 ; It is MAIN's job to act when the timer is 0, and reset it if needed.
+
 DoAnimateClock4
 	lda AnimateFrames4           ; Is animation countdown already 0?
 	beq EndOfTimers              ; Yes, do not decrement now.
@@ -442,6 +445,7 @@ EndOfTimers
 ; If the timer is non-zero, Change eyeball position and force redraw.
 ; This nicely multi-tasks the eyes to return to center even if MAIN is 
 ; is not doing anything related to the frog.
+
 DoAnimateEyeballs
 	lda FrogRefocus              ; Is the eye move counter greater than 0?
 	beq EndOfClockChecks         ; No, Nothing else to do here.
@@ -462,6 +466,7 @@ EndOfClockChecks
 ; about the frog position.  The main code changed position based on joystick
 ; input.  The VBI change position if the frog was on a scrolling boat row.
 ; Here, finally apply the position and move the frog image.
+
 MaintainFrogliness
 	lda FrogUpdate               ; Nonzero means something important needs to be updated.
 	bne SimplyUpdatePosition
@@ -481,6 +486,7 @@ NoFrogUpdate
 ; Here we detect if a change needs to be made, and then 
 ; decrement the color if so.  All colors end at luminance
 ; value $04.  Luminance $00 means no further consideration.
+
 ManageScoredFades
 	ldx CurrentDL
 	lda MANAGE_SCORE_COLORS_TABLE,x
@@ -527,6 +533,7 @@ EndManageScoreFades
 ;BoatyFrame         .byte 0  ; counts 0 to 7.
 ;BoatyMcBoatCounter .byte 2  ; decrement.  On 0 animate a component.
 ;BoatyComponent     .byte 0  ; 0, 1, 2, 3 one of the four boat parts.
+
 ManageBoatAnimations
 	dec BoatyMcBoatCounter           ; subtract from scroll delay counter
 	bne ExitBoatyness                ; Not 0 yet, so no animation.
@@ -598,8 +605,11 @@ ExitMyDeferredVBI
 	jmp XITVBV               ; Return to OS.  SYSVBV for Immediate interrupt.
 
 
+;==============================================================================
 
-	.align $0100 ; Make the DLIs start in the same page to simplify chaining.
+
+	.align $0100 ; Make the DLIs start in the same page to simplify chaining. I hope.
+
 
 ;==============================================================================
 ;                                                           MyDLI
@@ -697,15 +707,10 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
 
 	pha   	; custom startup to deal with a possible timing problem.
 
-	; for the extra scan line get the sky color for the Beach 
-	; (usually prior water color) instead of COLBK.
-;	lda #$0F
-;	sta COLBK
+	jsr LoadPmSpecs2 ; Copy all entries from column 2 to PM registers 
 	
-	jsr LoadPmSpecs2 
-	
-	sta HITCLR                  ; The one and only time this DLI is called.
-	
+	sta HITCLR       ; Because this is the one and only time this DLI is called.
+
 	lda ColorPF0 ; from Page 0.
 	sta WSYNC
 	; Top of the line is sky or blue water from row above.   
@@ -813,18 +818,8 @@ GAME_DLI_BOAT2BEACH ; DLI sets COLPF1,2,3,COLPF0, BK for the Beach.
 ; -----------------------------------------------------------------------------
 
 COLPF0_COLBK_DLI
-;	mStart_DLI
 
 	jmp DO_COLPF0_COLBK_DLI
-;	lda COLPF0_TABLE,y   ; Get pixels color
-;	pha
-;	lda COLBK_TABLE,y    ; Get background color
-;	sta WSYNC
-;	sta COLBK            ; Set background
-;	pla
-;	sta COLPF0           ; Set pixels.
-
-;	jmp Exit_DLI
 
 
 ;==============================================================================
@@ -843,7 +838,7 @@ SPLASH_PMGZERO_DLI
 
 
 ;==============================================================================
-; SPLASH_PMGSPECS0_DLI                                                     A
+; SPLASH PMGSPECS0 DLI                                                     A
 ;==============================================================================
 ; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
 ; same display list structure and DLIs.  
@@ -855,29 +850,15 @@ SPLASH_PMGZERO_DLI
 SPLASH_PMGSPECS0_DLI
 
 	jmp DO_SPLASH_PMGSPECS0_DLI
-	
-;	mStart_DLI
-
-;	lda COLPF0_TABLE,y   ; Get pixels color
-;	pha
-;	lda COLBK_TABLE,y    ; Get background color
-;	sta WSYNC
-;	sta COLBK            ; Set background
-;	pla
-;	sta COLPF0           ; Set pixels.
-
-;	jsr LoadPMSpecs2     ; Load the first table entry into 
-
-;	jmp Exit_DLI
 
 
 ;==============================================================================
-; SPLASH_PMGSPECS2_DLI
-; COLPF0_COLBK_TITLE_DLI                                                     A
+; SPLASH PMGSPECS2 DLI                                                  A
 ;==============================================================================
 ; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
 ; same display list structure and DLIs.  
-; Sets background color and the COLPF0 pixel color.  
+; Sets background color and the COLPF0 pixel color.
+;
 ; Table driven.  
 ; Perfectly re-usable for anywhere Map Mode 9 or Blank instructions are 
 ; being managed.  In the case of blank lines you just don't see the pixel 
@@ -888,24 +869,12 @@ SPLASH_PMGSPECS0_DLI
 ; -----------------------------------------------------------------------------
 
 SPLASH_PMGSPECS2_DLI
-;COLPF0_COLBK_TITLE_DLI
-;	mStart_DLI
 
 	jmp DO_SPLASH_PMGSPECS2_DLI ; DO_COLPF0_COLBK_TITLE_DLI
-	
-;	lda COLPF0_TABLE,y   ; Get pixels color
-;	pha
-;	lda COLBK_TABLE,y    ; Get background color
-;	sta WSYNC
-;	sta COLBK            ; Set background
-;	pla
-;	sta COLPF0           ; Set pixels.
-
-;	jmp Exit_DLI
 
 
 ;==============================================================================
-; SCORE TITLE  DLI                                                       A 
+; SCORE TITLE DLI                                                       A 
 ;==============================================================================
 ; Used on Title displays.  
 ; This is called on a blank before the text line. 
@@ -918,6 +887,7 @@ SPLASH_PMGSPECS2_DLI
 ; -----------------------------------------------------------------------------
 
 Score_Title_DLI
+
 	mStart_DLI
 
 	jsr Score_Title_With_PMG
@@ -940,6 +910,7 @@ Score_Title_DLI
 ; -----------------------------------------------------------------------------
 
 Score1_DLI
+
 	mStart_DLI
 
 	lda ColorPF1         ; Get text color (luminance)
@@ -949,14 +920,11 @@ Score1_DLI
 	sta COLBK            ; Write new border color.
 	sta COLPF2           ; Write new background color
 
-	jsr LoadPMSpecs0     ; Load the first table entry into 
+	jsr LoadPMSpecs0     ; Load the first table entry into PM registers
 
 ; Finish by loading the next DLI's colors.  The second score line preps the Beach.
 ; This is redundant (useless) (time-wasting) work when not on the game display, 
 ; but this is also not damaging.
-;	tya
-;	pha
-;	ldy ThisDLI
 
 	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
 
@@ -970,32 +938,25 @@ Score1_DLI
 ; Only ColorPF1 matters for the playfielld as the background and border will 
 ; be forced to black. 
 ; This also sets Player/Missile parameters for P0,P1,P2, M0 and M1 to show 
-; the "Score" and "Hi" text.
+; the "Frogs" and "Saved" text.
 ; Since all of this takes place in the blank space then it does not 
 ; matter that there is no WSYNC.  
 ; -----------------------------------------------------------------------------
 
 Score2_DLI
+
 	mStart_DLI
 
 	lda ColorPF1         ; Get text color (luminance)
 	sta COLPF1           ; write new text color.
 
-;	lda #COLOR_BLACK     ; Black for background and text background.
-;	sta COLBK            ; Write new border color.
-;	sta COLPF2           ; Write new background color
-
-	jsr LoadPMSpecs1     ; Load the first table entry into 
+	jsr LoadPMSpecs1     ; Load the first table entry into PM registers
 
 ; Finish by loading the next DLI's colors.  The second score line preps the Beach.
 ; This is redundant (useless) (time-wasting) work when not on the game display, 
 ; but this is also not damaging.
-;	tya
-;	pha
-;	ldy ThisDLI
 
 	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
-
 
 
 ;==============================================================================
@@ -1008,12 +969,8 @@ Score2_DLI
 ; Restore registers and exit.
 ; -----------------------------------------------------------------------------
 
-;Exit_DLI_WithoutYPrep ; Called by code that did not save Y
-;	tya
-;	pha
-;	ldy ThisDLI
-
 Exit_DLI
+
 	lda (ThisDLIAddr), y ; update low byte for next chained DLI.
 	sta VDSLST
 
@@ -1031,7 +988,7 @@ DoNothing_DLI ; In testing mode jump here to not do anything or to stop the DLI 
 ; DLI to set colors for the Prompt line.  
 ; And while we're here do the HSCROLL for the scrolling credits.
 ; Then link to DLI_SPC2 to set colors for the scrolling line.
-; Since there is no text here (in blank line), it does not matter 
+; Since there is no text here (running in blank line), it does not matter 
 ; that COLPF1 is written before WSYNC.
 ; -----------------------------------------------------------------------------
 
@@ -1046,8 +1003,8 @@ DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text.
 	sta COLBK             ; Write new border color.
 	sta COLPF2            ; Write new background color
 
-	lda CreditHSCROL      ; HScroll for credits.
-	sta HSCROL
+;	lda CreditHSCROL      ; HScroll for credits.
+;	sta HSCROL
 
 ; Unfortunately, DLI_SPC2 landed +8 bytes into the next page.  So full address needs to be set...
 	lda #<DLI_SPC2        ; Update the DLI vector for the last routine for credit color.
@@ -1094,8 +1051,16 @@ DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
 
 
 ;==============================================================================
-; LOAD COLORS
+; LOAD COLORS -- Common targets JMP'd here from other places.
 ;==============================================================================
+; LOAD ALL COLORS_DLI             - load PF0, then BAK, PF1, PF2, PF3.
+; LOAD ALMOST ALL COLORS_DLI      - load BAK, PF1, PF2, PF3 (not PF0).
+; SETUP ALL ON NEXT LINE_DLI      - increment line index, then prep colors for 
+;                                   the next DLI.
+; SETUP ALL COLORS_DLI            - prep colors for DLI based on current line 
+;                                   index.
+; LOAD ALMOST ALL BOAT COLORS_DLI - load PF0, PF1, PF2, PF3 from Page zero.
+;
 ; Common code called/jumped to by DLIs.
 ; JMP here is 3 byte instruction to execute 11 bytes of common DLI closure.
 ; Load the staged values, store in the color registers.
@@ -1227,7 +1192,6 @@ DO_COLPF0_COLBK_DLI
 	pha
 	lda COLBK_TABLE,y    ; Get background color
 
-;	sta WSYNC
 	sta WSYNC
 	
 	sta COLBK            ; Set background
@@ -1325,8 +1289,10 @@ DO_SPLASH_PMGSPECS2_DLI
 ; LOAD PM SPECS 0                                                       A 
 ;==============================================================================
 ; Called by Score 1 DLI.
-; Load the table entry 0 values for P0,P1,P2,M0,M1 to the P/M registers.
+; Load the table entry 1 values for P0,P1,P2,P3,M0,M1,M2,M3  
+; to the P/M registers.
 ; -----------------------------------------------------------------------------
+
 LoadPmSpecs0
 
 	lda PRIOR_TABLE
@@ -1378,8 +1344,10 @@ LoadPmSpecs0
 ; LOAD PM SPECS 1                                                       A 
 ;==============================================================================
 ; Called by Score 2 DLI.
-; Load the table entry 1 values for P0,P1,P2,P3,M0,M1,M2,M3 to the P/M registers.
+; Load the table entry 1 values for P0,P1,P2,P3,M0,M1,M2,M3 
+; to the P/M registers.
 ; -----------------------------------------------------------------------------
+
 LoadPmSpecs1
 
 	lda PRIOR_TABLE+1
@@ -1431,7 +1399,8 @@ LoadPmSpecs1
 ; LOAD PM SPECS 2                                                       A 
 ;==============================================================================
 ; Called on Title, Game, and Game Over displays.
-; Load the table entry 2 values for P0,P1,P2,P3,M0,M1,M2,M3 to the P/M registers.
+; Load the table entry 2 values for P0,P1,P2,P3,M0,M1,M2,M3 
+; to the P/M registers.
 ; -----------------------------------------------------------------------------
 
 LoadPmSpecs2

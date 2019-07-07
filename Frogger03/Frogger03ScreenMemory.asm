@@ -869,9 +869,6 @@ GAME_COLPF2_COLORS ; 22 entries.
 	
 	.by COLOR_ORANGE2+2        ; last beach
 
-;	.by COLOR_BLACK+$0E
-;	.by COLOR_BLACK+$0E
-
 
 GAME_COLPF3_COLORS ; 22 entries.  Arg!  Tried to avoid this, but it is needed 
                    ; in order to do the fade/wipe.
@@ -1187,7 +1184,6 @@ SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 	.byte <COLPF0_COLBK_DLI     ; DLI (43) 4
 	.byte <COLPF0_COLBK_DLI     ; DLI (44) 3
 	.byte <COLPF0_COLBK_DLI     ; DLI (45) 2
-;	.byte <COLPF0_COLBK_DLI     ; DLI (46) 1
 
 	.byte <DLI_SPC1             ; DLI 47 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
 ;	.byte <DLI_SPC2_SetCredits  ; DLI 48 - Set black background and white text for scrolling credits
@@ -1317,8 +1313,8 @@ GAME_BASE_PMG_TABLE
 	.by [PLAYFIELD_RIGHT_EDGE_NORMAL-19] [PLAYFIELD_RIGHT_EDGE_NORMAL-19] $00 ; HPOSP2_TABLE 
 	.by $00                              [PLAYFIELD_RIGHT_EDGE_NORMAL-11] [PLAYFIELD_RIGHT_EDGE_NORMAL+1] ; HPOSP3_TABLE 
 	
-	.by [PLAYFIELD_LEFT_EDGE_NORMAL+18] [PLAYFIELD_LEFT_EDGE_NORMAL+18]  $00 ; HPOSM0_TABLE 
-	.by [PLAYFIELD_LEFT_EDGE_NORMAL+16] [PLAYFIELD_LEFT_EDGE_NORMAL+16]  $00 ; HPOSM1_TABLE 
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+18] [PLAYFIELD_LEFT_EDGE_NORMAL+18] $00 ; HPOSM0_TABLE 
+	.by [PLAYFIELD_LEFT_EDGE_NORMAL+16] [PLAYFIELD_LEFT_EDGE_NORMAL+16] $00 ; HPOSM1_TABLE 
 	.by $00                             [PLAYFIELD_RIGHT_EDGE_NORMAL-1] $00 ; HPOSM2_TABLE 
 	.by $00                             [PLAYFIELD_RIGHT_EDGE_NORMAL-3] [PLAYFIELD_LEFT_EDGE_NORMAL-8] ; HPOSM3_TABLE
 
@@ -1346,7 +1342,7 @@ WIN_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object
 	.by $00 $00 $00 ; HPOSM2_TABLE 
 	.by $00 $00 $00 ; HPOSM3_TABLE
 
-	.by [GTIA_MODE_DEFAULT|%0001] [GTIA_MODE_DEFAULT|%0001] [ GTIA_MODE_DEFAULT|FIFTH_PLAYER|MULTICOLOR_PM|%0001] ; PRIOR_TABLE 
+	.by [GTIA_MODE_DEFAULT|%0001] [GTIA_MODE_DEFAULT|%0001] [GTIA_MODE_DEFAULT|MULTICOLOR_PM|%0001] ; PRIOR_TABLE 
 
 DEAD_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object (nothing on screen)
 	.by $00 $00 $00 ; COLPM0_TABLE 
@@ -1373,16 +1369,16 @@ DEAD_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object (nothing on scree
 	.by [GTIA_MODE_DEFAULT|%0001] [GTIA_MODE_DEFAULT|%0001] [GTIA_MODE_DEFAULT|%0001] ; PRIOR_TABLE 
 
 OVER_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object
-	.by $00 $00 COLOR_BLACK+$4 ; COLPM0_TABLE 
-	.by $00 $00 COLOR_BLACK+$C ; COLPM1_TABLE 
-	.by $00 $00 COLOR_BLACK+$2 ; COLPM2_TABLE 
-	.by $00 $00 COLOR_BLACK+$2 ; COLPM3_TABLE 
+	.by $00 $00 COLOR_BLACK+$2 ; COLPM0_TABLE 
+	.by $00 $00 COLOR_BLACK+$e ; COLPM1_TABLE 
+	.by $00 $00 COLOR_BLACK+$0 ; COLPM2_TABLE 
+	.by $00 $00 COLOR_BLACK+$0 ; COLPM3_TABLE 
 	
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP0_TABLE 
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP1_TABLE 
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP2_TABLE 
 	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_NORMAL ; SIZEP3_TABLE 
-	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_QUAD ; SIZEM_TABLE 
+	.by PM_SIZE_NORMAL PM_SIZE_NORMAL PM_SIZE_QUAD   ; SIZEM_TABLE 
 	
 	.by $00 $00 $00 ; HPOSP0_TABLE ; After switching to Win Display, restore Frog HPOS
 	.by $00 $00 $00 ; HPOSP1_TABLE 
@@ -1393,8 +1389,8 @@ OVER_BASE_PMG_TABLE ; Each row: Scores, Lives, Animated object
 	.by $00 $00 $00 ; HPOSM1_TABLE 
 	.by $00 $00 $00 ; HPOSM2_TABLE 
 	.by $00 $00 $00 ; HPOSM3_TABLE
-
-	.by [GTIA_MODE_DEFAULT|%0001] [GTIA_MODE_DEFAULT|%0001] [GTIA_MODE_DEFAULT|MULTICOLOR_PM|%0001] ; PRIOR_TABLE 
+OVER_BASE_PRIOR
+	.by [GTIA_MODE_DEFAULT|%0001] [GTIA_MODE_DEFAULT|%0001] [GTIA_MODE_DEFAULT|FIFTH_PLAYER|MULTICOLOR_PM|%0001] ; PRIOR_TABLE 
 
 
 MANAGE_SCORE_COLORS_TABLE  ; For each #DISPLAY, are the scores visible?
@@ -1978,10 +1974,10 @@ SPLAT_PMCOLORS_TABLE ; 0, 1, 2, 3
 ; Splash screens don't use the wall masks.
 
 GRAVE_PMCOLORS_TABLE ; 0, 1, 2, 3
-	.by COLOR_BLACK+$4        ; P0, 
-	.by COLOR_BLACK+$C        ; P1, 
-	.by COLOR_BLACK+$2        ; P2, 
-	.by COLOR_BLACK+$2        ; P3, 
+	.by COLOR_BLACK+$2        ; P0, 
+	.by COLOR_BLACK+$e        ; P1, 
+	.by COLOR_BLACK+$0        ; P2, 
+	.by COLOR_BLACK+$0        ; P3, 
 
 ; Farbenwackerdoodle...  P/Ms provide the color text labels 
 ; for Scores and Lives.  Why?  Well, originally for Version 02

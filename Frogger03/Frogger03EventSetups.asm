@@ -48,7 +48,6 @@ SetupTransitionToTitle
 
 	jsr HideButtonPrompt     ; Tell VBI the prompt flashing is disabled.
 	jsr RemoveFrogOnScreen   ; Remove the frog (from Game Over) if visible 
-;	jsr EraseFrog            ; Specifically zero the object (from Game Over)
 
 	lda #1
 	sta EventStage           ; Declare stage 1 behavior for Title Screen.
@@ -59,30 +58,17 @@ SetupTransitionToTitle
 	lda #EVENT_TRANS_TITLE   ; Change to Title Screen transition.
 	sta CurrentEvent
 
-;	lda #0                   ; Zero "old" position to trigger Updates to redraw first time.
-;	sta FrogPMX
-;	sta FrogPMY
-;	sta FrogShape            ; 0 is "off"  (it would already be off by default)
-
 	lda #OFF_FROGX           ; Set new X position to middle of screen.
 	sta WobOffsetX
-;	sta FrogNewPMX
 
 	lda #OFF_FROGY           ; Set new Y position to origin. (row 18)
 	sta WobOffsetY
-;	sta FrogNewPMY
-
-;	lda #SHAPE_FROG          ; Set new frog shape.
-;	sta FrogNewShape
-
-;	lda #1
-;	sta FrogEyeball          ; Set default eyeball shape (1 is default/centered)
 
 	jsr WobbleDeWobbleX_Now  ; Force immediate calculation of new X position.
 	jsr WobbleDeWobbleY_Now  ; Force immediate calculation of new Y position.
 
 	jsr SetFrogOnScreen      ; set Frog shape, set eye position, turn on VBI updates.
-;	sta FrogUpdate           ; and finally enable VBI to start P/M redraw. (>0 is ON)
+                             ; and finally enable VBI to start P/M redraw. (>0 is ON)
 
 	rts
 
@@ -97,7 +83,7 @@ SetupTransitionToTitle
 
 SetupTransitionToGame
 
-	lda #TITLE_WIPE_SPEED   ; Speed of fade/dissolve for transition
+	lda #TITLE_WIPE_SPEED  ; Speed of fade/dissolve for transition
 	jsr ResetTimers
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled.
@@ -106,7 +92,7 @@ SetupTransitionToGame
 	sta FrogUpdate         ; This cause VBI to erase and not redraw.
 
 	lda #25
-	sta EventCounter2       ; Prep the first transition loop.
+	sta EventCounter2      ; Prep the first transition loop.
 
 	lda CurrentDL
 	cmp #DISPLAY_DEAD
@@ -115,7 +101,7 @@ SetupTransitionToGame
 	beq GameStartAtTwo
 
 GameStartAtOne
-	lda #1                  ; First transition stage: Loop from bottom to top
+	lda #1                 ; First transition stage: Loop from bottom to top
 	sta EventStage
 	bne TransitionToGameSetEvent
 
@@ -149,34 +135,28 @@ TransitionToGameSetEvent
 SetupGame
 
 	lda #0
-	sta FrogSafety          ; Schrodinger's current frog is known to be alive.
+	sta FrogSafety         ; Schrodinger's current frog is known to be alive.
 
 	jsr HideButtonPrompt   ; Tell VBI the prompt flashing is disabled on the game screen.
 
-	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
+	lda #0                 ; Zero "old" position to trigger Updates to redraw first time.
 	sta FrogPMX
 	sta FrogPMY
-	sta FrogShape           ; 0 is "off"  (it would already be off by default)
+	sta FrogShape          ; 0 is "off"  (it would already be off by default)
 
-	ldx #18                 ; 18 (dec), number of screen rows of game field.
+	ldx #18                ; 18 (dec), number of screen rows of game field.
 	stx FrogNewRow
 	stx FrogRow
 
-	lda FROG_PMY_TABLE,x    ; Get the new Player/Missile Y position based on row number.
-	sta FrogNewPMY          ; Update Frog position on screen. 
+	lda FROG_PMY_TABLE,x   ; Get the new Player/Missile Y position based on row number.
+	sta FrogNewPMY         ; Update Frog position on screen. 
 
-	lda #MID_FROGX          ; Set new X position to middle of screen.
+	lda #MID_FROGX         ; Set new X position to middle of screen.
 	sta FrogNewPMX
 
-	jsr SetFrogOnScreen      ; set Frog shape, set eye position, turn on VBI updates.
+	jsr SetFrogOnScreen    ; set Frog shape, set eye position, turn on VBI updates.
 
-;	lda #SHAPE_FROG         ; Set new frog shape.
-;	sta FrogNewShape
-
-;	lda #1
-;	sta FrogUpdate
-
-	jsr PlayWaterFX         ; Start water noises.  Now.
+	jsr PlayWaterFX        ; Start water noises.  Now.
 
 	lda #EVENT_GAME        ; Yes, change to game screen event.
 	sta CurrentEvent
@@ -251,6 +231,8 @@ SetupWin
 ; Splat frog.
 ; Set timer to 1.5 second wait.
 ;
+; VBI established Schrodinger knows the frog is dead.
+;
 ; Uses A, X
 ; --------------------------------------------------------------------------
 
@@ -258,14 +240,13 @@ SetupTransitionToDead
 
 	jsr SetSplatteredOnScreen  ; splat the frog:
 
-	dec NumberOfLives          ; subtract a life.
-	lda #COLOR_PURPLE+$F       ; Flash the Lives counter label.
+	dec NumberOfLives       ; subtract a life.
+	lda #COLOR_PURPLE+$F    ; Flash the Lives counter label.
 	sta COLPM0_TABLE+1
 	sta COLPM1_TABLE+1
-	jsr CopyScoreToScreen      ; Update the screen information
+	jsr CopyScoreToScreen   ; Update the screen information
 	jsr PrintFrogsAndLives
 
-;	inc FrogSafety          ; Schrodinger knows the frog is dead.
 	lda #FROG_WAKE_SPEED    ; Initial delay 2 sec for frog corpse viewing/mourning
 	jsr ResetTimers
 
@@ -297,16 +278,15 @@ SetupTransitionToDead
 
 SetupDead
 
-	jsr RemoveFrogOnScreen   ; Scrape splattered frog off screen.
-;	jsr libScreenWaitFrame
+	jsr RemoveFrogOnScreen  ; Scrape splattered frog off screen.
 
-	lda #DEAD_CYCLE_SPEED     ; Animation moving speed.
+	lda #DEAD_CYCLE_SPEED   ; Animation moving speed.
 	jsr ResetTimers
 	
-	lda #DISPLAY_DEAD        ; Tell VBI to change screens.
-	jsr ChangeScreen         ; Then copy the color tables.
+	lda #DISPLAY_DEAD       ; Tell VBI to change screens.
+	jsr ChangeScreen        ; Then copy the color tables.
 
-	lda #0                   ; Color cycling index for dead.
+	lda #0                  ; Color cycling index for dead.
 	sta EventCounter
 	sta EventStage          ; Stage 0 is background color scroll.
 
@@ -365,19 +345,16 @@ SetupGameOver
 	lda #0                  ; base color for sine scroll. 
 	sta EventCounter
 	sta EventStage          ; And set stage 0 for color scroll and waiting for input.
-
-;	lda #0                  ; Zero "old" position to trigger Updates to redraw first time.
-	sta FrogPMX
+                
+	sta FrogPMX             ; Zero "old" position to trigger Updates to redraw first time.
 	sta FrogPMY
 	sta FrogShape           ; 0 is "off"  (it would already be off by default)
 
 	lda #OFF_TOMBX          ; Set new X position to middle of screen.
 	sta WobOffsetX
-;	sta FrogNewPMX
 
 	lda #OFF_TOMBY          ; Set new Y position to origin. (row 18)
 	sta WobOffsetX
-;	sta FrogNewPMY
 
 	lda #SHAPE_TOMB         ; Set new tomb shape.
 	sta FrogNewShape

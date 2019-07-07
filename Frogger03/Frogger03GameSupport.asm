@@ -114,10 +114,10 @@ BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 MOVING_ROW_STATES ; 19 entries describing boat directions. Beach (0), Right (1), Left (FF) directions.
 	.by 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0
 
-PM_OFFS=25 ; offset to line up P/M Vertical Y line to Playfield scan line
+PM_OFFS = 25 ; offset to line up P/M Vertical Y line to Playfield scan line
 
 FROG_PMY_TABLE ; 19 entries providing Frog Y position for each row.  (Each row is no longer equal size.)
-	.by [ 17+PM_OFFS] [ 26+PM_OFFS] [ 36+PM_OFFS]  ; Beach, Boat Right, Boat Left
+	.by [ 17+PM_OFFS] [ 26+PM_OFFS] [ 36+PM_OFFS] ; Beach, Boat Right, Boat Left
 	.by [ 45+PM_OFFS] [ 54+PM_OFFS] [ 64+PM_OFFS] 
 	.by [ 73+PM_OFFS] [ 82+PM_OFFS] [ 92+PM_OFFS] 
 	.by [101+PM_OFFS] [110+PM_OFFS] [120+PM_OFFS] 
@@ -235,16 +235,12 @@ NextScoreDigit
 	sta COLPM0_TABLE
 	sta COLPM1_TABLE
 
+;	lda #1              ; Reset number of
 	lda #3              ; Reset number of
 	sta NumberOfLives   ; lives to 3.
 	lda #COLOR_PURPLE+$F; Flash the Lives counter label.
 	sta COLPM0_TABLE+1
 	sta COLPM1_TABLE+1
-
-;	lda #0
-;	sta FrogsCrossed         ; Zero the number of successful crossings.
-;	sta FrogsCrossedIndex    ; And the index lookup for the boat/row settings.
-;	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
 
 	rts
 

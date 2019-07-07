@@ -290,24 +290,12 @@
 ;    +----------------------------------------+
 
 
-STATUS_LUMA=6 ; Base luminance for the status text.
+STATUS_LUMA = 6 ; Base luminance for the status text.
 
 
 ; ==========================================================================
 ; D I S P L A Y S   A N D   P L A Y F I E L D 
 ; ==========================================================================
-
-; ==========================================================================
-; DISPLAY TITLE SCREEN
-; ==========================================================================
-; Show the instruction/title screen.
-; --------------------------------------------------------------------------
-
-;DisplayTitleScreen
-;	lda #DISPLAY_TITLE   ; Tell VBI to change screens.
-;	jsr ChangeScreen     ; Then copy the color tables.
-
-;	rts
 
 
 ; ==========================================================================
@@ -322,31 +310,31 @@ STATUS_LUMA=6 ; Base luminance for the status text.
 
 FlashTitleLabels
 
-	lda AnimateFrames4         ; Did the timer expire?
-	bne EndFlashTitleLabels    ; No, nothing else to do.
+	lda AnimateFrames4       ; Did the timer expire?
+	bne EndFlashTitleLabels  ; No, nothing else to do.
 
-	lda #30                    ; Reset the timer.
+	lda #30                  ; Reset the timer.
 	sta AnimateFrames4          
 
-	inc EventCounter2          ; Iterate the EventCounter 0, 1, 2, 3, 0, 1, 2....
+	inc EventCounter2        ; Iterate the EventCounter 0, 1, 2, 3, 0, 1, 2....
 	lda EventCounter2
 	and #$03
 	sta EventCounter2
-	bne DoFlashHi              ; On 1, 2, 3 go to next nest.
+	bne DoFlashHi            ; On 1, 2, 3 go to next nest.
 
-	lda #COLOR_BLUE2+$0F      ; 0 is flash Score label.
+	lda #COLOR_BLUE2+$0F     ; 0 is flash Score label.
 	sta COLPM0_TABLE
 	sta COLPM1_TABLE
 	bne EndFlashTitleLabels
 
-DoFlashHi                     ; 1 is flash the hi score label
+DoFlashHi                    ; 1 is flash the hi score label
 	cmp #1
 	bne DoFlashSaved 
 	lda #COLOR_PINK+$0F      ; Flash Hi score label.
 	sta COLPM2_TABLE
 	bne EndFlashTitleLabels
 	
-DoFlashSaved                  ; 2 is flash the Saved frogs label
+DoFlashSaved                 ; 2 is flash the Saved frogs label
 	cmp #2
 	bne DoFlashLives
 	lda #COLOR_GREEN+$0F
@@ -355,7 +343,7 @@ DoFlashSaved                  ; 2 is flash the Saved frogs label
 	bne EndFlashTitleLabels
 
 DoFlashLives
-	lda #COLOR_PURPLE+$0F      ; 3 is flash Frog lives label.
+	lda #COLOR_PURPLE+$0F    ; 3 is flash Frog lives label.
 	sta COLPM0_TABLE+1
 	sta COLPM1_TABLE+1
 
@@ -466,9 +454,9 @@ RemoveFroggies
 	sta FrogsCrossedIndex    ; and the base index into difficulty arrays
 	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
 
-	lda #COLOR_GREEN+$F     ; Glow the Saved label.  VBI will decrement it.
-	sta COLPM2_TABLE+1      ; S a - - d
-	sta COLPM3_TABLE+1      ; - - v e d
+	lda #COLOR_GREEN+$F      ; Glow the Saved label.  VBI will decrement it.
+	sta COLPM2_TABLE+1       ; S a - - d
+	sta COLPM3_TABLE+1       ; - - v e d
 
 	rts
 
@@ -515,9 +503,9 @@ SavedFroggies           ; Write an alternating pattern of Frog1, Frog2 character
 
 WriteLives
 	ldy #0
-	sty SCREEN_LIVES   ; Hackitty hack.  The code below does not remove 
-	sty SCREEN_LIVES+1 ; missing/dead frogs.  oops.
-	sty SCREEN_LIVES+2 ; 
+	sty SCREEN_LIVES    ; Hackitty hack.  The code below does not remove 
+	sty SCREEN_LIVES+1  ; missing/dead frogs.  oops.
+	sty SCREEN_LIVES+2  ; 
 	
 	ldx NumberOfLives   ; Get number of lives.
 	beq EndPrintFrogsAndLives
@@ -564,10 +552,10 @@ ChangeScreen
 	; Display Win, Display Dead and Display Game Over are the same display lists.  
 	; The only difference is the LMS to point to the big text.
 	; So, reassign that here.
+
 	pha                               ; Save Display number for later.
 	tay
 	lda DISPLAYLIST_GFXLMS_TABLE,y    ; Get the new address.
-;	beq bCSCheckScreenBorders         ; If it is 0 it is not for the update.  Skip this.
 	sta GFX_LMS                       ; Save in the Win/Dead/Over display list.
 
 	; ALSO, the Game screen needs the mask borders on the left and right sides
@@ -1095,25 +1083,12 @@ bDoneWithEverything
 ; Y  =  is the DISPLAY_* value (defined elsewhere) for the desired display.
 ; --------------------------------------------------------------------------
 
-;COPY_BASE_LO_TABLE
-;	.byte <[GenericCopyBaseColors-1]  ; 0  = DISPLAY_TITLE
-;	.byte <[ZeroCurrentColors-1] ; 1  = DISPLAY_GAME  ; "Game" starts at black screen and is faded up.
-;	.byte <[CopyColors_Win-1]    ; 2  = DISPLAY_WIN
-;	.byte <[CopyColors_Dead-1]   ; 3  = DISPLAY_DEAD
-;	.byte <[CopyColors_Over-1]   ; 4  = DISPLAY_OVER
-
-;COPY_BASE_HI_TABLE
-;	.byte >[GenericCopyBaseColors-1]  ; 0  = DISPLAY_TITLE
-;	.byte >[ZeroCurrentColors-1] ; 1  = DISPLAY_GAME  ; "Game" starts at black screen and is faded up.
-;	.byte >[CopyColors_Win-1]    ; 2  = DISPLAY_WIN
-;	.byte >[CopyColors_Dead-1]   ; 3  = DISPLAY_DEAD
-;	.byte >[CopyColors_Over-1]   ; 4  = DISPLAY_OVER
-
 COPY_BASE_SIZE_TABLE ; Starting point at end of table to copy. (Game screen is 0, for custom)
 	.by 25 0 47 47 47
 
 
 CopyBaseColors
+
 	cpy #MAX_DISPLAYS         ; 5.
 	bcs EndCopyBaseColors     ; 5 or more is invalid display number. Exit.
 
@@ -1146,142 +1121,8 @@ bCBC_LoopCopyColors
 	dey
 	bne bCBC_LoopCopyColors   ; Do while more colors. (Note 0 entry is actually not needed, so not used.)
 
-
-;	lda COPY_BASE_LO_TABLE,y   ; Get routine high byte
-;	pha                        ; Push to stack
-;	lda COPY_BASE_HI_TABLE,y   ; Get routine low byte 
-;	pha                        ; Push to stack
-
-	; Dis here be mind bending...  
-	; If the arguments were incorrect then this rts returns whence it came.   
-	; However, if the code above pushes an address, then this rts "returns" 
-	; to the routine on the stack and then the rts in that routine will 
-	; return to the caller of this routine.
 EndCopyBaseColors
 	rts                  
-
-
-; ==========================================================================
-
-;CopyColors_Title
-
- ;	ldx #25 ; Title
-;bLoopCopyColorsToTitle
-;	lda TITLE_BACK_COLORS,x
-;	sta COLBK_TABLE,x
-
-;	lda TITLE_TEXT_COLORS,x
-;	sta COLPF1_TABLE,x
-;	sta COLPF0_TABLE,x ; Only for Title, the COLPF0 graphics colors are in the text colors list.
-
-;	dex
-;	bne bLoopCopyColorsToTitle
-
-;	rts  ;
-
-
-; ==========================================================================
-
-;CopyColors_Game
-
-;	jsr ZeroCurrentColors 
-
-;	rts ; 
-
-
-; ==========================================================================
-
-
-;CopyColors_Win
-
-;	ldx #47 ; Dead, Win, Over have only background and COLPF0 lists.
-;bLoopCopyColorsToWin
-;	lda WIN_BACK_COLORS,x
-;	sta COLBK_TABLE,x
-
-;	lda WIN_COLPF0_COLORS,x ; 
-;	sta COLPF0_TABLE,x
-
-;	dex
-;	bne bLoopCopyColorsToWin
-
-;	rts ; 
-
-
-; ==========================================================================
-
-;CopyColors_Dead
-
-;	ldx #47 ; Dead, Win, Over have only background and COLPF0 lists.
-;bLoopCopyColorsToDead
-;	lda DEAD_BACK_COLORS,x
-;	sta COLBK_TABLE,x
-
-;	lda DEAD_COLPF0_COLORS,x
-;	sta COLPF0_TABLE,x
-
-;	dex
-;	bne bLoopCopyColorsToDead
-
-;	rts ; 
-
-
-; ==========================================================================
-
-;CopyColors_Over
-
-;	ldx #47 ; Dead, Win, Over have only background and COLPF0 lists.
-;bLoopCopyColorsTOver
-;	lda OVER_BACK_COLORS,x
-;	sta COLBK_TABLE,x
-
-;	lda OVER_COLPF0_COLORS,x
-;	sta COLPF0_TABLE,x
-
-;	dex
-;	bne bLoopCopyColorsTOver
-;
-;	rts ;
-
-
-; ==========================================================================
-; GENERIC COPY BASE COLORS                                          A  Y
-; ==========================================================================
-; Copy the base colors for the current display.
-;
-; Base colors means the background, COLPF0 for pixels for Mode 9 graphics, 
-; and COLPF1 for text on Mode 2 text lines.
-;
-; The Game screen uses all color registers and its setup is custom which 
-; means this routine is not called for the Game screen.
-;
-; Note this copies "TEXT" values to COLPF0 and COLP1.  COLPF1 is only used
-; on the title screen. This is a non-issue for the other screens.
-; 
-; The caller was expected to set some page Zero variables:
-; MainPointer1 is the address of the background color table.
-; MainPointer2 is the address of the text color table.
-;
-; Y  =  is the DISPLAY_* value (defined elsewhere) for the desired display.
-; --------------------------------------------------------------------------
-
-;GenericCopyBaseColors
-
-;	lda COPY_BASE_SIZE_TABLE,y ; Main code should have validated display.
-;	tay                        ; Looping this many times...
- 
-;bGCBC_LoopCopyColors
-;	lda (MainPointer1),y       ; TITLE_BACK_COLORS,x
-;	sta COLBK_TABLE,y
-
-;	lda (MainPointer2),y       ; TITLE_TEXT_COLORS,x
-;	sta COLPF1_TABLE,y         ; Title screen has "text" using ANTIC Mode 2
-;	sta COLPF0_TABLE,y         ; All displays use COLPF0 graphics colors.
-
-;	dex
-;	bne bGCBC_LoopCopyColors
-
-;	rts
 
 
 ; ==========================================================================
@@ -1326,8 +1167,6 @@ LoopTopOverSine
 SkipZeroOverCycle2
 	cpy #48 ;                ; Reached the last line?
 	bne LoopTopOverSine      ; No, continue looping.
-
-;	beq EndGameOverScreen    ; Yes.  Exit now. 
 
 	rts
 
@@ -1410,7 +1249,9 @@ ExitWinColorScrollDown
 ; 
 ; Setup for next transition in EventCounter.
 ; --------------------------------------------------------------------------
+
 WinRainbow
+
 ; ======================== T O P ========================  
 ; Color scrolling skips the black/grey/white values.  
 ; The scrolling uses values 238 to 18 step -4
@@ -2036,6 +1877,7 @@ SetTextAsInverse  ; Make the text luminance the opposite of the background.
 ; --------------------------------------------------------------------------
 
 RunPromptForButton
+
 	lda #1
 	sta EnablePressAButton   ; Tell VBI to the prompt flashing is enabled.
 
@@ -2050,6 +1892,7 @@ RunPromptForButton
 	lda #%00010000       ; Set the button is pressed.
 
 ExitRunPrompt
+
 	rts
 
 
@@ -2117,7 +1960,7 @@ RemoveFrogOnScreen
 
 	rts
 
-	
+
 ;==============================================================================
 ;												PmgInit  A  X  Y
 ;==============================================================================
@@ -2125,10 +1968,8 @@ RemoveFrogOnScreen
 ; -----------------------------------------------------------------------------
 
 libPmgInit
-	; get all Players/Missiles off screen.
-;	jsr libPmgMoveAllZero
 
-	jsr libPmgAllZero
+	jsr libPmgAllZero  ; get all Players/Missiles off screen, etc.
 	
 	; clear all bitmap images
 	jsr libPmgClearBitmaps
@@ -2213,7 +2054,6 @@ bLoopZeroPMPosition
 	sta SIZEM
 
 	lda #[GTIA_MODE_DEFAULT|%0001]
-;	sta PRIOR
 	sta GPRIOR
 
 	rts
@@ -2261,20 +2101,16 @@ libPmgSetColors
 	asl   ; Times 4
 	tax   ; Back into index for referencing from table.
 
-	lda BASE_PMCOLORS_TABLE,x       ; Get color(s) associated to object
-;	sta PCOLOR0                     ; Stuff in the Player color registers.
-	sta COLPM0_TABLE+2
+	lda BASE_PMCOLORS_TABLE,x    ; Get color associated to object                 
+	sta COLPM0_TABLE+2           ; Stuff in the Player color registers.
 
 	lda BASE_PMCOLORS_TABLE+1,x
-;	sta PCOLOR1
 	sta COLPM1_TABLE+2
 
 	lda BASE_PMCOLORS_TABLE+2,x
-;	sta PCOLOR2
 	sta COLPM2_TABLE+2
 
 	lda BASE_PMCOLORS_TABLE+3,x
-;	sta PCOLOR3
 	sta COLPM3_TABLE+2
 
 	rts
@@ -2320,7 +2156,7 @@ bLPTL_LoadBytes
 
 SetPmgAllZero
 
-	lda #$00                ; 0 position
+	lda #$00            ; 0 position
 
 	sta COLPM0_TABLE+2
 	sta COLPM1_TABLE+2
@@ -2330,7 +2166,7 @@ SetPmgAllZero
 	sta SIZEP0_TABLE+2
 	sta SIZEP0_TABLE+2
 	sta SIZEP0_TABLE+2
-	sta SIZEM_TABLE+2               ; and Missile size 3, 2, 1, 0
+	sta SIZEM_TABLE+2   ; and Missile size 3, 2, 1, 0
 	sta HPOSP0_TABLE+2
 	sta HPOSP1_TABLE+2
 	sta HPOSP2_TABLE+2
@@ -2426,7 +2262,7 @@ WobbleDeWobbleX_Now          ; jsr here to force wobble coordinates
 	inc WobbleX              ; Increment Index for X offset
 	lda WobbleX              ; Get new X index
 	and #$3F                 ; Limit to 0 to 63.
-;	sta WobbleX              ; Remarkably, the Base-2-ness of the size plus the AND above make this STA unnecessary.
+	; Remarkably, the Base-2-ness of the size plus the AND above make it unecessary to update WobbleX.
 	tax                      ; X = Index for X movement
 	lda WOBBLE_SINE_TABLE,x  ; Get current path value for Horizontal placement.
 	clc
@@ -2442,7 +2278,7 @@ WobbleDeWobbleY_Now          ; jsr here to force wobble coordinates
 	inc WobbleY              ; Increment Index for Y offset.
 	lda WobbleY              ; Get new Y index
 	and #$3F                 ; Limit to 0 to 63.
-;	sta WobbleY              ; Remarkably, the Base-2-ness of the size plus the AND above make this STA unnecessary.
+	; Remarkably, the Base-2-ness of the size plus the AND above make it unnecessary to update WobbleY.
 	tax                      ; X = Index for Y movement
 	lda WOBBLE_SINE_TABLE,x  ; Get current path value for Vertical placement.
 	clc
@@ -2527,12 +2363,12 @@ EraseShape
 	ldy FrogUpdate     ; If -1, then update/erase is mandatory.
 	bmi bes_Test1
 
-	cmp FrogNewShape       ; Is it different from the old shape?
-	bne bes_Test1          ; Yes.  Erase is mandatory.
+	cmp FrogNewShape   ; Is it different from the old shape?
+	bne bes_Test1      ; Yes.  Erase is mandatory.
 
-	ldy FrogNewPMY      ; Get new position.
-	cpy FrogPMY         ; Is it the same as the old position?
-	beq ExitEraseShape  ; Yes.  Nothing to erase here.
+	ldy FrogNewPMY     ; Get new position.
+	cpy FrogPMY        ; Is it the same as the old position?
+	beq ExitEraseShape ; Yes.  Nothing to erase here.
 
 bes_Test1
 	cmp #SHAPE_FROG
@@ -2555,6 +2391,7 @@ bes_Test3
 ; Drawing a new shape will transition New to Current.
 ExitEraseShape
 	lda FrogShape  ; return with value for caller.
+
 	rts
 
 
@@ -2569,8 +2406,6 @@ BORDER_OFFSET=41
 EraseGameBorder
 
 	lda #$00
-;	sta HPOSP3
-;	sta HPOSM3
 	sta HPOSP3_TABLE+2
 	sta HPOSM3_TABLE+2
 
@@ -2599,17 +2434,12 @@ begb_LoopFillBorder
 EraseTomb
 
 	lda #0
-	ldx FrogPMY            ; Old  Y
+	ldx FrogPMY      ; Old  Y
 	ldy #22
-;	ldy #23
-	
+
 bLoopET_Erase
-;	lda #%10000001
-
-	sta PLAYERADR0,x   ; main  1
-
-;	lda #0
-	sta PLAYERADR1,x   ; main  2
+	sta PLAYERADR0,x ; main  1
+	sta PLAYERADR1,x ; main  2
 	sta PLAYERADR2,x ; 
 	sta PLAYERADR3,x ; 
 	sta MISSILEADR,x ; 
@@ -2629,7 +2459,7 @@ bLoopET_Erase
 EraseSplat
 
 	lda #0
-	ldx FrogPMY            ; Old frog Y
+	ldx FrogPMY        ; Old frog Y
 	ldy #10
 	
 bLoopES_Erase
@@ -2651,7 +2481,7 @@ bLoopES_Erase
 EraseFrog
 
 	lda #0
-	ldx FrogPMY            ; Old frog Y
+	ldx FrogPMY       ; Old frog Y
 	ldy #10
 	
 bLoopEF_Erase
@@ -2689,9 +2519,9 @@ bds_CheckInMotion
 	cmp FrogShape          ; Is it different from the old shape?
 	bne bds_Test1          ; Yes.  Redraw is mandatory.
 
-	ldy FrogNewPMY      ; Get new position.
-	cpy FrogPMY         ; Is it the same as the old position?
-	beq ExitDrawShape   ; Yes.  Nothing to draw here.
+	ldy FrogNewPMY         ; Get new position.
+	cpy FrogPMY            ; Is it the same as the old position?
+	beq ExitDrawShape      ; Yes.  Nothing to draw here.
 
 bds_Test1
 	cmp #SHAPE_FROG
@@ -2712,10 +2542,10 @@ bds_Test3
 
 ExitDrawShape
 	lda FrogNewShape ; return value to caller.
+
 	rts
 
 
-; Bulk copy for PMG specs may eliminate much of this.
 ;==============================================================================
 ;											DrawGameBorder  A  X  Y
 ;==============================================================================
@@ -2729,21 +2559,6 @@ ExitDrawShape
 
 DrawGameBorder
 
-;	lda #$00
-;;	sta PCOLOR3
-;;	sta COLOR3
-;;	sta HPOSP3
-;;	sta HPOSM3
-;	sta COLPM3_TABLE+2
-
-;	lda #PM_SIZE_QUAD
-;;	sta SIZEP3
-;	sta SIZEP3_TABLE+2
-
-;	lda #%11000000
-;;	sta SIZEM
-;	sta SIZEM_TABLE+2
-
 	ldx #178
 bdgb_LoopFillBorder
 	lda #$C0
@@ -2755,14 +2570,6 @@ bdgb_LoopFillBorder
 
 	dex
 	bne bdgb_LoopFillBorder
-
-;	lda #[PLAYFIELD_RIGHT_EDGE_NORMAL+1]
-;;	sta HPOSP3
-;	sta HPOSP3_TABLE+2
-
-;	lda #[PLAYFIELD_LEFT_EDGE_NORMAL-8]
-;;	sta HPOSM3
-;	sta HPOSM3_TABLE+2
 
 	rts
 
@@ -2777,6 +2584,7 @@ DrawTomb
 
 	ldx FrogNewPMY            ; New frog Y
 	ldy #22
+	
 bLoopDT_DrawTomb
 	lda PLAYER0_GRAVE_DATA,y
 	sta PLAYERADR0+22,x
@@ -2810,6 +2618,7 @@ DrawSplat
 
 	ldx FrogNewPMY
 	ldy #10
+	
 bLoopDS_DrawSplatFrog
 	lda PLAYER0_SPLATTER_DATA,y
 	sta PLAYERADR0+10,x
@@ -2890,7 +2699,6 @@ PositionShape
 bps_Test0
 	cmp #SHAPE_OFF
 	bne bps_Test1
-;	jsr libPmgMoveAllZero ; Zero all P/M HPOS, and sizes.
 	jmp ExitPositionShape
 
 bps_Test1
@@ -2928,46 +2736,19 @@ PositionTomb
 
 	; Do horizontal repositioning.
 	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
-;	stx HPOSP0 ; + 0 is shadow on left
-	stx HPOSP0_TABLE+2
+
+	stx HPOSP0_TABLE+2 ; + 0 is shadow on left
 	inx
 	inx
-;	stx HPOSM0 ; + 2 is p5 left part of tombstone
-	stx HPOSM0_TABLE+2
+	stx HPOSM0_TABLE+2 ; + 2 is p5 left part of tombstone
 	inx
 	inx
-;	stx HPOSP3 ; + 4 is part of RIP
-	stx HPOSP3_TABLE+2
+	stx HPOSP3_TABLE+2 ; + 4 is part of RIP
 	inx
-;	stx HPOSP2 ; + 5 is rest of the RIP
-	stx HPOSP2_TABLE+2
+	stx HPOSP2_TABLE+2 ; + 5 is rest of the RIP
 	inx
 	inx
-;	stx HPOSP1 ; + 7 right side of tombstone
-	stx HPOSP1_TABLE+2
-	
-;	ldx #0     ; Remove these other parts from visible display
-;;	stx HPOSM3 ;  0 is p5 off 
-;	stx HPOSM3_TABLE+2
-;;	stx HPOSM2 ;  2 is p5 off 
-;	stx HPOSM2_TABLE+2
-;;	stx HPOSM1 ;  4 is p5 off 
-;	stx HPOSM1_TABLE+2
-	
-;	; Bonus extra...  
-;	; Force set  Player/Missile sizes
-;	ldx #PM_SIZE_NORMAL ; aka $00
-;;	stx SIZEP0 ; Tombstone shadow
-;	stx SIZEP0_TABLE+2
-;;	stx SIZEP1 ; Frog parts 2
-;	stx SIZEP1_TABLE+2
-;;	stx SIZEP2 ; Frog colored iris
-;	stx SIZEP2_TABLE+2
-;;	stx SIZEP3 ; Frog mouth
-;	stx SIZEP3_TABLE+2
-;	ldx #PM_SIZE_QUAD
-;	stx SIZEM  ; Missile 0 is left size of tombstone
-;	stx SIZEM_TABLE+2
+	stx HPOSP1_TABLE+2 ; + 7 right side of tombstone
 
 	rts
 
@@ -2985,42 +2766,10 @@ PositionSplat
 
 	; Do horizontal repositioning.
 	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
-;	stx HPOSP0 ; + 0 is splat parts 1
-	stx HPOSP0_TABLE+2
+
+	stx HPOSP0_TABLE+2 ; + 0 is splat parts 1
 	inx
-;	stx HPOSP1 ; + 1 is splat parts 2
-	stx HPOSP1_TABLE+2
-	
-;	ldx #0     ; Remove these other parts from visible display
-
-;	lda CurrentDL
-;	cmp #DISPLAY_GAME
-;	beq bps_SkipZeroP3  ; Do not remove P3 on the game screen.
-
-;;	stx HPOSP3 ;  0 is off
-;	stx HPOSP3_TABLE+2
-;;	stx HPOSM3 ;  0 is p5 off
-;	stx HPOSM3_TABLE+2
-	
-;bps_SkipZeroP3
-;;	stx HPOSP2 ;  0 is p5 off
-;	stx HPOSP2_TABLE+2
-;;	stx HPOSM2 ;  0 is p5 off
-;	stx HPOSM2_TABLE+2
-;;	stx HPOSM1 ;  0 is p5 off
-;	stx HPOSM1_TABLE+2
-;;	stx HPOSM0 ;  0 is p5 off
-;	stx HPOSM0_TABLE+2
-
-;	; Bonus extra...  
-;	; Force set  Player/Missile sizes
-;	ldx #PM_SIZE_NORMAL ; aka $00
-;;	stx SIZEP0 ; Splat parts 1
-;	stx SIZEP0_TABLE+2
-;;	stx SIZEP1 ; Splat parts 2
-;	stx SIZEP1_TABLE+2
-;;	stx SIZEP2 ; Splat parts 2
-;	stx SIZEP2_TABLE+2
+	stx HPOSP1_TABLE+2 ; + 1 is splat parts 2
 
 	rts
 
@@ -3038,41 +2787,12 @@ PositionFrog
 
 	; Do horizontal repositioning.
 	; Change frog HPOS.  Each part is not at 0 origin, so there are offsets...
-;	stx HPOSP0 ; + 0 is frog parts 1
-	stx HPOSP0_TABLE+2
+
+	stx HPOSP0_TABLE+2 ; + 0 is frog parts 1
 	inx
-;	stx HPOSP1 ; + 1 is frog parts 2
-	stx HPOSP1_TABLE+2
-;	stx HPOSP2 ; + 0 is frog eye iris
-	stx HPOSP2_TABLE+2
+	stx HPOSP1_TABLE+2 ; + 1 is frog parts 2
+	stx HPOSP2_TABLE+2 ; + 1 is frog eye iris
 
-;	ldx #0     ; Remove these other parts from visible display
-;	lda CurrentDL
-;	cmp #DISPLAY_GAME
-;	beq bps_DoNoMoveMask
-
-;;	stx HPOSP3 ; On the game screen these need to stay to mask the left/right borders.
-;	stx HPOSP3_TABLE+2
-;;	stx HPOSM3
-;	stx HPOSM3_TABLE+2
-
-;bps_DoNoMoveMask 
-;;	stx HPOSM2 ;  0 is off
-;	stx HPOSM2_TABLE+2
-;;	stx HPOSM1 ;  0 is off
-;	stx HPOSM1_TABLE+2
-;;	stx HPOSM0 ;  0 is off
-;	stx HPOSM0_TABLE+2
-
-;	; Bonus extra...  
-;	; Force set  Player/Missile sizes
-;	ldx #PM_SIZE_NORMAL ; aka $00
-;	stx SIZEP0 ; Frog parts 1
-;	stx SIZEP0_TABLE+2
-;;	stx SIZEP1 ; Frog parts 2
-;	stx SIZEP1_TABLE+2
-;;	stx SIZEP2 ; rog eyeball 
-;	stx SIZEP2_TABLE+2
 
 	rts
 
@@ -3139,7 +2859,7 @@ b_usRedrawShape
 
 ExitUpdateShape
 	jsr UpdateShapeSpecs ; Commit the new shape and the new X and Y coords.
-	;  UpdateShapeSpecs returns the new shape number in X.
+	                     ;  UpdateShapeSpecs returns the new shape number in X.
 	jsr libPmgSetColors  ; Set colors for this object.  Depends on X = Shape number.
 
 	rts

@@ -115,7 +115,6 @@ EventGameInit
 	jsr SETVBV                 ; Tell OS to set it
 
 	lda #0
-;	sta COLOR4                 ; Border color, 0 is black.
 	sta FlaggedHiScore
 	sta InputStick             ; no input from joystick
 
@@ -123,10 +122,6 @@ EventGameInit
 	sta COLOR3
 
 	jsr libPmgInit             ; Will also reset SDMACTL settings for P/M DMA
-
-
-;	lda #4                     ; Quick hack to init the scrolling credits.
-;	sta HSCROL
 
 	jsr SetupTransitionToTitle ; will set CurrentEvent = EVENT_TRANS_TITLE
 
@@ -153,36 +148,8 @@ EventTransitionToTitle
 	bne TestTransTitle2        ; Not the Title Scroll, try next stage
 
 	; === STAGE 1 ===
-	; Each line is 40 spaces followed by the graphics.
-	; Scroll each one one at a time.
-;	lda SCROLL_TITLE_LMS0    
-;	cmp #<[TITLE_MEM1+40]      ; Reached the slide maximum ?
-;	beq NowScroll2             ; Yes.  Skip this line slide.
 
 	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
-
-;	inc SCROLL_TITLE_LMS0      ; Top line slide in progress.
-;	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
-
-;NowScroll2
-;	lda SCROLL_TITLE_LMS1
-;	cmp #<[TITLE_MEM2+40]      ; Reached the slide maximum ?
-;	beq NowScroll3             ; Yes.  Skip this line slide.
-
-;	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
-
-;	inc SCROLL_TITLE_LMS1      ; Middle line slide in progress.
-;	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
-
-;NowScroll3
-;	lda SCROLL_TITLE_LMS2
-;	cmp #<[TITLE_MEM3+40]      ; Reached the slide maximum ?
-;	beq FinishedNowSetupStage2 ; Yes.  All 3 lines moved.  Now do the glowing line.
-
-;	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
-;
-;	inc SCROLL_TITLE_LMS2      ; Bottom line slide in progress.
-;	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
 
 FinishedNowSetupStage2
 	ldx #0                     ; Setup channel 0 to play saber A sound.
@@ -201,13 +168,6 @@ FinishedNowSetupStage2
 TestTransTitle2
 	cmp #2
 	bne TestTransTitle3
-
-GlowingTitleUnderline
-;	lda COLPF1_TABLE+5         ; Get the text brightness of line 4.
-;	cmp #$0E                   ; It is maximum brightness?
-;	beq FinishedNowSetupStage3 ; Yes.  Time for the next stage.
-;	inc COLPF1_TABLE+5         ; No. Increment brightness.
-;	bne EndTransitionToTitle   ; Result of inc above is always non-zero. Go to end of event.
 
 FinishedNowSetupStage3
 	lda #3                    ; Set stage 3 as next part of Title screen event...
@@ -363,17 +323,11 @@ TestTransGame2
 	cmp #2
 	bne TestTransGame3
 
-	; Reset the game screen positions, Scrolling LMS offsets
-;	jsr ResetGamePlayfield
-
 	lda #DISPLAY_GAME        ; Tell VBI to change screens.
 	jsr ChangeScreen         ; Then copy the color tables.
 
-;	lda #DISPLAY_GAME
-;	jsr ZeroCurrentColors    ; But, insure the screen starts black.
-
 	; Finished stage 2, now setup Stage 3
-	
+
 	lda #3
 	sta EventStage
 	lda #2
@@ -439,14 +393,11 @@ EventGameScreen
 ; --------------------------------------------------------------------------
 
 	; VBI manages frog falling off the boats.
-	lda FrogSafety           ; Did the VBI flag the Shrodinger's frog is dead?
+	lda FrogSafety           ; Did the VBI flag that Shrodinger's frog is dead?
 	bne DoSetupForYerDead    ; Yes.  No input allowed.  Start the funeral.
 
 	jsr CheckInput           ; Get cooked stick or trigger if timer permits.
 	beq EndOfJoystickMoves   ; Nothing pressed, Skip the input section.
-
-; P/M graphics do not need "removal" 
-;	jsr RemoveFrogOnScreen   ; Remove the frog from the screen (duh)
 
 ProcessJoystickInput         ; Reminder: Input Bits: "0 0 0 Trigger Right Left 0 Up"
 	lda InputStick           ; Get the cooked joystick state... 
@@ -575,7 +526,6 @@ WinStageZero
 	jsr WinRainbow
 	beq EndWinScreen
 
-
 WinStageOne ; and Stage Two and Three for the fade out effects.
 	jsr CommonSplashFade ; Do Stage 1, 2, 3.  On exit, expect A = EventStage
 
@@ -620,24 +570,18 @@ EventTransitionToDead
 LoopDeadToBlack
 	cpx FrogRow             ; Is X the same as Frog Row?
 	beq SkipGreyFrog        ; Yes, do not grey this line.
-;	bne SkipRedFrog         ; No.  Skip setting row to red.
-;	lda #COLOR_PINK         ; Really, it is like red.
-;	bne SkipBlackFrog       ; Skip over choosing black.
+
 SkipRedFrog
 	lda #COLOR_BLACK        ; Choose black instead.
-SkipBlackFrog
+
 ; A subroutine, because it is too much code for the EventTransitionToDead
 ; branches to reach around. 
+SkipBlackFrog
 	jsr GreyEachColorTable  
 
 SkipGreyFrog
 	dex                     ; Next row.
 	bpl LoopDeadToBlack     ; 18 to 0...
-
-	; Do the empty green grass rows, too.  Logically, the frog cannot die 
-	; on row 18 or row 0, so we must know that A still contains #BLACK.  
-;	sta COLPF2_TABLE+2
-;	sta COLPF2_TABLE+21
 
 	lda #2
 	sta EventStage           ; Identify Stage 2 
@@ -667,46 +611,45 @@ EndTransitionToDead
 
 EventDeadScreen
 
-	lda EventStage              ; Stage 0 is waiting for input
-	bne DeadScreenCheckTimers   ; Not stage 0, skip button check
+	lda EventStage            ; Stage 0 is waiting for input
+	bne DeadScreenCheckTimers ; Not stage 0, skip button check
 
-	jsr RunPromptForButton      ; Check button press.
-	beq DeadScreenCheckTimers   ; No input, continue with timer checks.
+	jsr RunPromptForButton    ; Check button press.
+	beq DeadScreenCheckTimers ; No input, continue with timer checks.
 
-ProcessDeadScreenInput          ; Button is pressed. 
-	jsr HideButtonPrompt        ; Turn off the prompt
-	inc EventStage              ; Setup Stage 1 for the screen fading ...
+ProcessDeadScreenInput        ; Button is pressed. 
+	jsr HideButtonPrompt      ; Turn off the prompt
+	inc EventStage            ; Setup Stage 1 for the screen fading ...
 
 DeadScreenCheckTimers
 	; Check timers.  Animate colors per the stage.
-	lda AnimateFrames           ; Did animation counter reach 0 ?
-	bne EndDeadScreen           ; Nope.  Nothing to do.
-	lda #DEAD_CYCLE_SPEED       ; yes.  Reset animation timer.
+	lda AnimateFrames         ; Did animation counter reach 0 ?
+	bne EndDeadScreen         ; Nope.  Nothing to do.
+	lda #DEAD_CYCLE_SPEED     ; yes.  Reset animation timer.
 	jsr ResetTimers
 
 	lda EventStage   
-DeadStageZero                   ; Stage 0  cycling the background.
-;	cmp #0
-	bne DeadStageOne            ; non zero is stage 1 or 2 or 3 or ...
+DeadStageZero                 ; Stage 0  cycling the background.
+	bne DeadStageOne          ; non zero is stage 1 or 2 or 3 or ...
 
 	jsr DeadFrogRain
 	lda #0
-	beq EndDeadScreen           ; Stage 1 is set by the input handling earlier.
+	beq EndDeadScreen         ; Stage 1 is set by the input handling earlier.
 
 
-DeadStageOne ; and Stage Two and Three for the fade out effects.
-	jsr CommonSplashFade ; Do Stage 1, 2, 3.  On exit, expect A = EventStage
+DeadStageOne                  ; and Stage Two and Three for the fade out effects.
+	jsr CommonSplashFade      ; Do Stage 1, 2, 3.  On exit, expect A = EventStage
 
 ; The actual end.
 
-DeadStageFour                  ; Evaluate return to game, or game over.
-	cmp #4                     ; Is EventStage == 4?
+DeadStageFour                 ; Evaluate return to game, or game over.
+	cmp #4                    ; Is EventStage == 4?
 	bne EndDeadScreen
 
-	lda NumberOfLives           ; Have we run out of frogs?
-	beq SwitchToGameOver        ; Yes.  Game Over.
+	lda NumberOfLives         ; Have we run out of frogs?
+	beq SwitchToGameOver      ; Yes.  Game Over.
 
-	jsr SetupTransitionToGame   ; Go back to game screen.
+	jsr SetupTransitionToGame ; Go back to game screen.
 	bne EndDeadScreen
 
 SwitchToGameOver
@@ -792,7 +735,7 @@ OverStageOne                  ; and Stage Two and Three for the fade out effects
 ; The actual end.
 
 OverStage4
-	cmp #4                      ; Is EventStage == 4?
+	cmp #4                    ; Is EventStage == 4?
 	bne EndGameOverScreen
 
 	jsr SetupTransitionToTitle

@@ -17,7 +17,9 @@
 ;
 ; As much of the Pet code is used as possible.
 ; In most places only the barest minimum of changes are made to deal with
-; the differences on the Atari.  Notable changes:
+; the differences on the Atari.  
+;
+; Notable changes:
 ; * References to fixed addresses are changed to meaningful labels.  This
 ;   includes page 0 variables, and score values.
 ; * Kernel call $FFD2 is replaced with "fputc" subroutine for Atari.
@@ -41,6 +43,7 @@
 ; The only doubt I have is monitoring for the start of a frame where the
 ; Atari could monitor vcount or the jiffy counter.  Not sure how the Pet
 ; could do this.
+;
 ; * No IOCB printing to screen.  All screen writing is directly to
 ;   screen memory.  This greatly speeds up the Title screen and game
 ;   playfield presentation.  It also shrinks that code a little.
@@ -56,6 +59,7 @@
 ; The design principle continues to maintain the original presentation
 ; of a full screen of basic text.  (In Atari terms, this is ANTIC mode 2,
 ; or OS mode 0).  Everything else in the game is subject to Atari-fication.
+;
 ; * Color.  Every line of the text mode has a DLI to set background color
 ;   and the foreground text luminance.  The color is also used as an
 ;   animation tool on the screens for dead frog, game over, and saving
@@ -82,13 +86,28 @@
 ;   separately declared in memory.
 ;
 ; --------------------------------------------------------------------------
-; Version 03.  March 2019
+; Version 03.  July 2019
 ;
-; The design principle is to keep the play action as close as possible
-; to the original version as well as enhance the graphics presentation
-; as much as possible while still retaining layout as close as possible
-; to the original.  Changing features to make game appear smoother, 
-; slicker looking...
+; The design principle is to continue to keep the play action as close as 
+; possible to the original version as well as enhance the graphics 
+; presentation as much as possible while still retaining layout as close 
+; as possible to the original.  Changing features make the game appear 
+; smoother, slicker looking.
+;
+; One play action difference -- in the original version the frog would 
+; die when it contacted the left or right margin of the screen. In this 
+; version the frog will not die (immediately).  When the frog reaches a 
+; border it simply stops moving as the boats continue to leave the screen.
+; Eventually, if the frog does not jump to a beach or the next safe place 
+; on a boat, then the boat will slide out from under the frog and the frog
+; will lose contact with the safe seat area.
+;
+; In spite of all the changes below which include making the boat lines
+; taller with extra blank lines the screen manages to just barely fit
+; the same number of beach and boat lines as the original.  This is due to
+; the original version ignoring three full lines at the bottom of the 
+; screen, and revising the credits to a single line of scrolling text.
+; 
 ; * Horizontal fine scrolling the continuously scrolling credits line.
 ; * Halved the time for notes in Ode 2 Joy as it plays so long it 
 ;   starts to sound like a funeral dirge.
@@ -109,6 +128,7 @@
 ;   one of the "prize" screens) now each display has its own set of 
 ;   chained DLIs.  The VBI maintaining screens and DLI counter will also
 ;   enforce setting the base DLI routine for each display.
+; 
 ; --------------------------------------------------------------------------
 
 
@@ -273,31 +293,41 @@
 ; A big change to the main and game screens are the score lines and 
 ; lives/saved frog information is present on both screens.  The 
 ; text labels are now independently colored, and so can be made to 
-; do a strobe effect which is uses during the attract mode on the title 
-; screen and during the game when a value changes.  This has the 
+; do a strobe effect which is used during the attract mode on the title 
+; screen and during the game when a value changes.  The text has the 
 ; appearance that the text labels are ANTIC Mode 4 text, but this is not
 ; so.  The text lines are still ANTIC Mode 2 text lines, because I wanted 
 ; the extra precision to continue using the frog head graphics to count
-; saved frogs.   So, how is the text colored?  They are Player/Missile 
-; graphics that provide (up to) 10 characters for each text line.  A 
-; display list interrupt provides colors and repositions the 
-; player/missile graphics between score lines, and then afterwards updates
-; the player information again to provide the animated shapes on the 
-; Title, Game, and Game Over screens.  
+; saved frogs.   
 ;
-; The VBI basically runs almost the entire game -- the boats fine and 
+; So, then how is the text colored?  They are Player/Missile graphics that
+; provide (up to) 10 characters for each text line.  DLIs had to be 
+; revised again to slice these up on screen.  DLIs provide colors and 
+; reposition the Player/Missile graphics between score lines, and then 
+; afterwards update the Player/Missile information again to provide the 
+; animated shapes on the Title, Game, and Game Over screens.  In effect, 
+; there are potentially 12 Players/12 Missiles hiding in plain sight on 
+; screen (though not all are used all the time.)
+;
+; The VBI basically runs almost the entire game -- the boats' fine and 
 ; coarse scrolling, animating the boat images, animating score label 
-; colors, moving the frog player, playing the sound sequences, and 
-; running the credits line fine scrolling.
+; colors, moving the frog player (or other animated objects), playing the 
+; sound sequences, and running the credits line fine scrolling.  Just 
+; about everything moving occurs during the VBI.
 ;
-; The main code handles the input, determines the next location for the 
-; frog, and initiates changing screen modes and running the event loops
-; and changing event stages.  Almost nothing.  Most of the time the main 
-; code is just waiting for the frame counter to change.
+; The main code handles the player's joystick input.  It determines the 
+; next location for the frog (and other animated objects), but does not
+; actually move anything,  The Main code initiates changing screen modes, 
+; and running the event loops and changing event stages.  This includes 
+; the color animations on the three splash screens.  From a 6502 code 
+; perspective, almost nothing is going on per frame in the main code.  
+; Most of the time the main code is just waiting for the frame counter to 
+; change.
 ;
-; The main code is restructured as a legitimate jump table based on the 
-; current event target ID.  This cut out miles of code of silly event 
-; ID checking.
+; The main code for the game loop is now restructured as a legitimate jump 
+; table based on the current event target ID.  This cut out miles of code 
+; of silly event ID checking and may give others the impression the 
+; programmer is somehow clever. 
 ; 
 ; --------------------------------------------------------------------------
 
@@ -307,22 +337,34 @@
 ;   be much faster. (IMPLEMENTED, V01)
 ; * Timing delay loops are imprecise.  Use the OS jiffy clock (frame
 ;   counter) to maintain timing, and while we're here make timing tables
-;   for NTSC and PAL. (IMPLEMENTED, V01)  (V02 formalized this to a real
-;   Vertical Blank Interrupt service routine.)
+;   for NTSC and PAL. (IMPLEMENTED, V01)  (PAL timing tables not 
+;   actually in code, but discussed in the source.)  (V02 formalized this 
+;   timing to using the Vertical Blank Interrupt service routine to 
+;   manage activity frame by frame.)
 ; * Joystick controls.  I hate the keyboard.  The joystick is free and
 ;   easy on the Atari. (IMPLEMENTED, V02) 
 ; * Sound..  Some simple splats, plops, beeps, water sloshings.
 ;    (IMPLEMENTED, V02) 
-; * Custom character set that looks more like beach, boats, water, and frog.
-;    (IMPLEMENTED, V02) 
+; * Custom character set that looks more like beach, boats, water, and 
+;   frog. (IMPLEMENTED, V02) 
 ; * Hardware coarse scrolling with LMS pointer updates rather than moving 
 ;   the boats in memory.  (IMPLEMENTED, V02) 
-; * Horizontal Fine scrolling text allows smoother movements for the boats.
-;    (IMPLEMENTED, V03) 
+; * Improve boat, water, and beach visuals using multi-color, custom 
+;   characters.  (IMPLEMENTED V03)
+; * Horizontal Fine scrolling text to allow smoother movements for the 
+;   boats. (IMPLEMENTED, V03) 
 ; * Player Missile Frog. This would make frog placement v the boat
-;   positions easier when horizontal scrolling is in effect, not to mention
-;   extra color for the frog.
-;    (IMPLEMENTED, V03) 
+;   positions easier when horizontal scrolling is in effect, not to 
+;   mention extra color for the frog. (IMPLEMENTED, V03) 
+; --------------------------------------------------------------------------
+; Future Concepts:
+; * Bigger boats (and fewer lines)?
+; * Variable boat traffic?
+; * Allow moving down.
+; * Multi-player high scores, and saving to disk.
+; * Simultaneous Two-Player mode?
+; * Moving adversaries?
+; --------------------------------------------------------------------------
 ; * Stir, rinse, repeat -- more extreme of all of the above: more color,
 ;   more DLI, more custom character sets, isometric perspective.
 ;   Game additions -- pursuing enemies, alternate boat shapes, lily pads,
@@ -479,8 +521,8 @@ AnimateFrames4   .byte $00  ; Title Label flash
 ; A display number written here by main code directs the VBI to update the
 ; screen pointers and the pointers to the color tables. Updated by VBI to
 ; $FF when update is completed.
-VBICurrentDL     .byte $FF ; = Direct VBI to change screens.
-CurrentDL        .byte 
+VBICurrentDL     .byte $FF ; !$FF = Direct VBI to change to new display.
+CurrentDL        .byte DISPLAY_TITLE
 
 
 ; ======== V B I ======== SCROLLING CREDITS MANAGEMENT
@@ -541,7 +583,7 @@ VBIPointer2      .word $0000
 ; Main code sets 1 to turn it on. 
 ; Visibility actions performed by VBI.
 EnablePressAButton .byte 0
-PressAButtonState  .byte 0           ; 0 means fading background color down.   !0 means fading up.
+PressAButtonState  .byte 0           ; 0 means fading background color down. !0 means fading up.
 PressAButtonFrames .byte BLINK_SPEED ; Timer value for Press A Button Prompt updating.
 PressAButtonColor  .byte 0           ; The actual color of the prompt.
 PressAButtonText   .byte 0           ; The text luminance.
@@ -611,6 +653,7 @@ SOUND_DURATION3 .byte $00
 ; Having one, common Display List code pointing to the scrolling text 
 ; also eliminates any possibility of the text glitching when switching 
 ; between displays.   
+
 BOTTOM_OF_DISPLAY                    ; Prior to this DLI SPC1 set colors and HSCROL
 	mDL_LMS DL_TEXT_2,ANYBUTTON_MEM  ; (+0 to +7)   Prompt to start game.
 	.by DL_BLANK_1|DL_DLI            ; (+8)         DLI SPC2, set COLBK/COLPF2/COLPF1 for scrolling text.
@@ -684,6 +727,7 @@ SAVEY = $FF
 ; Inform DOS of the program's Auto-Run address...
 ; GameStart is in the "Game.asm' file.
 ; --------------------------------------------------------------------------
+
 	mDiskDPoke DOS_RUN_ADDR, GameStart
 
 	END

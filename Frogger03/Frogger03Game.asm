@@ -56,6 +56,7 @@ GameStart
 ; --------------------------------------------------------------------------
 
 GameLoop
+
 	jsr libScreenWaitFrame     ; Wait for end of frame, start of new frame.
 
 ; Due to the frame sync above, at this point the code
