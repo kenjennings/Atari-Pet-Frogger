@@ -240,16 +240,17 @@ bETS_RandomizeLogo
 	jmp bETS_Stage1
 
 bETS_EndTitleAnimation
-	lda #1                     ; Draw the title, as solid and stop animation.
+	lda #1                     ; Draw the title as solid and stop animation.
 	sta EventStage             ; Stage 1 is always skip the title drawing.
 	jsr TitleRender            ; and 1 also means draw the solid title.
 
 ; =============== Stage 1
 
 bETS_Stage1 
+
 CheckTitleInput
 	jsr RunPromptForButton     ; Blink Prompt to press Joystick button and check input.
-	beq EndTitleScreen         ; Nothing pressed, done with title screen.
+	beq CheckOptionSelect      ; Nothing pressed, done with title screen.
 
 ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transition.
 	jsr SetupTransitionToGame
@@ -260,6 +261,68 @@ ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transiti
 	; Therefore resetting the score is deferred until leaving the Title.
 	jsr ClearGameScores     ; Zero the score.  And high score if not set.
 	jsr PrintFrogsAndLives  ; Update the screen memory.
+
+	jmp EndTitleScreen
+
+	
+; For the Option/Select handling it is  easy to maintain safe input (no 
+; flaky on/offs) because once a key is read it takes a while to scroll 
+; the text in, giving the user time to release the key.
+; 
+; OPTION = Change number of frogs.
+; SELECT = Change game level/difficulty.
+;
+; If the Current selection for frogs is greater than the last game's (or 
+; the default) OR the current level is less than the last game's starting 
+; difficulty, then the high score is cleared on game start.
+
+CheckOptionSelect
+	lda VBIEnableScrollTitle   ; Is VBI busy scrolling option text?
+	bne EndTitleScreen         ; Yes.  Nothing more to do here.
+
+	; Is the title LMS pointing at the right buffer?
+	lda TT_LMS0                ; Get low byte of first LMS
+	cmp #<TITLE_END            ; Is it at the end? 
+	bne CheckReturnToTitle     ; No.  This means the readjusting work is done.
+
+	; Readjust display to show the left buffer visible 
+	; and reset scrolling origin.
+	jsr CopyRightToLeftTitleGraphics ; Copy right buffer to left buffer.
+	jsr TitleSetOrigin               ; Reset LMS to point to left buffer
+
+CheckReturnToTitle             ; Did the timer expire to restore the title to the screen?
+	lda RestoreTitleTimer      ; Wait for Input timeout is expired. 
+	bne WaitForConsoleInput    ; If not 0, then continue on to check input.
+
+	; Restart title animation and phase 0
+	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
+	lda #0 
+	sta EventStage
+	bne EndTitleScreen
+
+
+WaitForConsoleInput
+
+CheckOptionKey
+	lda CONSOL                 ; Get Option, Select, Start buttons
+	and #CONSOLE_OPTION        ; Is Option pressed?  0 = pressed. 1 = not
+	bne CheckSelectKey         ; No.  Try the select.
+	; increment starting frogs.
+	; generate string for right buffer
+
+
+
+CheckSelectKey
+	lda CONSOL                 ; Get Option, Select, Start buttons
+	and #CONSOLE_OPTION        ; Is Option pressed?  0 = pressed. 1 = not
+	; increment starting frogs.
+	; generate string for right buffer
+
+
+	; print to right buffer.
+	; Tell VBI to start scroll.
+	jsr TitlePrintString
+	inc VBIEnableScrollTitle
 
 EndTitleScreen
 

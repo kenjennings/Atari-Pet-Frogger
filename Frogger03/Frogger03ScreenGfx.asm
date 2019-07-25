@@ -352,45 +352,94 @@ EndFlashTitleLabels
 
 
 ; ==========================================================================
-; TITLE RENDER
+; TITLE RENDER                                                        A
 ; ==========================================================================
 ; Copy the title image to the screen memory. 
-; Acculumator determines behavior.
+; Accumulator determines behavior.
+;
+; Since screen memory has been restructured to perform horizontal scrolling,
+; the coping and loading the displayed title is more complicated.
+; 
+; The defined/declared Title graphics are a block of 60 bytes. 
+; The screen memory representation is a block of 120 bytes.  10 bytes on
+; the left (default visible) and 10 bytes on the right (scroll-in buffer)
+; 
 ;
 ; A == 0  Clear the Title.
 ; A == 1  Copy Title as is.
 ; A == -1 Use random value, mask with Title Image.
+; ==========================================================================
+; TITLE_START=TITLE_MEM1-1 ; Cheating. To show all color clocks from 
+;                          ; TITLE_MEM1 the LMS is at * -1, and HSCROLL 0
+; TITLE_END   = TITLE_START+10
+;
+; Values for manipulating screen memory.
+; TITLE_LEFT  = TITLE_MEM1
+; TITLE_RIGHT = TITLE_MEM1+10
+;
+; Start Scroll position = TITLE_START (Increment), HSCROL 0  (Decrement)
+; End   Scroll position = TITLE_START + 9,         HSCROL 0
 ; --------------------------------------------------------------------------
 
 TitleRender
 
-	ldx #59
+	ldx #9                   ; 10 iterations/bytes instead of 60.
 
-	cmp #0
-	beq bTZ_LoopClearTitle
-	bmi bTZ_loopRandomTitle
+	cmp #0                   ; Is is to clear?
+	beq bTR_LoopClearTitle   ; Yes.  Go clear.
+	bmi bTR_LoopRandomTitle  ; No.  Next choice is the random rezz in.
 
-bTZ_loopCopyTitle
-	lda TITLE_GFX,x
-	sta TITLE_MEM1,x
+bTR_loopCopyTitle
+	lda TITLE_GFX,x          ; Read from Title Image
+	sta TITLE_LEFT,x         ; Copy to screen memory.
+	lda TITLE_GFX+10,x       ; And so on.
+	sta TITLE_LEFT+20,x
+	lda TITLE_GFX+20,x
+	sta TITLE_LEFT+40,x
+	lda TITLE_GFX+30,x
+	sta TITLE_LEFT+60,x
+	lda TITLE_GFX+40,x
+	sta TITLE_LEFT+80,x
+	lda TITLE_GFX+50,x
+	sta TITLE_LEFT+100,x
 	dex
-	bpl bTZ_loopCopyTitle
+	bpl bTR_loopCopyTitle
 
 	rts
 
-bTZ_LoopClearTitle
-	sta TITLE_MEM1,x
+bTR_LoopClearTitle
+	sta TITLE_LEFT,x
+	sta TITLE_LEFT+20,x
+	sta TITLE_LEFT+40,x
+	sta TITLE_LEFT+60,x
+	sta TITLE_LEFT+80,x
+	sta TITLE_LEFT+100,x
 	dex
-	bpl bTZ_LoopClearTitle
+	bpl bTR_LoopClearTitle
 
 	rts
 
-bTZ_loopRandomTitle
+bTR_LoopRandomTitle
 	lda RANDOM
 	and TITLE_GFX,x
-	sta TITLE_MEM1,x
+	sta TITLE_LEFT,x
+	lda RANDOM
+	and TITLE_GFX+10,x
+	sta TITLE_LEFT+20,x
+	lda RANDOM
+	and TITLE_GFX+20,x
+	sta TITLE_LEFT+40,x
+	lda RANDOM
+	and TITLE_GFX+30,x
+	sta TITLE_LEFT+60,x
+	lda RANDOM
+	and TITLE_GFX+40,x
+	sta TITLE_LEFT+80,x
+	lda RANDOM
+	and TITLE_GFX+50,x
+	sta TITLE_LEFT+100,x
 	dex
-	bpl bTZ_loopRandomTitle
+	bpl bTR_LoopRandomTitle
 
 	rts
 
@@ -1757,6 +1806,306 @@ SaveNewLeftLMS
 	sta PF_LMS2,x           ; Update LMS pointer.
 
 EndOfLeftBoat
+	rts
+
+
+;==============================================================================
+; F I N E   S C R O L L I N G   T I T L E
+;==============================================================================
+
+; ==========================================================================
+; TITLE_START=TITLE_MEM1-1 ; Cheating. To show all color clocks from 
+;                          ; TITLE_MEM1 the LMS is at * -1, and HSCROLL 0
+; TITLE_END   = TITLE_START+10
+;
+; Values for manipulating screen memory.
+; TITLE_LEFT  = TITLE_MEM1
+; TITLE_RIGHT = TITLE_MEM1+10
+;
+; Start Scroll position = TITLE_START (Increment), HSCROL 0  (Decrement)
+; End   Scroll position = TITLE_START + 9,         HSCROL 0
+; --------------------------------------------------------------------------
+
+; Offsets from first LMS low byte in Display List to 
+; the subsequent LMS low byte of each title line. (VBI use)
+; Offset from TT_LMS0.
+
+TITLE_LMS_OFFSET 
+	.by 0 3 6 9 12 15 
+
+TITLE_LMS_ORIGIN
+	.by <TITLE_START <[TITLE_START+20] <[TITLE_START+40] <[TITLE_START+60] <[TITLE_START+80] <[TITLE_START+100]
+
+
+; ==========================================================================
+; TITLE LEFT SCROLL
+; ==========================================================================
+; Left scroll from origin (LMS-1/0) to Right target (9/0)
+; --------------------------------------------------------------------------
+
+TitleLeftScroll
+
+	lda TT_LMS0            ; Get current LMS
+	cmp #<[TITLE_START+9]  ; Did it reach the end?
+	beq bTLF_Exit          ; Yes.  Nothing to do.
+
+	dec TitleHSCROL        ; Decrement HSCROL.  
+	bpl bTLF_Exit          ; Positive. No roll over. Do not coarse scroll.
+
+	lda #15                ; Coarse scrolling to next byte
+	sta TitleHSCROL        ; Reset hscrol for next screen byte.
+
+	inc TT_LMS0            ; Coarse scroll display to next byte...
+	inc TT_LMS1
+	inc TT_LMS2
+	inc TT_LMS3
+	inc TT_LMS4
+	inc TT_LMS5
+
+bTLF_Exit
+	rts
+
+
+; ==========================================================================
+; TITLE SHIFT DOWN
+; ==========================================================================
+; Shift down the content of the Left buffer to incrementally and visibly 
+; clear the Left buffer before the scroll from the right.   ALSO shift down
+; the color table entries for the Title to follow the text pixels.
+; --------------------------------------------------------------------------
+
+TitleShiftDown
+
+	ldx #9
+
+bTSD_Loop
+	lda TITLE_LEFT+80,x  ; Copy Pixel Row 5 
+	sta TITLE_LEFT+100,x ; down to Row 6
+
+	lda TITLE_LEFT+60,x  ; Copy Pixel Row 4
+	sta TITLE_LEFT+80,x  ; down to Row 5
+
+	lda TITLE_LEFT+40,x  ; Copy Pixel Row 3
+	sta TITLE_LEFT+60,x  ; down to Row 4
+
+	lda TITLE_LEFT+20,x  ; Copy Pixel Row 2
+	sta TITLE_LEFT+40,x  ; down to Row 3
+
+	lda TITLE_LEFT,x     ; Copy Pixel Row 1
+	sta TITLE_LEFT+20,x  ; down to Row 2
+
+	lda #0               ; Erase
+	sta TITLE_LEFT,x     ; Row 1
+
+	dex
+	bpl bTSD_Loop        ; Loop including 0
+
+
+	ldx #4               ; Now move the pixel colors to match.
+
+bTSD_ColorLoop
+	lda COLPF0_TABLE+2,x ; shift colors in table 2 to 6
+	sta COLPF0_TABLE+3,x ; down to table 3 to 7
+
+	dex
+	bpl bTSD_Loop        ; Loop including 0
+
+	rts
+
+
+; ==========================================================================
+; TITLE PRINT STRING                                MainPointer1  A  X  Y
+; ==========================================================================
+; Iterate through a string of internal screen code characters.
+;
+; Uses MainPointer1 for string pointer.
+; Uses SAVEY to remember the string length.
+; Uses A to pass each character to the printing routine.
+;
+; X = position in screen's Right text buffer.  0 to 9.
+; Y = length
+; 
+; Registers saved prior to work.
+; --------------------------------------------------------------------------
+
+TitlePrintString
+
+	cpy #0                ; If length is 0, then
+	beq bTPS_Exit         ; Nothing to do here.  (yes, overkill.  could check X too for greater than 9.  derp.))
+
+	sty SAVEY             ; Remember length for later.
+
+	ldy #0                ; Start working length at 0 (index into input).
+bTPS_Loop
+	lda (MaintPointer1),y ; Get internal code character from input
+	jsr TitlePrintChar    ; Print it.  This routine preserves all registers.
+	inx                   ; Next character position in output screen buffer
+	iny                   ; Next position in the input string
+	cpy SAVEY             ; Did it reach length?
+	bne bTPS_Loop         ; Not yet.  Do next character.
+
+bTPS_Exit
+	rts
+
+
+; ==========================================================================
+; TITLE PRINT CHAR                                             A  X
+; ==========================================================================
+; Write bytes 1 to 6 (skipping 0 and 8) of the character from an internal 
+; character code into the right side Title buffer at a designated position.
+; The position is byte aligned.  No fancy bit twiddling to do pixel-
+; accurate placement. 
+;
+; Uses MaintPointer2 for character pointer.
+; Uses SAVEA temporarily.
+;
+; A = Internal Character Code
+; X = position in screen Right text buffer.  0 to 9.
+; 
+; Registers saved prior to work.
+; --------------------------------------------------------------------------
+
+TitlePrintChar
+
+	sta SAVEA ; save A for routine.
+
+	mRegSave  ; Preserve all regs on stack so routine does not affect caller.
+
+	lda #0
+	sta MainPointer2
+	sta MainPointer2+1
+
+	lda SAVEA
+
+	; MainPointer2 = A * 8
+	asl
+	rol MainPointer2+1
+	asl
+	rol MainPointer2+1
+	asl
+	rol MainPointer2+1
+	sta MainPointer2
+
+	; MainPointer2+1  += $e0 ; Or maybe use the redefined set?
+	clc
+	lda #$E0
+	adc MainPointer2+1
+	sta MainPointer2+1
+
+	; Copy middle 6 bytes from character set to screen memory.
+	ldy #1
+	lda (MainPointer2),y
+	sta TITLE_RIGHT,x
+	iny
+	lda (MainPointer2),y
+	sta TITLE_RIGHT+20,x
+	iny
+	lda (MainPointer2),y
+	sta TITLE_RIGHT+40,x
+	iny
+	lda (MainPointer2),y
+	sta TITLE_RIGHT+60,x
+	iny
+	lda (MainPointer2),y
+	sta TITLE_RIGHT+80,x
+	iny
+	lda (MainPointer2),y
+	sta TITLE_RIGHT+100,x
+
+bTPC_Exit
+	mRegRestore
+
+	rts
+
+
+; ==========================================================================
+; TITLE SET ORIGIN                                            
+; ==========================================================================
+; For the Title display, wait for the scan line to be below the title 
+; before changing the LMS values to avoid weirdness on display.
+; Set All Display List LMS to the Left Side buffer. Reset Title HSCROL.
+; This is called before scrolling from right to left. 
+; --------------------------------------------------------------------------
+
+TitleSetOrigin
+
+bTSO_WaitForScan88         ; Be sure the display passed the end of the title before changing LMS.
+	lda VCOUNT             ; 
+	cmp #44                ; scan line 88 / 2 should be ok.
+	bcc bTSO_WaitForScan88 ; Loop until scan line after the Title.
+
+	ldx #5
+
+bTSO_loop
+	ldy TITLE_LMS_OFFSET,x ; Get LMS offset
+
+	lda TITLE_LMS_ORIGIN,x ; Get low byte for this line of the scrolling buffer
+
+	sta TT_LMS0,y          ; Update LMS with low byte to TITLE. 
+
+	dex                    ; next line
+	bpl bTSO_loop          ; Reached the end?
+
+	ldx #0
+	stx TitleHSCROL        ; Zero the fine scroll while we're here
+
+	rts
+
+
+; ==========================================================================
+; TITLE CLEAR RIGHT GRAPHICS                                             
+; ==========================================================================
+; Clear the right side of the scrolling buffer.  
+; Done in preparation of populating and prior to scrolling left.
+; --------------------------------------------------------------------------
+
+TitleClearRightGraphics
+
+	lda #0
+	ldx #9
+
+bTCRG_Loop
+	sta TITLE_RIGHT,x
+	sta TITLE_RIGHT+20,x
+	sta TITLE_RIGHT+40,x
+	sta TITLE_RIGHT+60,x
+	sta TITLE_RIGHT+80,x
+	sta TITLE_RIGHT+100,x
+
+	dex
+	bpl bTCRG_Loop
+
+	rts
+
+
+; ==========================================================================
+; TITLE COPY RIGHT TO LEFT GRAPHICS                                             
+; ==========================================================================
+; Copy data on the right side of the buffer to the left side, so 
+; the scrolling can be reset to the origin. 
+; --------------------------------------------------------------------------
+
+TitleCopyRightToLeftGraphics
+
+	ldx #9
+
+bTCRTLG_Loop
+	lda TITLE_RIGHT,x
+	sta TITLE_LEFT,x
+	lda TITLE_RIGHT+20,x
+	sta TITLE_LEFT+20,x
+	lda TITLE_RIGHT+40,x
+	sta TITLE_LEFT+40,x
+	lda TITLE_RIGHT+60,x
+	sta TITLE_LEFT+60,x
+	lda TITLE_RIGHT+80,x
+	sta TITLE_LEFT+80,x
+	lda TITLE_RIGHT+100,x
+	sta TITLE_LEFT+100,x
+
+	dex
+	bpl bTCRTLG_Loop
+
 	rts
 
 

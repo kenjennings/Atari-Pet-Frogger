@@ -52,8 +52,8 @@ SetupTransitionToTitle
 	lda #1
 	sta EventStage           ; Declare stage 1 behavior for Title Screen.
 
-	lda #DISPLAY_TITLE       ; Tell VBI to change displays.
-	jsr ChangeScreen         ; Then copy the color tables.
+	lda #DISPLAY_TITLE       ; Tell VBI to change displays. VBI will reset origin.
+	jsr ChangeScreen         ; Then copy the color tables.  
 
 	lda #EVENT_TRANS_TITLE   ; Change to Title Screen transition.
 	sta CurrentEvent

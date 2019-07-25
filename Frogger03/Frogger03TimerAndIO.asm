@@ -158,7 +158,7 @@ EndResetTimers
 ; - - - - / 1 1 1 1 / - - - -  / 0 0 0 0  - nothing
 ; --------------------------------------------------------------------------
 
-STICKEMUPORNOT_TABLE
+STICKEMUPORNOT_TABLE ; cooked joystick values
 	.by $00 $00 $00 $00 $00 $08 $08 $08 $00 $04 $04 $04 $00 $00 $01 $00
 
 CheckInput
@@ -270,6 +270,10 @@ VBISetupDisplay
 	stx CurrentDL               ; Let Main know this is now the current screen.
 	lda #$FF                    ; Turn off the signal from Main to change screens.
 	sta VBICurrentDL
+
+	cpx #DISPLAY_TITLE          ; Is this the Title display?
+	bne VBIResetDLIChain        ; No, continue with DLI reset.
+	jsr TitleSetOrigin          ; Title screen.  Reset scrolling to origin.
 
 VBIResetDLIChain
 	ldy #0
@@ -521,6 +525,37 @@ DoFadeSaved
 EndManageScoreFades
 
 
+; ======== Manage Title Graphics Fine Scrolling  ========
+; Left Scroll the title graphics.
+; When it reaches target location reset the flag to disable scrolling.
+; Set the timer to tell MAIN to restore the title.
+; If the timer is non-zero, then decrement it.
+;
+; MAIN is expected to setup buffers and reset scroll position to 
+; origin before setting  VBIEnableScrollTitle  to start scrolling.
+
+ManageTitleScrolling
+	lda VBIEnableScrollTitle    ; Is scrolling turned on?
+	beq WaitToRestoreTitle      ; No. See if the timer needs something.
+
+	jsr TitleLeftScroll         ; Nonzero return here is null
+	lda TT_LMS0                 ; Get current LMS
+	cmp #<[TITLE_START+9]       ; Did it reach the end?
+	bne EndManageTitleScrolling ; Nope.  Done for this frame.
+
+	lda #0                      ; Reached target position.
+	sta VBIEnableScrollTitle    ; Turn off further left scrolling.
+	lda #151                    ; Set the timer to wait to restore the title.
+	sta RestoreTitleTimer       ; Set new timeout value.
+
+WaitToRestoreTitle              ; Tell Main when to restore title.
+	lda RestoreTitleTimer       ; Get timer value.
+	beq EndManageTitleScrolling ; Its 0?  Then skip this.
+	dec RestoreTitleTimer       ; Decrement timer when non-zero.
+
+EndManageTitleScrolling
+
+
 ; ======== Animate Boat Components ========
 ; Parts of the boats are animated to look like they're moving 
 ; through the water.
@@ -640,7 +675,6 @@ ExitMyDeferredVBI
 ; Note that the Title screen uses the COLBK table for both COLBK and COLPF2.
 ; -----------------------------------------------------------------------------
 
-TITLE_DLI ; DLI sets COLPF1, COLPF2, COLBK for score text. 
 TITLE_DLI_BLACKOUT  ; DLI Sets background to Black for blank area.
 
 	pha
@@ -660,13 +694,14 @@ TITLE_DLI_BLACKOUT  ; DLI Sets background to Black for blank area.
 ;==============================================================================
 ; TITLE_DLI_TEXTBLOCK                                             
 ;==============================================================================
+; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to 
+; start a text block.
 ; Since there is no text in blank lines, it does not matter that COLPF1 is 
 ; written before WSYNC.
 ; Also, since text characters are not defined to the top/bottom edge of the 
 ; character it is  safe to change COLPF1 in a sloppy way.
 ; -----------------------------------------------------------------------------
 
-TITLE_DLI_4 ; DLI sets COLPF1 text luminance from the table, COLBK and COLPF2 to start a text block.
 TITLE_DLI_TEXTBLOCK
 
 	mStart_DLI
@@ -687,13 +722,81 @@ TITLE_DLI_TEXTBLOCK
 ;==============================================================================
 
 ;==============================================================================
+; SCORE 1 DLI                                                            A 
+;==============================================================================
+; Used on Game displays.  
+; This is called on a blank before the text line. 
+; The VBI should have loaded up the Page zero staged colors. 
+; Only ColorPF1 matters for the playfield as the background and border will 
+; be forced to black. 
+; This also sets Player/Missile parameters for P0,P1,P2, M0 and M1 to show 
+; the "Score" and "Hi" text.
+; Since all of this takes place in the blank space then it does not 
+; matter that there is no WSYNC.  
+; -----------------------------------------------------------------------------
+
+Score1_DLI
+
+	mStart_DLI
+
+	lda ColorPF1         ; Get text color (luminance)
+	sta COLPF1           ; write new text color.
+
+	lda #COLOR_BLACK     ; Black for background and text background.
+	sta COLBK            ; Write new border color.
+	sta COLPF2           ; Write new background color
+
+	jsr LoadPMSpecs0     ; Load the first table entry into PM registers
+
+; Finish by loading the next DLI's colors.  The second score line preps the Beach.
+; This is redundant (useless) (time-wasting) work when not on the game display, 
+; but this is also not damaging.
+
+	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
+
+
+;==============================================================================
+; SCORE 2 DLI                                                            A 
+;==============================================================================
+; Used on Game displays.  
+; This is called on a blank before the text line. 
+; The VBI should have loaded up the Page zero staged colors. 
+; Only ColorPF1 matters for the playfield as the background and border will 
+; be forced to black. 
+; This also sets Player/Missile parameters for P0,P1,P2, M0 and M1 to show 
+; the "Frogs" and "Saved" text.
+; Since all of this takes place in the blank space then it does not 
+; matter that there is no WSYNC.  
+; -----------------------------------------------------------------------------
+
+Score2_DLI
+
+	mStart_DLI
+
+	lda ColorPF1         ; Get text color (luminance)
+	sta COLPF1           ; write new text color.
+
+	jsr LoadPMSpecs1     ; Load the first table entry into PM registers
+
+	; Load HSCROL for the Title display. It should be non-impacting on other displays.
+	lda TitleHSCROL      ; Get Title fine scrolling value.
+	sta HSCROL           ; Set fine scrolling.
+
+; Finish by loading the next DLI's colors.  The second score line preps the Beach.
+; This is redundant (useless) (time-wasting) work when not on the game display, 
+; but this is also not damaging.
+
+	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
+
+
+;==============================================================================
 ; GAME_DLI_BEACH0                                               
 ;==============================================================================
 ; BEACH 0
-; Sets colors for the first Beach line. 
+; Sets COLPF0,1,2,3,BK for the first Beach line. 
 ; This is a little different from the other transitions to Beaches.  
 ; Here, ALL colors must be set. 
-; In the later transitions from Boats to the Beach  COLPF0 should 
+; In the later transitions from Boats to the Beach COLPF0 should 
 ; be setup as the same color as in the previous line of boats.
 ; COLBAK is temporarily set to the value of COLPF0 to make a full
 ; scan line of "sky" color matching the COLPF0 sky color for the 
@@ -703,7 +806,6 @@ TITLE_DLI_TEXTBLOCK
 ; -----------------------------------------------------------------------------
 
 GAME_DLI_BEACH0 
-GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
 
 	pha   	; custom startup to deal with a possible timing problem.
 
@@ -713,8 +815,8 @@ GAME_DLI_2 ; DLI 2 sets COLPF0,1,2,3,BK for first Beach.
 
 	lda ColorPF0 ; from Page 0.
 	sta WSYNC
-	; Top of the line is sky or blue water from row above.   
-	; Make background temporarily match the playfield drawn this on the next line.
+	; Top of the line is sky or blue water from row above. 
+	; Make background temporarily match the playfield drawn on the next line.
 	sta COLBK
 	sta COLPF0
 
@@ -765,7 +867,7 @@ GAME_DLI_BOAT2BOAT  ; DLI sets HS, BK, COLPF3,2,1,0 for the Left Boats.
 	pla 
 	sta HSCROL        ; Ok to set now as this line does not scroll.
 
-	jmp LoadAlmostAllBoatColors_DLI ; set colors.  setup next row.
+	jmp LoadAlmostAllBoatColors_DLI ; set colors.  then setup next row.
 
 
 ;==============================================================================
@@ -794,7 +896,7 @@ GAME_DLI_BOAT2BEACH ; DLI sets COLPF1,2,3,COLPF0, BK for the Beach.
 	lda ColorPF0 ; from Page 0.
 	; Different from BEACH0, because no WSYNC right here.
 	; Top of the line is sky or blue water from row above.   
-	; Make background temporarily match the playfield drawn this on the next line.
+	; Make background temporarily match the playfield drawn on the next line.
 	sta COLBK
 	sta COLPF0
 
@@ -828,28 +930,13 @@ COLPF0_COLBK_DLI
 ; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
 ; same display list structure and DLIs.  
 ;
-; The first DLI on the title screen needs to do extra work 
-; on the player/missile data, so I needed another DLI here.
+; This first DLI on the title screen needs to do extra work on the 
+; player/missiles to remove all the "text" labels from the screen.
 ; -----------------------------------------------------------------------------
 
 SPLASH_PMGZERO_DLI
 
 	jmp DO_SPLASH_PMGZERO_DLI
-
-
-;==============================================================================
-; SPLASH PMGSPECS0 DLI                                                     A
-;==============================================================================
-; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
-; same display list structure and DLIs.  
-;
-; The first DLI on the title screen needs to do extra work 
-; on the player/missile data, so I needed another DLI here.
-; -----------------------------------------------------------------------------
-
-SPLASH_PMGSPECS0_DLI
-
-	jmp DO_SPLASH_PMGSPECS0_DLI
 
 
 ;==============================================================================
@@ -871,92 +958,6 @@ SPLASH_PMGSPECS0_DLI
 SPLASH_PMGSPECS2_DLI
 
 	jmp DO_SPLASH_PMGSPECS2_DLI ; DO_COLPF0_COLBK_TITLE_DLI
-
-
-;==============================================================================
-; SCORE TITLE DLI                                                       A 
-;==============================================================================
-; Used on Title displays.  
-; This is called on a blank before the text line. 
-; The VBI should have loaded up the Page zero staged colors. 
-; Only ColorPF1 matters for the playfielld as the background and border will 
-; be forced to black. 
-; This also sets Player/Missile parameters for P0,P1,P2, M0 and M1 to show 
-; the "Score" and "Hi" text.
-; Then it WSYNCs until after the first score line, and forces all HPOS to 0.
-; -----------------------------------------------------------------------------
-
-Score_Title_DLI
-
-	mStart_DLI
-
-	jsr Score_Title_With_PMG
-
-	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
-
-
-;==============================================================================
-; SCORE 1 DLI                                                            A 
-;==============================================================================
-; Used on Game displays.  
-; This is called on a blank before the text line. 
-; The VBI should have loaded up the Page zero staged colors. 
-; Only ColorPF1 matters for the playfielld as the background and border will 
-; be forced to black. 
-; This also sets Player/Missile parameters for P0,P1,P2, M0 and M1 to show 
-; the "Score" and "Hi" text.
-; Since all of this takes place in the blank space then it does not 
-; matter that there is no WSYNC.  
-; -----------------------------------------------------------------------------
-
-Score1_DLI
-
-	mStart_DLI
-
-	lda ColorPF1         ; Get text color (luminance)
-	sta COLPF1           ; write new text color.
-
-	lda #COLOR_BLACK     ; Black for background and text background.
-	sta COLBK            ; Write new border color.
-	sta COLPF2           ; Write new background color
-
-	jsr LoadPMSpecs0     ; Load the first table entry into PM registers
-
-; Finish by loading the next DLI's colors.  The second score line preps the Beach.
-; This is redundant (useless) (time-wasting) work when not on the game display, 
-; but this is also not damaging.
-
-	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
-
-
-;==============================================================================
-; SCORE 2 DLI                                                            A 
-;==============================================================================
-; Used on Game displays.  
-; This is called on a blank before the text line. 
-; The VBI should have loaded up the Page zero staged colors. 
-; Only ColorPF1 matters for the playfielld as the background and border will 
-; be forced to black. 
-; This also sets Player/Missile parameters for P0,P1,P2, M0 and M1 to show 
-; the "Frogs" and "Saved" text.
-; Since all of this takes place in the blank space then it does not 
-; matter that there is no WSYNC.  
-; -----------------------------------------------------------------------------
-
-Score2_DLI
-
-	mStart_DLI
-
-	lda ColorPF1         ; Get text color (luminance)
-	sta COLPF1           ; write new text color.
-
-	jsr LoadPMSpecs1     ; Load the first table entry into PM registers
-
-; Finish by loading the next DLI's colors.  The second score line preps the Beach.
-; This is redundant (useless) (time-wasting) work when not on the game display, 
-; but this is also not damaging.
-
-	jmp SetupAllOnNextLine_DLI ; Load colors for next DLI and end.
 
 
 ;==============================================================================
@@ -1149,27 +1150,27 @@ SetupAllColors
 ; Then fall through to set all the main playfield P/M object values.
 ; -----------------------------------------------------------------------------
 
-Score_Title_With_PMG
+;Score_Title_With_PMG
 
-	lda ColorPF1         ; Get text color (luminance)
-	sta COLPF1           ; write new text color.
+;	lda ColorPF1         ; Get text color (luminance)
+;	sta COLPF1           ; write new text color.
 
-	lda #COLOR_BLACK     ; Black for background and text background.
-	sta COLBK            ; Write new border color.
-	sta COLPF2           ; Write new background color
+;	lda #COLOR_BLACK     ; Black for background and text background.
+;	sta COLBK            ; Write new border color.
+;	sta COLPF2           ; Write new background color
 	
-	jsr LoadPmSpecs0
+;	jsr LoadPmSpecs0
 	
-	sta wsync ; Skip some scan lines to pass the top line of scrore labels.
-	sta wsync
-	sta wsync
-	sta wsync
-	sta wsync
-	sta wsync
+;	sta wsync ; Skip some scan lines to pass the top line of score labels.
+;	sta wsync
+;	sta wsync
+;	sta wsync
+;	sta wsync
+;	sta wsync
 
-	jsr libSetPmgHPOSZero  ; Remove second line of P/M labels from display.
+;	jsr libSetPmgHPOSZero  ; Remove second line of P/M labels from display.
 
-	rts
+;	rts
 
 
 ;==============================================================================
@@ -1217,39 +1218,6 @@ DO_SPLASH_PMGZERO_DLI
 	mStart_DLI
 
 	jsr libSetPmgHPOSZero 
-
-	jmp Exit_DLI
-
-
-
-;==============================================================================
-; DO_SPLASH_PMGSPECS0_DLI                                              A
-;==============================================================================
-; The three graphics screen (Saved, Dead Frog, and Game Over) have exactly the
-; same display list structure and DLIs.  
-; Sets background color and the COLPF0 pixel color.  
-; Table driven.  
-; Perfectly re-usable for anywhere Map Mode 9 or Blank instructions are 
-; being managed.  In the case of blank lines you just don't see the pixel 
-; color change, so it does not matter what is in the COLPF0 color table. 
-; -----------------------------------------------------------------------------
-
-DO_SPLASH_PMGSPECS0_DLI
-
-	mStart_DLI
-
-	lda COLPF0_TABLE,y   ; Get pixels color
-	pha
-	lda COLBK_TABLE,y    ; Get background color
-
-;	sta WSYNC
-	sta WSYNC
-	
-	sta COLBK            ; Set background
-	pla
-	sta COLPF0           ; Set pixels.
-
-	jsr LoadPmSpecs0 
 
 	jmp Exit_DLI
 

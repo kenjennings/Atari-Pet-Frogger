@@ -457,7 +457,7 @@ WobOffsetY        .byte 0         ; 75 for Frog. XX for Tomb.
 ; After processing input (from the joystick) this is the number of frames
 ; to count before new input is accepted.  This prevents moving the frog at
 ; 60 fps and maybe-sort-of compensates for jitter/uneven debounce of the 
-; joystick bits by flaky controllers.
+; joystick bits by flaky controllers. That's the theory.
 InputScanFrames   .byte $00 ; = INPUTSCAN_FRAMES
 InputStick        .byte $00 ; = STICK0 cooked to turn on direction bits + trigger
 
@@ -470,47 +470,52 @@ EventStage        .byte 0 ; An ID for directing multi-part events.
 EventCounter      .byte 0
 EventCounter2     .byte 0 ; Used for other counting, such as long event counting.
 
-; Miscellaneous temporary values as a result of lazy and stupid 
-; subroutine programming. 
-TempWipeColor     .byte 0 ; Used in a color update loop for splash screen.
-SavePF            .byte 0 ; Temp values for SliceColorAndLuma
-SavePFC           .byte 0 ; Temp values for SliceColorAndLuma
-TempSaveColor     .byte 0 ; Nudder temp value
-TempTargetColor   .byte 0 ; an a nudder.
-EverythingMatches .byte 0 ; Logical condition collection indicating all colors examined do match.
-						  ; Bits $10, $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2, COLPF3
-MainPointer1      .word 0 ; Random use for Main code.
-MainPointer2      .word 0 ; Random use for Main code.
+BasePmgAddr       .word $0000 ; Pointer to base table per the current display.  Set by VBI.  Used by Main.
 
-BasePmgAddr       .word $00 ; Pointer to base table per the current display.  Set by VBI.  Used by Main.
+; Miscellaneous temporary values.  Smells like the result of 
+; lazy and stupid subroutine programming. 
+TempWipeColor     ; Used in a color update loop for splash screen.
+SavePF            ; Temp values for SliceColorAndLuma
+TempSaveColor     ; Yet another temp value for .. reasons
+TEMP1             .byte 0
 
+SavePFC           ; Temp values for SliceColorAndLuma
+TempTargetColor   ; And another temp value.
+TEMP2             .byte 0
+
+EverythingMatches ; Logical condition collection indicating all colors examined do match.
+				  ; Bits $10, $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2, COLPF3
+TEMP3             .byte 0
+
+MainPointer1      .word $0000 ; Random use for Main code.
+MainPointer2      .word $0000 ; Random use for Main code.
 
 
 ; ======== D L I ======== DLI TABLES
 ; Pointer to current DLI address chain table.  (ThisDLIAddr),Y = DLI routine low byte.
-ThisDLIAddr     .word TITLE_DLI_CHAIN_TABLE  ; by default (VBI corrects this)
+ThisDLIAddr       .word TITLE_DLI_CHAIN_TABLE  ; by default (VBI corrects this)
 ; Index read by the Display List Interrupts to change the colors for each line.
 ; Note that since entry 0 in the DLI chain tables is for the first entry set
 ; by the VBI, the VBI starts the counter for DLI operation at 1 instead of 0
-ThisDLI         .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
+ThisDLI           .byte $00   ; = counts the instance of the DLI for indexing into the color tables.
 
 ; For speed reasons (I think)  the next DLI's values are pre-loaded into zero page.
-ColorBak     .byte $00 ; Attempt at optimization to save tya; pha; ldy $, lda $,y....
-ColorPF0     .byte $00   
-ColorPF1     .byte $00   
-ColorPF2     .byte $00   
-ColorPF3     .byte $00  
-NextHSCROL   .byte $00
+ColorBak          .byte $00 ; Attempt at optimization to save tya; pha; ldy $, lda $,y....
+ColorPF0          .byte $00   
+ColorPF1          .byte $00   
+ColorPF2          .byte $00   
+ColorPF3          .byte $00  
+NextHSCROL        .byte $00
 
 
 ; ======== V B I ======== TIMER FOR MAIN CODE
 ; Frame counter set by main code events for delay/speed of main activity.
 ; The VBI decrements this value until 0.
 ; Main code acts on value 0.
-AnimateFrames    .byte $00 
-AnimateFrames2   .byte $00
-AnimateFrames3   .byte $00  ; WobbleDeWobble
-AnimateFrames4   .byte $00  ; Title Label flash
+AnimateFrames     .byte $00 
+AnimateFrames2    .byte $00
+AnimateFrames3    .byte $00  ; WobbleDeWobble
+AnimateFrames4    .byte $00  ; Title Label flash
 
 ; ======== V B I ======== MANAGE DISPLAY LISTS
 ; DISPLAY_TITLE = 0
@@ -521,14 +526,20 @@ AnimateFrames4   .byte $00  ; Title Label flash
 ; A display number written here by main code directs the VBI to update the
 ; screen pointers and the pointers to the color tables. Updated by VBI to
 ; $FF when update is completed.
-VBICurrentDL     .byte $FF ; !$FF = Direct VBI to change to new display.
-CurrentDL        .byte DISPLAY_TITLE
+VBICurrentDL      .byte $FF ; !$FF = Direct VBI to change to new display.
+CurrentDL         .byte DISPLAY_TITLE
+
+
+; ======== V B I ======== SCROLLING TITLE MANAGEMENT
+VBIEnableScrollTitle .byte $00 ; Flag from Main to VBI to direct to start scrolling. VBI will clear.
+TitleHSCROL          .byte $00 ; HSCROLL for title graphics
+RestoreTitleTimer    .byte $00 ; After scroll is done, wait this long to return to title.
 
 
 ; ======== V B I ======== SCROLLING CREDITS MANAGEMENT
 ; VBI's Animation counter for scrolling the credit line. when it reaches 0, then scroll.
-ScrollCounter   .byte 2
-CreditHSCROL    .byte 4  ; Fine scrolling the credits
+ScrollCounter     .byte 2
+CreditHSCROL      .byte 4  ; Fine scrolling the credits
 
 
 ; ======== V B I ======== FROG EYEBALL MOVEMENT
@@ -553,12 +564,12 @@ FrogRefocus       .byte 0         ; Countdown timer to return the eyeballs to th
 ; Boat movements are managed by the VBI.
 ; The frame count value comes from BOAT_FRAMES based on the number of 
 ; frogs that crossed the river (FrogsCrossed) (0 to 10 difficulty level).
-CurrentRowLoop    .byte 0 ; Count from 0 to 18 in VBI
-CurrentBoatFrames .ds   19  ; How many frames does each row wait?
+CurrentRowLoop     .byte 0 ; Count from 0 to 18 in VBI
+CurrentBoatFrames  .ds   19  ; How many frames does each row wait?
 ; Count frames until next boat movement. (Note that 0 correctly means move every frame).
-BoatFramesPointer .word BOAT_FRAMES 
+BoatFramesPointer  .word BOAT_FRAMES 
 ; How many color clocks did boats move on this frame (to move the frog accordingly)
-BoatMovePointer   .word BOAT_SHIFT
+BoatMovePointer    .word BOAT_SHIFT
 
 
 ; ======== V B I ======== BOAT ANIMATED COMPONENTS
@@ -573,8 +584,8 @@ BoatyComponent     .byte 0  ; 0, 1, 2, 3 one of the four boat parts.
 BoatyFrame         .byte 0  ; counts 0 to 7.
 
 ; Need a pointer for random uses?
-VBIPointer1      .word $0000
-VBIPointer2      .word $0000
+VBIPointer1        .word $0000
+VBIPointer2        .word $0000
 
 
 ; ======== V B I ======== PRESS A BUTTON MANAGEMENT
@@ -654,12 +665,12 @@ SOUND_DURATION3 .byte $00
 ; also eliminates any possibility of the text glitching when switching 
 ; between displays.   
 
-BOTTOM_OF_DISPLAY                    ; Prior to this DLI SPC1 set colors and HSCROL
-	mDL_LMS DL_TEXT_2,ANYBUTTON_MEM  ; (+0 to +7)   Prompt to start game.
-	.by DL_BLANK_1|DL_DLI            ; (+8)         DLI SPC2, set COLBK/COLPF2/COLPF1 for scrolling text.
+BOTTOM_OF_DISPLAY                                 ; Prior to this DLI SPC1 set colors and HSCROL
+	mDL_LMS DL_TEXT_2,ANYBUTTON_MEM               ; (190-197) (+0 to +7)   Prompt to start game.
+	.by DL_BLANK_1|DL_DLI                         ; (198)     (+8)         DLI SPC2, set COLBK/COLPF2/COLPF1 for scrolling text.
 DL_SCROLLING_CREDIT
 SCROLL_CREDIT_LMS = [* + 1]
-	mDL_LMS DL_TEXT_2|DL_HSCROLL,SCROLLING_CREDIT ; (+9 to +16)  The perpetrators identified
+	mDL_LMS DL_TEXT_2|DL_HSCROLL,SCROLLING_CREDIT ; (199-206) (+9 to +16)  The perpetrators identified
 ; Note that as long as the system VBI is functioning the address 
 ; provided for JVB does not matter at all.  The system VBI will update
 ; ANTIC after this using the address in the shadow registers (SDLST)

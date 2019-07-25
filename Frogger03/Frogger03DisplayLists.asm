@@ -100,59 +100,64 @@ MAX_DISPLAYS  = 5
 
 TITLE_DISPLAYLIST
 	.byte DL_BLANK_8, DL_BLANK_4|DL_DLI
-	.byte DL_BLANK_3                       ; 20 blank scan lines.  
+	.byte DL_BLANK_3                         ; 15 blank scan lines (instead of the usual 24).
+	;                                                    SCORE DLI 0/Score1 sets COLPF1, COLPF2/COLBK for score text, and PMG
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1      ; (1-8)     Labels for scores 1.
+	;                                                    SCORE DLI 1/Score2 sets COLPF1, COLPF2/COLBK for score text, and PMG
+	.byte DL_BLANK_1                         ; (9)
 
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1    ; (1-8)     Labels for scores 1. 
-	;                                                  SCORE DLI 0/1 sets COLPF1, COLPF2/COLBK for score text.
-	.byte DL_BLANK_1                       ; (9)
-	mDL_LMS DL_TEXT_2,SCORE_MEM2           ; (10-17)   Labels for Scores 2.
+	mDL_LMS DL_TEXT_2,SCORE_MEM2             ; (10-17)   Labels for Scores 2.
 
-	;                                                  DLI 2/2 sets COLPF0,1,2,3,BK for Beach.
+	.byte DL_BLANK_3|DL_DLI                  ; (18-20)   Blank before Title graphics
+	;                                                    DLI 2/SPLASH_PMGSPECS2_DLI - Load PM Specs + COLPF0_COLBK_DLI
+	;                Title Graphics... HSCROL means to show all color clocks LMS must be -1, HSCROL 0
+TT_LMS0 = [* + 1]                            ;           Plus 1 is the address of the display list LMS
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1-1     ; (21-24)   DLI 3/COLPF0_COLBK_DLI Set COLPF0 for Line 2
+TT_LMS1 = [* + 1]                            ;           Plus 1 is the address of the display list LMS
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1-1+20  ; (25-28)   DLI 4/COLPF0_COLBK_DLI Set COLPF0 for Line 3
+TT_LMS2 = [* + 1]                            ;           Plus 1 is the address of the display list LMS
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1-1+40  ; (29-32)   DLI 5/COLPF0_COLBK_DLI Set COLPF0 for Line 4
+TT_LMS3 = [* + 1]                            ;           Plus 1 is the address of the display list LMS
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1-1+60  ; (33-36)   DLI 6/COLPF0_COLBK_DLI Set COLPF0 for Line 5
+TT_LMS4 = [* + 1]                            ;           Plus 1 is the address of the display list LMS
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1-1+80  ; (37-40)   DLI 7/COLPF0_COLBK_DLI Set COLPF0 for Line 6
+TT_LMS5 = [* + 1]                            ;           Plus 1 is the address of the display list LMS
+	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1-1+100 ; (41-44)   DLI 8/COLPF0_COLBK_DLI Set COLPF0 for underlines
 
-	.byte DL_BLANK_3|DL_DLI                ; (19-20)   Blank before Title graphics
+	.byte   DL_BLANK_2                       ; (45-46)   An empty line.      2
+	mDL_LMS DL_MAP_9,TITLE_UNDERLINE         ; (47-50)   Underlines        + 4
+	.byte   DL_BLANK_2|DL_DLI                ; (51-52)   An empty line.    + 2 = 8 
+	;                                                    DLI 9/TITLE_DLI_BLACKOUT set BLACK for COLBK.
 
-	;                                        Title Graphics...
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1     ; (21-24)   DLI 2/2 COLPF0_COLBK_DLI Set COLPF0 for Line 2
-	.byte   DL_MAP_9|DL_DLI                ; (25-28)   DLI 2/3 COLPF0_COLBK_DLI Set COLPF0 for Line 3
-	.byte   DL_MAP_9|DL_DLI                ; (29-32)   DLI 2/4 COLPF0_COLBK_DLI Set COLPF0 for Line 4
-	.byte   DL_MAP_9|DL_DLI                ; (33-36)   DLI 2/5 COLPF0_COLBK_DLI Set COLPF0 for Line 5
-	.byte   DL_MAP_9|DL_DLI                ; (37-40)   DLI 2/6 COLPF0_COLBK_DLI Set COLPF0 for Line 6
-	.byte   DL_MAP_9|DL_DLI                ; (41-44)   DLI 2/7 COLPF0_COLBK_DLI Set COLPF0 for underlines
+	.byte   DL_BLANK_8|DL_DLI                ; (53-60)   DLI 10/TITLE_DLI_TEXTBLOCK set AQUA for COLBK and COLPF2, and set COLPF1
 
-	.byte   DL_BLANK_2                     ; (45-46)   An empty line.      2
-	.byte   DL_MAP_9                       ; (47-50)   Underlines        + 4
-	.byte   DL_BLANK_2|DL_DLI              ; (51-52)   An empty line.    + 2 = 8 
-	;                                                  DLI 3/8 TITLE_DLI_3 set BLACK for COLBK.
+	;                 Basic Instructions... 
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1   ; (61-68)   DLI 11/TITLE_DLI_TEXTBLOCK set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI                 ; (69-76)   DLI 12/TITLE_DLI_TEXTBLOCK set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI                 ; (77-84)   DLI 13/TITLE_DLI_TEXTBLOCK set COLPF1 text
+	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM4   ; (85-92)   DLI 14/TITLE_DLI_TEXTBLOCK set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI                 ; (93-100)  DLI 15/TITLE_DLI_TEXTBLOCK set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI                 ; (101-108) DLI 16/TITLE_DLI_TEXTBLOCK set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI                 ; (109-116) DLI 17/TITLE_DLI_TEXTBLOCK set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI                 ; (117-124) DLI 18/TITLE_DLI_BLACKOUT set BLACK for COLBK
 
-	.byte   DL_BLANK_8|DL_DLI              ; (55-62)   DLI 4/9 TITLE_DLI_4 set AQUA for COLBK and COLPF2, and set COLPF1
+	.byte   DL_BLANK_8|DL_DLI                ; (125-132) DLI 19/TITLE_DLI_TEXTBLOCK set ORANGE2 for COLBK and COLPF2, set COLPF1 text
 
-	;                                        Basic Instructions... 
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM1 ; (57-64)   DLI 5/10 TITLE_DLI_5 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (65-72)   DLI 5/11 TITLE_DLI_5 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (73-80)   DLI 5/12 TITLE_DLI_5 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (81-88)   DLI 5/13 TITLE_DLI_5 set COLPF1 text
-	mDL_LMS DL_TEXT_2|DL_DLI,INSTRUCT_MEM5 ; (89-96)   DLI 5/14 TITLE_DLI_5 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (97-104)  DLI 5/15 TITLE_DLI_5 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (105-112) DLI 5/16 TITLE_DLI_5 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (113-120) DLI 3/17 TITLE_DLI_3 set BLACK for COLBK
+	;                                        ; Scoring.
+	.byte   DL_TEXT_2|DL_DLI                 ; (133-140) DLI 20/TITLE_DLI_TEXTBLOCK set COLPF1 text
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM2    ; (141-148) DLI 21/TITLE_DLI_TEXTBLOCK set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI                 ; (149-156) DLI 22/TITLE_DLI_BLACKOUT set BLACK for COLBK
 
-	.byte   DL_BLANK_8|DL_DLI              ; (121-128) DLI 4/18 TITLE_DLI_4 set ORANGE2 for COLBK and COLPF2, set COLPF1 text
+	.byte   DL_BLANK_8|DL_DLI                ; (157-164) DLI 23/TITLE_DLI_TEXTBLOCK set PINK for COLBK and COLPF2, and set COLPF1 text
 
-	;                                      ; Scoring.  
-	.byte   DL_TEXT_2|DL_DLI               ; (129-136) DLI 5/19 TITLE_DLI_5 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (137-144) DLI 5/20 TITLE_DLI_5 set COLPF1 text
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORING_MEM3  ; (145-152) DLI 3/21 TITLE_DLI_3 set BLACK for COLBK
+	;                 Game Controls...
+	.byte   DL_TEXT_2|DL_DLI                 ; (165-172) DLI 24/TITLE_DLI_TEXTBLOCK set COLPF1 text
+	.byte   DL_TEXT_2|DL_DLI                 ; (173-180) DLI 25/TITLE_DLI_BLACKOUT set BLACK for COLBK
 
-	.byte   DL_BLANK_8|DL_DLI              ; (153-160) An empty line. DLI 4/22 TITLE_DLI_4 set PINK for COLBK and COLPF2, and set COLPF1 text
+	.byte   DL_BLANK_8|DL_DLI                ; (181-188) DLI 26/SCP1 sets COLBK, COLPF2, COLPF1 colors. Then sets up for SPC2
+	.byte   DL_BLANK_1                       ; (189)     One extra to line up credit with the same line on the game screen 
 
-	;                                        Game Controls...
-	.byte   DL_TEXT_2|DL_DLI               ; (161-168) DLI 5/23 TITLE_DLI_5 set COLPF1 text
-	.byte   DL_TEXT_2|DL_DLI               ; (169-176) DLI 3/24 TITLE_DLI_3 set BLACK for COLBK
-
-	.byte   DL_BLANK_8|DL_DLI              ; (177-184) An empty line.  DLI SPC1/25 sets COLBK, COLPF2, COLPF1 colors.
-	.byte   DL_BLANK_1                     ; (185)     One extra to line up credit with the same line on the game screen 
-
-	mDL_JMP BOTTOM_OF_DISPLAY              ; (186-193, 194, 195-202) End of display.  See Page 0 for this evil.
+	mDL_JMP BOTTOM_OF_DISPLAY                ; (190-197, 198, 199-206) End of display.  See Page 0 for this evil.
 
 
 ; Revised V03 Main Game Play Screen:
@@ -220,152 +225,152 @@ TITLE_DISPLAYLIST
 
 GAME_DISPLAYLIST
 	.byte DL_BLANK_8, DL_BLANK_4|DL_DLI
-	.byte DL_BLANK_3                                ; 20 blank scan lines.  
-	;                                                           SCORE DLI 0/0 sets COLPF1, COLPF2/COLBK for score text.
+	.byte DL_BLANK_3                                ; 15 blank scan lines.  
+	;                                                           SCORE DLI 0/Score1 sets COLPF1, COLPF2/COLBK for score text.
 	
 	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM1             ; (1-8)     Labels for scores 1. 
-	;                                                           SCORE DLI 0/1 sets COLPF1, COLPF2/COLBK for score text.
-	
-	.byte DL_BLANK_1                                ; ()      
+	;                                                           SCORE DLI 1/Score2 sets COLPF1, COLPF2/COLBK for score text.
+
+	.byte DL_BLANK_1                                ; (9)      
 
 ; ========== Start
 
-	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM2             ; (9-16)    Labels for Scores 2.
-	;                                                           DLI 2/2 sets COLPF0,1,2,3,BK for Beach. (row 18)
+	mDL_LMS DL_TEXT_2|DL_DLI,SCORE_MEM2             ; (10-17)   Labels for Scores 2.
+	;                                                           DLI 2/BEACH0 sets COLPF0,1,2,3,BK for Beach. (row 18)
 
 ; ========== 1
 
-	.byte DL_BLANK_4                                ; (17)      Blank before Beach for time.
+	.byte DL_BLANK_4                                ; (18-21)   Blank before Beach for time.
 	
 PF_LMS0 = [* + 1]                                   ;           Plus 1 is the address of the display list LMS
-	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM0         ; (18-25)   Beach. 
-	;                                                           DLI 3/3 sets boats right (row 17) COLPF0,1,2,3,BK,HSCROLL.
-	.byte DL_BLANK_1                                ; (26)      One scan line 
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM0         ; (22-29)   Beach. 
+	;                                                           DLI 3/BEACH2BOAT sets boats right (row 17) COLPF0,1,2,3,BK,HSCROLL.
+	.byte DL_BLANK_1                                ; (30)      One scan line 
 
 PF_LMS1 = [* + 1] ; Right
-	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM1     ; (27-34)   Boats Right (row 17)
+	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM1     ; (31-38)   Boats Right (row 17)
 
-	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (35)      One scan line 
-	;                                                           DLI 3/4 sets boats left (row 16) COLPF0,1,2,3,BK,HSCROLL.
-	.byte DL_BLANK_1                                ; (36)      One scan line free time for DLI
+	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (39)      One scan line 
+	;                                                           DLI 4/BOAT2BOAT sets boats left (row 16) COLPF0,1,2,3,BK,HSCROLL.
+	.byte DL_BLANK_1                                ; (40)      One scan line free time for DLI
 
 PF_LMS2 = [* + 1] ; Left
-	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM2+8   ; (37-44)   Boats Left (row 16)
+	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM2+8   ; (41-48)   Boats Left (row 16)
 
 ; ========== 2
 
-	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (45)      One scan line 
-	;                                                           DLI 2/5 sets COLPF0,1,2,3,BK for Beach (row 15) 
+	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (49)      One scan line 
+	;                                                           DLI 5/BOAT2BEACH sets COLPF0,1,2,3,BK for Beach (row 15) 
 
 PF_LMS3 = [* + 1]                                   ;           Plus 1 is the address of the display list LMS
-	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM3         ; (46-53)   Beach. 
-	;                                                           DLI 3/6 sets boats right (row 14) COLPF0,1,2,3,BK,HSCROLL.
-	.byte DL_BLANK_1                                ; (54)      One scan line 
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM3         ; (50-57)   Beach. 
+	;                                                           DLI 6/BEACH2BOAT sets boats right (row 14) COLPF0,1,2,3,BK,HSCROLL.
+	.byte DL_BLANK_1                                ; (58)      One scan line 
 
 PF_LMS4 = [* + 1] ; Right
-	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM4+4   ; (55-62)   Boats Right (row 14)
+	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM4+4   ; (59-66)   Boats Right (row 14)
 
-	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (63)      One scan line 
-	;                                                           DLI 3/7 sets boats left (row 13) COLPF0,1,2,3,BK,HSCROLL.
-	.byte DL_BLANK_1                                ; (64)      One scan line free time for DLI
+	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (67)      One scan line 
+	;                                                           DLI 7/BOAT2BOAT sets boats left (row 13) COLPF0,1,2,3,BK,HSCROLL.
+	.byte DL_BLANK_1                                ; (68)      One scan line free time for DLI
 
 PF_LMS5 = [* + 1] ; Left
-	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM5+12  ; (65-72)   Boats Left (row 13)
+	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM5+12  ; (69-76)   Boats Left (row 13)
 
 ; ========== 3
 
-	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (73)      One scan line 
-	;                                                           DLI 2/8 sets COLPF0,1,2,3,BK for Beach (row 12) 
+	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (77)      One scan line 
+	;                                                           DLI 8/BOAT2BEACH sets COLPF0,1,2,3,BK for Beach (row 12) 
 
 PF_LMS6 = [* + 1]                                   ;           Plus 1 is the address of the display list LMS
-	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM6         ; (74-81)   Beach. 
-	;                                                           DLI 3/9 sets boats right (row 11) COLPF0,1,2,3,BK,HSCROLL.
-	.byte DL_BLANK_1                                ; (82)      One scan line 
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM6         ; (78-85)   Beach. 
+	;                                                           DLI 9/BEACH2BOAT sets boats right (row 11) COLPF0,1,2,3,BK,HSCROLL.
+	.byte DL_BLANK_1                                ; (86)      One scan line 
 
 PF_LMS7 = [* + 1] ; Right
-	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM7+4   ; (83-90)   Boats Right (row 11)
+	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM7+4   ; (87-94)   Boats Right (row 11)
 
-	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (91)      One scan line 
-	;                                                           DLI 3/10 sets boats left (row 10) COLPF0,1,2,3,BK,HSCROLL.
-	.byte DL_BLANK_1                                ; (92)      One scan line free time for DLI
+	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (95)      One scan line 
+	;                                                           DLI 10/BOAT2BOAT sets boats left (row 10) COLPF0,1,2,3,BK,HSCROLL.
+	.byte DL_BLANK_1                                ; (96)      One scan line free time for DLI
 
 PF_LMS8 = [* + 1] ; Left
-	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM8+12  ; (93-100)  Boats Left (row 10)
+	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM8+12  ; (97-104)  Boats Left (row 10)
 
 ; ========== 4
 
-	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (101)     One scan line 
-	;                                                           DLI 2/11 sets COLPF0,1,2,3,BK for Beach (row 9) 
+	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (105)     One scan line 
+	;                                                           DLI 11/BOAT2BEACH sets COLPF0,1,2,3,BK for Beach (row 9) 
 
 PF_LMS9 = [* + 1]                                   ;           Plus 1 is the address of the display list LMS
-	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM9         ; (102-109) Beach. 
-	;                                                           DLI 3/12 sets boats right (row 8) COLPF0,1,2,3,BK,HSCROLL.
-	.byte DL_BLANK_1                                ; (110)     One scan line 
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM9         ; (106-113) Beach. 
+	;                                                           DLI 12/BEACH2BOAT sets boats right (row 8) COLPF0,1,2,3,BK,HSCROLL.
+	.byte DL_BLANK_1                                ; (114)     One scan line 
 
 PF_LMS10 = [* + 1] ; Right
-	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM10+8  ; (111-118) Boats Right (row 8)
+	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM10+8  ; (115-122) Boats Right (row 8)
 
-	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (119)     One scan line 
-	;                                                           DLI 3/13 sets boats left (row 7) COLPF0,1,2,3,BK,HSCROLL.
-	.byte DL_BLANK_1                                ; (120)     One scan line free time for DLI
+	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (123)     One scan line 
+	;                                                           DLI 13/BOAT2BOAT sets boats left (row 7) COLPF0,1,2,3,BK,HSCROLL.
+	.byte DL_BLANK_1                                ; (124)     One scan line free time for DLI
 
 PF_LMS11 = [* + 1] ; Left
-	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM11+12 ; (121-128) Boats Left (row 7)
+	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM11+12 ; (125-132) Boats Left (row 7)
 
 ; ========== 5
 
-	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (129)     One scan line 
-	;                                                           DLI 2/14 sets COLPF0,1,2,3,BK for Beach (row 6) 
+	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (133)     One scan line 
+	;                                                           DLI 14/BOAT2BEACH sets COLPF0,1,2,3,BK for Beach (row 6) 
 
 PF_LMS12 = [* + 1]                                  ;           Plus 1 is the address of the display list LMS
-	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM12        ; (130-137) Beach. 
-	;                                                           DLI 3/15 sets boats right (row 5) COLPF0,1,2,3,BK,HSCROLL.
-	.byte DL_BLANK_1                                ; (138)     One scan line 
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM12        ; (134-141) Beach. 
+	;                                                           DLI 15/BEACH2BOAT sets boats right (row 5) COLPF0,1,2,3,BK,HSCROLL.
+	.byte DL_BLANK_1                                ; (142)     One scan line 
 
 PF_LMS13 = [* + 1] ; Right
-	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM13    ; (139-146) Boats Right (row 5)
+	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM13    ; (143-150) Boats Right (row 5)
 
-	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (147)      One scan line 
-	;                                                           DLI 3/16 sets boats left (row 4) COLPF0,1,2,3,BK,HSCROLL.
-	.byte DL_BLANK_1                                ; (148)     One scan line free time for DLI
+	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (151)     One scan line 
+	;                                                           DLI 16/BOAT2BOAT sets boats left (row 4) COLPF0,1,2,3,BK,HSCROLL.
+	.byte DL_BLANK_1                                ; (152)     One scan line free time for DLI
 
 PF_LMS14 = [* + 1] ; Left
-	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM14+4  ; (149-156) Boats Left (row 4)
+	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM14+4  ; (153-160) Boats Left (row 4)
 
 ; ========== 6
 
-	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (157)     One scan line 
-	;                                                           DLI 2/17 sets COLPF0,1,2,3,BK for Beach (row 3) 
+	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (161)     One scan line 
+	;                                                           DLI 17/BOAT2BEACH sets COLPF0,1,2,3,BK for Beach (row 3) 
 
 PF_LMS15 = [* + 1]                                  ;           Plus 1 is the address of the display list LMS
-	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM15        ; (158-165) Beach. 
-	;                                                           DLI 3/18 sets boats right (row 2) COLPF0,1,2,3,BK,HSCROLL.
-	.byte DL_BLANK_1                                ; (166)     One scan line 
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM15        ; (162-169) Beach. 
+	;                                                           DLI 18/BEACH2BOAT sets boats right (row 2) COLPF0,1,2,3,BK,HSCROLL.
+	.byte DL_BLANK_1                                ; (170)     One scan line 
 
 PF_LMS16 = [* + 1] ; Right
-	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM16+8  ; (167-174) Boats Right (row 2)
+	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM16+8  ; (171-178) Boats Right (row 2)
 
-	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (175)     One scan line 
-	;                                                           DLI 3/19 sets boats left (row 1) COLPF0,1,2,3,BK,HSCROLL.
-	.byte DL_BLANK_1                                ; (176)     One scan line free time for DLI
+	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (179)     One scan line 
+	;                                                           DLI 19/BOAT2BOAT sets boats left (row 1) COLPF0,1,2,3,BK,HSCROLL.
+	.byte DL_BLANK_1                                ; (180)     One scan line free time for DLI
 
 PF_LMS17 = [* + 1] ; Left
-	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM17+12 ; (177-184) Boats Left (row 1)
+	mDL_LMS DL_TEXT_4|DL_HSCROLL,PLAYFIELD_MEM17+12 ; (181-188) Boats Left (row 1)
 
 ; ========== End Beach 
 
-	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (185)     One scan line 
-	;                                                           DLI 2/20 sets COLPF0,1,2,3,BK for Beach (row 0) 
+	mDL_LMS DL_MAP_C|DL_DLI,MODE_C_COLPF0           ; (189)     One scan line 
+	;                                                           DLI 20/BOAT2BEACH sets COLPF0,1,2,3,BK for Beach (row 0) 
 
 PF_LMS18 = [* + 1]                                  ;           Plus 1 is the address of the display list LMS
-	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM18        ; (186-193) Beach. 
-	;                                                           DLI 5/21 HSCROL for credit, calls SPC2 to set COLPF2/COLBK Black
+	mDL_LMS DL_TEXT_4|DL_DLI,PLAYFIELD_MEM18        ; (190-197) Beach. 
+	;                                                           DLI 21/SPC2  then calls SPC2 to set COLPF2/COLBK Black
 
 ; ========== End 2
 
-	.byte DL_BLANK_1                                ; (194)     One scan line 
+	.byte DL_BLANK_1                                ; (198)     One scan line 
 
-	mDL_JMP DL_SCROLLING_CREDIT                     ; (195-202) End of display. No prompt for button. See Page 0 for the evil.
+	mDL_JMP DL_SCROLLING_CREDIT                     ; (199-206) End of display. No prompt for button. See Page 0 for the evil.
 
 
 
