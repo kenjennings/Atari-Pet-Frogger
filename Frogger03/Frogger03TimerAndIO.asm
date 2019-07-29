@@ -31,6 +31,7 @@
 BLINK_SPEED      = 3   ; Speed of updates to Press A Button prompt.
 
 TITLE_SPEED      = 2   ; Scrolling speed for title. 
+TITLE_DOWN_SPEED = 4   ; Shift title down before scroll.
 TITLE_WIPE_SPEED = 0   ; Title screen to game screen fade speed.
 
 WOBBLEX_SPEED    = 2   ; Speed of flying objects on Title and Game Over.
@@ -666,6 +667,8 @@ ExitMyDeferredVBI
 ;==============================================================================
 ; TITLE DLIs
 ;==============================================================================
+
+TITLE_DLI  ; Placeholder for VBI to restore staring address for DLI chain.
 
 ;==============================================================================
 ; TITLE_DLI_BLACKOUT                                             

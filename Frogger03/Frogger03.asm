@@ -431,12 +431,15 @@ FrogUpdate        .byte 0         ; 0 = no movement.  >0 = Any reason to change 
 
 FrogSafety        .byte 0         ; = 0 When Frog OK.  !0 == Yer Dead.  Can be set by VBI. Main must change shape.
 
-
-FrogsCrossed      .byte 0         ; = Number Of Frogs crossed
-FrogsCrossedIndex .byte 0         ; FrogsCrossed, limit to range of 0 to 13 difficulty, then times 18.  
+FrogsCrossed      .byte 0         ; = Number Of Frogs crossed in this game
+FrogsCrossedIndex .byte 0         ; FrogsCrossed + NewLevelStart, limit to range of 0 to 13 difficulty, then times 18.  
                                   ; FrogsCrossedIndex + FrogRow = Index to read from master lookups. 
+NewLevelStart     .byte 0         ; = Starting difficulty for new game.  (New level Start  + Frogs Crossed)
+LastLevelStart    .byte 0         ; = Previous game starting difficulty.
 
-NumberOfLives     .byte 0         ; = Is the Number Of Lives
+NumberOfLives     .byte 0         ; = Is the Number Of Lives remaining in this game
+NewNumberOfLives  .byte 3         ; = Starting number of lives for new game.
+LastNumberofLives .byte 3         ; = Previous game starting number of lives.
 
 ScoreToAdd        .byte 0         ; = Number To Be Added to Score
 NumberOfChars     .byte 0         ; = Number Of Characters across for score
@@ -477,15 +480,15 @@ BasePmgAddr       .word $0000 ; Pointer to base table per the current display.  
 TempWipeColor     ; Used in a color update loop for splash screen.
 SavePF            ; Temp values for SliceColorAndLuma
 TempSaveColor     ; Yet another temp value for .. reasons
-TEMP1             .byte 0
+ataTEMP1          .byte 0
 
 SavePFC           ; Temp values for SliceColorAndLuma
 TempTargetColor   ; And another temp value.
-TEMP2             .byte 0
+ataTEMP2          .byte 0
 
 EverythingMatches ; Logical condition collection indicating all colors examined do match.
 				  ; Bits $10, $8, $4, $2, $1 for COLBK, COLPF0, COLPF1, COLPF2, COLPF3
-TEMP3             .byte 0
+ataTEMP3          .byte 0
 
 MainPointer1      .word $0000 ; Random use for Main code.
 MainPointer2      .word $0000 ; Random use for Main code.

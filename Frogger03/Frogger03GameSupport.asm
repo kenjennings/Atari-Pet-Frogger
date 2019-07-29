@@ -65,6 +65,7 @@
 ; kind of parallax effect. almost).
 
 MAX_FROG_SPEED = 13 ; Number of difficulty levels (which means 14)
+MAX_FROG_LIVES = 7  ; User chosen number of frogs.
 
 ; About the arrays below.  18 bytes per row instead of 19:
 ; FrogRow ranges from 0 to 18 which is 19 rows.  The first and
@@ -458,7 +459,9 @@ ReallyExitFromDecColor
 
 MultiplyFrogsCrossed
 
-	lda FrogsCrossed
+	lda FrogsCrossed              ; How many Frogs saved?
+	clc                           ; Plus...
+	adc NewLevelStart             ; the starting difficulty level.
 	cmp #MAX_FROG_SPEED+1         ; Number of difficulty levels. 0 to 10 OK.  11 not so much
 	bcc SkipLimitCrossed
 	lda #MAX_FROG_SPEED

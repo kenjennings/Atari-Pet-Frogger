@@ -495,12 +495,19 @@ ClearSavedFrogs
 
 	ldx #20
 RemoveFroggies
-	sta SCREEN_SAVED-1,x     ; Write to screen 
-	dex                      ; Erase county-counter frog character
-	bne RemoveFroggies       ; then go back and remove the next frog counter.
+	sta SCREEN_SAVED-1,x      ; Write to screen 
+	dex                       ; Erase county-counter frog character
+	bne RemoveFroggies        ; then go back and remove the next frog counter.
 
-	sta FrogsCrossed         ; reset count to 0.  (Remember A == space == 0 ?)
-	sta FrogsCrossedIndex    ; and the base index into difficulty arrays
+	sta FrogsCrossed          ; reset count to 0.  (Remember A == space == 0 ?)
+	clc                       ; Plus...
+	adc NewLevelStart         ; the currently selected starting level.
+	cmp #MAX_FROG_SPEED+1     ; Number of difficulty levels. 0 to 10 OK.  11 not so much
+	bcc bCSF_SkipLimitCrossed 
+	lda #MAX_FROG_SPEED       ; Or Reset to max level.
+
+bCSF_SkipLimitCrossed
+	sta FrogsCrossedIndex    ; sets the base index into difficulty arrays
 	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
 
 	lda #COLOR_GREEN+$F      ; Glow the Saved label.  VBI will decrement it.
@@ -1876,6 +1883,8 @@ bTLF_Exit
 
 TitleShiftDown
 
+	jsr TitleWaitForScanLine88 ; Be sure the beam passed the title. 
+
 	ldx #9
 
 bTSD_Loop
@@ -1914,6 +1923,101 @@ bTSD_ColorLoop
 
 
 ; ==========================================================================
+; Screen codes for printing the numbers for the Option/Select Hacks.
+; ==========================================================================
+; Combine something from the "LIST" and stuff it into the "NUMBER" 
+; location, then print the string to pixels.
+; --------------------------------------------------------------------------
+
+LEVEL_TEXT   .sb " LEVEL "
+LEVEL_NUMBER .sb "   "       ; Actual number goes here.
+
+LIVES_LIST                        ; Reference 1 to 7 as --X, so 0 to 8
+LEVEL_LIST1  .sb "12345678911111" ; 0 to 13 == 1 to 14
+LEVEL_LIST2  .sb "         01234" ; 
+
+LIVES_TEXT   .sb " "
+LIVES_NUMBER .sb "  LIVES  " ; Actual number goes there
+
+
+; ==========================================================================
+; TITLE PREP LEVEL
+; ==========================================================================
+; Convert the user-selected NewLevelStart to "text" built of pixels
+; that will be scrolled into the Title area.
+; --------------------------------------------------------------------------
+
+TitlePrepLevel
+
+	ldx NewLevelStart ; 0 to 13  is 1 to 14
+	lda LEVEL_LIST1,x
+	sta LEVEL_NUMBER
+	lda LEVEL_LIST2,x
+	sta LEVEL_NUMBER+1
+
+	lda #<LEVEL_TEXT
+	ldx #>LEVEL_TEXT
+
+	jmp TitleFinishPrep
+
+
+; ==========================================================================
+; TITLE PREP LIVES
+; ==========================================================================
+; Convert the user-selected NewNumberOfLives to "text" built of pixels
+; that will be scrolled into the Title area.
+; hackitty hack hack hack
+; --------------------------------------------------------------------------
+
+TitlePrepLives
+
+	ldx NewNumberOfLives ; 1 to 7 
+	dex
+	bne bTPL_UsePlural ; 1 LIFE, 2 LIVES, right?
+	; Singular
+	lda #I_F
+	sta LIVES_NUMBER+4
+	lda #I_SPACE
+	sta LIVES_NUMBER+6
+	beq bTPL_SkipPlural
+
+bTPL_UsePlural
+	lda #I_V
+	sta LIVES_NUMBER+4
+	lda #I_S
+	sta LIVES_NUMBER+6
+
+bTPL_SkipPlural
+	lda LEVEL_LIST1,x
+	sta LIVES_NUMBER
+
+	lda #<LIVES_TEXT
+	ldx #>LIVES_TEXT
+
+	jmp TitleFinishPrep
+
+
+; ==========================================================================
+; TITLE FINISH PREP
+; ==========================================================================
+; Common code.  Fill in pointer, set length.  Print the pixels.
+; A+X == Address of screen codes to print.
+; --------------------------------------------------------------------------
+
+TitleFinishPrep
+
+	sta MainPointer1
+	stx MainPointer1+1
+
+	ldx #0
+	ldy #10
+
+	jsr TitlePrintString
+
+	rts
+
+
+; ==========================================================================
 ; TITLE PRINT STRING                                MainPointer1  A  X  Y
 ; ==========================================================================
 ; Iterate through a string of internal screen code characters.
@@ -1937,7 +2041,7 @@ TitlePrintString
 
 	ldy #0                ; Start working length at 0 (index into input).
 bTPS_Loop
-	lda (MaintPointer1),y ; Get internal code character from input
+	lda (MainPointer1),y ; Get internal code character from input
 	jsr TitlePrintChar    ; Print it.  This routine preserves all registers.
 	inx                   ; Next character position in output screen buffer
 	iny                   ; Next position in the input string
@@ -2029,10 +2133,7 @@ bTPC_Exit
 
 TitleSetOrigin
 
-bTSO_WaitForScan88         ; Be sure the display passed the end of the title before changing LMS.
-	lda VCOUNT             ; 
-	cmp #44                ; scan line 88 / 2 should be ok.
-	bcc bTSO_WaitForScan88 ; Loop until scan line after the Title.
+	jsr TitleWaitForScanLine88 ; Be sure the beam passed the title. 
 
 	ldx #5
 
@@ -2105,6 +2206,23 @@ bTCRTLG_Loop
 
 	dex
 	bpl bTCRTLG_Loop
+
+	rts
+
+
+; ==========================================================================
+; TITLE WAIT FOR SCAN LINE 88                                             
+; ==========================================================================
+; Wait to start changes to the Title graphics until after the electron beam
+; passes the title block.  This should prevent visible tearing or glitches 
+; while updating LMS or actual pixel values. 
+; --------------------------------------------------------------------------
+
+TitleWaitForScanLine88
+
+	lda VCOUNT                 ; Current electron bean scan line
+	cmp #44                    ; scan line 88 / 2 should be ok.
+	bcc TitleWaitForScanLine88 ; Loop until scan line after the Title.
 
 	rts
 

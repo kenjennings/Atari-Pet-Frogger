@@ -66,6 +66,9 @@ EVENT_TRANS_TITLE = 11 ; Transition animation from Game Over to Title.
 ; Called only once at start.  
 ; Transition to Title from here and all other events 
 ; will use non-zero events.
+; Note that the vast majority of game values in page 0 are automatically
+; set/initialized as load time, so there does not need to be any first-
+; time setup code here.
 ; --------------------------------------------------------------------------
 
 EventGameInit
@@ -118,7 +121,7 @@ EventGameInit
 	sta FlaggedHiScore
 	sta InputStick             ; no input from joystick
 
-	lda #COLOR_BLACK+$E        ; COLPF3 is white on all screens. it is up to DLIs to modify.
+	lda #COLOR_BLACK+$E        ; COLPF3 is white on all screens. it is up to DLIs to modify otherwise.
 	sta COLOR3
 
 	jsr libPmgInit             ; Will also reset SDMACTL settings for P/M DMA
@@ -131,9 +134,8 @@ EventGameInit
 ; ==========================================================================
 ; Event Process TRANSITION TO TITLE
 ; The setup for Transition to Title will turned on the Title Display.
-; Stage 1: Scroll in the Title graphic. (three lines, one at a time.)
-; Stage 2: Brighten line 4 luminance.
-; Stage 3: Initialize setup for Press Button on Title screen.
+; Stage 1: Start sound effects for rezz in Title graphics.
+; Stage 2: Go To Start event
 ; --------------------------------------------------------------------------
 
 EventTransitionToTitle
@@ -145,8 +147,9 @@ EventTransitionToTitle
 
 	lda EventStage           ; What stage are we in?
 	cmp #1
-	bne TestTransTitle2        ; Not the Title Scroll, try next stage
-
+;	bne TestTransTitle2        ; Not the Title noise, go to the setup for end.
+	bne GoToStartEventForTitle
+ 
 	; === STAGE 1 ===
 
 	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
@@ -164,26 +167,28 @@ FinishedNowSetupStage2
 	bne EndTransitionToTitle
 
 	; === STAGE 2 ===
-	; Ramp up luminance of line 4.
-TestTransTitle2
-	cmp #2
-	bne TestTransTitle3
 
-FinishedNowSetupStage3
-	lda #3                    ; Set stage 3 as next part of Title screen event...
-	sta EventStage
-	bne EndTransitionToTitle
+;TestTransTitle2
+;	cmp #2
+;	bne TestTransTitle3
+
+;FinishedNowSetupStage3
+;	lda #3                     ; Set stage 3 as next part of Title screen event...
+;	sta EventStage
+;	bne EndTransitionToTitle
 
 	; === STAGE 3 ===
-	; Set Up Press Any Button and get ready to run title screen/event.
-TestTransTitle3
-	cmp #3
-	bne EndTransitionToTitle  ; Really shouldn't get to that point
+
+;TestTransTitle3
+
+GoToStartEventForTitle
+;	cmp #3
+;	bne EndTransitionToTitle   ; Really shouldn't get to that point
 
 	lda #0 
 	sta EventStage
 
-	lda #EVENT_START         ; Yes, change to event to start new game.
+	lda #EVENT_START           ; Yes, change to event to start new game.
 	sta CurrentEvent
 
 EndTransitionToTitle
@@ -194,15 +199,23 @@ EndTransitionToTitle
 
 ; ==========================================================================
 ; Event process SCREEN START/NEW GAME
+; Copy the prior game setup to the prior game values.
 ; Clear the Game Scores and get ready for the Press A Button prompt.
 ;
 ; Sidebar: This is oddly inserted between Transition to Title and the
 ; Title to finish internal initialization per game, due to doofus-level
 ; lack of design planning, blah blah.
 ; The title screen has already been presented by Transition To Title.
+
 ; --------------------------------------------------------------------------
 
 EventScreenStart            ; This is New Game and Transition to title.
+
+	lda NewLevelStart       ; Copy the last game setups to the last game vars
+	sta LastLevelStart      
+
+	lda NewNumberOfLives    ; Copy the last game setups to the last game vars
+	sta LastNumberofLives
 
 	jsr ClearSavedFrogs     ; Erase the saved frogs from the screen. (Zero the count)
 	jsr PrintFrogsAndLives  ; Update the screen memory.
@@ -215,21 +228,33 @@ EventScreenStart            ; This is New Game and Transition to title.
 
 ; ==========================================================================
 ; Event Process TITLE SCREEN
-; The activity on the title screen is
-; 1) Blink Prompt for ANY key.
-; 2) Wait for joystick button.
-; 3) Setup for next transition.
+; The activity on the title screen:
+; Always draw the animated frog.
+; The frog animation is called on every frame.   The animated Rezz-in for 
+; the title test is also called on all frames.   There is no AnimateFrames
+; control of speed until the animations/scrolling for stage 2 and 3.
+; Stages: 
+; 0) Random rezz in for Title graphics.
+; Not Stage 0.
+; 1|4) Blink Prompt for ANY button, IF enabled.
+; Input checking is turned OFF during Stages 2, and 3.
+; 1) Just input checking per above, and testing Option/Select.
+; 2) Shifting Left Graphics down.
+; 3) OPTION or SELECT animation  scroll in.
+; 4) Waiting to return to Stage 0 (AnimateFrames2 timer).
 ; --------------------------------------------------------------------------
 
 EventTitleScreen
 
-	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
-	jsr FlashTitleLabels       ; Cycle the label flashing.
+; =============== Stage * ; Always run the frog and the label flashing. . .
+
+	jsr WobbleDeWobble         ; Frog drawing spirograph lines on the title.
+	jsr FlashTitleLabels       ; and cycle the label flashing.
 
 	lda EventStage
-	bne bETS_Stage1  ; stage is >0, so title treatment is over.
+	bne bETS_InputStage  ; stage is >0, so title treatment is over.
 
-; =============== Stage 0 ; Animating Logo only while sound runs
+; =============== Stage 0 ; Animating Title only while sound runs
 
 	lda SOUND_CONTROL3         ; Is channel 3 busy?
 	beq bETS_EndTitleAnimation ; No. Stop the title animation.
@@ -237,22 +262,26 @@ EventTitleScreen
 bETS_RandomizeLogo
 	lda #$FF                   ; Channel 3 is playing sound, so animate.
 	jsr TitleRender            ; and -1  means draw the random masked title.
-	jmp bETS_Stage1
+	jmp EndTitleScreen         ; Do not process input during the randomize.
 
 bETS_EndTitleAnimation
 	lda #1                     ; Draw the title as solid and stop animation.
 	sta EventStage             ; Stage 1 is always skip the title drawing.
+	sta EnablePressAButton     ; Turn On the prompt to press button (for later below).
 	jsr TitleRender            ; and 1 also means draw the solid title.
 
-; =============== Stage 1
+; =============== Stage-ish Not 0-ish, handling button input when Option/Select hacks are not in motion. 
 
-bETS_Stage1 
+bETS_InputStage 
 
 CheckTitleInput
-	jsr RunPromptForButton     ; Blink Prompt to press Joystick button and check input.
-	beq CheckOptionSelect      ; Nothing pressed, done with title screen.
+	lda EnablePressAButton     ; Is button input on?
+	beq CheckFunctionButton    ; No.  A later stage may still be running.
 
-ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transition.
+	jsr RunPromptForButton     ; Blink Prompt to press Joystick button and check input.
+	beq CheckFunctionButton    ; No joystick button.  Try a function key.
+
+ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transition to the game.
 	jsr SetupTransitionToGame
 
 	; This was part of the Start event, but after the change to keep the 
@@ -264,7 +293,7 @@ ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transiti
 
 	jmp EndTitleScreen
 
-	
+
 ; For the Option/Select handling it is  easy to maintain safe input (no 
 ; flaky on/offs) because once a key is read it takes a while to scroll 
 ; the text in, giving the user time to release the key.
@@ -276,7 +305,79 @@ ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transiti
 ; the default) OR the current level is less than the last game's starting 
 ; difficulty, then the high score is cleared on game start.
 
-CheckOptionSelect
+CheckFunctionButton
+	lda EventStage
+	cmp #1                   ; 1) Just doing input checking per above, and testing Option/Select.
+	beq CheckForConsoleInput
+	cmp #4                   ; 4) Just waiting to return to Stage 0.
+	beq CheckForConsoleInput
+	bne CheckTitleSlideDown ; 2) or 3) is animation in progress for Option or Select
+
+; =============== Stage 1 (or 4) ; Check on console keys.
+
+CheckForConsoleInput
+
+CheckOptionKey
+	lda CONSOL                 ; Get Option, Select, Start buttons
+	and #CONSOLE_OPTION        ; Is Option pressed?  0 = pressed. 1 = not
+	bne CheckSelectKey         ; No.  Try the select.
+	; increment starting frogs.
+	; generate string for right buffer
+	ldx NewLevelStart          
+	inx
+	cpx #[MAX_FROG_SPEED+1]    ; 13 + 1
+	bne bETS_SkipResetLevel
+	ldx #0
+bETS_SkipResetLevel
+	stx NewLevelStart
+
+	jsr TitlePrepLevel
+	jmp bETS_StartupStage2
+
+
+CheckSelectKey
+	lda CONSOL                 ; Get Option, Select, Start buttons
+	and #CONSOLE_SELECT        ; Is SELECT pressed?  0 = pressed. 1 = not
+	bne CheckSelectKey         ; No.  Try the select.
+	; increment lives.
+	; generate string for right buffer
+	ldx NewNumberOfLives
+	inx
+	cpx #[MAX_FROG_LIVES+1]    ; 7 + 1
+	bne bETS_SkipResetLives
+	ldx #1
+bETS_SkipResetLives
+	stx bETS_SkipResetLives
+	
+	jsr TitlePrepLives
+
+
+bETS_StartupStage2
+	lda #2
+	sta EventStage
+	lda #6
+	sta EventCounter
+	lda #TITLE_DOWN_SPEED
+	sta AnimateFrames
+	bne EndTitleScreen
+
+; =============== Stage 2 ; Shifting Left buffer down.
+
+CheckTitleSlideDown
+	lda EventStage
+	cmp #2
+	; Tell VBI to start scroll.
+	jsr TitlePrintString
+	inc VBIEnableScrollTitle
+	lda #3
+	sta EventStage
+	bne EndTitleScreen
+
+; =============== Stage 3 ; Scrolling in from Right to Left. 
+
+CheckTitleScroll
+	lda EventStage
+	cmp #3
 	lda VBIEnableScrollTitle   ; Is VBI busy scrolling option text?
 	bne EndTitleScreen         ; Yes.  Nothing more to do here.
 
@@ -287,12 +388,13 @@ CheckOptionSelect
 
 	; Readjust display to show the left buffer visible 
 	; and reset scrolling origin.
-	jsr CopyRightToLeftTitleGraphics ; Copy right buffer to left buffer.
+	jsr TitleCopyRightToLeftGraphics ; Copy right buffer to left buffer.
 	jsr TitleSetOrigin               ; Reset LMS to point to left buffer
+	
 
 CheckReturnToTitle             ; Did the timer expire to restore the title to the screen?
 	lda RestoreTitleTimer      ; Wait for Input timeout is expired. 
-	bne WaitForConsoleInput    ; If not 0, then continue on to check input.
+;	bne WaitForConsoleInput    ; If not 0, then continue on to check input.
 
 	; Restart title animation and phase 0
 	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
@@ -300,29 +402,7 @@ CheckReturnToTitle             ; Did the timer expire to restore the title to th
 	sta EventStage
 	bne EndTitleScreen
 
-
-WaitForConsoleInput
-
-CheckOptionKey
-	lda CONSOL                 ; Get Option, Select, Start buttons
-	and #CONSOLE_OPTION        ; Is Option pressed?  0 = pressed. 1 = not
-	bne CheckSelectKey         ; No.  Try the select.
-	; increment starting frogs.
-	; generate string for right buffer
-
-
-
-CheckSelectKey
-	lda CONSOL                 ; Get Option, Select, Start buttons
-	and #CONSOLE_OPTION        ; Is Option pressed?  0 = pressed. 1 = not
-	; increment starting frogs.
-	; generate string for right buffer
-
-
-	; print to right buffer.
-	; Tell VBI to start scroll.
-	jsr TitlePrintString
-	inc VBIEnableScrollTitle
+; =============== Stage 4 ; Waiting on AnimateFrames2 to return to Stage 0. 
 
 EndTitleScreen
 

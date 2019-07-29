@@ -104,7 +104,14 @@ I_SD = $4A ; "d", ctrl-J
 I_FROG1 = $7E ; DELETE, A Frog for frog counter. 
 I_FROG2 = $7F ; TAB, A Frog for frog counter. 
 
+; Used for the SELECT hack to play with number of lives to write the 
+; singular LIFE vs plural LIVES.
+I_SPACE = $00
+I_F     = $26
+I_S     = $33
+I_V     = $36
 
+ 
 	.align $0400 ; Start at ANTIC's 1K boundary for character sets
 
  
