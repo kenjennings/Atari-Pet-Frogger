@@ -229,15 +229,16 @@ EventScreenStart            ; This is New Game and Transition to title.
 ; ==========================================================================
 ; Event Process TITLE SCREEN
 ; The activity on the title screen:
-; Always draw the animated frog.
-; The frog animation is called on every frame.   The animated Rezz-in for 
-; the title test is also called on all frames.   There is no AnimateFrames
-; control of speed until the animations/scrolling for stage 2 and 3.
+; Always draw the animated frog. The frog animation is called on every 
+; since WobbleDeWobble manages timing and movement. 
+; The animated Rezz-in for the title text is also called on all frames.   
+; There is no AnimateFrames control of speed until the animations/scrolling 
+; for stage 2 and 3.
 ; Stages: 
 ; 0) Random rezz in for Title graphics.
 ; Not Stage 0.
-; 1|4) Blink Prompt for ANY button, IF enabled.
-; Input checking is turned OFF during Stages 2, and 3.
+; 1|4) Blink Prompt for joystick button.  Joystick button input is accepted.
+; Joystick button input is not observed during Stages 2, and 3.
 ; 1) Just input checking per above, and testing Option/Select.
 ; 2) Shifting Left Graphics down.
 ; 3) OPTION or SELECT animation  scroll in.
@@ -248,13 +249,13 @@ EventTitleScreen
 
 ; =============== Stage * ; Always run the frog and the label flashing. . .
 
-	jsr WobbleDeWobble         ; Frog drawing spirograph lines on the title.
+	jsr WobbleDeWobble         ; Frog drawing spirograph path on the title.
 	jsr FlashTitleLabels       ; and cycle the label flashing.
 
 	lda EventStage
-	bne bETS_InputStage  ; stage is >0, so title treatment is over.
+	bne bETS_InputStage        ; stage is >0, so title treatment is over.
 
-; =============== Stage 0 ; Animating Title only while sound runs
+; =============== Stage 0      ; Animating Title only while sound runs
 
 	lda SOUND_CONTROL3         ; Is channel 3 busy?
 	beq bETS_EndTitleAnimation ; No. Stop the title animation.
@@ -294,7 +295,7 @@ ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transiti
 	jmp EndTitleScreen
 
 
-; For the Option/Select handling it is  easy to maintain safe input (no 
+; For the Option/Select handling it is easy to maintain safe input (no 
 ; flaky on/offs) because once a key is read it takes a while to scroll 
 ; the text in, giving the user time to release the key.
 ; 
@@ -308,12 +309,97 @@ ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transiti
 CheckFunctionButton
 	lda EventStage
 	cmp #1                   ; 1) Just doing input checking per above, and testing Option/Select.
-	beq CheckForConsoleInput
-	cmp #4                   ; 4) Just waiting to return to Stage 0.
-	beq CheckForConsoleInput
-	bne CheckTitleSlideDown ; 2) or 3) is animation in progress for Option or Select
+	bne bETS_Stage2
 
-; =============== Stage 1 (or 4) ; Check on console keys.
+	jsr CheckForConsoleInput
+	jmp EndTitleScreen       ; Regardless of the console input, this is the end of stage 1.
+
+; =============== Stage 2    ; Shifting Left buffer down.
+
+bETS_Stage2
+	cmp #2
+	bne bETS_Stage3
+
+CheckTitleSlideDown 
+	lda AnimateFrames
+	bne EndTitleScreen       ; Animation frames not 0.  Wait till next time.
+
+	jsr TitleShiftDown       ; Shift Pixels down
+	dec EventCounter         ; Decrement number of times this is done.
+	bpl bETS_Stage2_ToStage3 ; When it is done, go to stage 3. 
+
+	lda #TITLE_DOWN_SPEED
+	sta AnimateFrames        ; Reset animation frame counter.
+	bne EndTitleScreen
+
+bETS_Stage2_ToStage3         ; Setup for next Stage
+	lda #3
+	sta EventStage
+
+	jsr RandomizeTitleColors ; Random color gradient for the Text pixels.
+
+	inc VBIEnableScrollTitle ; Turn on Title fine scrolling.
+	bne EndTitleScreen
+
+; =============== Stage 3    ; Scrolling in from Right to Left. 
+
+bETS_Stage3
+	cmp #3
+	bne bETS_Stage4
+
+CheckTitleScroll
+	lda VBIEnableScrollTitle   ; Is VBI busy scrolling option text?
+	bne EndTitleScreen         ; Yes.  Nothing more to do here.
+
+	; Is the title LMS pointing at the right buffer?
+	lda TT_LMS0                ; Get low byte of first LMS
+	cmp #<TITLE_END            ; Is it at the end?
+	beq EndTitleScreen         ; Yes.  Skip readjust to origin.
+
+	; Readjust display to show the left buffer visible 
+	; and reset scrolling origin.
+	jsr TitleCopyRightToLeftGraphics ; Copy right buffer to left buffer.
+	jsr TitleSetOrigin               ; Reset LMS to point to left buffer
+
+bETS_Stage3_ToStage4         ; Setup for next Stage
+	lda #4
+	sta EventStage
+	bne EndTitleScreen
+
+; =============== Stage 4 ; Waiting on RestoreTitleTimer to return to Stage 0. 
+
+bETS_Stage4
+	jsr CheckForConsoleInput ; Stage 4, allow console input.
+	beq bETS_CheckAutoReturn ; No console key pressed.  So, check if return is automatic.
+	lda #0                   ; Console key input reset path to Stage 2.  So, 0 the auto timer.
+	sta RestoreTitleTimer
+	beq EndTitleScreen
+
+bETS_CheckAutoReturn
+	lda RestoreTitleTimer    ; Wait for Input timeout to expire.  
+	bne EndTitleScreen       ; Not there yet.
+
+	; Expired auto timer... Return to Stage 0.
+	jsr ToPlayFXScrollOrNot  ; Start slide sound playing if not playing now.
+	lda #0
+	sta EventStage
+
+	jsr ResetTitleColors     ; Original title colors.
+
+
+EndTitleScreen
+
+	rts
+
+
+; ==========================================================================
+; Support Routine CHECK FOR CONSOLE INPUT
+; Evaluate if console key is pressed.
+; If so, then setup appropriate values for the scroll, and engage Stage 2.
+; Returns:
+; 0 for no input.
+; !0 for a CONSOLE key was pressed.
+; --------------------------------------------------------------------------
 
 CheckForConsoleInput
 
@@ -326,86 +412,45 @@ CheckOptionKey
 	ldx NewLevelStart          
 	inx
 	cpx #[MAX_FROG_SPEED+1]    ; 13 + 1
-	bne bETS_SkipResetLevel
+	bne bCFCI_SkipResetLevel
 	ldx #0
-bETS_SkipResetLevel
-	stx NewLevelStart
+bCFCI_SkipResetLevel
+	stx NewLevelStart          ; Updated starting level.
 
 	jsr TitlePrepLevel
-	jmp bETS_StartupStage2
+	jmp bCFCI_StartupStage2
 
 
 CheckSelectKey
 	lda CONSOL                 ; Get Option, Select, Start buttons
 	and #CONSOLE_SELECT        ; Is SELECT pressed?  0 = pressed. 1 = not
-	bne CheckSelectKey         ; No.  Try the select.
+	bne bCFCI_End              ; No.  Finished with all.
 	; increment lives.
 	; generate string for right buffer
 	ldx NewNumberOfLives
 	inx
 	cpx #[MAX_FROG_LIVES+1]    ; 7 + 1
-	bne bETS_SkipResetLives
+	bne bCFCI_SkipResetLives
 	ldx #1
-bETS_SkipResetLives
-	stx bETS_SkipResetLives
-	
+bCFCI_SkipResetLives
+	stx NewNumberOfLives
+
 	jsr TitlePrepLives
 
 
-bETS_StartupStage2
+bCFCI_StartupStage2
 	lda #2
-	sta EventStage
+	sta EventStage            ; Stage 2 is the shift Left Buffer down.
 	lda #6
-	sta EventCounter
+	sta EventCounter          ; Do it six times.
 	lda #TITLE_DOWN_SPEED
-	sta AnimateFrames
-	bne EndTitleScreen
+	sta AnimateFrames         ; Set animation speed.
+	bne bCFCI_Exit            ; Return !0 exit.
 
-; =============== Stage 2 ; Shifting Left buffer down.
+bCFCI_End
+	lda #0  ; 0 means nothing happened.
 
-CheckTitleSlideDown
-	lda EventStage
-	cmp #2
-	; Tell VBI to start scroll.
-	jsr TitlePrintString
-	inc VBIEnableScrollTitle
-	lda #3
-	sta EventStage
-	bne EndTitleScreen
-
-; =============== Stage 3 ; Scrolling in from Right to Left. 
-
-CheckTitleScroll
-	lda EventStage
-	cmp #3
-	lda VBIEnableScrollTitle   ; Is VBI busy scrolling option text?
-	bne EndTitleScreen         ; Yes.  Nothing more to do here.
-
-	; Is the title LMS pointing at the right buffer?
-	lda TT_LMS0                ; Get low byte of first LMS
-	cmp #<TITLE_END            ; Is it at the end? 
-	bne CheckReturnToTitle     ; No.  This means the readjusting work is done.
-
-	; Readjust display to show the left buffer visible 
-	; and reset scrolling origin.
-	jsr TitleCopyRightToLeftGraphics ; Copy right buffer to left buffer.
-	jsr TitleSetOrigin               ; Reset LMS to point to left buffer
-	
-
-CheckReturnToTitle             ; Did the timer expire to restore the title to the screen?
-	lda RestoreTitleTimer      ; Wait for Input timeout is expired. 
-;	bne WaitForConsoleInput    ; If not 0, then continue on to check input.
-
-	; Restart title animation and phase 0
-	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
-	lda #0 
-	sta EventStage
-	bne EndTitleScreen
-
-; =============== Stage 4 ; Waiting on AnimateFrames2 to return to Stage 0. 
-
-EndTitleScreen
-
+bCFCI_Exit
 	rts
 
 

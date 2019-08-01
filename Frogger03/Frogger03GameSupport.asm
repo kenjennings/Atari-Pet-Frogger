@@ -14,6 +14,7 @@
 
 ; ==========================================================================
 ; GAME SUPPORT
+; ==========================================================================
 ;
 ; Miscellaneous supporting data.
 ; Clear game scores.
@@ -64,8 +65,8 @@
 ; (and by making rows closer to the bottom run faster it produces a 
 ; kind of parallax effect. almost).
 
-MAX_FROG_SPEED = 13 ; Number of difficulty levels (which means 14)
-MAX_FROG_LIVES = 7  ; User chosen number of frogs.
+;MAX_FROG_SPEED = 13 ; Number of difficulty levels (which means 14)
+MAX_FROG_SPEED = 10 ; Number of difficulty levels (which means 11)
 
 ; About the arrays below.  18 bytes per row instead of 19:
 ; FrogRow ranges from 0 to 18 which is 19 rows.  The first and
@@ -82,19 +83,34 @@ MAX_FROG_LIVES = 7  ; User chosen number of frogs.
 
 BOAT_FRAMES ; Number of frames to wait to move boat. (top to bottom) (Difficulty 0 to 13)
 	.by 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7   ; Difficulty 0 
-	.by 0 7 7 0 7 7 0 7 7 0 5 5 0 5 5 0 5 5   ; Difficulty 1 
-	.by 0 7 7 0 7 7 0 5 5 0 5 5 0 3 3 0 3 3   ; Difficulty 2
-	.by 0 7 7 0 7 5 0 5 5 0 3 3 0 3 2 0 2 2   ; Difficulty 3 
-	.by 0 5 5 0 5 3 0 3 3 0 2 2 0 2 2 0 1 1   ; Difficulty 4 
-	.by 0 5 5 0 3 3 0 3 2 0 2 2 0 1 1 0 1 1   ; Difficulty 5 
-	.by 0 5 3 0 3 3 0 2 2 0 2 1 0 1 1 0 1 0   ; Difficulty 6 
-	.by 0 3 3 0 3 2 0 2 2 0 1 1 0 1 0 0 0 0   ; Difficulty 7
-	.by 0 3 3 0 2 2 0 1 1 0 1 1 0 0 0 0 0 0   ; Difficulty 8
-	.by 0 3 2 0 2 1 0 1 1 0 0 0 0 0 0 0 0 0   ; Difficulty 9
-	.by 0 2 2 0 1 1 0 1 0 0 0 0 0 0 0 0 0 0   ; Difficulty 10
-	.by 0 2 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
-	.by 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 12
-	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 13
+	.by 0 6 6 0 6 6 0 6 6 0 6 6 0 6 6 0 6 6   ; Difficulty 1 
+	.by 0 5 5 0 5 5 0 5 5 0 5 5 0 5 5 0 5 5   ; Difficulty 2
+	.by 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4   ; Difficulty 3 
+	.by 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3   ; Difficulty 4 
+	.by 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2   ; Difficulty 5 
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 0   ; Difficulty 6 
+	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 7
+	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 8
+	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 9
+	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  ; Difficulty 10
+;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
+;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 12
+;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 13
+
+;	.by 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7   ; Difficulty 0 
+;	.by 0 7 7 0 7 7 0 7 7 0 5 5 0 5 5 0 5 5   ; Difficulty 1 
+;	.by 0 7 7 0 7 7 0 5 5 0 5 5 0 3 3 0 3 3   ; Difficulty 2
+;	.by 0 7 7 0 7 5 0 5 5 0 3 3 0 3 2 0 2 2   ; Difficulty 3 
+;	.by 0 5 5 0 5 3 0 3 3 0 2 2 0 2 2 0 1 1   ; Difficulty 4 
+;	.by 0 5 5 0 3 3 0 3 2 0 2 2 0 1 1 0 1 1   ; Difficulty 5 
+;	.by 0 5 3 0 3 3 0 2 2 0 2 1 0 1 1 0 1 0   ; Difficulty 6 
+;	.by 0 3 3 0 3 2 0 2 2 0 1 1 0 1 0 0 0 0   ; Difficulty 7
+;	.by 0 3 3 0 2 2 0 1 1 0 1 1 0 0 0 0 0 0   ; Difficulty 8
+;	.by 0 3 2 0 2 1 0 1 1 0 0 0 0 0 0 0 0 0   ; Difficulty 9
+;	.by 0 2 2 0 1 1 0 1 0 0 0 0 0 0 0 0 0 0   ; Difficulty 10
+;	.by 0 2 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
+;	.by 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 12
+;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 13
 
 BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 0
@@ -105,12 +121,27 @@ BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 5
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 6
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 7
-	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 8
-	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 2 0 2 2   ; Difficulty 9
-	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 2 2 0 2 2   ; Difficulty 10
-	.by 0 1 1 0 1 1 0 1 1 0 2 2 0 2 2 0 2 2   ; Difficulty 11
-	.by 0 1 1 0 1 1 0 2 2 0 2 2 0 2 2 0 2 2   ; Difficulty 12
-	.by 0 1 1 0 2 2 0 2 2 0 2 3 0 2 3 0 3 3 0 ; Difficulty 13
+	.by 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2   ; Difficulty 8
+	.by 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3   ; Difficulty 9
+	.by 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0  ; Difficulty 10
+;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
+;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 12
+;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 13
+
+;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 0
+;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 1
+;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 2
+;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 3
+;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 4
+;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 5
+;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 6
+;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 7
+;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 8
+;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 2 0 2 2   ; Difficulty 9
+;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 2 2 0 2 2   ; Difficulty 10
+;	.by 0 1 1 0 1 1 0 1 1 0 2 2 0 2 2 0 2 2   ; Difficulty 11
+;	.by 0 1 1 0 1 1 0 2 2 0 2 2 0 2 2 0 2 2   ; Difficulty 12
+;	.by 0 1 1 0 2 2 0 2 2 0 2 3 0 2 3 0 3 3 0 ; Difficulty 13
 
 MOVING_ROW_STATES ; 19 entries describing boat directions. Beach (0), Right (1), Left (FF) directions.
 	.by 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0
@@ -129,7 +160,7 @@ FROG_PMY_TABLE ; 19 entries providing Frog Y position for each row.  (Each row i
 
 ; ==========================================================================
 ; FROG MOVE UP
-;
+; ==========================================================================
 ; Add 10 to the score.
 ; Decrement the Row counter.
 ; Set new Frog screen position.
@@ -162,7 +193,7 @@ FrogMoveUp
 
 ; ==========================================================================
 ; ZERO FROG PAGE ZERO
-;
+; ==========================================================================
 ; Zero a group of page 0 values: 
 ; (coordinates, and current shape index.)
 ; FrogPMY, FrogPMX, FrogShape, FrogNewPMY, FrogNewPMX, FrogNewShape
@@ -181,7 +212,7 @@ bPMAZClearCoords
 
 ; ==========================================================================
 ; FROG EYE FOCUS
-;
+; ==========================================================================
 ; The Frog's eyes move based on the joystick input direction.
 ; Default position for the eyes is #1.
 ;
@@ -209,37 +240,68 @@ FrogEyeFocus
 
 
 ; ==========================================================================
-; Clear the score digits to zeros.
-; That is, internal screen code for "0"
-; If a high score is flagged, then do not clear high score.
+; CLEAR GAME SCORES
+; ==========================================================================
+; The high score is un-flagged to clear it for the following reasons:
+; - The new number of lives is greater than the last game.
+; - The new level start is less than the last game.
+;
+; Clear the score digits to zeros. (That is, internal screen code for "0".)
+; If a high score is flagged, then do not clear the high score.
 ; And some other things at game start.
 ; --------------------------------------------------------------------------
 
 ClearGameScores
 
-	ldx #$07            ; 8 digits. 7 to 0
-	lda #INTERNAL_0     ; Atari internal code for "0"
+	lda NewNumberOfLives 
+	cmp LastNumberOfLives
+	beq bCGS_TestLevel         ; New == Last, do Level test
+	bcs bCGS_UnflagHiScore     ; New > Last.  REset high score.
 
-LoopClearScores
-	sta MyScore,x       ; Put zero/"0" in score buffer.
+bCGS_TestLevel
+	lda NewLevelStart 
+	cmp LastLevelStart
+	beq bCGS_SkipUnflagHiScore ; New == Last.  Do not unset high score.
+	bcs bCGS_SkipUnflagHiScore
 
-	ldy FlaggedHiScore  ; Has a high score been flagged? ($FF)
-	bmi NextScoreDigit  ; If so, then skip clearing Hi score and go to the next digit.
+bCGS_UnflagHiScore             ; Clear High Score Flag to trigger erasing high score.
+	lda #0
+	sta FlaggedHiScore
+	lda #COLOR_PINK+$FF        ; Strobe high score label.
+	sta COLPM2_TABLE
 
-	sta HiScore,x       ; Also put zero/"0" in the high score.
+bCGS_SkipUnflagHiScore
 
-NextScoreDigit
-	dex                 ; decrement index to score digits.
-	bpl LoopClearScores ; went from 0 to $FF? no, loop for next digit.
+	ldx #$07                   ; 8 digits. 7 to 0
+	lda #INTERNAL_0            ; Atari internal code for "0"
+ 
+bCGS_LoopClearScores
+	sta MyScore,x              ; Put zero/"0" in score buffer.
 
-	lda #COLOR_BLUE2+$F ; Glow the score label.  VBI will decrement it.
+	ldy FlaggedHiScore         ; Has a high score been flagged? ($FF)
+	bmi bCGS_NextScoreDigit    ; If so, then skip clearing Hi score and go to the next digit.
+
+	sta HiScore,x              ; Also put zero/"0" in the high score.
+
+bCGS_NextScoreDigit
+	dex                        ; decrement index to score digits.
+	bpl bCGS_LoopClearScores   ; went from 0 to $FF? no, loop for next digit.
+
+	; Set current lives and current start level.
+	; The prior values are now the same as the New/current game's.
+	lda NewLevelStart
+	sta LastLevelStart
+;	lda #1                     ; Reset number of
+;	lda #3                     ; Reset number of
+	lda NewNumberOfLives       ; Reset Number of 
+	sta NumberOfLives          ; lives to new game config.
+	sta LastNumberOfLives
+
+	lda #COLOR_BLUE2+$F        ; Strobe the score label.  VBI will decrement it.
 	sta COLPM0_TABLE
 	sta COLPM1_TABLE
 
-;	lda #1              ; Reset number of
-	lda #3              ; Reset number of
-	sta NumberOfLives   ; lives to 3.
-	lda #COLOR_PURPLE+$F; Flash the Lives counter label.
+	lda #COLOR_PURPLE+$F       ; And strobe the Lives counter label.
 	sta COLPM0_TABLE+1
 	sta COLPM1_TABLE+1
 
@@ -248,11 +310,12 @@ NextScoreDigit
 
 ; ==========================================================================
 ; ADD 500 TO SCORE
-;
+; ==========================================================================
 ; Add 500 to score.  (duh.)   Due to successful frog crossing.
 ;
-; isn't it interesting how the boats keep moving while main has this 
-; routine locked into waiting for sound to complete.
+; Isn't it interesting how the boats keep moving while the Main code 
+; line is locked into waiting for sound to complete.
+;
 ; Uses A, X
 ; --------------------------------------------------------------------------
 
@@ -285,7 +348,7 @@ ba5TS_AudioPause            ; Wait for audio to finish.
 
 ; ==========================================================================
 ; ADD 100 TO SCORE
-;
+; ==========================================================================
 ; Add 100 to score.  (duh.) 
 ; (Preserve  A X Y , because this is called from a loop elsewhere)
 ;
@@ -309,7 +372,7 @@ Add100ToScore
 
 ; ==========================================================================
 ; ADD 10 TO SCORE
-;
+; ==========================================================================
 ; Add 10 to score.  (duh.)
 ;
 ; Uses A, X
@@ -328,7 +391,7 @@ Add10ToScore
 
 ; ==========================================================================
 ; ADD TO SCORE
-;
+; ==========================================================================
 ; Add value in ScoreToAdd to the score at index position
 ; NumberOfChars in the score digits.
 ;
@@ -372,7 +435,7 @@ ExitAddToScore           ; All done.
 
 ; ==========================================================================
 ; HIGH SCORE OR NOT
-;
+; ==========================================================================
 ; Figure out if My Score is the High Score.
 ; If so, then copy My Score to High Score.
 ;
@@ -415,7 +478,7 @@ ExitHighScoreOrNot
 
 ; ==========================================================================
 ; DEC THIS COLOR OR NOT
-;
+; ==========================================================================
 ; Support code to optimize the tedium of managing four colors in 
 ; seven memory locations.
 ;
@@ -449,7 +512,7 @@ ReallyExitFromDecColor
 
 ; ==========================================================================
 ; MULTIPLY FROGS CROSSED
-;
+; ==========================================================================
 ; Multiply FroggsCrossed times 18 and save to FrogsCrossesIndex, to 
 ; determine the base entry in the difficulty arrays that control each 
 ; boat's speed on screen.
@@ -483,7 +546,7 @@ SkipLimitCrossed
 
 ; ==========================================================================
 ; MAKE DIFFICULTY POINTERS
-;
+; ==========================================================================
 ; Get the Address of the start of the current difficulty data.
 ; These are the BOAT_FRAMES and BOAT_SHIFT base addresses plus the 
 ; FrogsCrossedIndex. 

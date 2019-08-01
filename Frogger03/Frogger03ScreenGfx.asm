@@ -1480,6 +1480,49 @@ GreyEachColorTable
 
 
 ;==============================================================================
+; RANDOMIZE TITLE COLORS 
+;==============================================================================
+; Support function. Set a random gradient for the title pixels.
+; -----------------------------------------------------------------------------
+
+RandomizeTitleColors
+
+	lda RANDOM               ; Get a random value
+	eor COLPF0_TABLE+2       ; Flip bits through the previous color.
+	and #$F0                 ; Keep color component
+	ora #$04                 ; Start at 4, so we get 4, 6, 8, 10, 12, 14.
+	tay                      ; Y = A  ; for the increments below.
+
+	ldx #5
+bRTC_RecolorText             ; Fill the six bytes of color entries.
+	sty COLPF0_TABLE+2,x
+	iny                      ; --Y ; color + luminance
+	iny                      ; --Y ; color + luminance
+	dex                      ; --X ; previous color entry.
+	bpl bRTC_RecolorText     ; do 0 entry, too. stop at -1.
+
+	rts
+
+
+;==============================================================================
+; RESTORE TITLE COLORS 
+;==============================================================================
+; Support function. Set the original colors for the title pixels.
+; -----------------------------------------------------------------------------
+
+ResetTitleColors
+
+	ldx #5
+bRTC_RecolorTitle            ; Fix the six bytes of Title color entries.
+	lda TITLE_PIXEL_COLORS,x
+	sta COLPF0_TABLE+2,x
+	dex                      ; --X ; previous color entry.
+	bpl bRTC_RecolorTitle    ; do 0 entry, too. stop at -1.
+
+	rts
+
+
+;==============================================================================
 ; C H A R A C T E R   A N I M A T I O N
 ;==============================================================================
 
@@ -1860,7 +1903,7 @@ TitleLeftScroll
 	bpl bTLF_Exit          ; Positive. No roll over. Do not coarse scroll.
 
 	lda #15                ; Coarse scrolling to next byte
-	sta TitleHSCROL        ; Reset hscrol for next screen byte.
+	sta TitleHSCROL        ; Reset HSCROL for next screen byte.
 
 	inc TT_LMS0            ; Coarse scroll display to next byte...
 	inc TT_LMS1

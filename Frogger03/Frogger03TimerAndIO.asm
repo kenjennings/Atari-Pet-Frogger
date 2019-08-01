@@ -28,23 +28,24 @@
 ; ==========================================================================
 ; Animation speeds of various displayed items.   Number of frames to wait...
 ; --------------------------------------------------------------------------
-BLINK_SPEED      = 3   ; Speed of updates to Press A Button prompt.
+BLINK_SPEED       = 3   ; Speed of updates to Press A Button prompt.
 
-TITLE_SPEED      = 2   ; Scrolling speed for title. 
-TITLE_DOWN_SPEED = 4   ; Shift title down before scroll.
-TITLE_WIPE_SPEED = 0   ; Title screen to game screen fade speed.
+TITLE_SPEED       = 2   ; Scrolling speed for title. 
+TITLE_DOWN_SPEED  = 4   ; Shift title down before scroll.
+TITLE_RETURN_WAIT = 180 ; Time to wait to return to Stage 0.
+TITLE_WIPE_SPEED  = 0   ; Title screen to game screen fade speed.
 
-WOBBLEX_SPEED    = 2   ; Speed of flying objects on Title and Game Over.
-WOBBLEY_SPEED    = 3   ; Speed of flying objects on Title and Game Over.
+WOBBLEX_SPEED     = 2   ; Speed of flying objects on Title and Game Over.
+WOBBLEY_SPEED     = 3   ; Speed of flying objects on Title and Game Over.
 
-FROG_WAKE_SPEED  = 150 ; Initial delay about 2 sec for frog corpse '*' viewing/mourning
-DEAD_FADE_SPEED  = 4   ; Fade the game screen to black for Dead Frog
-DEAD_CYCLE_SPEED = 5   ; Speed of color animation on Dead screen
+FROG_WAKE_SPEED   = 150 ; Initial delay about 2 sec for frog corpse '*' viewing/mourning
+DEAD_FADE_SPEED   = 4   ; Fade the game screen to black for Dead Frog
+DEAD_CYCLE_SPEED  = 5   ; Speed of color animation on Dead screen
 
-WIN_FADE_SPEED   = 4   ; Fade the game screen to black to show Win
-WIN_CYCLE_SPEED  = 5   ; Speed of color animation on Win screen 
+WIN_FADE_SPEED    = 4   ; Fade the game screen to black to show Win
+WIN_CYCLE_SPEED   = 5   ; Speed of color animation on Win screen 
 
-GAME_OVER_SPEED  = 4  ; Speed of Game over background animation
+GAME_OVER_SPEED   = 4  ; Speed of Game over background animation
 
 
 ; Timer values.  NTSC.
@@ -546,7 +547,7 @@ ManageTitleScrolling
 
 	lda #0                      ; Reached target position.
 	sta VBIEnableScrollTitle    ; Turn off further left scrolling.
-	lda #151                    ; Set the timer to wait to restore the title.
+	lda #TITLE_RETURN_WAIT      ; Set the timer to wait to restore the title.
 	sta RestoreTitleTimer       ; Set new timeout value.
 
 WaitToRestoreTitle              ; Tell Main when to restore title.

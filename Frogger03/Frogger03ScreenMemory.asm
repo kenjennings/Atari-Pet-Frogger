@@ -752,6 +752,7 @@ TITLE_TEXT_COLORS ; 26 entries
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
 	.by $0E                               ; Scores, and blank line
 	.by $0a                               ; Scores, and blank line
+TITLE_PIXEL_COLORS
 	.by $EC $DA $C8 $B6 $A4 $92 $C2       ; title pixel colors. light to dark
 	.by $00                               ; blank
 	.by $04 $06 $08 $0A $0C $0A $08 $06   ; Instructions

@@ -45,6 +45,7 @@ SetupTransitionToTitle
 	sta EventCounter2        ; First label (score flashes)
 	sta EventStage           ; Drawing Title.
 	jsr TitleRender          ; 0 is erase title.
+	jsr TitleSetOrigin       ; Make sure left buffer is visible.
 
 	jsr HideButtonPrompt     ; Tell VBI the prompt flashing is disabled.
 	jsr RemoveFrogOnScreen   ; Remove the frog (from Game Over) if visible 
