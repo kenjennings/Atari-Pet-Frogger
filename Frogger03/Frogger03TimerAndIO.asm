@@ -69,7 +69,9 @@ INPUTSCAN_FRAMES = $07 ; previously $09
 
 
 ; ==========================================================================
-; RESET INPUT SCAN TIMER and ANIMATION TIMER
+; RESET TIMERS
+; ==========================================================================
+; Reset Input Scan Timer and AnimateFrames Timer.
 ;
 ; A  is the time to set for animation.
 ; --------------------------------------------------------------------------

@@ -61,6 +61,8 @@ EVENT_TRANS_TITLE = 11 ; Transition animation from Game Over to Title.
 ;       +--------------------------------------------------------+
 
 
+; ==========================================================================\
+; EVENT GAME INIT
 ; ==========================================================================
 ; The Game Starting Point.  Event Entry 0.
 ; Called only once at start.  
@@ -132,6 +134,8 @@ EventGameInit
 
 
 ; ==========================================================================
+; EVENT TRANSITION TO TITLE
+; ==========================================================================
 ; Event Process TRANSITION TO TITLE
 ; The setup for Transition to Title will turned on the Title Display.
 ; Stage 1: Start sound effects for rezz in Title graphics.
@@ -147,7 +151,6 @@ EventTransitionToTitle
 
 	lda EventStage           ; What stage are we in?
 	cmp #1
-;	bne TestTransTitle2        ; Not the Title noise, go to the setup for end.
 	bne GoToStartEventForTitle
  
 	; === STAGE 1 ===
@@ -168,23 +171,7 @@ FinishedNowSetupStage2
 
 	; === STAGE 2 ===
 
-;TestTransTitle2
-;	cmp #2
-;	bne TestTransTitle3
-
-;FinishedNowSetupStage3
-;	lda #3                     ; Set stage 3 as next part of Title screen event...
-;	sta EventStage
-;	bne EndTransitionToTitle
-
-	; === STAGE 3 ===
-
-;TestTransTitle3
-
 GoToStartEventForTitle
-;	cmp #3
-;	bne EndTransitionToTitle   ; Really shouldn't get to that point
-
 	lda #0 
 	sta EventStage
 
@@ -197,6 +184,8 @@ EndTransitionToTitle
 	rts
 
 
+; ==========================================================================
+; EVENT SCREEN Start
 ; ==========================================================================
 ; Event process SCREEN START/NEW GAME
 ; Copy the prior game setup to the prior game values.
@@ -226,6 +215,8 @@ EventScreenStart            ; This is New Game and Transition to title.
 	rts
 
 
+; ==========================================================================
+; EVENT TITLE Screen
 ; ==========================================================================
 ; Event Process TITLE SCREEN
 ; The activity on the title screen:
@@ -329,7 +320,8 @@ CheckTitleSlideDown
 	bpl bETS_Stage2_ToStage3 ; When it is done, go to stage 3. 
 
 	lda #TITLE_DOWN_SPEED
-	sta AnimateFrames        ; Reset animation frame counter.
+	jsr ResetTimers          ; Reset animation/input frame counter.
+;	sta AnimateFrames        
 	bne EndTitleScreen
 
 bETS_Stage2_ToStage3         ; Setup for next Stage
@@ -393,9 +385,13 @@ EndTitleScreen
 
 
 ; ==========================================================================
+; CHECK FOR CONSOLE INPUT
+; ==========================================================================
 ; Support Routine CHECK FOR CONSOLE INPUT
 ; Evaluate if console key is pressed.
-; If so, then setup appropriate values for the scroll, and engage Stage 2.
+; If so, then setup appropriate values for the value change, and 
+; setup to put the Title screen in Stage 2.
+;
 ; Returns:
 ; 0 for no input.
 ; !0 for a CONSOLE key was pressed.
@@ -444,7 +440,8 @@ bCFCI_StartupStage2
 	lda #6
 	sta EventCounter          ; Do it six times.
 	lda #TITLE_DOWN_SPEED
-	sta AnimateFrames         ; Set animation speed.
+	jsr ResetTimers           ; Reset animation/input frame counter.
+;	sta AnimateFrames         ; Set animation speed.
 	bne bCFCI_Exit            ; Return !0 exit.
 
 bCFCI_End
@@ -454,6 +451,8 @@ bCFCI_Exit
 	rts
 
 
+; ==========================================================================
+; EVENT TRANSITION TO GAME
 ; ==========================================================================
 ; Event Process TRANSITION TO GAME SCREEN
 ; The Activity in the transition area, based on timer.
@@ -557,8 +556,9 @@ EndTransitionToGame
 
 
 ; ==========================================================================
-; Event Process GAME SCREEN
+; EVENT GAME SCREEN
 ; ==========================================================================
+; Event Process: GAME SCREEN
 ; Play the game.
 ; 
 ; Many of the things in Version 02 have become non-events 
@@ -657,6 +657,8 @@ EndGameScreen
 
 
 ; ==========================================================================
+; EVENT TRANSITION TO Win
+; ==========================================================================
 ; Event Process TRANSITION TO WIN
 ; V03 currently removes the transition to Win screen.
 ; Now, just does immediate switch to the Win screen.
@@ -677,6 +679,8 @@ EndTransitionToWin
 	rts
 
 
+; ==========================================================================
+; EVENT WIN Screen
 ; ==========================================================================
 ; Event Process WIN SCREEN
 ;
@@ -730,6 +734,8 @@ EndWinScreen
 	rts
 
 
+; ==========================================================================
+; EVENT TRANSITION TO DEAD
 ; ==========================================================================
 ; Event Process TRANSITION TO DEAD
 ; The Activity in the transition area, based on timer.
@@ -787,6 +793,8 @@ EndTransitionToDead
 	rts
 
 
+; ==========================================================================
+; EVENT DEAD Screen
 ; ==========================================================================
 ; Event Process DEAD SCREEN
 ; 0a) While no button, animate the background colors. 
@@ -849,6 +857,8 @@ EndDeadScreen
 
 
 ; ==========================================================================
+; EVENT TRANSITON TO OVER
+; ==========================================================================
 ; Event Process TRANSITION TO OVER
 ;
 ; Fade out all lines of the Dead Screen.  
@@ -882,6 +892,8 @@ EndTransitionGameOver
 	rts
 
 
+; ==========================================================================
+; EVENT GAME OVER SCREEN
 ; ==========================================================================
 ; Event Process GAME OVER SCREEN
 ; The Activity in the transition area, based on timer.
@@ -931,4 +943,4 @@ OverStage4
 EndGameOverScreen
 
 	rts
-Over
+

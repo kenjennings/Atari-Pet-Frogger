@@ -328,7 +328,9 @@ SetupTransitionToGameOver
 
 
 ; ==========================================================================
-; SETUP GAME OVER SCREEN
+; SETUP GAME OVER
+; ==========================================================================
+; Setup the Game Over screen
 ;
 ; Prep values to run the Game Over screen
 ;

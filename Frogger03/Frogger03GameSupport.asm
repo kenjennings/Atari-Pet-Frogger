@@ -88,7 +88,7 @@ BOAT_FRAMES ; Number of frames to wait to move boat. (top to bottom) (Difficulty
 	.by 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4   ; Difficulty 3 
 	.by 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3   ; Difficulty 4 
 	.by 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2   ; Difficulty 5 
-	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 0   ; Difficulty 6 
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 6 
 	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 7
 	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 8
 	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 9

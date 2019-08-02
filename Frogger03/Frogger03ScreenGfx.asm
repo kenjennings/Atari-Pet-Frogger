@@ -519,6 +519,7 @@ bCSF_SkipLimitCrossed
 
 ; ==========================================================================
 ; PRINT FROGS AND LIVES
+; ==========================================================================
 ; Display the number of frogs that crossed the river and lives.
 ; There are two different character patterns that represent a frog 
 ; head used to indicate number of saved frogs. del/$7e and tab/$7f.
@@ -1182,6 +1183,8 @@ EndCopyBaseColors
 
 
 ; ==========================================================================
+; DEAD FROG GREY SCROLL
+; ==========================================================================
 ; Redundant code section used for two separate loops in the Dead Frog event.
 ;
 ; --------------------------------------------------------------------------
@@ -1199,6 +1202,8 @@ DeadFrogGreyScroll
 	rts
 
 
+; ==========================================================================
+; GAME OVER RED SINE
 ; ==========================================================================
 ; Game Over background color scroll.
 ;
@@ -1227,6 +1232,8 @@ SkipZeroOverCycle2
 	rts
 
 
+; ==========================================================================
+; OVER RED SCROLL
 ; ==========================================================================
 ; Redundant code section used for two separate loops in the Dead Frog event.
 ;
@@ -1297,7 +1304,7 @@ ExitWinColorScrollDown
 
 ; ==========================================================================
 ; WIN RANINBOW
-;
+; ==========================================================================
 ; Scroll Rainbow colors on screen while waiting for a button press.
 ; Scroll up at top. light to dark.  
 ; Scroll down at bottom.  Dark to light.
@@ -1397,6 +1404,8 @@ ExitSliceColorAndLuma
 
 
 ; ==========================================================================
+; FADE COLPF TO BLACK
+; ==========================================================================
 ; Support function. Decrement Title text colors.
 ; 
 ; Cut out of the EventTransitionToGame, it makes that shorter and more 
@@ -1433,6 +1442,8 @@ ExitFadeColPfToBlack          ; Insure we're leaving with 0 for both colors 0.  
 	rts
 
 
+; ==========================================================================
+; GREY EACH COLOR TABLE
 ; ==========================================================================
 ; Support function. Turn color table entries to grey. 
 ; 
@@ -1505,7 +1516,7 @@ bRTC_RecolorText             ; Fill the six bytes of color entries.
 
 
 ;==============================================================================
-; RESTORE TITLE COLORS 
+; RESET TITLE COLORS 
 ;==============================================================================
 ; Support function. Set the original colors for the title pixels.
 ; -----------------------------------------------------------------------------
@@ -1714,6 +1725,8 @@ BoatCsetCopy8
 ;==============================================================================
 
 ; ==========================================================================
+; FINE SCROLL THE CREDIT LINE
+; ==========================================================================
 ; Perpetually Scrolling Credits
 ; 
 ; The credits appear at the bottom line of the screen and continue 
@@ -1768,6 +1781,7 @@ BOAT_HS_TABLE
 
 ; ==========================================================================
 ; RIGHT BOAT FINE SCROLLING
+; ==========================================================================
 ; 
 ; Start Scroll position = LMS + 12 (decrement), HSCROL 0  (Increment)
 ; End   Scroll position = LMS + 0,              HSCROL 15
@@ -1815,6 +1829,7 @@ EndOfRightBoat
 
 ; ==========================================================================
 ; LEFT BOAT FINE SCROLLING
+; ==========================================================================
 ; 
 ; Start Scroll position = LMS + 0 (increment), HSCROL 15  (Decrement)
 ; End   Scroll position = LMS + 12,            HSCROL 0
@@ -2295,7 +2310,7 @@ HideButtonPrompt
 
 
 ;==============================================================================
-; TOGGLE PressAButtonState 
+; TOGGLE PRESS A BUTTON STATE 
 ;==============================================================================
 ; Flip the fade up/fade down state.
 
