@@ -67,6 +67,8 @@
 
 ;MAX_FROG_SPEED = 13 ; Number of difficulty levels (which means 14)
 MAX_FROG_SPEED = 10 ; Number of difficulty levels (which means 11)
+MAX_FROG_LIVES = 7  ; Maximum number of starting frog lives.
+
 
 ; About the arrays below.  18 bytes per row instead of 19:
 ; FrogRow ranges from 0 to 18 which is 19 rows.  The first and
@@ -267,7 +269,7 @@ bCGS_TestLevel
 bCGS_UnflagHiScore             ; Clear High Score Flag to trigger erasing high score.
 	lda #0
 	sta FlaggedHiScore
-	lda #COLOR_PINK+$FF        ; Strobe high score label.
+	lda #COLOR_PINK+$F        ; Strobe high score label.
 	sta COLPM2_TABLE
 
 bCGS_SkipUnflagHiScore

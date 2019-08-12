@@ -1502,14 +1502,15 @@ RandomizeTitleColors
 	eor COLPF0_TABLE+2       ; Flip bits through the previous color.
 	and #$F0                 ; Keep color component
 	ora #$04                 ; Start at 4, so we get 4, 6, 8, 10, 12, 14.
-	tay                      ; Y = A  ; for the increments below.
+	tax                      ; X = A  ; for the increments below.
 
-	ldx #5
+	ldy #5
 bRTC_RecolorText             ; Fill the six bytes of color entries.
-	sty COLPF0_TABLE+2,x
-	iny                      ; --Y ; color + luminance
-	iny                      ; --Y ; color + luminance
-	dex                      ; --X ; previous color entry.
+	sta COLPF0_TABLE+2,y
+	inx                      ; ++X ; color + luminance
+	inx                      ; ++X ; color + luminance
+	txa                      ; A = X in order to save
+	dey                      ; --X ; previous color entry.
 	bpl bRTC_RecolorText     ; do 0 entry, too. stop at -1.
 
 	rts

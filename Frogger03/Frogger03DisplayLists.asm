@@ -112,17 +112,17 @@ TITLE_DISPLAYLIST
 	;                                                    DLI 2/SPLASH_PMGSPECS2_DLI - Load PM Specs + COLPF0_COLBK_DLI
 	;                Title Graphics... HSCROL means to show all color clocks LMS must be -1, HSCROL 0
 TT_LMS0 = [* + 1]                            ;           Plus 1 is the address of the display list LMS
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1-1     ; (21-24)   DLI 3/COLPF0_COLBK_DLI Set COLPF0 for Line 2
+	mDL_LMS DL_MAP_9|DL_DLI|DL_HSCROLL,TITLE_START     ; (21-24)   DLI 3/COLPF0_COLBK_DLI Set COLPF0 for Line 2
 TT_LMS1 = [* + 1]                            ;           Plus 1 is the address of the display list LMS
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1-1+20  ; (25-28)   DLI 4/COLPF0_COLBK_DLI Set COLPF0 for Line 3
+	mDL_LMS DL_MAP_9|DL_DLI|DL_HSCROLL,TITLE_START+20  ; (25-28)   DLI 4/COLPF0_COLBK_DLI Set COLPF0 for Line 3
 TT_LMS2 = [* + 1]                            ;           Plus 1 is the address of the display list LMS
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1-1+40  ; (29-32)   DLI 5/COLPF0_COLBK_DLI Set COLPF0 for Line 4
+	mDL_LMS DL_MAP_9|DL_DLI|DL_HSCROLL,TITLE_START+40  ; (29-32)   DLI 5/COLPF0_COLBK_DLI Set COLPF0 for Line 4
 TT_LMS3 = [* + 1]                            ;           Plus 1 is the address of the display list LMS
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1-1+60  ; (33-36)   DLI 6/COLPF0_COLBK_DLI Set COLPF0 for Line 5
+	mDL_LMS DL_MAP_9|DL_DLI|DL_HSCROLL,TITLE_START+60  ; (33-36)   DLI 6/COLPF0_COLBK_DLI Set COLPF0 for Line 5
 TT_LMS4 = [* + 1]                            ;           Plus 1 is the address of the display list LMS
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1-1+80  ; (37-40)   DLI 7/COLPF0_COLBK_DLI Set COLPF0 for Line 6
+	mDL_LMS DL_MAP_9|DL_DLI|DL_HSCROLL,TITLE_START+80  ; (37-40)   DLI 7/COLPF0_COLBK_DLI Set COLPF0 for Line 6
 TT_LMS5 = [* + 1]                            ;           Plus 1 is the address of the display list LMS
-	mDL_LMS DL_MAP_9|DL_DLI,TITLE_MEM1-1+100 ; (41-44)   DLI 8/COLPF0_COLBK_DLI Set COLPF0 for underlines
+	mDL_LMS DL_MAP_9|DL_DLI|DL_HSCROLL,TITLE_START+100 ; (41-44)   DLI 8/COLPF0_COLBK_DLI Set COLPF0 for underlines
 
 	.byte   DL_BLANK_2                       ; (45-46)   An empty line.      2
 	mDL_LMS DL_MAP_9,TITLE_UNDERLINE         ; (47-50)   Underlines        + 4
