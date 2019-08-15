@@ -308,7 +308,7 @@ CheckFunctionButton
 ; =============== Stage 2    ; Shifting Left buffer down.
 
 bETS_Stage2
-	cmp #2
+	cmp #2                   ; 2) slide left buffer down.
 	bne bETS_Stage3
 
 CheckTitleSlideDown 
@@ -319,10 +319,9 @@ CheckTitleSlideDown
 	dec EventCounter         ; Decrement number of times this is done.
 	bpl bETS_Stage2_ToStage3 ; When it is done, go to stage 3. 
 
-	lda #TITLE_DOWN_SPEED
-	jsr ResetTimers          ; Reset animation/input frame counter.
-;	sta AnimateFrames        
-	bne EndTitleScreen
+	lda #TITLE_DOWN_SPEED    ; The down shift is not done, so 
+	jsr ResetTimers          ; Reset animation/input frame counter.      
+	jmp EndTitleScreen
 
 bETS_Stage2_ToStage3         ; Setup for next Stage
 	lda #3

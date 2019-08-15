@@ -1976,7 +1976,7 @@ bTSD_ColorLoop
 	sta COLPF0_TABLE+3,x ; down to table 3 to 7
 
 	dex
-	bpl bTSD_Loop        ; Loop including 0
+	bpl bTSD_ColorLoop   ; Loop including 0
 
 	rts
 
