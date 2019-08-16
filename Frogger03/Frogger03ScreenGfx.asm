@@ -1912,7 +1912,7 @@ TITLE_LMS_ORIGIN
 TitleLeftScroll
 
 	lda TT_LMS0            ; Get current LMS
-	cmp #<[TITLE_START+9]  ; Did it reach the end?
+	cmp #<[TITLE_END] ; <[TITLE_START+9]  ; Did it reach the end?
 	beq bTLF_Exit          ; Yes.  Nothing to do.
 
 	dec TitleHSCROL        ; Decrement HSCROL.  

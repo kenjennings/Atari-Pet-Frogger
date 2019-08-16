@@ -300,16 +300,16 @@ ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transiti
 CheckFunctionButton
 	lda EventStage
 	cmp #1                   ; 1) Just doing input checking per above, and testing Option/Select.
-	bne bETS_Stage2
+	bne bETS_Stage2          ; Not Stage 1.  Go to Stage 2.  Skip checking console keys.
 
-	jsr CheckForConsoleInput
+	jsr CheckForConsoleInput ; Sets up for Stage 2, and EventCounter for TitleShiftDown.
 	jmp EndTitleScreen       ; Regardless of the console input, this is the end of stage 1.
 
 ; =============== Stage 2    ; Shifting Left buffer down.
 
 bETS_Stage2
 	cmp #2                   ; 2) slide left buffer down.
-	bne bETS_Stage3
+	bne bETS_Stage3          ; Not Stage 2.  Try Stage 3.
 
 CheckTitleSlideDown 
 	lda AnimateFrames
@@ -317,7 +317,7 @@ CheckTitleSlideDown
 
 	jsr TitleShiftDown       ; Shift Pixels down
 	dec EventCounter         ; Decrement number of times this is done.
-	bpl bETS_Stage2_ToStage3 ; When it is done, go to stage 3. 
+	bmi bETS_Stage2_ToStage3 ; When it is done, go to stage 3. 
 
 	lda #TITLE_DOWN_SPEED    ; The down shift is not done, so 
 	jsr ResetTimers          ; Reset animation/input frame counter.      
