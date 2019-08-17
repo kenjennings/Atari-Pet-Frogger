@@ -343,9 +343,10 @@ CheckTitleScroll
 	bne EndTitleScreen         ; Yes.  Nothing more to do here.
 
 	; Is the title LMS pointing at the right buffer?
-	lda TT_LMS0                ; Get low byte of first LMS
-	cmp #<TITLE_END            ; Is it at the end?
-	beq EndTitleScreen         ; Yes.  Skip readjust to origin.
+;	jsr TitleIsItAtTheEnd      ; Test if scrolling limits reached.
+;;	lda TT_LMS0                ; Get low byte of first LMS
+;;	cmp #<TITLE_END            ; Is it at the end?
+;	beq EndTitleScreen         ; Yes.  Skip readjust to origin.
 
 	; Readjust display to show the left buffer visible 
 	; and reset scrolling origin.
@@ -428,10 +429,9 @@ CheckSelectKey
 	bne bCFCI_SkipResetLives
 	ldx #1
 bCFCI_SkipResetLives
-	stx NewNumberOfLives
-
-	jsr TitlePrepLives
-
+	stx NewNumberOfLives      ; Get the updated number of new lives for the next game.
+	jsr TitlePrepLives        ; Get the scrolling buffer ready.
+	jsr WriteNewLives         ; Update the status line to match the new number of frogs.
 
 bCFCI_StartupStage2
 	lda #2

@@ -536,38 +536,101 @@ bCSF_SkipLimitCrossed
 
 PrintFrogsAndLives
 
-	ldx FrogsCrossed    ; Number of times successfully crossed the rivers.
-	beq WriteLives      ; then nothing to display. Skip to do lives.
+	ldx FrogsCrossed     ; Number of times successfully crossed the rivers.
+	beq WriteLives       ; then nothing to display. Skip to do lives. 
 
-	ldy #20             ; Start printing right to left from end of field.
+	ldy #20              ; Start printing right to left from end of field.
 
-	cpx #21             ; Limit saved frogs to the remaining width of screen
+	cpx #21              ; Limit saved frogs to the remaining width of screen
 	bcc SavedFroggies
 
 	ldx #20
 
-SavedFroggies           ; Write an alternating pattern of Frog1, Frog2 characters.
-	lda #I_FROG1        ; On Atari we're using tab/$7f as a frog shape.
-	sta SCREEN_SAVED-1,y  ; Write to screen. 
+SavedFroggies            ; Write an alternating pattern of Frog1, Frog2 characters.
+	lda #I_FROG1         ; On Atari we're using tab/$7f as a frog shape.
+	sta SCREEN_SAVED-1,y ; Write to screen. 
 	dey
-	dex                 ; Decrement number of frogs.
-	beq WriteLives      ; Reached 0, stop adding frogs.
-	lda #I_FROG2        ; On Atari we're using del/$7e as a frog shape.
-	sta SCREEN_SAVED-1,y  ; Write to screen. 
+	dex                  ; Decrement number of frogs.
+	beq WriteLives       ; Reached 0, stop adding frogs.
+	lda #I_FROG2         ; On Atari we're using del/$7e as a frog shape.
+	sta SCREEN_SAVED-1,y ; Write to screen. 
 	dey
-	dex                 ; Decrement number of frogs.
-	bne SavedFroggies   ; then go back and display the next frog counter.
+	dex                  ; Decrement number of frogs.
+	bne SavedFroggies    ; then go back and display the next frog counter.
 
+; Erase Frog Life icons from screen.
+; Redraw the number of Frog icons per the value of NumberOfLives.
 WriteLives
-	ldy #0
-	sty SCREEN_LIVES    ; Hackitty hack.  The code below does not remove 
-	sty SCREEN_LIVES+1  ; missing/dead frogs.  oops.
-	sty SCREEN_LIVES+2  ; 
-	
-	ldx NumberOfLives   ; Get number of lives.
-	beq EndPrintFrogsAndLives
+	jsr EraseFrogLives
 
-LoopWriteLives
+;	lda #0
+;	ldy #7
+;bPFAL_EraseFrogs          ; Remove 7 frogs from screen
+;	sty SCREEN_LIVES-1,y 
+;	dey
+;	bne bPFAL_EraseFrogs
+
+;	sty SCREEN_LIVES+1  ; missing/dead frogs.  oops.
+;	sty SCREEN_LIVES+2  ; 
+
+	ldx NumberOfLives         ; Get number of lives in X
+	beq EndPrintFrogsAndLives ; No lives.  End here.
+
+	jsr RedrawFrogLives
+
+;LoopWriteLives
+;	lda #I_FROG1        ; On Atari we're using tab/$7f as a frog shape.
+;	sta SCREEN_LIVES,y  ; Write to screen. 
+;	iny
+;	dex                 ; Decrement number of frogs.
+;	beq EndPrintFrogsAndLives ; Reached 0, stop adding frogs.
+;	lda #I_FROG2        ; On Atari we're using del/$7e as a frog shape.
+;	sta SCREEN_LIVES,y  ; Write to screen. 
+;	iny
+;	dex                 ; Decrement number of frogs.
+;	bne LoopWriteLives  ; then go back and display the next number of frogs.
+
+EndPrintFrogsAndLives
+	rts
+
+
+; ==========================================================================
+; ERASE FROG LIVES
+; ==========================================================================
+; Support function.  
+; Remove current list of frog lives from screen.
+; Subroutine, because it could be called from multiple places.
+; --------------------------------------------------------------------------
+
+EraseFrogLives
+
+	lda #0
+	ldy #7
+bPFAL_EraseFrogs          ; Remove 7 frogs from screen
+	sta SCREEN_LIVES-1,y 
+	dey
+	bne bPFAL_EraseFrogs
+
+	rts
+
+
+; ==========================================================================
+; REDRAW FROG LIVES                                                    X
+; ==========================================================================
+; Support function.  
+; Remove current list of frog lives from screen.
+; Subroutine, because it could be called from multiple places.
+; The value of the X register gives the number of Frog Life 
+; characters to draw. 
+; The caller should not use this routine if the value is 0.
+; This expects that EraseFrogLives was called before this.
+; --------------------------------------------------------------------------
+
+RedrawFrogLives
+
+	ldy #0
+
+bRFL_WriteLives
 	lda #I_FROG1        ; On Atari we're using tab/$7f as a frog shape.
 	sta SCREEN_LIVES,y  ; Write to screen. 
 	iny
@@ -577,9 +640,31 @@ LoopWriteLives
 	sta SCREEN_LIVES,y  ; Write to screen. 
 	iny
 	dex                 ; Decrement number of frogs.
-	bne LoopWriteLives  ; then go back and display the next number of frogs.
+	bne bRFL_WriteLives  ; then go back and display the next number of frogs.
 
-EndPrintFrogsAndLives
+EndRedrawFrogLives
+	rts
+
+
+; ==========================================================================
+; WRITE NEW LIVES 
+; ==========================================================================
+; Support function.  
+; When SELECT is pressed it updates NewNumberOfLives.
+; Erase Frog Life icons from screen.
+; Redraw the number of Frog icons per the value of NewNumberOfLives.
+; --------------------------------------------------------------------------
+
+WriteNewLives
+
+	jsr EraseFrogLives
+
+	ldx NewNumberOfLives   ; Get new number of lives in X
+	beq EndWriteNewLives
+
+	jsr RedrawFrogLives
+
+EndWriteNewLives
 	rts
 
 
@@ -794,6 +879,7 @@ SplashLoopBottomToBlack
 ; Support function for setting colors.
 ; Write the same value to a specific entry in all color tables.
 ; Typically, this will be black.
+; The Game Over display needs to use white for COLPF3 instead of Black.
 ; Then decrement the Y index.
 ;
 ; A = the color value to use.
@@ -1499,14 +1585,14 @@ GreyEachColorTable
 RandomizeTitleColors
 
 	lda RANDOM               ; Get a random value
-	eor COLPF0_TABLE+2       ; Flip bits through the previous color.
+	eor COLPF0_TABLE+3       ; Flip bits through the previous color.
 	and #$F0                 ; Keep color component
 	ora #$04                 ; Start at 4, so we get 4, 6, 8, 10, 12, 14.
 	tax                      ; X = A  ; for the increments below.
 
 	ldy #5
 bRTC_RecolorText             ; Fill the six bytes of color entries.
-	sta COLPF0_TABLE+2,y
+	sta COLPF0_TABLE+3,y
 	inx                      ; ++X ; color + luminance
 	inx                      ; ++X ; color + luminance
 	txa                      ; A = X in order to save
@@ -1527,7 +1613,7 @@ ResetTitleColors
 	ldx #5
 bRTC_RecolorTitle            ; Fix the six bytes of Title color entries.
 	lda TITLE_PIXEL_COLORS,x
-	sta COLPF0_TABLE+2,x
+	sta COLPF0_TABLE+3,x
 	dex                      ; --X ; previous color entry.
 	bpl bRTC_RecolorTitle    ; do 0 entry, too. stop at -1.
 
@@ -1904,6 +1990,27 @@ TITLE_LMS_ORIGIN
 
 
 ; ==========================================================================
+; TITLE IS IT AT THE END
+; ==========================================================================
+; Test Scrolling values.
+; Returns CPU flag:
+;  0 = At the end.
+; !0 = Continue to scroll.
+; --------------------------------------------------------------------------
+
+TitleIsItAtTheEnd
+
+	lda TT_LMS0            ; Get current LMS
+	cmp #<[TITLE_END]      ; Did it reach the end? which is <[TITLE_START+10]
+	bne bTIIATE_Exit       ; No.  Exit here, since scrolling can continue. 
+	lda TitleHSCROL        ; What is the fine scroll position?
+;	beq bTLF_Exit          ; Zero.  Reached the end.  Nothing to do.
+
+bTIIATE_Exit
+	rts
+
+
+; ==========================================================================
 ; TITLE LEFT SCROLL
 ; ==========================================================================
 ; Left scroll from origin (LMS-1/0) to Right target (9/0)
@@ -1911,10 +2018,15 @@ TITLE_LMS_ORIGIN
 
 TitleLeftScroll
 
-	lda TT_LMS0            ; Get current LMS
-	cmp #<[TITLE_END] ; <[TITLE_START+9]  ; Did it reach the end?
-	beq bTLF_Exit          ; Yes.  Nothing to do.
+	jsr TitleIsItAtTheEnd  ; Test if scrolling limits reached.
+	beq bTLF_Exit          ; Zero.  Reached the end.  Nothing to do.
 
+;	lda TT_LMS0            ; Get current LMS
+;	cmp #<[TITLE_END]      ; Did it reach the end? which is <[TITLE_START+10]
+;	bne bTLF_Scrollit      ; No.  Move it.
+;	lda TitleHSCROL        ; What is the fine scroll position?
+
+bTLF_Scrollit
 	dec TitleHSCROL        ; Decrement HSCROL.  
 	bpl bTLF_Exit          ; Positive. No roll over. Do not coarse scroll.
 
@@ -1972,8 +2084,8 @@ bTSD_Loop
 	ldx #4               ; Now move the pixel colors to match.
 
 bTSD_ColorLoop
-	lda COLPF0_TABLE+2,x ; shift colors in table 2 to 6
-	sta COLPF0_TABLE+3,x ; down to table 3 to 7
+	lda COLPF0_TABLE+3,x ; shift colors in table 3 to 7 (actually from 7, 6, 5, 4, 3)
+	sta COLPF0_TABLE+4,x ; down to table 4 to 8         (actually to 8, 7, 6, 5, 4)
 
 	dex
 	bpl bTSD_ColorLoop   ; Loop including 0
@@ -1986,6 +2098,7 @@ bTSD_ColorLoop
 ; ==========================================================================
 ; Combine something from the "LIST" and stuff it into the "NUMBER" 
 ; location, then print the string to pixels.
+; "LEVEL 9"   "7 LIVES"
 ; --------------------------------------------------------------------------
 
 LEVEL_TEXT   .sb " LEVEL "
