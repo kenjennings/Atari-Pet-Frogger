@@ -9,7 +9,7 @@
 ; Version 00, November 2018
 ; Version 01, December 2018
 ; Version 02, February 2019 
-; Version 03, July 2019
+; Version 03, August 2019
 ; ==========================================================================
 
 ; ==========================================================================
@@ -86,7 +86,7 @@
 ;   separately declared in memory.
 ;
 ; --------------------------------------------------------------------------
-; Version 03.  July 2019
+; Version 03.  August 2019
 ;
 ; The design principle is to continue to keep the play action as close as 
 ; possible to the original version as well as enhance the graphics 
@@ -696,16 +696,16 @@ SAVEY = $FF
 
 	; Label And Credit Where Ultimate Credit Is Due
 	.by "** Thanks to the Word (John 1:1), Creator of heaven, and earth, and "
-	.by "semiconductor chemistry and physics which makes all this fun possible. "
+	.by "semiconductor chemistry and physics making all this fun possible. "
 	.by "** Dales" ATASCII_HEART "ft PET FROGGER by John C. Dale, November 1983. "
-	.by "** Atari port by Ken Jennings, July 2019, Version 03. "
+	.by "** Atari port by Ken Jennings, August 2019, Version 03. "
 	.by "** Improved graphics for the playfield and frog. "
 	.by "Fine Scrolling Boats. Custom character set for boats. "
 	.by "Player/Missile Frog. "
 	.by "Customized Display Lists and DLIs. "
 	.by "Most game logic moved to VBI. **"
 	.by "Special Thanks to playtesters "
-	.by "-The Doctor-, Philsan, and Faicuai.**"
+	.by "-The Doctor-, Philsan, Faicuai, and Mclaneinc. **"
 
 
 ; ==========================================================================
