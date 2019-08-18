@@ -1819,24 +1819,24 @@ BoatCsetCopy8
 ; The credits appear at the bottom line of the screen and continue 
 ; scrolling forever.
 ; 
-; Yeah, not entirely the most efficient fine scroll.
 ; ANTIC supports fine horizontal scrolling 16 color clocks or 4 text
-; characters at a time.  But, the actual credit text length is variable
-; every time I change the string, so it is more simple code to fine scroll
-; only one character at a time before a coarse scroll.  Still, the way the 
-; Atari coarse scrolls makes this a mind-bogglingly, low-overhead activity
-; compared to any other 8-bit.  Only update one pointer instead of rewriting 
-; the screen data to coarse scroll.
+; characters at a time.  This means the buffer to scroll needs to be a 
+; multiple of 4 character long.  Just remember to pad after editing.
+;
+; Most of the time only update HSCROL.  
+; Occasionally, add 4 to the LMS pointer to screen data to coarse scroll.
 ; --------------------------------------------------------------------------
 
 FineScrollTheCreditLine          ; scroll the text identifying the perpetrators
 
 	dec CreditHSCROL             ; Subtract one color clock from the left (aka fine scroll).
-	bne ExitScrollTheCredits     ; It is not yet 0.  Nothing else to do here.
+	bpl ExitScrollTheCredits     ; It did not roll 0 to -1.  Nothing else to do here.
 
 ResetCreditScroll                ; Fine Scroll reached 0, so coarse scroll the text.
-	inc SCROLL_CREDIT_LMS        ; Move text left one character position.
-	lda SCROLL_CREDIT_LMS
+	lda SCROLL_CREDIT_LMS        ; Move text left one character position.
+	clc
+	adc #4
+	sta SCROLL_CREDIT_LMS
 	cmp #<END_OF_CREDITS         ; Did coarse scroll position reach the end of the text?
 	bne RestartCreditHSCROL      ; No.  We are done with coarse scroll, now reset fine scroll. 
 
@@ -1844,7 +1844,7 @@ ResetCreditScroll                ; Fine Scroll reached 0, so coarse scroll the t
 	sta SCROLL_CREDIT_LMS
 
 RestartCreditHSCROL              ; Reset the 
-	lda #4                       ; horizontal fine 
+	lda #15                      ; horizontal fine 
 	sta CreditHSCROL             ; scrolling.
 
 ExitScrollTheCredits
@@ -1975,7 +1975,7 @@ EndOfLeftBoat
 ; TITLE_RIGHT = TITLE_MEM1+10
 ;
 ; Start Scroll position = TITLE_START (Increment), HSCROL 0  (Decrement)
-; End   Scroll position = TITLE_START + 9,         HSCROL 0
+; End   Scroll position = TITLE_START + 10,        HSCROL 0
 ; --------------------------------------------------------------------------
 
 ; Offsets from first LMS low byte in Display List to 
@@ -2026,10 +2026,14 @@ TitleLeftScroll
 ;	bne bTLF_Scrollit      ; No.  Move it.
 ;	lda TitleHSCROL        ; What is the fine scroll position?
 
-bTLF_Scrollit
-	dec TitleHSCROL        ; Decrement HSCROL.  
-	bpl bTLF_Exit          ; Positive. No roll over. Do not coarse scroll.
+bTLF_Scrollit              ; 2 color clocks per scroll.
+	dec TitleHSCROL        ; Decrement HSCROL... 14, 12, 10, 8, 6, 4, 2, 0
+	jsr TitleIsItAtTheEnd  ; Test if scrolling limits reached.
+	beq bTLF_Exit          ; At the end.
+	dec TitleHSCROL        ; Decrement HSCROL. 13, 11, 9, 7, 5, 3, 1, -1 (reset)
+	bpl bTLF_Exit          ; Positive.  Nothing else to do.
 
+bTLF_ResetTitleHScrol
 	lda #15                ; Coarse scrolling to next byte
 	sta TitleHSCROL        ; Reset HSCROL for next screen byte.
 
@@ -2518,17 +2522,15 @@ SetTextAsInverse  ; Make the text luminance the opposite of the background.
 RunPromptForButton
 
 	lda #1
-	sta EnablePressAButton   ; Tell VBI to the prompt flashing is enabled.
+	sta EnablePressAButton  ; Tell VBI to the prompt flashing is enabled.
 
-	jsr CheckInput           ; Get input. Non Zero means there is input.
-	and #%00010000           ; Strip it down to only the joystick button.
-	beq ExitRunPrompt        ; If 0, then do not play sound.
+	jsr CheckInput          ; Get input. Non Zero means there is input.
+	and #%00010000          ; Strip it down to only the joystick button.
+	beq ExitRunPrompt       ; If 0, then do not play sound.
 
-	ldx #2                   ; Button pressed. Set Pokey channel 2 to tink sound.
-	ldy #SOUND_TINK
-	jsr SetSound 
+	jsr PlayTink            ; Button pressed. Set Pokey channel 2 to tink sound.
 
-	lda #%00010000       ; Set the button is pressed.
+	lda #%00010000          ; Set the button is pressed.
 
 ExitRunPrompt
 

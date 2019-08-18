@@ -542,10 +542,9 @@ ManageTitleScrolling
 	lda VBIEnableScrollTitle    ; Is scrolling turned on?
 	beq WaitToRestoreTitle      ; No. See if the timer needs something.
 
-	jsr TitleLeftScroll         ; Nonzero return here is null
-	lda TT_LMS0                 ; Get current LMS
-	cmp #<[TITLE_START+9]       ; Did it reach the end?
-	bne EndManageTitleScrolling ; Nope.  Done for this frame.
+	jsr TitleLeftScroll         ; Scroll it
+	jsr TitleIsItAtTheEnd       ; Is it done?  Zero return is over.
+	bne EndManageTitleScrolling ; Nope.  Do again on the next frame.
 
 	lda #0                      ; Reached target position.
 	sta VBIEnableScrollTitle    ; Turn off further left scrolling.

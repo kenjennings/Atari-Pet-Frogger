@@ -437,7 +437,7 @@ FrogsCrossedIndex .byte 0         ; FrogsCrossed + NewLevelStart, limit to range
 NewLevelStart     .byte 0         ; = Starting difficulty for new game.  (New level Start  + Frogs Crossed)
 LastLevelStart    .byte 0         ; = Previous game starting difficulty.
 
-NumberOfLives     .byte 0         ; = Is the Number Of Lives remaining in this game
+NumberOfLives     .byte 3         ; = Is the Number Of Lives remaining in this game
 NewNumberOfLives  .byte 3         ; = Starting number of lives for new game.
 LastNumberofLives .byte 3         ; = Previous game starting number of lives.
 

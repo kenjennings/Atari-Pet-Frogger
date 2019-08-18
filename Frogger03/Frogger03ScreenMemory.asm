@@ -410,21 +410,17 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 6  |                                        |
 
 ; Now:
-SCROLLING_CREDIT   ; 40+52+62+57+40 == 251 ; almost a page, how nice.
-;BLANK_MEM ; Blank text also used for blanks in other places.
-;	.sb "                                        " ; 40
-
+SCROLLING_CREDIT   ; 40 * 6 == 240   + 8 == 248   page, how nice.
 ; The perpetrators identified...
 	.sb "PET FROGGER (c) November 1983 by Dales" ATASCII_HEART "f" ; 40 
 	.sb "t for CBM PET 4032 written by John C. Da" ; 40 
-	.sb "le.  Atari 8-bit computer port by Ken Je" ; 40
-	.sb "nnings, V03, July 2019.  Special thanks " ; 40
-	.sb "to testers -The Doctor-, Philsan, and Faicuai.       " ; 53
+	.sb "le. Atari 8-bit parody by Ken Jennings, " ; 40
+	.sb "V03, August 2019. Special thanks to test" ; 40
+	.sb "ers -The Doctor-, Philsan, Mclaneinc, Fa" ; 40
+	.sb "icuai.  "                         ; 8
 
 END_OF_CREDITS
 	.sb "PET FROGGER (c) November 1983 by Dales" ATASCII_HEART "f" ; 40 
-;EXTRA_BLANK_MEM ; Trailing blanks for credit scrolling.
-;	.sb "                                        " ; 40
 
 
 	.align $0100 ; Realign to next page.

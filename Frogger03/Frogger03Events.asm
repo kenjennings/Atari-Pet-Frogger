@@ -403,6 +403,9 @@ CheckOptionKey
 	lda CONSOL                 ; Get Option, Select, Start buttons
 	and #CONSOLE_OPTION        ; Is Option pressed?  0 = pressed. 1 = not
 	bne CheckSelectKey         ; No.  Try the select.
+
+	jsr PlayTink            ; Button pressed. Set Pokey channel 2 to tink sound.
+
 	; increment starting frogs.
 	; generate string for right buffer
 	ldx NewLevelStart          
@@ -421,6 +424,9 @@ CheckSelectKey
 	lda CONSOL                 ; Get Option, Select, Start buttons
 	and #CONSOLE_SELECT        ; Is SELECT pressed?  0 = pressed. 1 = not
 	bne bCFCI_End              ; No.  Finished with all.
+
+	jsr PlayTink            ; Button pressed. Set Pokey channel 2 to tink sound.
+
 	; increment lives.
 	; generate string for right buffer
 	ldx NewNumberOfLives

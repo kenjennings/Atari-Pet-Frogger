@@ -12,7 +12,7 @@
 ; Version 03, July 2019
 ; ==========================================================================
 
- 
+
 ; ==========================================================================
 ; Frogger AUDIO
 ;
@@ -22,7 +22,7 @@
 ; Game sound allocation:
 ; Channel 0 - title slide, light saber
 ; Channel 1 - light saber
-; Channel 2 - Frog movement bump.  Point award.  music.
+; Channel 2 - Frog movement bump.  Point award.  Music.
 ; Channel 3 - Ambient water noise, music.
 ; --------------------------------------------------------------------------
 
@@ -168,39 +168,39 @@ SOUND_ENTRY_HUMMER_B ; one-half of Atari light saber
 
 
 SOUND_ENTRY_DIRGE ; Chopin's Funeral for a frog (or gunslinger in Outlaw) 
-	.byte $A4,182,0,1 ; F, 1/4, 16 steps
-	.byte $A6,182,13,1 
-	.byte $A4,182,0,1 
-	.byte $A2,182,0,1 
-	.byte $A4,182,0,1 ; F, 1/8 ., 12 steps
-	.byte $A6,182,9,1 
-	.byte $A4,182,0,1 
-	.byte $A2,182,0,1 
-	.byte $A4,182,0,1 ; F, 1/16,  4 steps
-	.byte $A6,182,0,1 
-	.byte $A4,182,0,1 
-	.byte $A2,182,0,1 
-	.byte $A4,182,0,1 ; F, 1/2, 32 steps
-	.byte $A6,182,29,1 
-	.byte $A4,182,0,1 
-	.byte $A2,182,0,1 
+;	.byte $A4,182,0,1 ; F, 1/4, 16 steps
+;	.byte $A6,182,13,1 
+;	.byte $A4,182,0,1 
+;	.byte $A2,182,0,1 
+;	.byte $A4,182,0,1 ; F, 1/8 ., 12 steps
+;	.byte $A6,182,9,1 
+;	.byte $A4,182,0,1 
+;	.byte $A2,182,0,1 
+;	.byte $A4,182,0,1 ; F, 1/16,  4 steps
+;	.byte $A6,182,0,1 
+;	.byte $A4,182,0,1 
+;	.byte $A2,182,0,1 
+;	.byte $A4,182,0,1 ; F, 1/2, 32 steps
+;	.byte $A6,182,29,1 
+;	.byte $A4,182,0,1 
+;	.byte $A2,182,0,1 
 
-	.byte $A4,182,0,1 ; F, 1/4, 16 steps
-	.byte $A6,182,13,1 
-	.byte $A4,182,0,1 
-	.byte $A2,182,0,1 
-	.byte $A4,182,0,1 ; F, 1/8 ., 12 steps
-	.byte $A6,182,9,1 
-	.byte $A4,182,0,1 
-	.byte $A2,182,0,1 
-	.byte $A4,182,0,1 ; F, 1/16,  4 steps
-	.byte $A6,182,0,1 
-	.byte $A4,182,0,1 
-	.byte $A2,182,0,1 
-	.byte $A4,182,0,1 ; F, 1/2, 32 steps
-	.byte $A6,182,29,1 
-	.byte $A4,182,0,1 
-	.byte $A2,182,0,1 
+;	.byte $A4,182,0,1 ; F, 1/4, 16 steps
+;	.byte $A6,182,13,1 
+;	.byte $A4,182,0,1 
+;	.byte $A2,182,0,1 
+;	.byte $A4,182,0,1 ; F, 1/8 ., 12 steps
+;	.byte $A6,182,9,1 
+;	.byte $A4,182,0,1 
+;	.byte $A2,182,0,1 
+;	.byte $A4,182,0,1 ; F, 1/16,  4 steps
+;	.byte $A6,182,0,1 
+;	.byte $A4,182,0,1 
+;	.byte $A2,182,0,1 
+;	.byte $A4,182,0,1 ; F, 1/2, 32 steps
+;	.byte $A6,182,29,1 
+;	.byte $A4,182,0,1 
+;	.byte $A2,182,0,1 
 
 	.byte $A4,182,0,1 ; F, 1/4, 16 steps
 	.byte $A6,182,13,1 
@@ -387,8 +387,6 @@ SOUND_FX_HI_TABLE
 	.byte >SOUND_ENTRY_WATER
 	.byte >SOUND_ENTRY_ENGINES
 	.byte >SOUND_ENTRY_BLING
-	
-	
 
 
 ; ==========================================================================
@@ -472,6 +470,29 @@ PlayThump
 	jsr SetSound 
 
 	mRegRestore                ; Macro: Restore Y, X, A, and CPU flags
+
+	rts
+
+
+; ==========================================================================
+; PlayTink                                                       *  *  *
+; -------------------------------------------------------------------------- 
+; Play tink for button input
+;
+; Main routine uses this to play the feedback sound for button input.
+; 
+; Uses A, X, Y, but preserves all registers on entry/exit.
+; --------------------------------------------------------------------------
+
+PlayTink
+
+	mRegSave                 ; Macro: save CPU flags, and A, X, Y
+
+	ldx #2                   ; Button pressed. Set Pokey channel 2 to tink sound.
+	ldy #SOUND_TINK
+	jsr SetSound 
+
+	mRegRestore              ; Macro: Restore Y, X, A, and CPU flags
 
 	rts
 
