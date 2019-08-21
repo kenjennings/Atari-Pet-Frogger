@@ -462,7 +462,8 @@ TestTransGame3
 
 	ldx EventCounter2
 	jsr IncrementTableColors ; Complicated fade up of four color registers.
-	beq TransGameNextLine    ; 
+	beq TransGameNextLine    ; if done, then move to next line
+	jsr IncrementTableColors ; Do it again. V03 playtesters think this should be faster.
 	bne EndTransitionToGame  ; All colors do not match yet. Be back later to do more.
 
 TransGameNextLine            ; All colors match on this line.  Do next line.
