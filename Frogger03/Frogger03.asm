@@ -403,20 +403,6 @@
 
 ; ======== M A I N   G A M E   G L O B A L S ======== 
 
-; FYI: VBI manages moving Frog around, so there's never any visible tearing.
-; Also, its best to evaluate the P/M collisions when the display is not active.
-
-; MIN_FROGX = PLAYFIELD_LEFT_EDGE_NORMAL    ; Left edge of frog movement
-; MAX_FROGX = PLAYFIELD_RIGHT_EDGE_NORMAL-8 ; right edge of frog movement
-; MID_FROGX = [MIN_FROGX+MAX_FROGX]/2       ; Middle of screen, starting position.
-
-; MAX_FROGY = PM_1LINE_NORMAL_BOTTOM        ; starting position for frog at bottom of screen
-
-; SHAPE_OFF   = 0
-; SHAPE_FROG  = 1
-; SHAPE_SPLAT = 2
-; SHAPE_TOMB  = 3
-
 FrogRow           .byte $00       ; = Frog Y row position (in the beach/boat playfield not counting score lines)
 FrogNewRow        .byte $00       ; = Main signals to VBI to move row.
 
@@ -567,7 +553,7 @@ FrogRefocus       .byte 0         ; Countdown timer to return the eyeballs to th
 ; Boat movements are managed by the VBI.
 ; The frame count value comes from BOAT_FRAMES based on the number of 
 ; frogs that crossed the river (FrogsCrossed) (0 to 10 difficulty level).
-CurrentRowLoop     .byte 0 ; Count from 0 to 18 in VBI
+CurrentRowLoop     .byte 0   ; Count from 0 to 18 in VBI
 CurrentBoatFrames  .ds   19  ; How many frames does each row wait?
 ; Count frames until next boat movement. (Note that 0 correctly means move every frame).
 BoatFramesPointer  .word BOAT_FRAMES 
@@ -637,10 +623,10 @@ SOUND_FX_HI3 .byte 0
 ; 4) VBI when playing sets SOUND_CONTROL value to 2. 
 
 SOUND_CONTROL
-SOUND_CONTROL0 .byte $00
-SOUND_CONTROL1 .byte $00
-SOUND_CONTROL2 .byte $00
-SOUND_CONTROL3 .byte $00
+SOUND_CONTROL0  .byte $00
+SOUND_CONTROL1  .byte $00
+SOUND_CONTROL2  .byte $00
+SOUND_CONTROL3  .byte $00
 
 ; When these are non-zero, the current settings continue for the next frame.
 SOUND_DURATION

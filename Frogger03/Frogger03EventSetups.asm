@@ -97,17 +97,17 @@ SetupTransitionToGame
 
 	lda CurrentDL
 	cmp #DISPLAY_DEAD
-	beq GameStartAtTwo
+	beq GameStartAtTwo     ; This is Dead display.  Skip ahead to Part Two.
 	cmp #DISPLAY_WIN
-	beq GameStartAtTwo
+	beq GameStartAtTwo     ; This is Win display.  Skip ahead to Part Two.
 
-GameStartAtOne
+GameStartAtOne             ; Not Dead, Not Win.  Must be OVER, or other.
 	lda #1                 ; First transition stage: Loop from bottom to top
 	sta EventStage
 	bne TransitionToGameSetEvent
 
-GameStartAtTwo ; Coming here from WIN will end up with black text.
-	; Fix this first. 
+GameStartAtTwo ; Coming here from WIN will end up with black Scores/Status text.
+	           ; Fix this first by restoring the original colors. 
 	lda GAME_COLPF1_COLORS+1
 	sta COLPF1_TABLE+1
 	lda GAME_COLPF1_COLORS+2
@@ -283,7 +283,7 @@ SetupDead
 
 	lda #DEAD_CYCLE_SPEED   ; Animation moving speed.
 	jsr ResetTimers
-	
+
 	lda #DISPLAY_DEAD       ; Tell VBI to change screens.
 	jsr ChangeScreen        ; Then copy the color tables.
 

@@ -78,8 +78,8 @@ EventGameInit
 
 	lda #AUDCTL_CLOCK_64KHZ    ; Set only this one bit for clock.
 	sta AUDCTL                 ; Global POKEY Audio Control.
-	lda #3                     ; Set SKCTL to 3 to stop possible cassette noise. 
-	sta SKCTL                  ; So say Mapping The Atari and De Re Atari.
+	lda #3                     ; Set SKCTL to 3 to stop possible cassette noise, 
+	sta SKCTL                  ; so say Mapping The Atari and De Re Atari.
 	jsr StopAllSound           ; Zero all AUDC and AUDF
 
 	lda #>CHARACTER_SET        ; Set custom character set.  Global to game, forever.
@@ -130,7 +130,7 @@ EventGameInit
 
 	jsr SetupTransitionToTitle ; will set CurrentEvent = EVENT_TRANS_TITLE
 
-	rts                         ; And now ready to go to main game loop . . . .
+	rts                         ; And now ready to go back to main game loop . . . .
 
 
 ; ==========================================================================
@@ -158,10 +158,10 @@ EventTransitionToTitle
 	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
 
 FinishedNowSetupStage2
-	ldx #0                     ; Setup channel 0 to play saber A sound.
+	ldx #0                     ; Setup channel 0 to play light saber A sound.
 	ldy #SOUND_HUM_A
 	jsr SetSound 
-	ldx #1                     ; Setup channel 1 to play saber B sound.
+	ldx #1                     ; Setup channel 1 to play light saber B sound.
 	ldy #SOUND_HUM_B
 	jsr SetSound
 
@@ -179,7 +179,7 @@ GoToStartEventForTitle
 	sta CurrentEvent
 
 EndTransitionToTitle
-	jsr WobbleDeWobble         ; Frog drawing spirograph art on the title.
+	jsr WobbleDeWobble         ; Frog following spirograph art path on the title.
 
 	rts
 
@@ -192,22 +192,21 @@ EndTransitionToTitle
 ; Clear the Game Scores and get ready for the Press A Button prompt.
 ;
 ; Sidebar: This is oddly inserted between Transition to Title and the
-; Title to finish internal initialization per game, due to doofus-level
+; Title to finish internal initialization per game due to doofus-level
 ; lack of design planning, blah blah.
 ; The title screen has already been presented by Transition To Title.
-
 ; --------------------------------------------------------------------------
 
 EventScreenStart            ; This is New Game and Transition to title.
 
-	lda NewLevelStart       ; Copy the last game setups to the last game vars
+	lda NewLevelStart       ; Copy the new game setups to the last game vars
 	sta LastLevelStart      
 
-	lda NewNumberOfLives    ; Copy the last game setups to the last game vars
+	lda NewNumberOfLives    ; Copy the new game setups to the last game vars
 	sta LastNumberofLives
 
 	jsr ClearSavedFrogs     ; Erase the saved frogs from the screen. (Zero the count)
-	jsr PrintFrogsAndLives  ; Update the screen memory.
+	jsr PrintFrogsAndLives  ; Update the screen memory for the status.
 
 	lda #EVENT_TITLE       ; Next step is operating the title screen input.
 	sta CurrentEvent
@@ -221,10 +220,10 @@ EventScreenStart            ; This is New Game and Transition to title.
 ; Event Process TITLE SCREEN
 ; The activity on the title screen:
 ; Always draw the animated frog. The frog animation is called on every 
-; since WobbleDeWobble manages timing and movement. 
+; frame since WobbleDeWobble manages timing and movement. 
 ; The animated Rezz-in for the title text is also called on all frames.   
-; There is no AnimateFrames control of speed until the animations/scrolling 
-; for stage 2 and 3.
+; There is no AnimateFrames control of the speed until the animations
+; and scrolling for stage 2 and 3.
 ; Stages: 
 ; 0) Random rezz in for Title graphics.
 ; Not Stage 0.
@@ -232,8 +231,8 @@ EventScreenStart            ; This is New Game and Transition to title.
 ; Joystick button input is not observed during Stages 2, and 3.
 ; 1) Just input checking per above, and testing Option/Select.
 ; 2) Shifting Left Graphics down.
-; 3) OPTION or SELECT animation  scroll in.
-; 4) Waiting to return to Stage 0 (AnimateFrames2 timer).
+; 3) OPTION or SELECT animation  scroll in from Right to Left.
+; 4) Waiting to return to Stage 0 (AnimateFrames2 timer). and Button Input.
 ; --------------------------------------------------------------------------
 
 EventTitleScreen
@@ -302,7 +301,7 @@ CheckFunctionButton
 	cmp #1                   ; 1) Just doing input checking per above, and testing Option/Select.
 	bne bETS_Stage2          ; Not Stage 1.  Go to Stage 2.  Skip checking console keys.
 
-	jsr CheckForConsoleInput ; Sets up for Stage 2, and EventCounter for TitleShiftDown.
+	jsr CheckForConsoleInput ; If Button pressed, then sets Stage 2, and EventCounter for TitleShiftDown.
 	jmp EndTitleScreen       ; Regardless of the console input, this is the end of stage 1.
 
 ; =============== Stage 2    ; Shifting Left buffer down.
@@ -342,12 +341,6 @@ CheckTitleScroll
 	lda VBIEnableScrollTitle   ; Is VBI busy scrolling option text?
 	bne EndTitleScreen         ; Yes.  Nothing more to do here.
 
-	; Is the title LMS pointing at the right buffer?
-;	jsr TitleIsItAtTheEnd      ; Test if scrolling limits reached.
-;;	lda TT_LMS0                ; Get low byte of first LMS
-;;	cmp #<TITLE_END            ; Is it at the end?
-;	beq EndTitleScreen         ; Yes.  Skip readjust to origin.
-
 	; Readjust display to show the left buffer visible 
 	; and reset scrolling origin.
 	jsr TitleCopyRightToLeftGraphics ; Copy right buffer to left buffer.
@@ -360,16 +353,16 @@ bETS_Stage3_ToStage4         ; Setup for next Stage
 
 ; =============== Stage 4 ; Waiting on RestoreTitleTimer to return to Stage 0. 
 
-bETS_Stage4
-	jsr CheckForConsoleInput ; Stage 4, allow console input.
+bETS_Stage4                  ; Stage 4, allow console input.
+	jsr CheckForConsoleInput ; If Button pressed, then sets Stage 2, and EventCounter for TitleShiftDown.
 	beq bETS_CheckAutoReturn ; No console key pressed.  So, check if return is automatic.
-	lda #0                   ; Console key input reset path to Stage 2.  So, 0 the auto timer.
+	lda #0                   ; Console key input returns us to Stage 2, so zero the auto timer.
 	sta RestoreTitleTimer
 	beq EndTitleScreen
 
 bETS_CheckAutoReturn
-	lda RestoreTitleTimer    ; Wait for Input timeout to expire.  
-	bne EndTitleScreen       ; Not there yet.
+	lda RestoreTitleTimer    ; Wait for Input timeout to expire. 
+	bne EndTitleScreen       ; No timeout yet.
 
 	; Expired auto timer... Return to Stage 0.
 	jsr ToPlayFXScrollOrNot  ; Start slide sound playing if not playing now.
@@ -381,78 +374,6 @@ bETS_CheckAutoReturn
 
 EndTitleScreen
 
-	rts
-
-
-; ==========================================================================
-; CHECK FOR CONSOLE INPUT
-; ==========================================================================
-; Support Routine CHECK FOR CONSOLE INPUT
-; Evaluate if console key is pressed.
-; If so, then setup appropriate values for the value change, and 
-; setup to put the Title screen in Stage 2.
-;
-; Returns:
-; 0 for no input.
-; !0 for a CONSOLE key was pressed.
-; --------------------------------------------------------------------------
-
-CheckForConsoleInput
-
-CheckOptionKey
-	lda CONSOL                 ; Get Option, Select, Start buttons
-	and #CONSOLE_OPTION        ; Is Option pressed?  0 = pressed. 1 = not
-	bne CheckSelectKey         ; No.  Try the select.
-
-	jsr PlayTink            ; Button pressed. Set Pokey channel 2 to tink sound.
-
-	; increment starting frogs.
-	; generate string for right buffer
-	ldx NewLevelStart          
-	inx
-	cpx #[MAX_FROG_SPEED+1]    ; 13 + 1
-	bne bCFCI_SkipResetLevel
-	ldx #0
-bCFCI_SkipResetLevel
-	stx NewLevelStart          ; Updated starting level.
-
-	jsr TitlePrepLevel
-	jmp bCFCI_StartupStage2
-
-
-CheckSelectKey
-	lda CONSOL                 ; Get Option, Select, Start buttons
-	and #CONSOLE_SELECT        ; Is SELECT pressed?  0 = pressed. 1 = not
-	bne bCFCI_End              ; No.  Finished with all.
-
-	jsr PlayTink            ; Button pressed. Set Pokey channel 2 to tink sound.
-
-	; increment lives.
-	; generate string for right buffer
-	ldx NewNumberOfLives
-	inx
-	cpx #[MAX_FROG_LIVES+1]    ; 7 + 1
-	bne bCFCI_SkipResetLives
-	ldx #1
-bCFCI_SkipResetLives
-	stx NewNumberOfLives      ; Get the updated number of new lives for the next game.
-	jsr TitlePrepLives        ; Get the scrolling buffer ready.
-	jsr WriteNewLives         ; Update the status line to match the new number of frogs.
-
-bCFCI_StartupStage2
-	lda #2
-	sta EventStage            ; Stage 2 is the shift Left Buffer down.
-	lda #6
-	sta EventCounter          ; Do it six times.
-	lda #TITLE_DOWN_SPEED
-	jsr ResetTimers           ; Reset animation/input frame counter.
-;	sta AnimateFrames         ; Set animation speed.
-	bne bCFCI_Exit            ; Return !0 exit.
-
-bCFCI_End
-	lda #0  ; 0 means nothing happened.
-
-bCFCI_Exit
 	rts
 
 
@@ -477,7 +398,7 @@ EventTransitionToGame
 	lda #TITLE_WIPE_SPEED    ; yes.  Reset it.
 	jsr ResetTimers
 
-	lda EventStage         ; What stage are we in?
+	lda EventStage           ; What stage are we in?
 	cmp #1
 	bne TestTransGame2       ; Not the fade out, try next stage
 
@@ -486,11 +407,14 @@ EventTransitionToGame
 	; Fade out COLPF0 and COLPF1 at the same time.
 	; When luminance reaches 0, set color to 0. 
 	; When COLPF0/COLPF1 reach 0 then change COLPF2/COLBK to COLOR_BLACK.
-	jsr FadeColPfToBlack     ; Returns color 0 | color 1, then ....
+	jsr FadeColPfToBlack     ; Decrement color 0, color 1, until zero.  Return COLPF0 | COLPF1 ...
+	beq ZeroCOLPF2           ; ... If both are 0, then zero the background.
+	jsr FadeColPfToBlack     ; V03 tester recommends speeding up the transition. Do it again.
 	bne EndTransitionToGame  ; ... If either color is non-zero, done for this pass.
 
 ZeroCOLPF2                   ; FadeColPfToBlack returned 0, so the text (and pixel) is 0.  
 	lda #0                   ; Therefore, zero the background(s).
+	;                        ; FYI: FadeColPfToBlack  did  ldx EventCounter2
 	sta COLPF2_TABLE,x
 	sta COLBK_TABLE,x
 
@@ -538,6 +462,7 @@ TestTransGame3
 
 	ldx EventCounter2
 	jsr IncrementTableColors ; Complicated fade up of four color registers.
+	beq TransGameNextLine    ; 
 	bne EndTransitionToGame  ; All colors do not match yet. Be back later to do more.
 
 TransGameNextLine            ; All colors match on this line.  Do next line.
@@ -718,9 +643,9 @@ WinScreenCheckTimers
 
 	lda EventStage
 WinStageZero
-	bne WinStageOne
+	bne WinStageOne             ; Not Stage Zero
 
-	jsr WinRainbow
+	jsr WinRainbow              ; Run the Art.
 	beq EndWinScreen
 
 WinStageOne ; and Stage Two and Three for the fade out effects.
@@ -729,7 +654,7 @@ WinStageOne ; and Stage Two and Three for the fade out effects.
 ; The actual end.
 
 WinStageFour                  ; Evaluate return to game, or game over.
-	cmp #4                     ; Is EventStage == 4?
+	cmp #4                    ; Is EventStage == 4?
 	bne EndWinScreen
 
 	jsr SetupTransitionToGame

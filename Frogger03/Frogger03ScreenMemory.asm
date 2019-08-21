@@ -92,9 +92,6 @@ ATASCII_HEART  = $00 ; heart graphics
 ; bytes directly to the screen:
 INTERNAL_0        = $10 ; Number '0' for scores.
 INTERNAL_SPACE    = $00 ; Blank space character.
-;INTERNAL_HLINE    = $52 ; underline for title text.
-
-;I_H = INTERNAL_HLINE
 
 SIZEOF_LINE    = 39  ; That is, 40 - 1
 SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
@@ -410,7 +407,10 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 ; 6  |                                        |
 
 ; Now:
-SCROLLING_CREDIT   ; 40 * 6 == 240   + 8 == 248   page, how nice.
+SCROLLING_CREDIT   ; 40 * 6 == 240   + 8 == 248.
+; Since fine scrolling buffers 4 characters, make sure the 
+; credits string is padded to a multiple of 4 characters.
+
 ; The perpetrators identified...
 	.sb "PET FROGGER (c) November 1983 by Dales" ATASCII_HEART "f" ; 40 
 	.sb "t for CBM PET 4032 written by John C. Da" ; 40 
@@ -456,7 +456,6 @@ PLAYFIELD_MEM16
 ; |]]|  |  |  |]]|]]|]]|  |  |]]|  |  |  |]]|  |  |  |]]|  |]]|  | ]|]]|] |  | ]|]]|]]|  | ]|]]|]]|  |]]|]]|]]|  |]]|  |]]|
 
 TITLE_MEM1  ; "Blank" to support the animated dissolve in.
-;	.ds 60  ; Code will clear it, so do not need to declare 60 bytes of zeros.                             ; + 60 == 124
 	.ds 120  ; Code will clear it, so do not need to declare zeros.                                        ; + 120 == 184
 
 ; Values for manipulating screen memory.
@@ -700,29 +699,6 @@ GAMEOVER_MEM                                            ; + 60 == 180
 	.align $0100 ; Realign to next page.
 
 
-; ==========================================================================
-; Color Layouts for the screens.
-; 23 lines of data each, not 25.
-; Line 24 for the Press A Button Prompt and 
-; line 25 for the scrolling credits are managed directly, by
-; the VBI, so they do not need entries in the tables.
-; --------------------------------------------------------------------------
-; FYI from GTIA.asm:
-; COLOR_ORANGE1 =      $10
-; COLOR_ORANGE2 =      $20
-; COLOR_RED_ORANGE =   $30
-; COLOR_PINK =         $40
-; COLOR_PURPLE =       $50
-; COLOR_PURPLE_BLUE =  $60
-; COLOR_BLUE1 =        $70
-; COLOR_BLUE2 =        $80
-; COLOR_LITE_BLUE =    $90
-; COLOR_AQUA =         $A0
-; COLOR_BLUE_GREEN =   $B0
-; COLOR_GREEN =        $C0
-; COLOR_YELLOW_GREEN = $D0
-; COLOR_ORANGE_GREEN = $E0
-; COLOR_LITE_ORANGE =  $F0
 
 TITLE_BACK_COLORS ; 26 entries 
 	; Mode 2 lines - text background (COLPF2) and border (COLBK). 
@@ -1713,47 +1689,6 @@ PLAYER1_EYE_DATA
 	.by $11 $33 $11 $FF
 	.by $55 $11 $11 $FF
 
-;PLAYER1_EYE_OFFSET ; Image number * 4 -1
-;	.by 3 7 11 15
-
-	
-	
-; The small frog parts are padded to minimum 3 bytes so they 
-; can be redrawn in a common loop.
-
-;; Player 3 is the mouth.
-;; 3 . . . 3 . . .
-;; 3 3 . 3 3 . . .
-;; . 3 3 3 . . . .
-
-;PLAYER3_FROG_DATA
-;	.by $00 $00 $00 $00 $00 $00 $00 $63 $3E $1C $00
-
-; Player 5 (the Missile, M3) is COLPF3, White. +1 
-; 1 1 . . . . . .  ; 
-; 1 1 . . . . . .  ; 
-; 1 1 . . . . . .  ;
-; Player 5 (the Missile, M2) is COLPF3, White. +3
-; . . 1 . . . . .  ; 
-; . . 1 . . . . .  ; 
-; . . 1 . . . . .  ;
-; Player 5 (the Missile, M1) is COLPF3, White.+5
-; . . . . 1 1 . .  ; 
-; . . . . 1 1 . .  ; 
-; . . . . 1 1 . .  ; 
-; Player 5 (the Missile, M0) is COLPF3, White.+7
-; . . . . . . 1 .  ; 
-; . . . . . . 1 .  ; 
-; . . . . . . 1 .  ; 
-
-; Data for Player 3 and Missile 3 is $C0 to draw the vertical 
-; mask for the left and right sides of the game display.
-; At quad width that will cover 8 color clocks/2 characters.
-
-
-;PLAYER5_FROG_DATA 
-;	.by $C0 $C0 $C0 $C0 $C0 $0C0 $C0 $C0 $C0 $C0 $C0
-
 
 
 ; Splatty Frog
@@ -2016,7 +1951,7 @@ GRAVE_PMCOLORS_TABLE ; 0, 1, 2, 3
 ; We could go to using the custom character set defined for the 
 ; title text.  But, then there's only one color available for 
 ; these lines.  Boring.  Monotonous compared to everything else 
-; going on.  
+; going on.
 ;
 ; We could just change the background color to make the Mode 2 
 ; text look green, but that affects everything on the line.  I 

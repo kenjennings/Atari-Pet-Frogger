@@ -28,24 +28,24 @@
 ; ==========================================================================
 ; Animation speeds of various displayed items.   Number of frames to wait...
 ; --------------------------------------------------------------------------
-BLINK_SPEED       = 3   ; Speed of updates to Press A Button prompt.
+BLINK_SPEED       = 3    ; Speed of updates to Press A Button prompt.
 
-TITLE_SPEED       = 2   ; Scrolling speed for title. 
-TITLE_DOWN_SPEED  = 4   ; Shift title down before scroll.
-TITLE_RETURN_WAIT = 180 ; Time to wait to return to Stage 0.
-TITLE_WIPE_SPEED  = 0   ; Title screen to game screen fade speed.
+TITLE_SPEED       = 2    ; Scrolling speed for title. 
+TITLE_DOWN_SPEED  = 3    ; Shift title down before scroll.
+TITLE_RETURN_WAIT = 180  ; Time to wait to return to Stage 0.
+TITLE_WIPE_SPEED  = 0    ; Title screen to game screen fade speed.
 
-WOBBLEX_SPEED     = 2   ; Speed of flying objects on Title and Game Over.
-WOBBLEY_SPEED     = 3   ; Speed of flying objects on Title and Game Over.
+WOBBLEX_SPEED     = 2    ; Speed of flying objects on Title and Game Over.
+WOBBLEY_SPEED     = 3    ; Speed of flying objects on Title and Game Over.
 
-FROG_WAKE_SPEED   = 150 ; Initial delay about 2 sec for frog corpse '*' viewing/mourning
-DEAD_FADE_SPEED   = 4   ; Fade the game screen to black for Dead Frog
-DEAD_CYCLE_SPEED  = 5   ; Speed of color animation on Dead screen
+FROG_WAKE_SPEED   = 120  ; Initial delay about 2 sec for frog corpse viewing/mourning
+DEAD_FADE_SPEED   = 4    ; Fade the game screen to black for Dead Frog
+DEAD_CYCLE_SPEED  = 5    ; Speed of color animation on Dead screen
 
-WIN_FADE_SPEED    = 4   ; Fade the game screen to black to show Win
-WIN_CYCLE_SPEED   = 5   ; Speed of color animation on Win screen 
+WIN_FADE_SPEED    = 4    ; Fade the game screen to black to show Win
+WIN_CYCLE_SPEED   = 5    ; Speed of color animation on Win screen 
 
-GAME_OVER_SPEED   = 4  ; Speed of Game over background animation
+GAME_OVER_SPEED   = 4    ; Speed of Game over background animation
 
 
 ; Timer values.  NTSC.
@@ -55,7 +55,7 @@ GAME_OVER_SPEED   = 4  ; Speed of Game over background animation
 ; 60 fps and maybe compensates for any jitter/uneven toggling of the joystick
 ; bits by flaky controllers.
 ; At 9 events per second the frog moves horizontally 18 color clocks, max. 
-INPUTSCAN_FRAMES = $07 ; previously $09
+INPUTSCAN_FRAMES = $07  ; previously $09
 
 
 ; PAL Timer values.  PAL ?? guesses...
@@ -204,6 +204,79 @@ ExitCheckInput
 	rts
 
 
+; ==========================================================================
+; CHECK FOR CONSOLE INPUT
+; ==========================================================================
+; Support Routine CHECK FOR CONSOLE INPUT
+; Evaluate if console key is pressed.
+; This is called during the Title-specific event.
+; If a console key is pressed then do the associated game config value 
+; changes, prepare the Title line scrolling, and set the Title screen 
+; to execute at Stage 2.
+;
+; Returns:
+; 0 for no input.
+; !0 for a CONSOLE key was pressed.
+; --------------------------------------------------------------------------
+
+CheckForConsoleInput
+
+CheckOptionKey
+	lda CONSOL                 ; Get Option, Select, Start buttons
+	and #CONSOLE_OPTION        ; Is Option pressed?  0 = pressed. 1 = not
+	bne CheckSelectKey         ; No.  Try the select.
+
+	jsr PlayTink               ; Button pressed. Set Pokey channel 2 to tink sound.
+
+	; increment starting frogs.
+	; generate string for right buffer
+	ldx NewLevelStart          
+	inx
+	cpx #[MAX_FROG_SPEED+1]    ; 13 + 1
+	bne bCFCI_SkipResetLevel
+	ldx #0
+bCFCI_SkipResetLevel
+	stx NewLevelStart          ; Updated starting level.
+
+	jsr TitlePrepLevel
+	jmp bCFCI_StartupStage2
+
+
+CheckSelectKey
+	lda CONSOL                 ; Get Option, Select, Start buttons
+	and #CONSOLE_SELECT        ; Is SELECT pressed?  0 = pressed. 1 = not
+	bne bCFCI_End              ; No.  Finished with all.
+
+	jsr PlayTink               ; Button pressed. Set Pokey channel 2 to tink sound.
+
+	; increment lives.
+	; generate string for right buffer
+	ldx NewNumberOfLives
+	inx
+	cpx #[MAX_FROG_LIVES+1]    ; 7 + 1
+	bne bCFCI_SkipResetLives
+	ldx #1
+bCFCI_SkipResetLives
+	stx NewNumberOfLives      ; Get the updated number of new lives for the next game.
+	jsr TitlePrepLives        ; Get the scrolling buffer ready.
+	jsr WriteNewLives         ; Update the status line to match the new number of frogs.
+
+bCFCI_StartupStage2
+	lda #2
+	sta EventStage            ; Stage 2 is the shift Left Buffer down.
+	lda #6
+	sta EventCounter          ; Do it six times.
+	lda #TITLE_DOWN_SPEED
+	jsr ResetTimers           ; Reset animation/input frame counter.
+	bne bCFCI_Exit            ; Return !0 exit.
+
+bCFCI_End
+	lda #0  ; 0 means nothing happened.
+
+bCFCI_Exit
+	rts
+
+
 ;==============================================================================
 ;                                                           SCREENWAITFRAME  A
 ;==============================================================================
@@ -214,15 +287,15 @@ ExitCheckInput
 
 libScreenWaitFrame
 
-	pha                ; Save A, so caller is not disturbed.
-	lda RTCLOK60       ; Read the jiffy clock incremented during vertical blank.
+	pha                 ; Save A, so caller is not disturbed.
+	lda RTCLOK60        ; Read the jiffy clock incremented during vertical blank.
 
 bLoopWaitFrame
-	cmp RTCLOK60       ; Is it still the same?
-	beq bLoopWaitFrame ; Yes.  Then the frame has not ended.
+	cmp RTCLOK60        ; Is it still the same?
+	beq bLoopWaitFrame  ; Yes.  Then the frame has not ended.
 
-	pla                ; restore A
-	rts                ; No.  Clock changed means frame ended.  exit.
+	pla                 ; restore A
+	rts                 ; No.  Clock changed means frame ended.  exit.
 
 
 
@@ -399,10 +472,10 @@ ResetBoatFrames
 LeftBoatScroll
 	jsr LeftBoatFineScrolling     ; Do Left Boat Fine Scrolling.  (and frog X update) 
 
-EndOfScrollLoop                  ; end of this row.  go to the next one.
-	iny                          ; Y reliably has Row.  X was changed.
-	cpy #18                      ; Last entry is beach.  Do not bother to go further.
-	bne LoopBoatScrolling        ; Not 18.  Process the next row.
+EndOfScrollLoop                   ; end of this row.  go to the next one.
+	iny                           ; Y reliably has Row.  X was changed.
+	cpy #18                       ; Last entry is beach.  Do not bother to go further.
+	bne LoopBoatScrolling         ; Not 18.  Process the next row.
 
 EndOfBoatScrolling
 
@@ -428,7 +501,7 @@ DoAnimateClock
 
 DoAnimateClock2
 	lda AnimateFrames2           ; Is animation countdown already 0?
-	beq DoAnimateClock3        ; Yes, do not decrement now.
+	beq DoAnimateClock3          ; Yes, do not decrement now.
 	dec AnimateFrames2           ; Minus 1
 
 ; ======== Manage Another Main code timer.  Decrement while non-zero. ========
@@ -436,7 +509,7 @@ DoAnimateClock2
 
 DoAnimateClock3
 	lda AnimateFrames3           ; Is animation countdown already 0?
-	beq DoAnimateClock4         ; Yes, do not decrement now.
+	beq DoAnimateClock4          ; Yes, do not decrement now.
 	dec AnimateFrames3           ; Minus 1
 	
 ; ======== Manage Another Main code timer.  Decrement while non-zero. ========
@@ -484,7 +557,7 @@ MaintainFrogliness
 
 ; ==== Frog and boat position gyrations are done.  ==== Is there actual movement?
 SimplyUpdatePosition
-	jsr ProcessNewShapePosition ; limit object to screen.  redraw the object.
+	jsr ProcessNewShapePosition  ; limit object to screen.  redraw the object.
 
 NoFrogUpdate
 
@@ -501,30 +574,30 @@ ManageScoredFades
 	beq EndManageScoreFades
 
 DoFadeScore
-	lda COLPM0_TABLE      ; Get Color.
-	jsr DecThisColorOrNot ; Can it be decremented?
-	sta COLPM0_TABLE      ; Re-Save Color
-	sta COLPM1_TABLE      ; Second half of the same object is same color
+	lda COLPM0_TABLE       ; Get Color.
+	jsr DecThisColorOrNot  ; Can it be decremented?
+	sta COLPM0_TABLE       ; Re-Save Color
+	sta COLPM1_TABLE       ; Second half of the same object is same color
 
 DoFadeHiScore
-	lda COLPM2_TABLE      ; Get Color.
-	jsr DecThisColorOrNot ; Can it be decremented?
-	sta COLPM2_TABLE      ; Re-Save Color 
+	lda COLPM2_TABLE       ; Get Color.
+	jsr DecThisColorOrNot  ; Can it be decremented?
+	sta COLPM2_TABLE       ; Re-Save Color 
 
 DoFadeLives
 	lda MANAGE_LIVES_COLORS_TABLE,x ; Is this a thing to do on this display.
 	beq EndManageScoreFades
 
-	lda COLPM0_TABLE+1  ; Get Color.
-	jsr DecThisColorOrNot ; Can it be decremented?
-	sta COLPM0_TABLE+1  ; Re-Save Color
-	sta COLPM1_TABLE+1  ; Second half of the same object is same color
+	lda COLPM0_TABLE+1     ; Get Color.
+	jsr DecThisColorOrNot  ; Can it be decremented?
+	sta COLPM0_TABLE+1     ; Re-Save Color
+	sta COLPM1_TABLE+1     ; Second half of the same object is same color
 
 DoFadeSaved
-	lda COLPM2_TABLE+1  ; Get Color.
-	jsr DecThisColorOrNot ; Can it be decremented?
-	sta COLPM2_TABLE+1  ; Re-Save Color
-	sta COLPM3_TABLE+1  ; Second half of the same object is same color
+	lda COLPM2_TABLE+1     ; Get Color.
+	jsr DecThisColorOrNot  ; Can it be decremented?
+	sta COLPM2_TABLE+1     ; Re-Save Color
+	sta COLPM3_TABLE+1     ; Second half of the same object is same color
 
 EndManageScoreFades
 
@@ -539,22 +612,22 @@ EndManageScoreFades
 ; origin before setting  VBIEnableScrollTitle  to start scrolling.
 
 ManageTitleScrolling
-	lda VBIEnableScrollTitle    ; Is scrolling turned on?
-	beq WaitToRestoreTitle      ; No. See if the timer needs something.
+	lda VBIEnableScrollTitle     ; Is scrolling turned on?
+	beq WaitToRestoreTitle       ; No. See if the timer needs something.
 
-	jsr TitleLeftScroll         ; Scroll it
-	jsr TitleIsItAtTheEnd       ; Is it done?  Zero return is over.
-	bne EndManageTitleScrolling ; Nope.  Do again on the next frame.
+	jsr TitleLeftScroll          ; Scroll it
+	jsr TitleIsItAtTheEnd        ; Is it done?  Zero return is over.
+	bne EndManageTitleScrolling  ; Nope.  Do again on the next frame.
 
-	lda #0                      ; Reached target position.
-	sta VBIEnableScrollTitle    ; Turn off further left scrolling.
-	lda #TITLE_RETURN_WAIT      ; Set the timer to wait to restore the title.
-	sta RestoreTitleTimer       ; Set new timeout value.
+	lda #0                       ; Reached target position.
+	sta VBIEnableScrollTitle     ; Turn off further left scrolling.
+	lda #TITLE_RETURN_WAIT       ; Set the timer to wait to restore the title.
+	sta RestoreTitleTimer        ; Set new timeout value.
 
-WaitToRestoreTitle              ; Tell Main when to restore title.
-	lda RestoreTitleTimer       ; Get timer value.
-	beq EndManageTitleScrolling ; Its 0?  Then skip this.
-	dec RestoreTitleTimer       ; Decrement timer when non-zero.
+WaitToRestoreTitle               ; Tell Main when to restore title.
+	lda RestoreTitleTimer        ; Get timer value.
+	beq EndManageTitleScrolling  ; Its 0?  Then skip this.
+	dec RestoreTitleTimer        ; Decrement timer when non-zero.
 
 EndManageTitleScrolling
 
@@ -573,28 +646,28 @@ EndManageTitleScrolling
 ;BoatyComponent     .byte 0  ; 0, 1, 2, 3 one of the four boat parts.
 
 ManageBoatAnimations
-	dec BoatyMcBoatCounter           ; subtract from scroll delay counter
-	bne ExitBoatyness                ; Not 0 yet, so no animation.
+	dec BoatyMcBoatCounter        ; subtract from scroll delay counter
+	bne ExitBoatyness             ; Not 0 yet, so no animation.
 
 	; One of the boat components will be animated. 
-	lda #2                           ; Reset counter to original value.
+	lda #2                        ; Reset counter to original value.
 	sta BoatyMcBoatCounter
 
-	ldx BoatyFrame                   ; going to load a frame, which one?
-	jsr DoBoatCharacterAnimation     ; load the frame for the current component.
+	ldx BoatyFrame                ; going to load a frame, which one?
+	jsr DoBoatCharacterAnimation  ; load the frame for the current component.
 
 ; Finish by setting up for next frame/component.
-	inc BoatyComponent           ; increment to next visual component for next time.
-	lda BoatyComponent           ; get it to mask it 
-	and #$03                     ; mask it to value 0 to 3
-	sta BoatyComponent           ; Save it.
-	bne ExitBoatyness            ; it is non-zero, so no new frame counter.
+	inc BoatyComponent            ; increment to next visual component for next time.
+	lda BoatyComponent            ; get it to mask it 
+	and #$03                      ; mask it to value 0 to 3
+	sta BoatyComponent            ; Save it.
+	bne ExitBoatyness             ; it is non-zero, so no new frame counter.
 
 ; Whenever the boat component returns to 0, then update the frame counter...
-	inc BoatyFrame               ; next frame.
-	lda BoatyFrame               ; get it to mask it.
-	and #$07                     ; mask it to 0 to 7
-	sta BoatyFrame               ; save it.
+	inc BoatyFrame                ; next frame.
+	lda BoatyFrame                ; get it to mask it.
+	and #$07                      ; mask it to 0 to 7
+	sta BoatyFrame                ; save it.
 
 ExitBoatyness
 
@@ -602,11 +675,11 @@ ExitBoatyness
 ; ======== Manage the prompt flashing for Press A Button ========
 ManagePressAButtonPrompt
 	lda EnablePressAButton
-	bne DoAnimateButtonTimer ; Not zero is enabled.
+	bne DoAnimateButtonTimer      ; Not zero means enabled.
 	; Prompt is off.  Zero everything.
-	sta PressAButtonColor      ; Set background
-	sta PressAButtonText      ; Set text.
-	sta PressAButtonFrames   ; This makes sure it will restart as soon as enabled.
+	sta PressAButtonColor         ; Set background
+	sta PressAButtonText          ; Set text.
+	sta PressAButtonFrames        ; This makes sure it will restart as soon as enabled.
 	beq DoCheesySoundService  
 
 ; Note that the Enable/Disable behavior connected to the timer mechanism 
@@ -615,32 +688,32 @@ ManagePressAButtonPrompt
 ; immediately.
 DoAnimateButtonTimer
 	lda PressAButtonFrames   
-	beq DoPromptColorchange  ; Timer is Zero.  Go switch colors.
-	dec PressAButtonFrames   ; Minus 1
-	bne DoCheesySoundService ; if it is still non-zero end this section.
+	beq DoPromptColorchange       ; Timer is Zero.  Go switch colors.
+	dec PressAButtonFrames        ; Minus 1
+	bne DoCheesySoundService      ; if it is still non-zero end this section.
 
 DoPromptColorchange
-	jsr ToggleButtonPrompt   ; Manipulates colors for prompt.
+	jsr ToggleButtonPrompt        ; Manipulates colors for prompt.
 
-DoCheesySoundService         ; World's most inept sound sequencer.
+DoCheesySoundService              ; World's most inept sound sequencer.
 	jsr SoundService
 
 
 ; ======== Manage scrolling the Credits text ========
-ScrollTheCreditLine              ; Scroll the text identifying the perpetrators
-	dec ScrollCounter            ; subtract from scroll delay counter
-	bne EndOfScrollTheCredits    ; Not 0 yet, so no scrolling.
-	lda #2                       ; Reset counter to original value.
+ScrollTheCreditLine               ; Scroll the text identifying the perpetrators
+	dec ScrollCounter             ; subtract from scroll delay counter
+	bne EndOfScrollTheCredits     ; Not 0 yet, so no scrolling.
+	lda #2                        ; Reset counter to original value.
 	sta ScrollCounter
 
-	jsr FineScrollTheCreditLine  ; Do the business.
+	jsr FineScrollTheCreditLine   ; Do the business.
 
 EndOfScrollTheCredits
 
 
 ExitMyDeferredVBI
 
-	jmp XITVBV               ; Return to OS.  SYSVBV for Immediate interrupt.
+	jmp XITVBV                    ; Return to OS.  SYSVBV for Immediate interrupt.
 
 
 ;==============================================================================
@@ -714,7 +787,7 @@ TITLE_DLI_TEXTBLOCK
 	lda ColorPf1         ; Get text luminance from zero page.
 	sta COLPF1           ; write new text luminance.
 
-	lda ColorBak        ; Get background from zero page.
+	lda ColorBak         ; Get background from zero page.
 	sta WSYNC
 	sta COLBK
 	sta COLPF2
@@ -1043,7 +1116,7 @@ DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
 	sta COLBK            ; Write new border color.
 	sta COLPF2           ; Write new background color
 
-	lda CreditHSCROL      ; HScroll for credits.
+	lda CreditHSCROL     ; HScroll for credits.
 	sta HSCROL
 
 	lda #<DoNothing_DLI  ; Stop DLI Chain.  VBI will restart the chain.
@@ -1143,39 +1216,6 @@ SetupAllColors
 	sta ColorBak
 
 	rts
-
-
-;==============================================================================
-; SCORE TITLE WITH PMG                                                       A 
-;==============================================================================
-; Called on Title display
-; Set the score playfield colors.   
-; Set the scoreline player/missiles.
-; WAIT until after the text line.
-; Then fall through to set all the main playfield P/M object values.
-; -----------------------------------------------------------------------------
-
-;Score_Title_With_PMG
-
-;	lda ColorPF1         ; Get text color (luminance)
-;	sta COLPF1           ; write new text color.
-
-;	lda #COLOR_BLACK     ; Black for background and text background.
-;	sta COLBK            ; Write new border color.
-;	sta COLPF2           ; Write new background color
-	
-;	jsr LoadPmSpecs0
-	
-;	sta wsync ; Skip some scan lines to pass the top line of score labels.
-;	sta wsync
-;	sta wsync
-;	sta wsync
-;	sta wsync
-;	sta wsync
-
-;	jsr libSetPmgHPOSZero  ; Remove second line of P/M labels from display.
-
-;	rts
 
 
 ;==============================================================================

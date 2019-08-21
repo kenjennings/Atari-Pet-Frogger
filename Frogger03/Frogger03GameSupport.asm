@@ -196,7 +196,7 @@ FrogMoveUp
 ; ==========================================================================
 ; ZERO FROG PAGE ZERO
 ; ==========================================================================
-; Zero a group of page 0 values: 
+; Zero a group of page 0 values for Frog P/M graphics: 
 ; (coordinates, and current shape index.)
 ; FrogPMY, FrogPMX, FrogShape, FrogNewPMY, FrogNewPMX, FrogNewShape
 ; --------------------------------------------------------------------------
@@ -204,10 +204,10 @@ FrogMoveUp
 ZeroFrogPageZero
 
 	ldx #5
-bPMAZClearCoords 
+bZFPZ_ClearCoords 
 	sta FrogPMY,x
 	dex
-	bpl bPMAZClearCoords
+	bpl bZFPZ_ClearCoords
 
 	rts
 
@@ -290,22 +290,16 @@ bCGS_NextScoreDigit
 	bpl bCGS_LoopClearScores   ; went from 0 to $FF? no, loop for next digit.
 
 	; Set current lives and current start level.
-	; The prior values are now the same as the New/current game's.
+	; The prior values are now set the same as the New/current game's.
 	lda NewLevelStart
 	sta LastLevelStart
-;	lda #1                     ; Reset number of
-;	lda #3                     ; Reset number of
+
 	lda NewNumberOfLives       ; Reset Number of 
 	sta NumberOfLives          ; lives to new game config.
 	sta LastNumberOfLives
 
-	lda #COLOR_BLUE2+$F        ; Strobe the score label.  VBI will decrement it.
-	sta COLPM0_TABLE
-	sta COLPM1_TABLE
-
-	lda #COLOR_PURPLE+$F       ; And strobe the Lives counter label.
-	sta COLPM0_TABLE+1
-	sta COLPM1_TABLE+1
+	jsr StrobeScoreLabel       ; Strobe the score label.  VBI will decrement it.
+	jsr StrobeLivesLabel       ; And strobe the Lives counter label.
 
 	rts
 
@@ -324,9 +318,7 @@ bCGS_NextScoreDigit
 Add500ToScore
 
 	inc FrogsCrossed        ; Add to frogs successfully crossed the rivers.
-	lda #COLOR_GREEN+$F     ; Glow the Saved label.  VBI will decrement it.
-	sta COLPM2_TABLE+1      ; S a - - d
-	sta COLPM3_TABLE+1      ; - - v e d
+	jsr StrobeSavedLabel    ; Glow the Saved label.  VBI will decrement it.
 	jsr PrintFrogsAndLives  ; update the head count
 
 	ldy #5 
@@ -424,10 +416,8 @@ EvaluateCarry            ; (re)evaluate if carry occurred for the current positi
 	bne EvaluateCarry    ; This cannot go from $FF to 0, so it must be not zero.
 
 ExitAddToScore           ; All done.
-	lda #COLOR_BLUE2+$F ; Glow the score label.  VBI will decrement it.
-	sta COLPM0_TABLE
-	sta COLPM1_TABLE
-	
+	jsr StrobeScoreLabel ; Glow the score label.  VBI will decrement it.
+
 	jsr HighScoreOrNot   ; If My score is high score, then copy to high score. (and glow it if needed.)
 
 	mRegRestoreAYX       ; Restore Y, X, and A
@@ -468,11 +458,10 @@ CopyNewHighScore                ; It is a high score.
 	cpx #7                      ; Copy until the remaining 7 digits are done.
 	bne CopyNewHighScore
 
-	lda #COLOR_PINK+$F         ; Glow the high score label.  VBI will decrement it.
-	sta COLPM2_TABLE
+	jsr StrobeHiScoreLabel      ; Glow the high score label.  VBI will decrement it.
 
 	lda #$FF
-	sta FlaggedHiScore         ; Flag the high score. Score must have changed to get here.
+	sta FlaggedHiScore          ; Flag the high score. Score must have changed to get here.
 
 ExitHighScoreOrNot
 	rts
@@ -481,8 +470,8 @@ ExitHighScoreOrNot
 ; ==========================================================================
 ; DEC THIS COLOR OR NOT
 ; ==========================================================================
-; Support code to optimize the tedium of managing four colors in 
-; seven memory locations.
+; Support code to optimize the tedium of managing four colors for the 
+; status labels in seven memory locations.
 ;
 ; Given a color value in A, determine if it is a color (not 0) 
 ; and if the luminance value is not 6.
@@ -524,22 +513,22 @@ ReallyExitFromDecColor
 
 MultiplyFrogsCrossed
 
-	lda FrogsCrossed              ; How many Frogs saved?
-	clc                           ; Plus...
-	adc NewLevelStart             ; the starting difficulty level.
-	cmp #MAX_FROG_SPEED+1         ; Number of difficulty levels. 0 to 10 OK.  11 not so much
+	lda FrogsCrossed           ; How many Frogs saved?
+	clc                        ; Plus...
+	adc NewLevelStart          ; the starting difficulty level.
+	cmp #MAX_FROG_SPEED+1      ; Number of difficulty levels. 0 to 10 OK.  11 not so much
 	bcc SkipLimitCrossed
 	lda #MAX_FROG_SPEED
 
 SkipLimitCrossed
-	asl              ; Times 2
+	asl                        ; Times 2
 	sta FrogsCrossedIndex
-	asl              ; Times 4
-	asl              ; Times 8
-	asl              ; Times 16
+	asl                        ; Times 4
+	asl                        ; Times 8
+	asl                        ; Times 16
 	clc
-	adc FrogsCrossedIndex ; Add to self (*2) + (*16) == (*18)
-	sta FrogsCrossedIndex ; And Save Times 18
+	adc FrogsCrossedIndex      ; Add to self (*2) + (*16) == (*18)
+	sta FrogsCrossedIndex      ; And Save Times 18
 
 	jsr MakeDifficultyPointers ; Set pointers to the array row for the difficulty values.
 
@@ -554,27 +543,31 @@ SkipLimitCrossed
 ; FrogsCrossedIndex. 
 ; From Here the code can use the FrogRow as Y index and reference the 
 ; master data by (ZeroPage),Y.
-;
+; 
 ; Uses A
 ; -------------------------------------------------------------------------- 
 
 MakeDifficultyPointers
 
-	lda #<BOAT_FRAMES
-	clc
-	adc FrogsCrossedIndex
-	sta BoatFramesPointer
-	lda #>BOAT_FRAMES
-	adc #0
-	sta BoatFramesPointer+1
+	; BoatFramesPointer = BOATFRAMES + FrogsCrossedIndex (multiplied by 18)
 
-	lda #<BOAT_SHIFT
+	lda #<BOAT_FRAMES       ; Add low byte of the Frames base address
 	clc
-	adc FrogsCrossedIndex
-	sta BoatMovePointer
-	lda #>BOAT_SHIFT
+	adc FrogsCrossedIndex   ; To the current index
+	sta BoatFramesPointer   ; Save as pointer to the frames array.
+	lda #>BOAT_FRAMES       ; and add high byte of the Frames base address
 	adc #0
-	sta BoatMovePointer+1
+	sta BoatFramesPointer+1 ; Save as pointer to the frames array.
+
+	; BoatMovePointer = BOAT_SHIFT + FrogsCrossedIndex (multiplied by 18)
+
+	lda #<BOAT_SHIFT        ; Add low byte of the movement base address
+	clc
+	adc FrogsCrossedIndex   ; To the current index
+	sta BoatMovePointer     ; Save as pointer to the shift/speed array.
+	lda #>BOAT_SHIFT        ; and add high byte of the Frames base address
+	adc #0
+	sta BoatMovePointer+1   ; Save as pointer to the shift/speed array.
 
 	rts
 

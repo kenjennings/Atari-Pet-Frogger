@@ -322,30 +322,23 @@ FlashTitleLabels
 	sta EventCounter2
 	bne DoFlashHi            ; On 1, 2, 3 go to next nest.
 
-	lda #COLOR_BLUE2+$0F     ; 0 is flash Score label.
-	sta COLPM0_TABLE
-	sta COLPM1_TABLE
+	jsr StrobeScoreLabel     ; 0 is flash Score label.
 	bne EndFlashTitleLabels
 
 DoFlashHi                    ; 1 is flash the hi score label
 	cmp #1
 	bne DoFlashSaved 
-	lda #COLOR_PINK+$0F      ; Flash Hi score label.
-	sta COLPM2_TABLE
+	jsr StrobeHiScoreLabel   ; Flash Hi score label.
 	bne EndFlashTitleLabels
-	
+
 DoFlashSaved                 ; 2 is flash the Saved frogs label
 	cmp #2
 	bne DoFlashLives
-	lda #COLOR_GREEN+$0F
-	sta COLPM2_TABLE+1
-	sta COLPM3_TABLE+1
+	jsr StrobeSavedLabel     ; Flash Saved frogs label.
 	bne EndFlashTitleLabels
 
 DoFlashLives
-	lda #COLOR_PURPLE+$0F    ; 3 is flash Frog lives label.
-	sta COLPM0_TABLE+1
-	sta COLPM1_TABLE+1
+	jsr StrobeLivesLabel     ; 3 is flash Frog lives label.
 
 EndFlashTitleLabels
 	rts
@@ -457,7 +450,7 @@ bTR_LoopRandomTitle
 ; temporarily generate a non-numeric character when there is carry, and I
 ; don't want that (possibly) visible on the screen however short it may be.
 ; Also, we have run out of adequate page 0 space, so these need to be 
-; declared here, or wherever, doesn't matter... unless someone decides 
+; declared here, or wherever else, doesn't matter... unless someone decides
 ; to put this in a ROM card and then this is a problem.  In that case 
 ; there are a lot of things that have to change about screen memory and 
 ; other lists. 
@@ -470,11 +463,11 @@ CopyScoreToScreen
 
 	ldx #7
 DoUpdateScreenScore
-	lda MyScore,x       ; Read from Score buffer
+	lda MyScore,x           ; Read from Score buffer
 	sta SCREEN_MYSCORE,x
-	lda HiScore,x       ; Read from Hi Score buffer
+	lda HiScore,x           ; Read from Hi Score buffer
 	sta SCREEN_HISCORE,x
-	dex                 ; Loop 8 bytes - 7 to 0.
+	dex                     ; Loop 8 bytes - 7 to 0.
 	bpl DoUpdateScreenScore
 
 	rts
@@ -483,7 +476,11 @@ DoUpdateScreenScore
 ; ==========================================================================
 ; CLEAR SAVED FROGS
 ; ==========================================================================
-; Remove the number of saved frogs from the screen.
+; Remove the number of saved frogs from the screen, for start of game.
+; And...
+; Clears Number of frogs crossed the rivers.
+; Determine new starting level.
+; Set the speed/level difficulty.
 ;
 ; 1  |0000000:Score                 Hi:0000000| SCORE_TXT
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
@@ -491,7 +488,7 @@ DoUpdateScreenScore
 
 ClearSavedFrogs
 
-	lda #INTERNAL_SPACE ; Blank space. which also happens to be 0.
+	lda #INTERNAL_SPACE       ; Blank space. which also happens to be 0.
 
 	ldx #20
 RemoveFroggies
@@ -510,9 +507,7 @@ bCSF_SkipLimitCrossed
 	sta FrogsCrossedIndex    ; sets the base index into difficulty arrays
 	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
 
-	lda #COLOR_GREEN+$F      ; Glow the Saved label.  VBI will decrement it.
-	sta COLPM2_TABLE+1       ; S a - - d
-	sta COLPM3_TABLE+1       ; - - v e d
+	jsr StrobeSavedLabel     ; Glow the Saved label.  VBI will decrement it.
 
 	rts
 
@@ -563,32 +558,10 @@ SavedFroggies            ; Write an alternating pattern of Frog1, Frog2 characte
 WriteLives
 	jsr EraseFrogLives
 
-;	lda #0
-;	ldy #7
-;bPFAL_EraseFrogs          ; Remove 7 frogs from screen
-;	sty SCREEN_LIVES-1,y 
-;	dey
-;	bne bPFAL_EraseFrogs
-
-;	sty SCREEN_LIVES+1  ; missing/dead frogs.  oops.
-;	sty SCREEN_LIVES+2  ; 
-
 	ldx NumberOfLives         ; Get number of lives in X
 	beq EndPrintFrogsAndLives ; No lives.  End here.
 
 	jsr RedrawFrogLives
-
-;LoopWriteLives
-;	lda #I_FROG1        ; On Atari we're using tab/$7f as a frog shape.
-;	sta SCREEN_LIVES,y  ; Write to screen. 
-;	iny
-;	dex                 ; Decrement number of frogs.
-;	beq EndPrintFrogsAndLives ; Reached 0, stop adding frogs.
-;	lda #I_FROG2        ; On Atari we're using del/$7e as a frog shape.
-;	sta SCREEN_LIVES,y  ; Write to screen. 
-;	iny
-;	dex                 ; Decrement number of frogs.
-;	bne LoopWriteLives  ; then go back and display the next number of frogs.
 
 EndPrintFrogsAndLives
 	rts
@@ -604,7 +577,8 @@ EndPrintFrogsAndLives
 
 EraseFrogLives
 
-	lda #0
+	lda #INTERNAL_SPACE
+
 	ldy #7
 bPFAL_EraseFrogs          ; Remove 7 frogs from screen
 	sta SCREEN_LIVES-1,y 
@@ -636,6 +610,7 @@ bRFL_WriteLives
 	iny
 	dex                 ; Decrement number of frogs.
 	beq EndPrintFrogsAndLives ; Reached 0, stop adding frogs.
+
 	lda #I_FROG2        ; On Atari we're using del/$7e as a frog shape.
 	sta SCREEN_LIVES,y  ; Write to screen. 
 	iny
@@ -735,6 +710,69 @@ LoopChangeScreenWaitForVBI            ; Wait for VBI to signal the values change
 ; ==========================================================================
 
 ; ==========================================================================
+; STROBE SCORE LABEL                                                
+; ==========================================================================
+; Set the P/M graphics colors for the Score label to the brightest value.
+; The VBI will decrement this until it is back to normal.
+; --------------------------------------------------------------------------
+
+StrobeScoreLabel
+
+	lda #COLOR_BLUE2+$F
+	sta COLPM0_TABLE
+	sta COLPM1_TABLE
+
+	rts
+
+
+; ==========================================================================
+; STROBE LIVES LABEL                                                
+; ==========================================================================
+; Set the P/M graphics colors for the Lives label to the brightest value.
+; The VBI will decrement this until it is back to normal.
+; --------------------------------------------------------------------------
+
+StrobeLivesLabel
+
+	lda #COLOR_PURPLE+$F
+	sta COLPM0_TABLE+1
+	sta COLPM1_TABLE+1
+
+	rts
+
+
+; ==========================================================================
+; STROBE SAVED LABEL                                                
+; ==========================================================================
+; Set the P/M graphics colors for the Saved frogs label to the brightest 
+; value. The VBI will decrement this until it is back to normal.
+; --------------------------------------------------------------------------
+
+StrobeSavedLabel
+
+	lda #COLOR_GREEN+$F
+	sta COLPM2_TABLE+1      ; S a - - d
+	sta COLPM3_TABLE+1      ; - - v e d
+
+	rts
+
+
+; ==========================================================================
+; STROBE HI SCORE LABEL                                                
+; ==========================================================================
+; Set the P/M graphics colors for the Hi Score label to the brightest value.
+; The VBI will decrement this until it is back to normal.
+; --------------------------------------------------------------------------
+
+StrobeHiScoreLabel
+
+	lda #COLOR_PINK+$F
+	sta COLPM2_TABLE
+
+	rts
+
+
+; ==========================================================================
 ; ZERO CURRENT COLORS                                                 A  Y
 ; ==========================================================================
 ; Force all the colors in the current tables to black.
@@ -821,8 +859,7 @@ DeadLoopBottomOverGrey
 	jsr DeadFrogGreyScroll      ; Increments and color stuffing.
 	cpy #48                     ; Reached the 23rd line?
 	bne DeadLoopBottomOverGrey  ; No, continue looping.
-;	beq EndDeadScreen
-	
+
 	rts
 
 
@@ -888,22 +925,24 @@ SplashLoopBottomToBlack
 
 NukeAllColorsFromOrbitToBeSure
 
-	sta COLBK_TABLE,y           ; Zero Background
-	sta COLPF0_TABLE,y          ; Zero pixel (or text)
-	sta COLPF1_TABLE,y          ; Zero text
-	sta COLPF2_TABLE,y          ; Zero something else
+	sta COLBK_TABLE,y     ; Zero Background
+	sta COLPF0_TABLE,y    ; Zero pixel (or text)
+	sta COLPF1_TABLE,y    ; Zero text
+	sta COLPF2_TABLE,y    ; Zero something else
 
-	pha
+	pha                   ; Save the color we're using. (originally Black).
+
 	ldx CurrentDL
 	cpx #DISPLAY_OVER
-	bne DoNotUseWhite
-	lda #COLOR_BLACK+$0e
+	bne DoNotUseWhite     ; Not the Game Over display. Use original (Black).
+	lda #COLOR_BLACK+$0e  ; Over display uses White instead.
 
 DoNotUseWhite
-	sta COLPF3_TABLE,y          ; Zero this too
-	pla
+	sta COLPF3_TABLE,y    ; Zero this too
 
-	dey
+	pla                   ; Get the color we're using.
+
+	dey                   ; Decrement row counter.
 
 	rts
 
@@ -1112,7 +1151,7 @@ IncrementGameColor      ; Y = current color.   A = target color
 	iny
 	iny
 	tya                 ; A = new current color.
-	
+
 SkipIncCurrent
 	rts
 
@@ -1879,36 +1918,36 @@ BOAT_HS_TABLE
 RightBoatFineScrolling
 
 	; Easier to push the frog first before the actual fine scrolling.
-	cpy FrogRow             ; Are we on the frog's row?
-	bne DoFineScrollRight   ; No.  Continue with boat scroll.
+	cpy FrogRow              ; Are we on the frog's row?
+	bne DoFineScrollRight    ; No.  Continue with boat scroll.
 	clc
 	lda FrogNewPMX
-	adc (BoatMovePointer),y ; Increment the position same as HSCROL distance.
+	adc (BoatMovePointer),y  ; Increment the position same as HSCROL distance.
 	sta FrogNewPMX
 
 DoFineScrollRight
-	ldx BOAT_HS_TABLE,y     ; X = Get the index into HSCROL table.
-	lda HSCROL_TABLE,x      ; Get value of HSCROL.
+	ldx BOAT_HS_TABLE,y      ; X = Get the index into HSCROL table.
+	lda HSCROL_TABLE,x       ; Get value of HSCROL.
 	clc
-	adc (BoatMovePointer),y ; Increment the HSCROL.
-	cmp #16                 ; Shift past scroll limit?
-	bcs DoCoarseScrollRight ; Yes.  Need to coarse scroll.
-	sta HSCROL_TABLE,x      ; No. Save the updated HSCROL.
-	rts                     ; Done.  No coarse scroll this time.
+	adc (BoatMovePointer),y  ; Increment the HSCROL.
+	cmp #16                  ; Shift past scroll limit?
+	bcs DoCoarseScrollRight  ; Yes.  Need to coarse scroll.
+	sta HSCROL_TABLE,x       ; No. Save the updated HSCROL.
+	rts                      ; Done.  No coarse scroll this time.
 
 	; HSCROL wrapped over 15.  Time to coarse scroll by subtracting 4 from LMS.
 DoCoarseScrollRight
 ;	sec  ; Got here via bcs
-	sbc #16                 ; Fix the new HSCROL
-	sta HSCROL_TABLE,x      ; Save the updated HSCROL.
-	ldx BOAT_LMS_OFFSET,y   ; X = Get the index to the LMS in the Display List for this line.
-	lda PF_LMS1,x           ; Get the actual LMS low byte.
+	sbc #16                  ; Fix the new HSCROL
+	sta HSCROL_TABLE,x       ; Save the updated HSCROL.
+	ldx BOAT_LMS_OFFSET,y    ; X = Get the index to the LMS in the Display List for this line.
+	lda PF_LMS1,x            ; Get the actual LMS low byte.
 	sec
-	sbc #4                  ; Subtract 4 from LMS in display list.
-	bpl SaveNewRightLMS     ; If still positive (0), then good to update LMS
-	lda #12                 ; LMS went negative. Reset to start position.
+	sbc #4                   ; Subtract 4 from LMS in display list.
+	bpl SaveNewRightLMS      ; If still positive (0), then good to update LMS
+	lda #12                  ; LMS went negative. Reset to start position.
 SaveNewRightLMS
-	sta PF_LMS1,x           ; Update LMS pointer.
+	sta PF_LMS1,x            ; Update LMS pointer.
 
 EndOfRightBoat
 	rts
@@ -1927,35 +1966,35 @@ EndOfRightBoat
 LeftBoatFineScrolling
 
 	; Easier to push the frog first before the actual fine scrolling.
-	cpy FrogRow             ; Are we on the frog's row?
-	bne DoFineScrollLeft    ; No.  Continue with boat scroll.
+	cpy FrogRow              ; Are we on the frog's row?
+	bne DoFineScrollLeft     ; No.  Continue with boat scroll.
 	sec
 	lda FrogNewPMX
-	sbc (BoatMovePointer),y ; Decrement the position same as HSCROL distance.
+	sbc (BoatMovePointer),y  ; Decrement the position same as HSCROL distance.
 	sta FrogNewPMX
 
 DoFineScrollLeft
-	ldx BOAT_HS_TABLE,y     ; X = Get the index into HSCROL table.
-	lda HSCROL_TABLE,x      ; Get value of HSCROL.
+	ldx BOAT_HS_TABLE,y      ; X = Get the index into HSCROL table.
+	lda HSCROL_TABLE,x       ; Get value of HSCROL.
 	sec
-	sbc (BoatMovePointer),y ; Decrement the HSCROL
-	bmi DoCoarseScrollLeft  ; It went negative, must reset and coarse scroll
-	sta HSCROL_TABLE,x      ; It's OK. Save the updated HSCROL.
-	rts                     ; Done.  No coarse scroll this time.
+	sbc (BoatMovePointer),y  ; Decrement the HSCROL
+	bmi DoCoarseScrollLeft   ; It went negative, must reset and coarse scroll
+	sta HSCROL_TABLE,x       ; It's OK. Save the updated HSCROL.
+	rts                      ; Done.  No coarse scroll this time.
 
 	; HSCROL wrapped below 0.  Time to coarse scroll by Adding 4 to LMS.
 DoCoarseScrollLeft
-	adc #16                 ; Re-wrap over 0 into the positive.
-	sta HSCROL_TABLE,x      ; Save the updated HSCROL.
-	ldx BOAT_LMS_OFFSET,y   ; X = Get the index to the LMS in the Display List for this line.
-	lda PF_LMS2,x           ; Get the actual LMS low byte.
+	adc #16                  ; Re-wrap over 0 into the positive.
+	sta HSCROL_TABLE,x       ; Save the updated HSCROL.
+	ldx BOAT_LMS_OFFSET,y    ; X = Get the index to the LMS in the Display List for this line.
+	lda PF_LMS2,x            ; Get the actual LMS low byte.
 	clc
-	adc #4                  ; Add 4 to LMS in display list.
-	cmp #13                 ; Is it greater than max (12)? 
-	bcc SaveNewLeftLMS      ; No.  Good to update LMS.
-	lda #0                  ; LMS greater than 12. Reset to start position.
+	adc #4                   ; Add 4 to LMS in display list.
+	cmp #13                  ; Is it greater than max (12)? 
+	bcc SaveNewLeftLMS       ; No.  Good to update LMS.
+	lda #0                   ; LMS greater than 12. Reset to start position.
 SaveNewLeftLMS
-	sta PF_LMS2,x           ; Update LMS pointer.
+	sta PF_LMS2,x            ; Update LMS pointer.
 
 EndOfLeftBoat
 	rts
@@ -2004,7 +2043,6 @@ TitleIsItAtTheEnd
 	cmp #<[TITLE_END]      ; Did it reach the end? which is <[TITLE_START+10]
 	bne bTIIATE_Exit       ; No.  Exit here, since scrolling can continue. 
 	lda TitleHSCROL        ; What is the fine scroll position?
-;	beq bTLF_Exit          ; Zero.  Reached the end.  Nothing to do.
 
 bTIIATE_Exit
 	rts
@@ -2020,11 +2058,6 @@ TitleLeftScroll
 
 	jsr TitleIsItAtTheEnd  ; Test if scrolling limits reached.
 	beq bTLF_Exit          ; Zero.  Reached the end.  Nothing to do.
-
-;	lda TT_LMS0            ; Get current LMS
-;	cmp #<[TITLE_END]      ; Did it reach the end? which is <[TITLE_START+10]
-;	bne bTLF_Scrollit      ; No.  Move it.
-;	lda TitleHSCROL        ; What is the fine scroll position?
 
 bTLF_Scrollit              ; 2 color clocks per scroll.
 	dec TitleHSCROL        ; Decrement HSCROL... 14, 12, 10, 8, 6, 4, 2, 0
@@ -2063,36 +2096,36 @@ TitleShiftDown
 	ldx #9
 
 bTSD_Loop
-	lda TITLE_LEFT+80,x  ; Copy Pixel Row 5 
-	sta TITLE_LEFT+100,x ; down to Row 6
+	lda TITLE_LEFT+80,x   ; Copy Pixel Row 5 
+	sta TITLE_LEFT+100,x  ; down to Row 6
 
-	lda TITLE_LEFT+60,x  ; Copy Pixel Row 4
-	sta TITLE_LEFT+80,x  ; down to Row 5
+	lda TITLE_LEFT+60,x   ; Copy Pixel Row 4
+	sta TITLE_LEFT+80,x   ; down to Row 5
 
-	lda TITLE_LEFT+40,x  ; Copy Pixel Row 3
-	sta TITLE_LEFT+60,x  ; down to Row 4
+	lda TITLE_LEFT+40,x   ; Copy Pixel Row 3
+	sta TITLE_LEFT+60,x   ; down to Row 4
 
-	lda TITLE_LEFT+20,x  ; Copy Pixel Row 2
-	sta TITLE_LEFT+40,x  ; down to Row 3
+	lda TITLE_LEFT+20,x   ; Copy Pixel Row 2
+	sta TITLE_LEFT+40,x   ; down to Row 3
 
-	lda TITLE_LEFT,x     ; Copy Pixel Row 1
-	sta TITLE_LEFT+20,x  ; down to Row 2
+	lda TITLE_LEFT,x      ; Copy Pixel Row 1
+	sta TITLE_LEFT+20,x   ; down to Row 2
 
-	lda #0               ; Erase
-	sta TITLE_LEFT,x     ; Row 1
-
+	lda #0                ; Erase
+	sta TITLE_LEFT,x      ; Row 1
+ 
 	dex
-	bpl bTSD_Loop        ; Loop including 0
+	bpl bTSD_Loop         ; Loop including 0
 
 
-	ldx #4               ; Now move the pixel colors to match.
+	ldx #4                ; Now move the pixel colors to match.
 
 bTSD_ColorLoop
-	lda COLPF0_TABLE+3,x ; shift colors in table 3 to 7 (actually from 7, 6, 5, 4, 3)
-	sta COLPF0_TABLE+4,x ; down to table 4 to 8         (actually to 8, 7, 6, 5, 4)
+	lda COLPF0_TABLE+3,x  ; shift colors in table 3 to 7 (actually from 7, 6, 5, 4, 3)
+	sta COLPF0_TABLE+4,x  ; down to table 4 to 8         (actually to 8, 7, 6, 5, 4)
 
 	dex
-	bpl bTSD_ColorLoop   ; Loop including 0
+	bpl bTSD_ColorLoop    ; Loop including 0
 
 	rts
 
@@ -2125,9 +2158,11 @@ LIVES_NUMBER .sb "  LIVES  " ; Actual number goes there
 
 TitlePrepLevel
 
-	ldx NewLevelStart ; 0 to 13  is 1 to 14
+	ldx NewLevelStart   ; 0 to 13  is 1 to 14
+
 	lda LEVEL_LIST1,x
 	sta LEVEL_NUMBER
+
 	lda LEVEL_LIST2,x
 	sta LEVEL_NUMBER+1
 
@@ -2217,7 +2252,7 @@ TitlePrintString
 
 	ldy #0                ; Start working length at 0 (index into input).
 bTPS_Loop
-	lda (MainPointer1),y ; Get internal code character from input
+	lda (MainPointer1),y  ; Get internal code character from input
 	jsr TitlePrintChar    ; Print it.  This routine preserves all registers.
 	inx                   ; Next character position in output screen buffer
 	iny                   ; Next position in the input string
@@ -2314,17 +2349,17 @@ TitleSetOrigin
 	ldx #5
 
 bTSO_loop
-	ldy TITLE_LMS_OFFSET,x ; Get LMS offset
+	ldy TITLE_LMS_OFFSET,x  ; Get LMS offset
 
-	lda TITLE_LMS_ORIGIN,x ; Get low byte for this line of the scrolling buffer
+	lda TITLE_LMS_ORIGIN,x  ; Get low byte for this line of the scrolling buffer
 
-	sta TT_LMS0,y          ; Update LMS with low byte to TITLE. 
+	sta TT_LMS0,y           ; Update LMS with low byte to TITLE. 
 
-	dex                    ; next line
-	bpl bTSO_loop          ; Reached the end?
+	dex                     ; next line
+	bpl bTSO_loop           ; Reached the end?
 
 	ldx #0
-	stx TitleHSCROL        ; Zero the fine scroll while we're here
+	stx TitleHSCROL         ; Zero the fine scroll while we're here
 
 	rts
 
@@ -2338,7 +2373,7 @@ bTSO_loop
 
 TitleClearRightGraphics
 
-	lda #0
+	lda #INTERNAL_SPACE
 	ldx #9
 
 bTCRG_Loop
@@ -2468,7 +2503,7 @@ ToggleButtonPrompt
 	bne PromptFadeUp            ; >0 == up.
 
 	; Prompt Fading the background down.
-	lda PressAButtonColor         ; Get the current background color.
+	lda PressAButtonColor       ; Get the current background color.
 	AND #$0F                    ; Look at only the luminance.
 	bne RegularPromptFadeDown   ; Not 0 yet, do a normal job on it.
 
@@ -2477,12 +2512,12 @@ SetNewPromptColor
 	eor PressAButtonColor         ; value by chewing on it with the original color.
 	and #$F0                    ; Mask out the luminance for Dark.
 	beq SetNewPromptColor       ; Do again if black/color 0 turned up
-	sta PressAButtonColor         ; Set background.
+	sta PressAButtonColor       ; Set background.
 	jsr TogglePressAButtonState ; Change fading mode to up (1)
 	bne SetTextAsInverse        ; Text Brightness inverse from the background
 
 RegularPromptFadeDown
-	dec PressAButtonColor         ; Subtract 1 from the color (which is the luminance)
+	dec PressAButtonColor       ; Subtract 1 from the color (which is the luminance)
 	jmp SetTextAsInverse        ; And reset the text to accordingly.
 
 PromptFadeUp
@@ -2495,13 +2530,13 @@ PromptFadeUp
 	rts
 
 RegularPromptFadeUp
-	inc PressAButtonColor         ; Add 1 to the color (which is the luminance)
+	inc PressAButtonColor       ; Add 1 to the color (which is the luminance)
 	; and fall into setting the text luminance setup....
 
 SetTextAsInverse  ; Make the text luminance the opposite of the background.
-	lda PressAButtonColor         ; Background color...
+	lda PressAButtonColor       ; Background color...
 	eor #$0F                    ; Not (!) the background color's luminance.
-	sta PressAButtonText         ; Use as the text's luminance.
+	sta PressAButtonText        ; Use as the text's luminance.
 
 	rts
 
@@ -2654,11 +2689,11 @@ libSetPmgHPOSZero
 
 	lda #$00                ; 0 position
 
-	sta HPOSP0
+	sta HPOSP0 ; Player positions 0, 1, 2, 3
 	sta HPOSP1
 	sta HPOSP2
 	sta HPOSP3
-	sta HPOSM0
+	sta HPOSM0 ; Missile positions 0, 1, 2, 3
 	sta HPOSM1
 	sta HPOSM2
 	sta HPOSM3
@@ -2681,20 +2716,20 @@ libSetPmgHPOSZero
 
 libPmgAllZero
 
+	jsr libSetPmgHPOSZero   ; Sets all HPOS off screen.
+
 	lda #$00                ; 0 position
 	ldx #$03                ; four objects, 3 to 0
 
-bLoopZeroPMPosition
-	sta HPOSP0,x            ; Player positions 3, 2, 1, 0
+bLoopZeroPMSpecs
 	sta SIZEP0,x            ; Player width 3, 2, 1, 0
-	sta HPOSM0,x            ; Missiles 3, 2, 1, 0 just to be sure.
 	sta PCOLOR0,x           ; And black the colors.
 	dex
-	bpl bLoopZeroPMPosition
+	bpl bLoopZeroPMSpecs
 
 	sta SIZEM
 
-	lda #[GTIA_MODE_DEFAULT|%0001]
+	lda #[GTIA_MODE_DEFAULT|%0001] ; Default priority 
 	sta GPRIOR
 
 	rts
@@ -2706,7 +2741,7 @@ bLoopZeroPMPosition
 ; Zero the bitmaps for all players and missiles
 ; 
 ; Try to make this called only once at game initialization.
-; All other P/M  use should be otrderly and clean up after itself.
+; All other P/M  use should be orderly and clean up after itself.
 ; Residual P/M pixels are verboten.
 ; -----------------------------------------------------------------------------
 
