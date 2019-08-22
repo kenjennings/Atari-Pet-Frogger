@@ -1,0 +1,66 @@
+I think this is the last testing go-round for Version 03.  Mostly this is about voting on what scrolling speeds work and what is unrealistic.
+
+You can press OPTION and SELECT on the title screen to change the number of lives and the starting level. There is visual feedback for what you choose.  This makes it easier to try out different speeds.
+
+The game behavior is intentionally as similar as possible to the original Pet game.  The original author intended it as a simple, twitchy reflex game and at maximum speed on the PET the boats are insanely fast.  On the short list for a future version I'll add a timer and something like sinking boats or other obstacles which would require much slower scrolling.
+
+While the last testable version had different scrolling speeds for different rows of boats, this current version temporarily uses the same speed for all the lines of boats to make it easier to judge the level of stupid occurring.  My opinion is levels 3 to 9 are probably the usable ones in NTSC.
+
+Level 1 (watching paint dry.)
+8 Frames per 1 pixel/color clock scroll
+NTSC 7.5 pixels/second (less than two characters/second.)
+PAL  6.25 pixels/second (just slightly more than 1.5 characters/second)
+
+Level 2 (watching the snail Olympics.)
+7 Frames per 1 pixel/color clock scroll
+NTSC 8.5 pixels/second (about two characters/second.)
+PAL  7 pixels/second (just slightly less than 2 character/second)
+
+Level 3  (Maybe as exciting as "meh".)
+6 Frames per 1 pixel/color clock scroll
+NTSC 10 pixels/second (2.5 characters/second.)
+PAL  8.3 pixels/second (about two characters/second.)
+
+Level 4  (Good enough for small kids?)
+5 Frames per 1 pixel/color clock scroll
+NTSC 12 pixels/second (3 characters/second.)
+PAL  10 pixels/second (2.5 characters/second.)
+
+Level 5
+4 Frames per 1 pixel/color clock scroll
+NTSC 15 pixels/second (4 characters/second.)
+PAL  12.5 pixels/second (about 3 characters/second.)
+
+Level 6
+3 Frames per 1 pixel/color clock scroll
+NTSC 20 pixels/second (5 characters/second.) (about one boat length)
+PAL  16.6 pixels/second (about 4 characters/second.)
+
+Level 7
+2 Frames per 1 pixel/color clock scroll
+NTSC 30 pixels/second (7.5 characters/second.)
+PAL  25 pixels/second (about 6 characters/second.)
+
+Level 8
+1 Frames per 1 pixel/color clock scroll
+NTSC 60 pixels/second (15 characters/second.)
+PAL  50 pixels/second (12.5 characters/second.)
+
+Level 9  (possibly highest tolerable speed.)
+1 Frames per 2 pixel/color clock scroll
+NTSC 120 pixels/second (30 characters/second.)
+PAL  100 pixels/second (25 characters/second.)
+
+Level 10  (cartoon roadrunner speed).
+1 Frames per 3 pixel/color clock scroll
+NTSC 180 pixels/second (45 characters/second.)
+PAL  150 pixels/second (37.5 characters/second.)
+
+Level 11  (Spaceballs' ludicrous speed.)
+1 Frames per 4 pixel/color clock scroll
+NTSC 240 pixels/second (60 characters/second.)
+PAL  200 pixels/second (50 characters/second.)
+
+
+Thanks,
+Ken.

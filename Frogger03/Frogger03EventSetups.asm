@@ -184,15 +184,7 @@ SetupTransitionToWin
 	lda #DISPLAY_WIN        ; Tell VBI to change screens.
 	jsr ChangeScreen        ; Then copy the color tables.
 
-	ldx #3                  ; Setup channel 3 to play Ode To Joy for saving the frog.
-	ldy #SOUND_JOY
-	jsr SetSound 
-
-	jsr libScreenWaitFrame  ; Wait for a frame.
-
-	ldx #2                  ; Setup channel 2 to play Ode To Joy for saving the frog.
-	ldy #SOUND_JOY
-	jsr SetSound 
+	jsr PlayOdeToJoy        ; Play Ode To Joy for saving the frog.  Uses two channels, 2 and 3.
 
 	lda #EVENT_TRANS_WIN   ; Next step is operating the transition animation.
 	sta CurrentEvent
@@ -210,7 +202,7 @@ SetupTransitionToWin
 
 SetupWin
 
-	lda #WIN_CYCLE_SPEED    ; 
+	lda #WIN_CYCLE_SPEED    ;
 	jsr ResetTimers
 
 	lda #238                ; Color scrolling 238 to 16;  Light to dark. Increment.
@@ -242,9 +234,7 @@ SetupTransitionToDead
 	jsr SetSplatteredOnScreen  ; splat the frog:
 
 	dec NumberOfLives       ; subtract a life.
-	lda #COLOR_PURPLE+$F    ; Flash the Lives counter label.
-	sta COLPM0_TABLE+1
-	sta COLPM1_TABLE+1
+	jsr StrobeLivesLabel    ; Flash the Lives counter label.
 	jsr CopyScoreToScreen   ; Update the screen information
 	jsr PrintFrogsAndLives
 
@@ -254,9 +244,7 @@ SetupTransitionToDead
 	lda #1                  ; Set Stage 1 in the fading control.
 	sta EventStage
 
-	ldx #3                  ; Setup channel 3 to play funeral dirge for the dead frog.
-	ldy #SOUND_DIRGE
-	jsr SetSound 
+	jsr PlayFuneral         ; Setup channel 3 to play funeral dirge for the dead frog.
 
 	; In this case we do not want the Transition to change to the next 
 	; display immediately as the player must have time to view and 

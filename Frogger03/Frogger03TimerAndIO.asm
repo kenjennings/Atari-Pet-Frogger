@@ -446,7 +446,7 @@ ManageBoatScrolling
 LoopBoatScrolling
 	; Need row in X and Y due to different 6502 addressing modes in the timer and scroll functions.
 	tya                           ; A = Y, Current Row 
-	tax                           ; X = A, Current Row.  dec zeropage,x, darn you cpu.
+	tax                           ; X = A, Current Row.  Can't dec zeropage,x, darn you cpu.
 
 	lda MOVING_ROW_STATES,y       ; Get the current Row State
 	beq EndOfScrollLoop           ; Not a scrolling row.  Go to next row.

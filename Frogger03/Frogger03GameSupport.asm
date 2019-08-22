@@ -94,7 +94,7 @@ BOAT_FRAMES ; Number of frames to wait to move boat. (top to bottom) (Difficulty
 	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 7
 	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 8
 	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 9
-	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  ; Difficulty 10
+	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 10
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 12
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 13
@@ -125,7 +125,7 @@ BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 7
 	.by 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2   ; Difficulty 8
 	.by 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3   ; Difficulty 9
-	.by 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0  ; Difficulty 10
+	.by 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 ; Difficulty 10
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 12
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 13

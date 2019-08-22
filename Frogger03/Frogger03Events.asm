@@ -149,7 +149,7 @@ EventTransitionToTitle
 	lda #TITLE_SPEED           ; yes.  Reset it.
 	jsr ResetTimers
 
-	lda EventStage           ; What stage are we in?
+	lda EventStage             ; What stage are we in?
 	cmp #1
 	bne GoToStartEventForTitle
  
@@ -158,12 +158,7 @@ EventTransitionToTitle
 	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
 
 FinishedNowSetupStage2
-	ldx #0                     ; Setup channel 0 to play light saber A sound.
-	ldy #SOUND_HUM_A
-	jsr SetSound 
-	ldx #1                     ; Setup channel 1 to play light saber B sound.
-	ldy #SOUND_HUM_B
-	jsr SetSound
+	jsr PlaySaberHum           ; Play light saber hum using two channels.
 
 	lda #2                     ; Set stage 2 as next part of Title screen event...
 	sta EventStage
@@ -204,6 +199,7 @@ EventScreenStart            ; This is New Game and Transition to title.
 
 	lda NewNumberOfLives    ; Copy the new game setups to the last game vars
 	sta LastNumberofLives
+	sta NumberOfLives
 
 	jsr ClearSavedFrogs     ; Erase the saved frogs from the screen. (Zero the count)
 	jsr PrintFrogsAndLives  ; Update the screen memory for the status.

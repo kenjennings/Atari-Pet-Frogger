@@ -17,13 +17,16 @@
 ; Frogger AUDIO
 ;
 ; All the routines to run "The world's cheapest sequencer." 
-; It is truly sad.
+;
+; It is a truly sad thing.
 ;
 ; Game sound allocation:
-; Channel 0 - title slide, light saber
-; Channel 1 - light saber
-; Channel 2 - Frog movement bump.  Point award.  Music.
-; Channel 3 - Ambient water noise, music.
+;             Title           Game                 Win/Dead/Over       Other
+;----------   ------------    -----------------    -------------       -----------
+; Channel 0 - slide, hum A    
+; Channel 1 - downs ,hum B    engines
+; Channel 2 - lefts           jump, 100pt ding     OdeToJoy            button tink
+; Channel 3 - Rezz slide      water                OdeToJoy, Funeral
 ; --------------------------------------------------------------------------
 
 SOUND_OFF     = 0
@@ -37,8 +40,10 @@ SOUND_JOY     = 7
 SOUND_WATER   = 8
 SOUND_ENGINES = 9
 SOUND_BLING   = 10 
+SOUND_DOWNS   = 11
+SOUND_LEFTS   = 12
 
-SOUND_MAX   = 10
+SOUND_MAX   = 12
 
 ; ======== The world's most inept sound system. ========
 ;
@@ -353,13 +358,47 @@ SOUND_ENTRY_WATER    ; Water sloshing noises
 
 
 SOUND_ENTRY_ENGINES  ; Engine sounds noises
-	.byte $82,1,75,1 ; several full seconds 
-	.byte $83,2,75,1 ; of different sounds 
-	.byte $81,3,75,1 ; at different volumes.
-	.byte $84,4,75,1
-	.byte $82,5,75,1
-	.byte $81,2,75,255 ; End.  Do not stop sound.
+	.byte $C1,231,80,1 ; several full seconds 
+	.byte $C2,220,80,1 ; of different sounds 
+	.byte $C4,255,80,1 ; at different volumes.
+	.byte $C1,243,80,1
+	.byte $C3,198,80,1
+	.byte $C2,211,80,255 ; End.  Do not stop sound.
 
+
+SOUND_ENTRY_DOWNS ; title graphics shift down.
+	.byte $04,4,6,1 
+	.byte $04,3,6,1 
+	.byte $03,2,6,1 
+	.byte $03,1,6,1 
+	.byte $02,0,6,1 
+	.byte $00,$00,0,0
+
+SOUND_ENTRY_LEFTS
+	.byte $a4,22,6,1 
+	.byte $a4,21,6,1 
+	.byte $a4,20,6,1 
+	.byte $a4,19,6,1 
+	.byte $a4,18,6,1 
+	.byte $a4,17,6,1 
+	.byte $a4,16,6,1 
+	.byte $a4,15,6,1 
+	.byte $a4,14,6,1 
+	.byte $a4,13,6,1 
+	.byte $a4,12,6,1 
+	.byte $a4,11,6,1 
+	.byte $a4,10,6,1 
+	.byte $a4,9,6,1 
+	.byte $a4,8,6,1 
+	.byte $a4,7,6,1 
+	.byte $a4,6,6,1 
+	.byte $a4,5,6,1 
+	.byte $a4,4,6,1 
+	.byte $a4,3,6,1 
+	.byte $a3,2,6,1 
+	.byte $a3,1,6,1 
+	.byte $a2,0,6,1 
+	.byte $00,$00,0,0
 
 ; Pointers to starting sound entry in a sequence.
 SOUND_FX_LO_TABLE
@@ -374,6 +413,9 @@ SOUND_FX_LO_TABLE
 	.byte <SOUND_ENTRY_WATER
 	.byte <SOUND_ENTRY_ENGINES
 	.byte <SOUND_ENTRY_BLING
+	.byte <SOUND_ENTRY_DOWNS
+	.byte <SOUND_ENTRY_LEFTS
+
 
 SOUND_FX_HI_TABLE
 	.byte >SOUND_ENTRY_OFF
@@ -387,6 +429,8 @@ SOUND_FX_HI_TABLE
 	.byte >SOUND_ENTRY_WATER
 	.byte >SOUND_ENTRY_ENGINES
 	.byte >SOUND_ENTRY_BLING
+	.byte <SOUND_ENTRY_DOWNS
+	.byte <SOUND_ENTRY_LEFTS
 
 
 ; ==========================================================================
@@ -443,6 +487,36 @@ PlayWaterFX
 	jsr SetSound
 
 ExitPlayWaterFX
+	rts
+
+
+; ==========================================================================
+; ToReplayFXEnginesOrNot                                           A  X  Y
+; -------------------------------------------------------------------------- 
+; To Replay engine noise effects or not
+; 
+; Main routine to play the Engine sounds during the game. 
+; This checks the channel 1 control to see if it is idle.  
+; If the channel is idle then the engines sound sequence is restarted.
+;
+; Engines are a series of long duration buzzing sounds. 
+; 
+; Uses all the registers. 
+; X = sound channel to assign.
+; Y = sound number to use. (values declared at beginning of Audio.asm.) 
+; --------------------------------------------------------------------------
+
+ToReplayFXEnginesOrNot
+
+	lda SOUND_CONTROL1      ; Is channel 1 busy?
+	bne ExitPlayEnginesFX   ; Yes.  Don't do anything.
+
+PlayEnginesFX
+	ldx #1                  ; Setup channel 1 to play water noises
+	ldy #SOUND_ENGINES
+	jsr SetSound
+
+ExitPlayEnginesFX
 	rts
 
 
@@ -514,6 +588,123 @@ PlayBling
 
 	ldx #1                     ; Setup channel 1 to play ding a ling.
 	ldy #SOUND_BLING
+	jsr SetSound 
+
+	mRegRestore                ; Macro: Restore Y, X, A, and CPU flags
+
+	rts
+
+
+; ==========================================================================
+; PlayLefts                                                      *  *  *
+; -------------------------------------------------------------------------- 
+; Play Left movement sound for title graphics on OPTION and SELECT
+; 
+; Uses A, X, Y, but preserves all registers on entry/exit.
+; --------------------------------------------------------------------------
+
+PlayLefts
+
+	mRegSave                   ; Macro: save CPU flags, and A, X, Y
+
+	ldx #2                     ; Setup channel 2 to play.
+	ldy #SOUND_LEFTS
+	jsr SetSound 
+
+	mRegRestore                ; Macro: Restore Y, X, A, and CPU flags
+
+	rts
+
+
+; ==========================================================================
+; PlayDowns                                                      *  *  *
+; -------------------------------------------------------------------------- 
+; Play down movement sound for title graphics on OPTION and SELECT
+; 
+; Uses A, X, Y, but preserves all registers on entry/exit.
+; --------------------------------------------------------------------------
+
+PlayDowns
+
+	mRegSave                   ; Macro: save CPU flags, and A, X, Y
+
+	ldx #1                     ; Setup channel 2 to play.
+	ldy #SOUND_DOWNS
+	jsr SetSound 
+
+	mRegRestore                ; Macro: Restore Y, X, A, and CPU flags
+
+	rts
+
+
+; ==========================================================================
+; PlaySaberHum                                                    *  *  *
+; -------------------------------------------------------------------------- 
+; Play light saber hum using two channels.
+; 
+; Uses A, X, Y, but preserves all registers on entry/exit.
+; --------------------------------------------------------------------------
+
+PlaySaberHum
+
+	mRegSave                   ; Macro: save CPU flags, and A, X, Y
+
+	ldx #0                     ; Setup channel 0 to play light saber A sound.
+	ldy #SOUND_HUM_A
+	jsr SetSound
+
+	ldx #1                     ; Setup channel 1 to play light saber B sound.
+	ldy #SOUND_HUM_B
+	jsr SetSound 
+
+	mRegRestore                ; Macro: Restore Y, X, A, and CPU flags
+
+	rts
+
+
+; ==========================================================================
+; PlayOdeToJoy                                                    *  *  *
+; -------------------------------------------------------------------------- 
+; Play Ode To Joy for saving the frog.  Uses two channels, 2 and 3.
+; The playback is offset by a frame for each voice to produce a 
+; slight ringing, electric echo effect.
+; 
+; Uses A, X, Y, but preserves all registers on entry/exit.
+; --------------------------------------------------------------------------
+
+PlayOdeToJoy
+
+	mRegSave                   ; Macro: save CPU flags, and A, X, Y
+
+	ldx #3                  ; Setup channel 3 to play Ode To Joy for saving the frog.
+	ldy #SOUND_JOY
+	jsr SetSound 
+
+	jsr libScreenWaitFrame  ; Wait for a frame.
+
+	ldx #2                  ; Setup channel 2 to play Ode To Joy for saving the frog.
+	ldy #SOUND_JOY
+	jsr SetSound 
+
+	mRegRestore                ; Macro: Restore Y, X, A, and CPU flags
+
+	rts
+
+
+; ==========================================================================
+; PlayFuneral                                                    *  *  *
+; -------------------------------------------------------------------------- 
+; Play Funeral dirge when a frog dies. 
+; 
+; Uses A, X, Y, but preserves all registers on entry/exit.
+; --------------------------------------------------------------------------
+
+PlayFuneral
+
+	mRegSave                   ; Macro: save CPU flags, and A, X, Y
+
+	ldx #3                     ; Setup channel 3 to play funeral dirge for the dead frog.
+	ldy #SOUND_DIRGE
 	jsr SetSound 
 
 	mRegRestore                ; Macro: Restore Y, X, A, and CPU flags
