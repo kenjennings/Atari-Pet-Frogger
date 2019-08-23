@@ -47,26 +47,61 @@ SOUND_MAX   = 12
 
 ; ======== The world's most inept sound system. ========
 ;
-; The world's cheapest sequencer. Play one sound value from a table at each 
-; call. Assuming this is done synchronized to the frame it performs a sound 
-; change every 16.6ms (approximately)  (at 60fps)
-; 
-; Sound control between main process and VBI to turn on/off/play sounds.
-; 0   = Set by Main to direct stop managing sound pending an update from 
-;       MAIN. This does not stop the POKEY's currently playing sound. 
-;       It is set by the VBI to indicate the channel is idle/unmanaged. 
-; 1   = Main sets to direct VBI to start playing a new sound FX.
-; 2   = VBI sets when it is playing to inform Main that it has taken 
+; The world's cheapest sequencer. For each audio channel play one sound 
+; value from a table at each call. Assuming this is done synchronized to 
+; the frame it performs a sound change every 16.6ms (at NTSC 60fps)
+;
+; Sequencer control values for each voice are in Page 0.... (18 bytes total)
+;
+;; Pointer used by the VBI service routine for the current sequence under work:
+; SOUND_POINTER .word $0000
+;
+;; Pointers to the sound entry in use for each voice.
+; SOUND_FX_LO
+; SOUND_FX_LO0 .byte 0
+; SOUND_FX_LO1 .byte 0
+; SOUND_FX_LO2 .byte 0
+; SOUND_FX_LO3 .byte 0 
+
+; SOUND_FX_HI
+; SOUND_FX_HI0 .byte 0
+; SOUND_FX_HI1 .byte 0
+; SOUND_FX_HI2 .byte 0
+; SOUND_FX_HI3 .byte 0 
+
+; Sound Control values coordinate between the main process and the VBI 
+; service routine to turn on/off/play sounds. Control Values:
+; 0   = Set by Main to direct VBI to stop managing sound pending an 
+;       update from MAIN. This does not stop the POKEY's currently 
+;       playing sound.  It is set by the VBI when a sequence is complete 
+;       to indicate the channel is idle/unmanaged. 
+; 1   = MAIN sets to direct VBI to start playing a new sound FX.
+; 2   = VBI sets when it is playing to inform MAIN that it has taken 
 ;       direction and is now busy.
-; 255 = Direct VBI to silence the channel.
+; 255 = Direct VBI to silence the channel immediately.
 ;
 ; So, the procedure for playing sound.
 ; 1) MAIN sets the channel's SOUND_CONTROL to 0.
 ; 2) MAIN sets the channel's SOUND_FX_LO/HI pointer to the sound effects 
 ;    sequence to play.
 ; 3) MAIN sets the channel's SOUND_CONTROL to 1 to tell VBI to start.
-; 4) VBI when playing sets the channel's SOUND_CONTROL value to 2, then 
-;    to 0 when done.
+; 4) VBI sets the channel's SOUND_CONTROL value to 2 when playing, then 
+;    when the sequence is complete, back to value 0.
+
+; SOUND_CONTROL
+; SOUND_CONTROL0  .byte $00
+; SOUND_CONTROL1  .byte $00
+; SOUND_CONTROL2  .byte $00
+; SOUND_CONTROL3  .byte $00
+
+; When these are non-zero, the current settings continue for the next frame.
+; SOUND_DURATION
+; SOUND_DURATION0 .byte $00
+; SOUND_DURATION1 .byte $00
+; SOUND_DURATION2 .byte $00
+; SOUND_DURATION3 .byte $00
+
+; ======================================================
 
 
 	.align 4
@@ -77,10 +112,13 @@ SOUND_MAX   = 12
 ; byte 2, Duration, number of frames to count. 0 counts as 1 frame.
 ; byte 3, 0 == End of sequence. Stop playing sound. (Set AUDF and AUDC to 0)
 ;         1 == Continue normal playing.
-;       255 == End of sequence. Do not stop playing sound.
+;       255 == End of sequence. Do not stop POKEY playing current sound.
 ;       Eventually some other magic to be determined goes here.
+; Like this:
+;	.byte Distortion/volume, Frequency, Frame/Duration, Control
 
-SOUND_ENTRY_OFF
+
+SOUND_ENTRY_OFF   ; A formality, so that 0 has consistent meaning.
 	.byte 0,0,0,0
 
 
@@ -94,6 +132,7 @@ SOUND_ENTRY_TINK ; Press A Button.
 
 	.byte $A0,0,0,0
 
+
 SOUND_ENTRY_BLING ; Press A Button.
 	.byte $Aa,25,1,1
 	.byte $A8,25,1,1
@@ -101,14 +140,15 @@ SOUND_ENTRY_BLING ; Press A Button.
 	.byte $A4,25,1,1
 	.byte $A1,25,1,1
 	.byte $A0,0,3,1
-	
+
 	.byte $A0,0,0,0
+
 
 	; Maybe if I thought about it for a while I could do a 
 	; ramp/counting feature in the sound entry control byte 
 	; in less than 100-ish bytes of code which is about how 
 	; much space this table occupies. 
-SOUND_ENTRY_SLIDE ; Title logo lines slide right to left
+SOUND_ENTRY_SLIDE    ; Title logo lines slide right to left
 	.byte $02,50,1,1 ; 1 == 2 frames per wait.
 	.byte $03,49,1,1
 	.byte $03,48,1,1
@@ -159,9 +199,11 @@ SOUND_ENTRY_HUMMER_A ; one-half of Atari light saber
 	.byte $A5,$FF,7,1
 	.byte $A3,$FF,7,1
 	.byte $A1,$FF,7,1
+
 	.byte $A0,0,0,0
 
-SOUND_ENTRY_HUMMER_B ; one-half of Atari light saber
+
+SOUND_ENTRY_HUMMER_B ; other-half of Atari light saber
 	.byte $A8,$FE,30,1
 	.byte $A8,$FE,7,1
 	.byte $A7,$FE,7,1
@@ -169,10 +211,11 @@ SOUND_ENTRY_HUMMER_B ; one-half of Atari light saber
 	.byte $A5,$FE,7,1
 	.byte $A3,$FE,7,1
 	.byte $A1,$FE,7,1
+
 	.byte $A0,0,0,0
 
 
-SOUND_ENTRY_DIRGE ; Chopin's Funeral for a frog (or gunslinger in Outlaw) 
+SOUND_ENTRY_DIRGE     ; Chopin's Funeral for a frog (or a gunslinger in Outlaw) 
 ;	.byte $A4,182,0,1 ; F, 1/4, 16 steps
 ;	.byte $A6,182,13,1 
 ;	.byte $A4,182,0,1 
@@ -256,12 +299,13 @@ SOUND_ENTRY_DIRGE ; Chopin's Funeral for a frog (or gunslinger in Outlaw)
 	.byte $A0,$00,0,0
 
 
-SOUND_ENTRY_THUMP ; When a frog moves
+SOUND_ENTRY_THUMP     ; When a frog moves
 	.byte $A2,240,0,1 
 	.byte $A5,240,0,1 
 	.byte $A8,240,2,1 
 	.byte $A4,240,0,1 
 	.byte $A1,240,0,1 
+
 	.byte $A0,$00,0,0
 
 
@@ -349,56 +393,61 @@ SOUND_ENTRY_ODE2JOY ; Beethoven's Ode To Joy when a frog is saved
 
 
 SOUND_ENTRY_WATER    ; Water sloshing noises
-	.byte $82,1,75,1 ; several full seconds 
-	.byte $83,2,75,1 ; of different sounds 
+	.byte $81,1,75,1 ; several full seconds 
+	.byte $81,2,75,1 ; of different sounds 
 	.byte $81,3,75,1 ; at different volumes.
-	.byte $84,4,75,1
-	.byte $82,5,75,1
+	.byte $81,4,75,1
+	.byte $81,5,75,1
+
 	.byte $81,2,75,255 ; End.  Do not stop sound.
 
 
-SOUND_ENTRY_ENGINES  ; Engine sounds noises
-	.byte $C1,231,80,1 ; several full seconds 
-	.byte $C2,220,80,1 ; of different sounds 
-	.byte $C4,255,80,1 ; at different volumes.
-	.byte $C1,243,80,1
-	.byte $C3,198,80,1
-	.byte $C2,211,80,255 ; End.  Do not stop sound.
+SOUND_ENTRY_ENGINES    ; Engine sounds noises
+	.byte $C5,231,75,1 ; several full seconds 
+	.byte $C4,220,75,1 ; of different sounds 
+	.byte $C5,255,75,1 ; at different volumes.
+	.byte $C4,243,75,1
+	.byte $C5,198,75,1
+
+	.byte $C4,211,75,255 ; End.  Do not stop sound.
 
 
-SOUND_ENTRY_DOWNS ; title graphics shift down.
-	.byte $04,4,6,1 
-	.byte $04,3,6,1 
-	.byte $03,2,6,1 
-	.byte $03,1,6,1 
-	.byte $02,0,6,1 
+SOUND_ENTRY_DOWNS   ; title graphics shift down.
+	.byte $04,4,4,1 
+	.byte $04,3,4,1 
+	.byte $03,2,4,1 
+	.byte $03,1,4,1 
+	.byte $02,0,4,1 
+
 	.byte $00,$00,0,0
+
 
 SOUND_ENTRY_LEFTS
-	.byte $a4,22,6,1 
-	.byte $a4,21,6,1 
-	.byte $a4,20,6,1 
-	.byte $a4,19,6,1 
-	.byte $a4,18,6,1 
-	.byte $a4,17,6,1 
-	.byte $a4,16,6,1 
-	.byte $a4,15,6,1 
-	.byte $a4,14,6,1 
-	.byte $a4,13,6,1 
-	.byte $a4,12,6,1 
-	.byte $a4,11,6,1 
-	.byte $a4,10,6,1 
-	.byte $a4,9,6,1 
-	.byte $a4,8,6,1 
-	.byte $a4,7,6,1 
-	.byte $a4,6,6,1 
-	.byte $a4,5,6,1 
-	.byte $a4,4,6,1 
-	.byte $a4,3,6,1 
-	.byte $a3,2,6,1 
-	.byte $a3,1,6,1 
-	.byte $a2,0,6,1 
+	.byte $a1,21,2,1 
+	.byte $a1,20,2,1 
+	.byte $a1,19,2,1 
+	.byte $a1,18,2,1 
+	.byte $a1,17,2,1 
+	.byte $a1,16,2,1 
+	.byte $a1,15,2,1 
+	.byte $a1,14,2,1 
+	.byte $a1,13,2,1 
+	.byte $a1,12,2,1 
+	.byte $a1,11,2,1 
+	.byte $a1,10,2,1 
+	.byte $a1,9,2,1 
+	.byte $a1,8,2,1 
+	.byte $a1,7,2,1 
+	.byte $a1,6,2,1 
+	.byte $a1,5,2,1 
+	.byte $a1,4,2,1 
+	.byte $a1,3,2,1 
+	.byte $a1,2,2,1 
+	.byte $a1,1,2,1 
+	.byte $a1,0,2,1 
+
 	.byte $00,$00,0,0
+
 
 ; Pointers to starting sound entry in a sequence.
 SOUND_FX_LO_TABLE
@@ -429,8 +478,8 @@ SOUND_FX_HI_TABLE
 	.byte >SOUND_ENTRY_WATER
 	.byte >SOUND_ENTRY_ENGINES
 	.byte >SOUND_ENTRY_BLING
-	.byte <SOUND_ENTRY_DOWNS
-	.byte <SOUND_ENTRY_LEFTS
+	.byte >SOUND_ENTRY_DOWNS
+	.byte >SOUND_ENTRY_LEFTS
 
 
 ; ==========================================================================

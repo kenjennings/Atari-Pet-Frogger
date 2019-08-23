@@ -268,6 +268,8 @@ bCFCI_StartupStage2
 	sta EventCounter          ; Do it six times.
 	lda #TITLE_DOWN_SPEED
 	jsr ResetTimers           ; Reset animation/input frame counter.
+
+	jsr PlayDowns             ; Play down movement sound for title graphics on OPTION and SELECT
 	bne bCFCI_Exit            ; Return !0 exit.
 
 bCFCI_End

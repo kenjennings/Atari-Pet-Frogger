@@ -158,6 +158,7 @@ SetupGame
 	jsr SetFrogOnScreen    ; set Frog shape, set eye position, turn on VBI updates.
 
 	jsr PlayWaterFX        ; Start water noises.  Now.
+	jsr PlayEnginesFX      ; Start engine noises.  Now.
 
 	lda #EVENT_GAME        ; Yes, change to game screen event.
 	sta CurrentEvent
@@ -185,6 +186,10 @@ SetupTransitionToWin
 	jsr ChangeScreen        ; Then copy the color tables.
 
 	jsr PlayOdeToJoy        ; Play Ode To Joy for saving the frog.  Uses two channels, 2 and 3.
+
+	ldx #1                  ; Shutup 1
+	ldy #SOUND_OFF
+	jsr SetSound
 
 	lda #EVENT_TRANS_WIN   ; Next step is operating the transition animation.
 	sta CurrentEvent
@@ -246,6 +251,10 @@ SetupTransitionToDead
 
 	jsr PlayFuneral         ; Setup channel 3 to play funeral dirge for the dead frog.
 
+	ldx #1                  ; Shutup 1
+	ldy #SOUND_OFF
+	jsr SetSound
+	
 	; In this case we do not want the Transition to change to the next 
 	; display immediately as the player must have time to view and 
 	; mourn the splattered frog remains laying in state.  There will be 

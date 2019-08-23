@@ -324,6 +324,7 @@ bETS_Stage2_ToStage3         ; Setup for next Stage
 
 	jsr RandomizeTitleColors ; Random color gradient for the Text pixels.
 
+	jsr PlayLefts            ;  Play Left movement sound for title graphics on OPTION and SELECT
 	inc VBIEnableScrollTitle ; Turn on Title fine scrolling.
 	bne EndTitleScreen
 
@@ -570,8 +571,9 @@ FrogHasMoved
 
 EndOfJoystickMoves
 
-	jsr ToReplayFXWaterOrNot ; Time to replay the water noises?
-	jmp EndGameScreen        ; Done with game loop.
+	jsr ToReplayFXWaterOrNot   ; Time to replay the water noises?
+	jsr ToReplayFXEnginesOrNot ; Time to replay the engine noises?
+	jmp EndGameScreen          ; Done with game loop.
 
 
 DoSetupForYerDead

@@ -590,8 +590,8 @@ PressAButtonText   .byte 0           ; The text luminance.
 
 
 ; ======== V B I ======== The world's most inept sound system. 
-; Index used by the VBI for the current sound.
 
+; Pointer used by the VBI service routine for the current sequence under work:
 SOUND_POINTER .word $0000
 
 ; Pointer to the sound entry in use for each voice.
@@ -607,20 +607,24 @@ SOUND_FX_HI1 .byte 0
 SOUND_FX_HI2 .byte 0
 SOUND_FX_HI3 .byte 0 
 
-; Sound control between main process and VBI to turn on/off/play sounds.
-; 0   = Set by Main to direct stop managing sound pending an update from 
-;       MAIN. This does not stop the POKEY's currently playing sound. 
-;       It is set by the VBI to indicate the channel is idle. (unmanaged) 
-; 1   = Main sets to direct VBI to start playing a sound FX.
-; 2   = VBI sets when it is playing to inform Main that it has taken 
+; Sound Control value coordinates between the main process and the VBI 
+; service routine to turn on/off/play sounds. Control Values:
+; 0   = Set by Main to direct VBI to stop managing sound pending an 
+;       update from MAIN. This does not stop the POKEY's currently 
+;       playing sound.  It is set by the VBI when a sequence is complete 
+;       to indicate the channel is idle/unmanaged. 
+; 1   = MAIN sets to direct VBI to start playing a new sound FX.
+; 2   = VBI sets when it is playing to inform MAIN that it has taken 
 ;       direction and is now busy.
-; 255 = Direct VBI to silence the channel.
+; 255 = Direct VBI to silence the channel immediately.
+;
 ; So, the procedure for playing sound.
-; 1) MAIN sets SOUND_CONTROL to 0.
-; 2) MAIN sets SOUND_FX_LO/HI pointer to the sound effects 
+; 1) MAIN sets the channel's SOUND_CONTROL to 0.
+; 2) MAIN sets the channel's SOUND_FX_LO/HI pointer to the sound effects 
 ;    sequence to play.
-; 3) MAIN sets SOUND_CONTROL to 1 to tell VBI to start.
-; 4) VBI when playing sets SOUND_CONTROL value to 2. 
+; 3) MAIN sets the channel's SOUND_CONTROL to 1 to tell VBI to start.
+; 4) VBI sets the channel's SOUND_CONTROL value to 2 when playing, then 
+;    when the sequence is complete, back to value 0.
 
 SOUND_CONTROL
 SOUND_CONTROL0  .byte $00
