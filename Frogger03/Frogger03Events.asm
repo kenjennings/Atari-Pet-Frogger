@@ -46,7 +46,7 @@ EVENT_TRANS_DEAD  = 7  ; Transition animation from Game to Dead.
 EVENT_DEAD        = 8  ; Yer Dead!
 
 EVENT_TRANS_OVER  = 9  ; Transition animation from Dead to Game Over.
-EVENT_OVER        = 10  ; Game Over.
+EVENT_OVER        = 10 ; Game Over.
 
 EVENT_TRANS_TITLE = 11 ; Transition animation from Game Over to Title.
 
@@ -157,7 +157,7 @@ EventTransitionToTitle
 
 	jsr ToPlayFXScrollOrNot    ; Start slide sound playing if not playing now.
 
-FinishedNowSetupStage2
+;FinishedNowSetupStage2
 	jsr PlaySaberHum           ; Play light saber hum using two channels.
 
 	lda #2                     ; Set stage 2 as next part of Title screen event...
@@ -246,7 +246,7 @@ EventTitleScreen
 	lda SOUND_CONTROL3         ; Is channel 3 busy?
 	beq bETS_EndTitleAnimation ; No. Stop the title animation.
 
-bETS_RandomizeLogo
+;bETS_RandomizeLogo
 	lda #$FF                   ; Channel 3 is playing sound, so animate.
 	jsr TitleRender            ; and -1  means draw the random masked title.
 	jmp EndTitleScreen         ; Do not process input during the randomize.
@@ -261,14 +261,14 @@ bETS_EndTitleAnimation
 
 bETS_InputStage 
 
-CheckTitleInput
+;CheckTitleInput
 	lda EnablePressAButton     ; Is button input on?
 	beq CheckFunctionButton    ; No.  A later stage may still be running.
 
 	jsr RunPromptForButton     ; Blink Prompt to press Joystick button and check input.
 	beq CheckFunctionButton    ; No joystick button.  Try a function key.
 
-ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transition to the game.
+;ProcessTitleScreenInput        ; Button pressed. Prepare for the screen transition to the game.
 	jsr SetupTransitionToGame
 
 	; This was part of the Start event, but after the change to keep the 
@@ -300,17 +300,31 @@ CheckFunctionButton
 	jsr CheckForConsoleInput ; If Button pressed, then sets Stage 2, and EventCounter for TitleShiftDown.
 	jmp EndTitleScreen       ; Regardless of the console input, this is the end of stage 1.
 
-; =============== Stage 2    ; Shifting Left buffer down.
+; =============== Stage 2    ; Shifting Left buffer pixels down.
 
 bETS_Stage2
 	cmp #2                   ; 2) slide left buffer down.
 	bne bETS_Stage3          ; Not Stage 2.  Try Stage 3.
 
-CheckTitleSlideDown 
+;CheckTitleSlideDown 
 	lda AnimateFrames
 	bne EndTitleScreen       ; Animation frames not 0.  Wait till next time.
 
 	jsr TitleShiftDown       ; Shift Pixels down
+
+	; We got here in one of 2 ways:
+	; 1) From Title Logo being displayed (with green underlines)
+	; 2) From a SELECT/OPTION choice where the underlines are faded 
+	;    to match the yellow background.
+	; Therefore, fade the green underlines to yellow only when they are not already faded out.
+	lda COLPF0_TABLE+9          ; Get current underline color.
+	cmp TITLE_UNDERLINE_FADE    ; Is it already the target color (from the fading table)?
+	beq bETS_SkipFadeUnderlines ; Already faded to yellow, do nothing.
+	ldx EventCounter            ; Get the counter
+	lda TITLE_UNDERLINE_FADE,x  ; Get the new color based on the counter (6, 5, 4, 3, 2, 1 0.)
+	sta COLPF0_TABLE+9          ; Update underlines color.
+
+bETS_SkipFadeUnderlines
 	dec EventCounter         ; Decrement number of times this is done.
 	bmi bETS_Stage2_ToStage3 ; When it is done, go to stage 3. 
 
@@ -328,13 +342,13 @@ bETS_Stage2_ToStage3         ; Setup for next Stage
 	inc VBIEnableScrollTitle ; Turn on Title fine scrolling.
 	bne EndTitleScreen
 
-; =============== Stage 3    ; Scrolling in from Right to Left. 
+; =============== Stage 3    ; Scrolling in pixels from Right to Left. 
 
 bETS_Stage3
 	cmp #3
 	bne bETS_Stage4
 
-CheckTitleScroll
+;CheckTitleScroll
 	lda VBIEnableScrollTitle   ; Is VBI busy scrolling option text?
 	bne EndTitleScreen         ; Yes.  Nothing more to do here.
 
@@ -343,7 +357,7 @@ CheckTitleScroll
 	jsr TitleCopyRightToLeftGraphics ; Copy right buffer to left buffer.
 	jsr TitleSetOrigin               ; Reset LMS to point to left buffer
 
-bETS_Stage3_ToStage4         ; Setup for next Stage
+;bETS_Stage3_ToStage4         ; Setup for next Stage
 	lda #4
 	sta EventStage
 	bne EndTitleScreen
@@ -358,11 +372,13 @@ bETS_Stage4                  ; Stage 4, allow console input.
 	beq EndTitleScreen
 
 bETS_CheckAutoReturn
-	lda RestoreTitleTimer    ; Wait for Input timeout to expire. 
+	lda RestoreTitleTimer    ; Wait for Input timeout to expire.
 	bne EndTitleScreen       ; No timeout yet.
 
 	; Expired auto timer... Return to Stage 0.
 	jsr ToPlayFXScrollOrNot  ; Start slide sound playing if not playing now.
+	lda TITLE_UNDERLINE_FADE+6 ; Return underlines to green (SELECT/OPTION faded them out.)
+	sta COLPF0_TABLE+9
 	lda #0
 	sta EventStage
 
@@ -515,10 +531,10 @@ EventGameScreen
 	jsr CheckInput           ; Get cooked stick or trigger if timer permits.
 	beq EndOfJoystickMoves   ; Nothing pressed, Skip the input section.
 
-ProcessJoystickInput         ; Reminder: Input Bits: "0 0 0 Trigger Right Left 0 Up"
+;ProcessJoystickInput         ; Reminder: Input Bits: "0 0 0 Trigger Right Left 0 Up"
 	lda InputStick           ; Get the cooked joystick state... 
 
-UpStickTest
+;UpStickTest
 	ror                      ; Roll out low bit. UP
 	bcc LeftStickTest        ; No bit. Try Left.
 
@@ -575,10 +591,8 @@ EndOfJoystickMoves
 	jsr ToReplayFXEnginesOrNot ; Time to replay the engine noises?
 	jmp EndGameScreen          ; Done with game loop.
 
-
 DoSetupForYerDead
 	jsr SetupTransitionToDead
-	bne EndGameScreen        ; last action in function is lda/sta a non-zero value.
 
 EndGameScreen
 
@@ -694,12 +708,12 @@ LoopDeadToBlack
 	cpx FrogRow             ; Is X the same as Frog Row?
 	beq SkipGreyFrog        ; Yes, do not grey this line.
 
-SkipRedFrog
+;SkipRedFrog
 	lda #COLOR_BLACK        ; Choose black instead.
 
 ; A subroutine, because it is too much code for the EventTransitionToDead
 ; branches to reach around. 
-SkipBlackFrog
+;SkipBlackFrog
 	jsr GreyEachColorTable  
 
 SkipGreyFrog
@@ -742,7 +756,7 @@ EventDeadScreen
 	jsr RunPromptForButton    ; Check button press.
 	beq DeadScreenCheckTimers ; No input, continue with timer checks.
 
-ProcessDeadScreenInput        ; Button is pressed. 
+;ProcessDeadScreenInput        ; Button is pressed. 
 	jsr HideButtonPrompt      ; Turn off the prompt
 	inc EventStage            ; Setup Stage 1 for the screen fading ...
 
@@ -813,7 +827,7 @@ EventTransitionGameOver
 	lda #GAME_OVER_SPEED      ; yes.  Reset it.
 	jsr ResetTimers
 
-DoneWithTranOver               ; call counter is 0.  go to game over.
+;DoneWithTranOver               ; call counter is 0.  go to game over.
 	jsr SetupGameOver
 
 EndTransitionGameOver
@@ -838,7 +852,7 @@ EventGameOverScreen
 	jsr RunPromptForButton    ; Check button press.
 	beq OverScreenCheckTimers ; No press.  Skip the input section.  continue with timers, color scrolling.
 
-ProcessGameOverScreenInput    ; a key is pressed. Prepare for the screen transition.
+;ProcessGameOverScreenInput    ; a key is pressed. Prepare for the screen transition.
 	jsr HideButtonPrompt      ; Turn off the prompt
 	inc EventStage            ; Setup Stage 1 for the screen fading ...
 

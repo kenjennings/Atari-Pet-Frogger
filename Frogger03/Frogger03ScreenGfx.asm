@@ -679,7 +679,7 @@ ChangeScreen
 	; of the screen.   Determine if we need to do it or not do it and then
 	; draw or erase the borders accordingly.
 
-bCSCheckScreenBorders
+;bCSCheckScreenBorders
 	lda DISPLAY_NEEDS_BORDERS_TABLE,y ; Does this display need the P/M graphics borders? 
 	beq bCSNoBorders                  ; If it is 0 it is not needed.  Erase it this.
 	jsr DrawGameBorder                ; Game screen needs left and right sides masked.
@@ -1072,7 +1072,7 @@ CommonSplashFade
 
 	lda EventStage
 
-SplashStageOne                    ; Stage 1 is set background black.             
+;SplashStageOne                    ; Stage 1 is set background black.             
 	cmp #1
 	bne SplashStageTwo
 
@@ -1487,7 +1487,7 @@ LoopBottomWinScroll         ; Scroll colors in opposite direction
 	cpy #48                 ; Reached the end, 20th line after text? 
 	bne LoopBottomWinScroll ; No, continue looping.
 
-EndWinRainbow
+;EndWinRainbow
 
 	rts
 
@@ -1949,7 +1949,7 @@ DoCoarseScrollRight
 SaveNewRightLMS
 	sta PF_LMS1,x            ; Update LMS pointer.
 
-EndOfRightBoat
+;EndOfRightBoat
 	rts
 
 
@@ -1996,7 +1996,7 @@ DoCoarseScrollLeft
 SaveNewLeftLMS
 	sta PF_LMS2,x            ; Update LMS pointer.
 
-EndOfLeftBoat
+;EndOfLeftBoat
 	rts
 
 
@@ -2059,14 +2059,14 @@ TitleLeftScroll
 	jsr TitleIsItAtTheEnd  ; Test if scrolling limits reached.
 	beq bTLF_Exit          ; Zero.  Reached the end.  Nothing to do.
 
-bTLF_Scrollit              ; 2 color clocks per scroll.
+;bTLF_Scrollit              ; 2 color clocks per scroll.
 	dec TitleHSCROL        ; Decrement HSCROL... 14, 12, 10, 8, 6, 4, 2, 0
 	jsr TitleIsItAtTheEnd  ; Test if scrolling limits reached.
 	beq bTLF_Exit          ; At the end.
 	dec TitleHSCROL        ; Decrement HSCROL. 13, 11, 9, 7, 5, 3, 1, -1 (reset)
 	bpl bTLF_Exit          ; Positive.  Nothing else to do.
 
-bTLF_ResetTitleHScrol
+;bTLF_ResetTitleHScrol
 	lda #15                ; Coarse scrolling to next byte
 	sta TitleHSCROL        ; Reset HSCROL for next screen byte.
 
@@ -2327,7 +2327,6 @@ TitlePrintChar
 	lda (MainPointer2),y
 	sta TITLE_RIGHT+100,x
 
-bTPC_Exit
 	mRegRestore
 
 	rts
@@ -2371,23 +2370,23 @@ bTSO_loop
 ; Done in preparation of populating and prior to scrolling left.
 ; --------------------------------------------------------------------------
 
-TitleClearRightGraphics
+;TitleClearRightGraphics
 
-	lda #INTERNAL_SPACE
-	ldx #9
+;	lda #INTERNAL_SPACE
+;	ldx #9
 
-bTCRG_Loop
-	sta TITLE_RIGHT,x
-	sta TITLE_RIGHT+20,x
-	sta TITLE_RIGHT+40,x
-	sta TITLE_RIGHT+60,x
-	sta TITLE_RIGHT+80,x
-	sta TITLE_RIGHT+100,x
+;bTCRG_Loop
+;	sta TITLE_RIGHT,x
+;	sta TITLE_RIGHT+20,x
+;	sta TITLE_RIGHT+40,x
+;	sta TITLE_RIGHT+60,x
+;	sta TITLE_RIGHT+80,x
+;	sta TITLE_RIGHT+100,x
 
-	dex
-	bpl bTCRG_Loop
+;	dex
+;	bpl bTCRG_Loop
 
-	rts
+;	rts
 
 
 ; ==========================================================================

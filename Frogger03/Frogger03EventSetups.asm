@@ -101,7 +101,7 @@ SetupTransitionToGame
 	cmp #DISPLAY_WIN
 	beq GameStartAtTwo     ; This is Win display.  Skip ahead to Part Two.
 
-GameStartAtOne             ; Not Dead, Not Win.  Must be OVER, or other.
+;GameStartAtOne             ; Not Dead, Not Win.  Must be OVER, or other.
 	lda #1                 ; First transition stage: Loop from bottom to top
 	sta EventStage
 	bne TransitionToGameSetEvent

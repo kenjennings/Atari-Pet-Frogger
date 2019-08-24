@@ -43,7 +43,7 @@ SOUND_BLING   = 10
 SOUND_DOWNS   = 11
 SOUND_LEFTS   = 12
 
-SOUND_MAX   = 12
+SOUND_MAX     = 12
 
 ; ======== The world's most inept sound system. ========
 ;
@@ -105,6 +105,7 @@ SOUND_MAX   = 12
 
 
 	.align 4
+
 
 ; A sound Entry is 4 bytes...
 ; byte 0, AUDC (distortion/volume) value

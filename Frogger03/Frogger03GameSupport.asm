@@ -65,6 +65,62 @@
 ; (and by making rows closer to the bottom run faster it produces a 
 ; kind of parallax effect. almost).
 
+; Possible scrolling speeds:
+; Speed 1 (watching paint dry.  Actually, the drying paint cried from boredom.)
+; 8 Frames per 1 pixel/color clock scroll
+; NTSC 7.5 pixels/second (less than two characters/second.)
+; PAL  6.25 pixels/second (just slightly more than 1.5 characters/second)
+
+; Speed 2 (watching the snail Olympics.)
+; 7 Frames per 1 pixel/color clock scroll
+; NTSC 8.5 pixels/second (about two characters/second.)
+; PAL  7 pixels/second (just slightly less than 2 character/second)
+
+; Speed 3  (Maybe as exciting as "meh".)
+; 6 Frames per 1 pixel/color clock scroll
+; NTSC 10 pixels/second (2.5 characters/second.)
+; PAL  8.3 pixels/second (about two characters/second.)
+
+;Speed 4  (Good enough for small kids?)
+;5 Frames per 1 pixel/color clock scroll
+;NTSC 12 pixels/second (3 characters/second.)
+;PAL  10 pixels/second (2.5 characters/second.)
+
+;Speed 5 (15 fps is entering the range of actual animation)
+;4 Frames per 1 pixel/color clock scroll
+;NTSC 15 pixels/second (4 characters/second.)
+;PAL  12.5 pixels/second (about 3 characters/second.)
+
+;Speed 6
+;3 Frames per 1 pixel/color clock scroll
+;NTSC 20 pixels/second (5 characters/second.) (about one boat length)
+;PAL  16.6 pixels/second (about 4 characters/second.)
+
+;Speed 7
+;2 Frames per 1 pixel/color clock scroll
+;NTSC 30 pixels/second (7.5 characters/second.)
+;PAL  25 pixels/second (about 6 characters/second.)
+
+;Speed 8
+;1 Frames per 1 pixel/color clock scroll
+;NTSC 60 pixels/second (15 characters/second.)
+;PAL  50 pixels/second (12.5 characters/second.)
+
+;Speed 9  (possibly highest tolerable speed.)
+;1 Frames per 2 pixel/color clock scroll
+;NTSC 120 pixels/second (30 characters/second.)
+;PAL  100 pixels/second (25 characters/second.)
+
+;Speed 10  (cartoon roadrunner speed).
+;1 Frames per 3 pixel/color clock scroll
+;NTSC 180 pixels/second (45 characters/second.)
+;PAL  150 pixels/second (37.5 characters/second.)
+
+;Speed 11  (Spaceballs' ludicrous speed.)
+;1 Frames per 4 pixel/color clock scroll
+;NTSC 240 pixels/second (60 characters/second.)
+;PAL  200 pixels/second (50 characters/second.)
+
 ;MAX_FROG_SPEED = 13 ; Number of difficulty levels (which means 14)
 MAX_FROG_SPEED = 10 ; Number of difficulty levels (which means 11)
 MAX_FROG_LIVES = 7  ; Maximum number of starting frog lives.
@@ -84,8 +140,8 @@ MAX_FROG_LIVES = 7  ; Maximum number of starting frog lives.
 ; rather than simply (BOAT_FRAMES),Y.
 
 BOAT_FRAMES ; Number of frames to wait to move boat. (top to bottom) (Difficulty 0 to 13)
-	.by 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7   ; Difficulty 0 
-	.by 0 6 6 0 6 6 0 6 6 0 6 6 0 6 6 0 6 6   ; Difficulty 1 
+	.by 0 7 7 0 6 6 0 5 5 0 4 4 0 3 3 0 2 2   ; Difficulty 0 
+	.by 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 1 
 	.by 0 5 5 0 5 5 0 5 5 0 5 5 0 5 5 0 5 5   ; Difficulty 2
 	.by 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4   ; Difficulty 3 
 	.by 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3   ; Difficulty 4 
@@ -116,7 +172,7 @@ BOAT_FRAMES ; Number of frames to wait to move boat. (top to bottom) (Difficulty
 
 BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 0
-	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 1
+	.by 0 1 1 0 1 1 0 2 2 0 3 3 0 4 4 0 4 4   ; Difficulty 1
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 2
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 3
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 4
@@ -201,15 +257,15 @@ FrogMoveUp
 ; FrogPMY, FrogPMX, FrogShape, FrogNewPMY, FrogNewPMX, FrogNewShape
 ; --------------------------------------------------------------------------
 
-ZeroFrogPageZero
+;ZeroFrogPageZero
 
-	ldx #5
-bZFPZ_ClearCoords 
-	sta FrogPMY,x
-	dex
-	bpl bZFPZ_ClearCoords
+;	ldx #5
+;bZFPZ_ClearCoords 
+;	sta FrogPMY,x
+;	dex
+;	bpl bZFPZ_ClearCoords
 
-	rts
+;	rts
 
 
 ; ==========================================================================
@@ -463,7 +519,7 @@ CopyNewHighScore                ; It is a high score.
 	lda #$FF
 	sta FlaggedHiScore          ; Flag the high score. Score must have changed to get here.
 
-ExitHighScoreOrNot
+;ExitHighScoreOrNot
 	rts
 
 

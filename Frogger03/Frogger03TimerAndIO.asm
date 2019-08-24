@@ -174,7 +174,7 @@ CheckInput
 	lda STICKEMUPORNOT_TABLE,x ; Convert input into workable, filtered output.
 	sta InputStick             ; Save it.
 
-AddTriggerInput
+;AddTriggerInput
 	lda STRIG0                 ; 0 is button pressed., !0 is not pressed.
 	bne DoneWithBitCookery     ; if non-zero, then no button pressed.
 
@@ -189,7 +189,7 @@ DoneWithBitCookery             ; Some input was captured?
 	lda #INPUTSCAN_FRAMES      ; Because there was input collected, then
 	sta InputScanFrames        ; Reset the input timer.
 
-ExitInputCollection            ; Input occurred
+;ExitInputCollection            ; Input occurred
 	lda #0                     ; Kill the attract mode flag
 	sta ATRACT                 ; to prevent color cycling.
 
@@ -328,7 +328,7 @@ MyImmediateVBI
 	lda VBICurrentDL            ; Did Main code signal to change displays?
 	bmi VBIResetDLIChain        ; -1, No, just restore current DLI chain.
 
-VBISetupDisplay
+;VBISetupDisplay
 	tax                         ; Use VBICurrentDL  as index to tables.
 
 	lda DISPLAYLIST_LO_TABLE,x  ; Copy Display List Pointer
@@ -1147,10 +1147,10 @@ DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
 ; Load the staged values, store in the color registers.
 ; -----------------------------------------------------------------------------
 
-LoadAllColors_DLI
+;LoadAllColors_DLI
 
-	lda ColorPF0   ; Get color Rocks 1   
-	sta COLPF0
+;	lda ColorPF0   ; Get color Rocks 1   
+;	sta COLPF0
 
 LoadAlmostAllColors_DLI
 	lda ColorBak   ; Get real background color again. (To repair the color for the Beach background)
@@ -1168,7 +1168,7 @@ LoadAlmostAllColors_DLI
 SetupAllOnNextLine_DLI
 	iny
 
-SetupAllColors_DLI
+; SetupAllColors_DLI
 	jsr SetupAllColors
 
 	dey

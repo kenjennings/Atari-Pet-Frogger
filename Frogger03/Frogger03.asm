@@ -553,7 +553,7 @@ FrogRefocus       .byte 0         ; Countdown timer to return the eyeballs to th
 ; Boat movements are managed by the VBI.
 ; The frame count value comes from BOAT_FRAMES based on the number of 
 ; frogs that crossed the river (FrogsCrossed) (0 to 10 difficulty level).
-CurrentRowLoop     .byte 0   ; Count from 0 to 18 in VBI
+;CurrentRowLoop     .byte 0   ; Count from 0 to 18 in VBI
 CurrentBoatFrames  .ds   19  ; How many frames does each row wait?
 ; Count frames until next boat movement. (Note that 0 correctly means move every frame).
 BoatFramesPointer  .word BOAT_FRAMES 

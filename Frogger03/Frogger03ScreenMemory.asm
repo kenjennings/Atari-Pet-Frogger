@@ -706,7 +706,7 @@ TITLE_BACK_COLORS ; 26 entries
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry. 
 	.by COLOR_BLACK              ; Scores, and blank line
 	.by COLOR_BLACK              ; Scores, and blank line
-	.by COLOR_BLUE1        COLOR_PURPLE_BLUE+2      ; Title pixel colors.  Dark to light... 
+	.by COLOR_BLUE1        COLOR_PURPLE_BLUE+2      ; Title background colors.  Dark to light... 
 	.by COLOR_PURPLE+4     COLOR_PINK+6             ; Title lines
 	.by COLOR_RED_ORANGE+8 COLOR_ORANGE2+10         ; Title lines
 	.by COLOR_ORANGE1+12                            ; Title lines
@@ -725,7 +725,9 @@ TITLE_TEXT_COLORS ; 26 entries
 	.by $0E                               ; Scores, and blank line
 	.by $0a                               ; Scores, and blank line
 TITLE_PIXEL_COLORS
-	.by $EC $DA $C8 $B6 $A4 $92 $C2       ; title pixel colors. light to dark
+	.by $EC $DA $C8 $B6 $A4 $92           ; title pixel colors. light to dark
+TITLE_UNDERLINE_COLOR
+	.by $C2                               ; title's underline.
 	.by $00                               ; blank
 	.by $04 $06 $08 $0A $0C $0A $08 $06   ; Instructions
 	.by $00                               ; blank
@@ -733,7 +735,8 @@ TITLE_PIXEL_COLORS
 	.by $00                               ; blank
 	.by $08 $0A                           ; controls
 
-
+TITLE_UNDERLINE_FADE ; Green to bright yellow transition when the SELECT/OPTION slide down occurs.  6 to 0
+	.by COLOR_ORANGE1+12 COLOR_GREEN+12 COLOR_GREEN+10 COLOR_GREEN+8 COLOR_GREEN+6 COLOR_GREEN+4 COLOR_GREEN+2
 
 GAME_BACK_COLORS; 22 entries.
 	.by 0 ; Entry 0 in the DLI list was indexed through by VBI to start the first entry.
@@ -1050,7 +1053,7 @@ DLI_HI_TABLE
 	; Priority bits %0001 put 5th Player below regular Players. 
 GPRIOR_TABLE
 	.byte GTIA_MODE_DEFAULT|MULTICOLOR_PM|%0001              ; Title Screen ; Frog is Multi-color PM
-	.byte GTIA_MODE_DEFAULT|MULTICOLOR_PM|%0001              ; Game Screen ; (Frog again) Also screen uses P3/M3 as black left and right borders
+	.byte GTIA_MODE_DEFAULT|MULTICOLOR_PM|%0001              ; Game Screen ; (Frog again) and uses P3/M3 as black left and right borders
 	.byte 0                                                  ; Splash screen SAVED, no P/M
 	.byte 0                                                  ; Splash screen DEAD, no P/M
 	.byte GTIA_MODE_DEFAULT|FIFTH_PLAYER|MULTICOLOR_PM|%0001 ; Splash screen GAMEOVER - needs P5 
