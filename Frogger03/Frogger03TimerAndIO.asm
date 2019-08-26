@@ -1106,27 +1106,33 @@ DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text.
 ; -----------------------------------------------------------------------------
 
 DLI_SPC2  ; DLI just sets black for background COLBK, COLPF2, and text luminance for scrolling text.
-	mRegSaveAY
+;	mRegSaveAY
 
-DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
-	ldy #$0C             ; luminance for text.  Hardcoded.  Always visible on all screens.
+	pha
+	lda CreditHSCROL     ; HScroll for credits.
+	sta HSCROL
+	
+;DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
+;	ldy #$0C             ; luminance for text.  Hardcoded.  Always visible on all screens.
 	lda #COLOR_BLACK     ; color for background.
 
 	sta WSYNC            ; sync to end of scan line
 
-	sty COLPF1           ; Write text luminance for credits.
+;	sty COLPF1           ; Write text luminance for credits.
 	sta COLBK            ; Write new border color.
 	sta COLPF2           ; Write new background color
+	lda #$0C
+	sta COLPF1
 
-	lda CreditHSCROL     ; HScroll for credits.
-	sta HSCROL
 
 	lda #<DoNothing_DLI  ; Stop DLI Chain.  VBI will restart the chain.
 	sta VDSLST
 	lda #>DoNothing_DLI  ; Stop DLI Chain.  VBI will restart the chain.
 	sta VDSLST+1
 
-	mRegRestoreAY
+;	mRegRestoreAY
+
+	pla 
 
 	rti
 
