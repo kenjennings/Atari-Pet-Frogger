@@ -194,17 +194,17 @@ EndTransitionToTitle
 
 EventScreenStart            ; This is New Game and Transition to title.
 
-	lda NewLevelStart       ; Copy the new game setups to the last game vars
+	lda NewLevelStart       ; Copy the new game setups to the last (i.e. current) game vars
 	sta LastLevelStart      
 
-	lda NewNumberOfLives    ; Copy the new game setups to the last game vars
+	lda NewNumberOfLives    ; Copy the new game setups to the last (i.e. current) game vars
 	sta LastNumberofLives
 	sta NumberOfLives
 
-	jsr ClearSavedFrogs     ; Erase the saved frogs from the screen. (Zero the count)
+	jsr ClearSavedFrogs     ; Erase the saved frogs from the screen. (Zero the frog count)
 	jsr PrintFrogsAndLives  ; Update the screen memory for the status.
 
-	lda #EVENT_TITLE       ; Next step is operating the title screen input.
+	lda #EVENT_TITLE        ; Next step is operating the title screen input.
 	sta CurrentEvent
 
 	rts
@@ -317,12 +317,12 @@ bETS_Stage2
 	; 2) From a SELECT/OPTION choice where the underlines are faded 
 	;    to match the yellow background.
 	; Therefore, fade the green underlines to yellow only when they are not already faded out.
-	lda COLPF0_TABLE+9          ; Get current underline color.
+	lda COLPF0_TABLE+8          ; Get current underline color.
 	cmp TITLE_UNDERLINE_FADE    ; Is it already the target color (from the fading table)?
 	beq bETS_SkipFadeUnderlines ; Already faded to yellow, do nothing.
 	ldx EventCounter            ; Get the counter
 	lda TITLE_UNDERLINE_FADE,x  ; Get the new color based on the counter (6, 5, 4, 3, 2, 1 0.)
-	sta COLPF0_TABLE+9          ; Update underlines color.
+	sta COLPF0_TABLE+8          ; Update underlines color.
 
 bETS_SkipFadeUnderlines
 	dec EventCounter         ; Decrement number of times this is done.
@@ -377,8 +377,8 @@ bETS_CheckAutoReturn
 
 	; Expired auto timer... Return to Stage 0.
 	jsr ToPlayFXScrollOrNot  ; Start slide sound playing if not playing now.
-	lda TITLE_UNDERLINE_FADE+6 ; Return underlines to green (SELECT/OPTION faded them out.)
-	sta COLPF0_TABLE+9
+	lda TITLE_UNDERLINE_FADE,x ; Return underlines to green (SELECT/OPTION faded them out.)
+	sta COLPF0_TABLE+8
 	lda #0
 	sta EventStage
 

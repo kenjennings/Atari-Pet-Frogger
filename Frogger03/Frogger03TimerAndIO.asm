@@ -1074,6 +1074,7 @@ DoNothing_DLI ; In testing mode jump here to not do anything or to stop the DLI 
 ; -----------------------------------------------------------------------------
 
 DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text. 
+
 	pha                   ; aka pha
 
 	lda PressAButtonText  ; Get text color (luminance)
@@ -1084,10 +1085,7 @@ DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text.
 	sta COLBK             ; Write new border color.
 	sta COLPF2            ; Write new background color
 
-;	lda CreditHSCROL      ; HScroll for credits.
-;	sta HSCROL
-
-; Unfortunately, DLI_SPC2 landed +8 bytes into the next page.  So full address needs to be set...
+	; Overriding the table-driven addresses now to go to DLI_SPC2
 	lda #<DLI_SPC2        ; Update the DLI vector for the last routine for credit color.
 	sta VDSLST
 	lda #>DLI_SPC2        ; Update the DLI vector for the last routine for credit color.
@@ -1103,34 +1101,31 @@ DLI_SPC1  ; DLI sets COLPF1, COLPF2, COLBK for Prompt text.
 ;==============================================================================
 ; DLI to set colors for the Scrolling credits.   
 ; ALWAYS the last DLI on screen.
+; Squeezing screen geometry eliminated a blank line here, so the 
+; lazy way HSCROL was set no longer works and causes bizarre 
+; corruption at the bottom of the screen.  The routine needed to be 
+; optimized to avoid overhead and set HSCROL as soon as possible. 
 ; -----------------------------------------------------------------------------
 
-DLI_SPC2  ; DLI just sets black for background COLBK, COLPF2, and text luminance for scrolling text.
-;	mRegSaveAY
+DLI_SPC2  ; DLI sets black for background COLBK, COLPF2, and text luminance for scrolling text.
 
 	pha
+
 	lda CreditHSCROL     ; HScroll for credits.
 	sta HSCROL
-	
-;DLI_SPC2_SetCredits      ; Entry point to make this shareable by other caller.
-;	ldy #$0C             ; luminance for text.  Hardcoded.  Always visible on all screens.
+
 	lda #COLOR_BLACK     ; color for background.
-
 	sta WSYNC            ; sync to end of scan line
-
-;	sty COLPF1           ; Write text luminance for credits.
 	sta COLBK            ; Write new border color.
 	sta COLPF2           ; Write new background color
-	lda #$0C
-	sta COLPF1
 
+	lda #$0C             ; luminance for text.  Hardcoded.  Always visible on all screens.
+	sta COLPF1           ; Write text luminance for credits.
 
 	lda #<DoNothing_DLI  ; Stop DLI Chain.  VBI will restart the chain.
 	sta VDSLST
-	lda #>DoNothing_DLI  ; Stop DLI Chain.  VBI will restart the chain.
+	lda #>DoNothing_DLI
 	sta VDSLST+1
-
-;	mRegRestoreAY
 
 	pla 
 
@@ -1153,12 +1148,8 @@ DLI_SPC2  ; DLI just sets black for background COLBK, COLPF2, and text luminance
 ; Load the staged values, store in the color registers.
 ; -----------------------------------------------------------------------------
 
-;LoadAllColors_DLI
-
-;	lda ColorPF0   ; Get color Rocks 1   
-;	sta COLPF0
-
 LoadAlmostAllColors_DLI
+
 	lda ColorBak   ; Get real background color again. (To repair the color for the Beach background)
 	sta WSYNC
 	sta COLBK
@@ -1172,9 +1163,9 @@ LoadAlmostAllColors_DLI
 
 
 SetupAllOnNextLine_DLI
+
 	iny
 
-; SetupAllColors_DLI
 	jsr SetupAllColors
 
 	dey

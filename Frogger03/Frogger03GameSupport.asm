@@ -141,7 +141,7 @@ MAX_FROG_LIVES = 7  ; Maximum number of starting frog lives.
 
 BOAT_FRAMES ; Number of frames to wait to move boat. (top to bottom) (Difficulty 0 to 13)
 	.by 0 7 7 0 6 6 0 5 5 0 4 4 0 3 3 0 2 2   ; Difficulty 0 
-	.by 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 1 
+	.by 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 7 7   ; Difficulty 1 
 	.by 0 5 5 0 5 5 0 5 5 0 5 5 0 5 5 0 5 5   ; Difficulty 2
 	.by 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4   ; Difficulty 3 
 	.by 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3   ; Difficulty 4 
@@ -172,7 +172,7 @@ BOAT_FRAMES ; Number of frames to wait to move boat. (top to bottom) (Difficulty
 
 BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 0
-	.by 0 1 1 0 1 1 0 2 2 0 3 3 0 4 4 0 4 4   ; Difficulty 1
+	.by 0 1 1 0 1 1 0 2 2 0 3 3 0 4 4 0 1 1   ; Difficulty 1
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 2
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 3
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 4
@@ -247,25 +247,6 @@ FrogMoveUp
 
 	lda FrogNewRow       ; Tell caller the new row number.
 	rts
-
-
-; ==========================================================================
-; ZERO FROG PAGE ZERO
-; ==========================================================================
-; Zero a group of page 0 values for Frog P/M graphics: 
-; (coordinates, and current shape index.)
-; FrogPMY, FrogPMX, FrogShape, FrogNewPMY, FrogNewPMX, FrogNewShape
-; --------------------------------------------------------------------------
-
-;ZeroFrogPageZero
-
-;	ldx #5
-;bZFPZ_ClearCoords 
-;	sta FrogPMY,x
-;	dex
-;	bpl bZFPZ_ClearCoords
-
-;	rts
 
 
 ; ==========================================================================

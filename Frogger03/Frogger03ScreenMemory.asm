@@ -1182,7 +1182,7 @@ SPLASH_DLI_CHAIN_TABLE ; Low byte update to next DLI from the title display
 	.byte <COLPF0_COLBK_DLI     ; DLI (45) 2
 
 	.byte <DLI_SPC1             ; DLI 47 - Special DLI for Press Button Prompt will go to the next DLI for Scrolling text.
-;	.byte <DLI_SPC2_SetCredits  ; DLI 48 - Set black background and white text for scrolling credits
+;	.byte <DLI_SPC2             ; DLI 48 - Set black background and white text for scrolling credits
 
 
 ; Color tables must be big enough to contain data up to the maximum DLI index that
