@@ -497,14 +497,17 @@ RemoveFroggies
 	bne RemoveFroggies        ; then go back and remove the next frog counter.
 
 	sta FrogsCrossed          ; reset count to 0.  (Remember A == space == 0 ?)
-	clc                       ; Plus...
-	adc NewLevelStart         ; the currently selected starting level.
-	cmp #MAX_FROG_SPEED+1     ; Number of difficulty levels. 0 to 10 OK.  11 not so much
-	bcc bCSF_SkipLimitCrossed 
-	lda #MAX_FROG_SPEED       ; Or Reset to max level.
 
-bCSF_SkipLimitCrossed
-	sta FrogsCrossedIndex    ; sets the base index into difficulty arrays
+; Add FrogsCrossed + NewLevelStart == Current Difficulty
+;	clc                       ; Plus...
+;	adc NewLevelStart         ; the currently selected starting level.
+;	cmp #MAX_FROG_SPEED+1     ; Number of difficulty levels. 0 to 10 OK.  11 not so much
+;	bcc bCSF_SkipLimitCrossed 
+;	lda #MAX_FROG_SPEED       ; Or Reset to max level.
+
+;bCSF_SkipLimitCrossed
+;	sta FrogsCrossedIndex    ; sets the base index into difficulty arrays
+
 	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
 
 	jsr StrobeSavedLabel     ; Glow the Saved label.  VBI will decrement it.

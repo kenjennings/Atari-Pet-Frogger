@@ -246,6 +246,7 @@ FrogMoveUp
 	sta FrogNewPMY       ; Update Frog position on screen. 
 
 	lda FrogNewRow       ; Tell caller the new row number.
+
 	rts
 
 
@@ -541,8 +542,9 @@ ReallyExitFromDecColor
 ; ==========================================================================
 ; MULTIPLY FROGS CROSSED
 ; ==========================================================================
-; Multiply FroggsCrossed times 18 and save to FrogsCrossesIndex, to 
-; determine the base entry in the difficulty arrays that control each 
+; 1) FrogsCrossed + NewLevelStart == Current Difficulty (FrogsCrossedIndex)
+; 2) Multiply FrogsCrossedIndex times 18 and save. 
+; This determines the base entry in the difficulty arrays that control each 
 ; boat's speed on screen.
 ;
 ; Uses A
@@ -554,12 +556,12 @@ MultiplyFrogsCrossed
 	clc                        ; Plus...
 	adc NewLevelStart          ; the starting difficulty level.
 	cmp #MAX_FROG_SPEED+1      ; Number of difficulty levels. 0 to 10 OK.  11 not so much
-	bcc SkipLimitCrossed
-	lda #MAX_FROG_SPEED
+	bcc bMFC_SkipLimitCrossed  ; Exceeded the number of levels?
+	lda #MAX_FROG_SPEED        ; Yes.  Reset to max level.
 
-SkipLimitCrossed
+bMFC_SkipLimitCrossed
 	asl                        ; Times 2
-	sta FrogsCrossedIndex
+	sta FrogsCrossedIndex      ; Save Times 2
 	asl                        ; Times 4
 	asl                        ; Times 8
 	asl                        ; Times 16
