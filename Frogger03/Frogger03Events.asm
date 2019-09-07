@@ -312,19 +312,9 @@ bETS_Stage2
 
 	jsr TitleShiftDown       ; Shift Pixels down
 
-	; We got here in one of 2 ways:
-	; 1) From Title Logo being displayed (with green underlines)
-	; 2) From a SELECT/OPTION choice where the underlines are faded 
-	;    to match the yellow background.
-	; Therefore, fade the green underlines to yellow only when they are not already faded out.
-	lda COLPF0_TABLE+8          ; Get current underline color.
-	cmp TITLE_UNDERLINE_FADE    ; Is it already the target color (from the fading table)?
-	beq bETS_SkipFadeUnderlines ; Already faded to yellow, do nothing.
-	ldx EventCounter            ; Get the counter
-	lda TITLE_UNDERLINE_FADE,x  ; Get the new color based on the counter (6, 5, 4, 3, 2, 1 0.)
-	sta COLPF0_TABLE+8          ; Update underlines color.
+	ldx EventCounter         ; Get the counter
+	jsr FadeTitleUnderlines  ; Fade (or not) the green underlines to yellow.
 
-bETS_SkipFadeUnderlines
 	dec EventCounter         ; Decrement number of times this is done.
 	bmi bETS_Stage2_ToStage3 ; When it is done, go to stage 3. 
 

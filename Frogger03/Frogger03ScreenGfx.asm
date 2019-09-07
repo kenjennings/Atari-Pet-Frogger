@@ -438,6 +438,37 @@ bTR_LoopRandomTitle
 
 
 ; ==========================================================================
+; FADE TITLE UNDERLINES
+; ==========================================================================
+; Table lookup from a list of colors and assign to the underline pixels 
+; on the title screen.  This is used to transition from the PET FROGGER 
+; title to the OPTION/SELECT text as the text produced for feedback will 
+; NOT line up with the regular title's underlines.
+;
+; We got here in one of 2 ways:
+; 1) From Title Logo being displayed (with green underlines)
+; 2) From a SELECT/OPTION choice where the underlines are 
+;    already faded to match the yellow background.
+; Therefore, fade the green underlines to yellow only when 
+; they are not already faded out.  (Extra comparison up front.)
+;
+; X is the counter to use for fetching a new color from the table.
+; --------------------------------------------------------------------------
+
+FadeTitleUnderlines
+
+	lda COLPF0_TABLE+9          ; Get current underline color.
+	cmp TITLE_UNDERLINE_FADE    ; Is it already the target color (from the fading table)?
+	beq bFTU_End                ; Already faded to yellow, do nothing.
+
+	lda TITLE_UNDERLINE_FADE,x  ; Get the new color based on the counter (6, 5, 4, 3, 2, 1 0.)
+	sta COLPF0_TABLE+9          ; Update underlines color.
+
+bFTU_End
+	rts
+
+
+; ==========================================================================
 ; COPY SCORE TO SCREEN
 ; ==========================================================================
 ; Copy the score from memory to screen positions.
@@ -2350,7 +2381,7 @@ TitleSetOrigin
 
 	ldx #5
 
-bTSO_loop
+bTSO_Loop
 	ldy TITLE_LMS_OFFSET,x  ; Get LMS offset
 
 	lda TITLE_LMS_ORIGIN,x  ; Get low byte for this line of the scrolling buffer
@@ -2358,7 +2389,7 @@ bTSO_loop
 	sta TT_LMS0,y           ; Update LMS with low byte to TITLE. 
 
 	dex                     ; next line
-	bpl bTSO_loop           ; Reached the end?
+	bpl bTSO_Loop           ; Reached the end?
 
 	ldx #0
 	stx TitleHSCROL         ; Zero the fine scroll while we're here
@@ -2723,11 +2754,11 @@ libPmgAllZero
 	lda #$00                ; 0 position
 	ldx #$03                ; four objects, 3 to 0
 
-bLoopZeroPMSpecs
+bAZ_LoopZeroPMSpecs
 	sta SIZEP0,x            ; Player width 3, 2, 1, 0
 	sta PCOLOR0,x           ; And black the colors.
 	dex
-	bpl bLoopZeroPMSpecs
+	bpl bAZ_LoopZeroPMSpecs
 
 	sta SIZEM
 
@@ -2752,14 +2783,14 @@ libPmgClearBitmaps
 	lda #$00
 	tax      ; count 0 to 255.
 
-bCBloop
+bCB_Loop
 	sta MISSILEADR,x ; Missiles
 	sta PLAYERADR0,x  ; Player 0
 	sta PLAYERADR1,x  ; Player 1
 	sta PLAYERADR2,x  ; Player 2
 	sta PLAYERADR3,x  ; Player 3
 	inx
-	bne bCBloop       ; Count 1 to 255, then 0 breaks out of loop
+	bne bCB_Loop      ; Count 1 to 255, then 0 breaks out of loop
 
 	rts
 
@@ -3031,43 +3062,43 @@ ExitCheckRideTheBoat
 
 EraseShape
 
-	lda FrogShape       ; Current shape?
-	beq ExitEraseShape  ; 0 is off. Nothing to Erase.
+	lda FrogShape          ; Current shape?
+	beq bES_ExitEraseShape ; 0 is off. Nothing to Erase.
 
 	; Note that if there is animation here is where the frame change 
 	; would be evaluated to be followed by the position check if the 
 	; frame does not change.
 
-	ldy FrogUpdate     ; If -1, then update/erase is mandatory.
-	bmi bes_Test1
+	ldy FrogUpdate         ; If -1, then update/erase is mandatory.
+	bmi bES_Test1
 
-	cmp FrogNewShape   ; Is it different from the old shape?
-	bne bes_Test1      ; Yes.  Erase is mandatory.
+	cmp FrogNewShape       ; Is it different from the old shape?
+	bne bES_Test1          ; Yes.  Erase is mandatory.
 
-	ldy FrogNewPMY     ; Get new position.
-	cpy FrogPMY        ; Is it the same as the old position?
-	beq ExitEraseShape ; Yes.  Nothing to erase here.
+	ldy FrogNewPMY         ; Get new position.
+	cpy FrogPMY            ; Is it the same as the old position?
+	beq bES_ExitEraseShape ; Yes.  Nothing to erase here.
 
-bes_Test1
+bES_Test1
 	cmp #SHAPE_FROG
-	bne bes_Test2
+	bne bES_Test2
 	jsr EraseFrog
-	jmp ExitEraseShape
+	jmp bES_ExitEraseShape
 
-bes_Test2
+bES_Test2
 	cmp #SHAPE_SPLAT
-	bne bes_Test3
+	bne bES_Test3
 	jsr EraseSplat
-	jmp ExitEraseShape
+	jmp bES_ExitEraseShape
 
-bes_Test3
+bES_Test3
 	cmp #SHAPE_TOMB
-	bne ExitEraseShape
+	bne bES_ExitEraseShape
 	jsr EraseTomb
 
 ; Do not change FrogShape to FrogNewShape.   
 ; Drawing a new shape will transition New to Current.
-ExitEraseShape
+bES_ExitEraseShape
 	lda FrogShape  ; return with value for caller.
 
 	rts
@@ -3089,7 +3120,7 @@ EraseGameBorder
 
 	ldx #178
 
-begb_LoopFillBorder
+bEGB_LoopFillBorder
 	lda #$00
 	sta PLAYERADR3+BORDER_OFFSET,x
 	
@@ -3098,7 +3129,7 @@ begb_LoopFillBorder
 	sta MISSILEADR+BORDER_OFFSET,x
 
 	dex
-	bne begb_LoopFillBorder
+	bne bEGB_LoopFillBorder
 
 	rts
 
@@ -3115,7 +3146,7 @@ EraseTomb
 	ldx FrogPMY      ; Old  Y
 	ldy #22
 
-bLoopET_Erase
+bET_LoopErase
 	sta PLAYERADR0,x ; main  1
 	sta PLAYERADR1,x ; main  2
 	sta PLAYERADR2,x ; 
@@ -3123,7 +3154,7 @@ bLoopET_Erase
 	sta MISSILEADR,x ; 
 	inx
 	dey
-	bpl bLoopET_Erase
+	bpl bET_LoopErase
 
 	rts
 
@@ -3139,13 +3170,13 @@ EraseSplat
 	lda #0
 	ldx FrogPMY        ; Old frog Y
 	ldy #10
-	
-bLoopES_Erase
+
+bES_LoopErase
 	sta PLAYERADR0,x   ; splat 1
 	sta PLAYERADR1,x   ; splat 2
 	inx
 	dey
-	bpl bLoopES_Erase
+	bpl bES_LoopErase
 
 	rts
 
@@ -3161,14 +3192,14 @@ EraseFrog
 	lda #0
 	ldx FrogPMY       ; Old frog Y
 	ldy #10
-	
-bLoopEF_Erase
+
+bEF_LoopErase
 	sta PLAYERADR0,x  ; main frog 1
 	sta PLAYERADR1,x  ; main frog 2, mouth, pupil
 	sta PLAYERADR2,x  ; eyeball
 	inx
 	dey
-	bpl bLoopEF_Erase
+	bpl bEF_LoopErase
 
 	rts
 
@@ -3186,34 +3217,34 @@ DrawShape
 
 	ldy FrogUpdate        ; Is update mandatory?
 	bmi ExitDrawShape     ; Update is forced off.
-	beq bds_CheckInMotion ; Update is neutral.
-	bpl bds_Test1         ; FrogUpdate >0 means redraw is required.
+	beq bDS_CheckInMotion ; Update is neutral.
+	bpl bDS_Test1         ; FrogUpdate >0 means redraw is required.
 	
 	; Note that if there is animation here is where the frame change 
 	; would be evaluated to be followed by the position check if the 
 	; frame does not change.
 
-bds_CheckInMotion
+bDS_CheckInMotion
 	cmp FrogShape          ; Is it different from the old shape?
-	bne bds_Test1          ; Yes.  Redraw is mandatory.
+	bne bDS_Test1          ; Yes.  Redraw is mandatory.
 
 	ldy FrogNewPMY         ; Get new position.
 	cpy FrogPMY            ; Is it the same as the old position?
 	beq ExitDrawShape      ; Yes.  Nothing to draw here.
 
-bds_Test1
+bDS_Test1
 	cmp #SHAPE_FROG
-	bne bds_Test2
+	bne bDS_Test2
 	jsr DrawFrog
 	jmp ExitDrawShape
 
-bds_Test2
+bDS_Test2
 	cmp #SHAPE_SPLAT
-	bne bds_Test3
+	bne bDS_Test3
 	jsr DrawSplat
 	jmp ExitDrawShape
 
-bds_Test3
+bDS_Test3
 	cmp #SHAPE_TOMB
 	bne ExitDrawShape
 	jsr DrawTomb
@@ -3238,7 +3269,7 @@ ExitDrawShape
 DrawGameBorder
 
 	ldx #178
-bdgb_LoopFillBorder
+bDGB_LoopFillBorder
 	lda #$C0
 	sta PLAYERADR3+BORDER_OFFSET,x
 
@@ -3247,7 +3278,7 @@ bdgb_LoopFillBorder
 	sta MISSILEADR+BORDER_OFFSET,x
 
 	dex
-	bne bdgb_LoopFillBorder
+	bne bDGB_LoopFillBorder
 
 	rts
 
@@ -3262,8 +3293,8 @@ DrawTomb
 
 	ldx FrogNewPMY            ; New frog Y
 	ldy #22
-	
-bLoopDT_DrawTomb
+
+bDT_LoopDrawTomb
 	lda PLAYER0_GRAVE_DATA,y
 	sta PLAYERADR0+22,x
 
@@ -3281,7 +3312,7 @@ bLoopDT_DrawTomb
 
 	dex
 	dey
-	bpl bLoopDT_DrawTomb
+	bpl bDT_LoopDrawTomb
 
 	rts
 
@@ -3297,7 +3328,7 @@ DrawSplat
 	ldx FrogNewPMY
 	ldy #10
 	
-bLoopDS_DrawSplatFrog
+bDS_LoopDrawSplatFrog
 	lda PLAYER0_SPLATTER_DATA,y
 	sta PLAYERADR0+10,x
 
@@ -3306,7 +3337,7 @@ bLoopDS_DrawSplatFrog
 
 	dex
 	dey
-	bpl bLoopDS_DrawSplatFrog
+	bpl bDS_LoopDrawSplatFrog
 
 	rts
 
@@ -3322,7 +3353,7 @@ DrawFrog
 	ldx FrogNewPMY            ; New frog Y
 	ldy #10
 
-bLoopDF_DrawFrog
+bDF_LoopDrawFrog
 	lda PLAYER0_FROG_DATA,y
 	sta PLAYERADR0+10,x
 
@@ -3331,7 +3362,7 @@ bLoopDF_DrawFrog
 
 	dex
 	dey
-	bpl bLoopDF_DrawFrog
+	bpl bDF_LoopDrawFrog
 
 	; Player 2 is the eyeball whites
 	ldx FrogNewPMY             ; Reload new frog Y
@@ -3374,24 +3405,24 @@ PositionShape
 	cpy FrogPMX            ; Is it the same as the old position?
 	beq ExitPositionShape  ; Yes.  Nothing to draw here.
 
-bps_Test0
+bPS_Test0
 	cmp #SHAPE_OFF
-	bne bps_Test1
+	bne bPS_Test1
 	jmp ExitPositionShape
 
-bps_Test1
+bPS_Test1
 	cmp #SHAPE_FROG
-	bne bps_Test2
+	bne bPS_Test2
 	jsr PositionFrog
 	jmp ExitPositionShape
 
-bps_Test2
+bPS_Test2
 	cmp #SHAPE_SPLAT
-	bne bps_Test3
+	bne bPS_Test3
 	jsr PositionSplat
 	jmp ExitPositionShape
 
-bps_Test3
+bPS_Test3
 	cmp #SHAPE_TOMB
 	bne ExitPositionShape
 	jsr PositionTomb
@@ -3523,7 +3554,7 @@ UpdateShape
 
 	jsr EraseShape       ; Remove old shape at the old vertical Y position.
 	lda FrogUpdate        
-	bpl b_usRedrawShape  ; >0 = continue   
+	bpl bUS_RedrawShape  ; >0 = continue   
 
 	lda #SHAPE_OFF       ; <0 = stop, so stop doing things after the erase.
 	sta FrogUpdate       ; Erased above, therefore stop everything further.
@@ -3531,7 +3562,7 @@ UpdateShape
 	sta FrogShape
 	beq ExitUpdateShape
 
-b_usRedrawShape
+bUS_RedrawShape
 	jsr DrawShape        ; Draw NEW shape at new vertical Y position.
 	jsr PositionShape    ; Move shape to new horizontal X position. (and set sizes).
 
