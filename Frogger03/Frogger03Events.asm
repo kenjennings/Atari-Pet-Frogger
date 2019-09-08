@@ -243,6 +243,9 @@ EventTitleScreen
 
 ; =============== Stage 0      ; Animating Title only while sound runs
 
+	lda TITLE_UNDERLINE_FADE+6
+	sta COLPF0_TABLE+9
+
 	lda SOUND_CONTROL3         ; Is channel 3 busy?
 	beq bETS_EndTitleAnimation ; No. Stop the title animation.
 
