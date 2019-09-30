@@ -20,13 +20,13 @@ Version 03, July 2019 continues to maintain the same game play in the same forma
 
 **What kind of game is Pet Frogger?**
 
-The original author describes it as Frogger-like.  (Frogger was a new game in arcades when he wrote the Pet Frogger game.) Frogger provides a myriad of enemies and environmental hazards.  Consequently, objects in Frogger are much slower moving and the Frog can be controlled in all four directions.
+The original author describes it as Frogger-like.  (Frogger was a new game in arcades when he wrote the Pet Frogger game.)  The arcade Frogger provides a myriad of enemies and environmental hazards.  Consequently, objects in Frogger are much slower moving and the Frog can be controlled in all four directions.
 
 Comparing the two, Pet Frogger is more simple than Frogger: The Frog moves only forward, left and right.  There is never a place to move the frog in the down direction. The lethal hazards are the rivers, fore and aft boat positions, and sitting in a boat when the Frog's position would move off screen.  The beaches between rivers are indefinitely safe, and the seats in the boats are safe (again, unless the frog leaves the screen while on a boat.)  The difficulty lies in the progressive speed increases of the boats to the point where it becomes a twitch game faster than typical human reflexes.  
 
-This is also similar to another game, Freeway from Activision.  Freeway is the original Crossy-Road where the goal is to get chickens to the other side of the road in a limited amount of time while avoiding horizontally moving traffic.  In this case there is nothing strictly lethal.  Traffic can move fast, but hitting an object merely slows the chickens' progress by momentarily knocking the chicken backwards after which it can continue.  This appears visually more similar to Pet Frogger than the Frogger game.
+This is also similar to another game, Freeway, from Activision.  Freeway is the original Crossy-Road where the goal is to get chickens to the other side of the road in a limited amount of time while avoiding horizontally moving traffic.  In this case there is nothing strictly lethal.  Traffic can move fast, but hitting an object merely slows the chickens' progress by momentarily knocking the chicken backwards after which it can continue.  Freeway appears visually more similar to Pet Frogger than the arcade Frogger game.
 
-Pet Frogger is also similar to some early arcade games (electro-mechanical, and early video games) where the goal is to accomplish a physical skill as many times as possible within a fixed amount of time.  Though, Pet Frogger has no time pressure which reduces the stress level of executing the frog boat-boarding skill at high speed. 
+Pet Frogger is also similar to early arcade games (the electro-mechanical types, and some early video games).  Many of these games' objective is to accomplish a simple physical skill as many times as possible within a fixed amount of time.  all we're doing here is jumping forward to hopefully safe places.  Though, Pet Frogger has no time pressure which reduces the stress level of executing the frog's boat-boarding skill at high speed. 
 
 ---
 
