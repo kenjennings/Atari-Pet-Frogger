@@ -8,7 +8,7 @@ The OldSkoolCoder YouTube channel is here:  https://www.youtube.com/channel/UCtW
 
 OldSkoolCoder's PET FROGGER video is here:  https://www.youtube.com/watch?v=xPiCUcdOry4
 
-This repository is for the Pet Frogger game ported to the Atari 8-bit computers.  Further revisions may implement Atari-esque styled enhancements to the game as I have time and interest.
+This repository is for the Pet Frogger game ported to the Atari 8-bit computers.  The initial version is a direct port with as few changes possible to make the game function on the Atari the same as the Pet.  The focus of successive revisions is to maintain the play mechanics as close as possible to the original game while introducing optimizations and graphics enhancements to the game.
 
 ---
 
@@ -32,13 +32,11 @@ As much of the original PET 4032 assembly code is used as possible.  In most pla
 
 [![V01 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger01/V01_Composite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01/README_V01.md)
 
-Reorganized, rewritten, and refactored to implement modular code.  The game structure is remade into an event-like loop driven by monitoring video frame changes.
+Reorganized, rewritten, and refactored to modularize the code.  This is done to facilitate enhancements for future versions.  The game structure is remade into an event-like loop driven by monitoring video frame changes.  Yes, there still is no sound.
 
 The reorganization made it easier to add new, "graphics" displays for dead frog, saved frog, and game over as well as animated transitions between the screens.  Driving off the vertical blank for timing eliminated the CPU loop used for delays.
 
-Other than the timer control routine monitoring for vertical blank changes there is nothing very Atari-specific going on here, and this could be ported back to the Pet 4032 provided character and keyboard code values are turned back into the values for the Pet.
-
-Yes, there still is no sound.
+Although the code is substantially modified from the original, the only thing going on that is Atari-specific is the timer control routine monitoring for vertical blank changes.  (I could not identify a way to do this on the Pet.)  Aside from this feature the entire code could be ported back to the Pet 4032.  (Character and keyboard code values would also need to be turned back into the Pet's values.)
 
 ---
 
@@ -46,24 +44,39 @@ Yes, there still is no sound.
 
 [![V02 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger02/V02_Composite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02/README_V02.md)
 
-Version 02 continues to maintain the same game play in the same format as prior version.  The screen display is still the plain text mode (ANTIC mode 2, OS Text Mode 0) and frog movement is the size of a character.  Everything else about the game working and operation has been Atari-fied.
+Version 02 continues to maintain the same game play in the same format as prior version.  The screen display is still the plain text mode (ANTIC mode 2, OS Text Mode 0) and frog movement is the size of a character.  
 
-Short version: The game now uses joystick input instead of the keyboard, animated color is applied to the custom screens, and a redefined character set provides a frog and boats that look more like a frog and boats.  
-
-By the way, there is now sound and "music" (minimally).
+More of the game's internal operations and display parts have been Atari-fied.  Short version: There is now sound and music (minimally), the game uses joystick input instead of the keyboard, animated color is applied to the custom screens, and a redefined character set provides a frog and boats that look more like a frog and boats.
 
 ---
 
-**Version 03 PET FROGGER -- WORK^H^H^H^H CONTEMPLATION IN PROGRESS**
-
 [Version 03 PET FROGGER](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03/README_V03.md "Version 03 Atari PET FROGGER") 
 
-**More to come? Or Not?**
+[![V02 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_Composite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03/README_V03.md)
+
+** Still Work In Progress***
+
+!!! Note, the current executable is a setup for playtesters and does not implement the difficulty arrangement expected in the final version. !!!
+ 
+Version 03 maintains the same game play and overall screen layout as the prior version.  The same number of lines of boats appear on the display.  Within this limit the graphics are significantly enhanced.  
+
+The game graphics are changed to multi-color text (ANTIC mode 4, 5 colors), the boats are built of redefined characters with animated water parts.  Also, the boats now fine-scroll for movement.
+
+Player/Missile graphics are used now for the Frog, and for various other display enhancements on the screens. 
+
+OPTION and SELECT can be used on the Title screen to change the difficulty level, and the number of Frog lives.
+
+---
+
+**More to come in V4? Or Not?**
 
 **??????????????????**
 
-Uh, Oh...   What's happening here...
+The version V03 Playtesters suggest objects other than boats on the scrolling lines.   Also, boats that sink could be an interesting obstacle.
 
-[![V03 Proto](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_NewProtoTitle2.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03/README_V03.md)
+These kinds of changes would vastly affect how the boat lines are represented in memory which then cascades into a number of other major code reorganizations.   We'll see. 
+
+**??????????????????**
+
 
 ---
