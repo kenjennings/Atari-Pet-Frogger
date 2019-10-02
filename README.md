@@ -54,7 +54,7 @@ More of the game's internal operations and display parts have been Atari-fied.  
 
 [![V03 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_NewProtoTitle2.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03/README_V03.md)
 
-** Still Work In Progress***
+**Currently Work In Progress**
 
 !!! Note, the current executable is a setup for playtesters and does not implement the difficulty arrangement expected in the final version. !!!
  
