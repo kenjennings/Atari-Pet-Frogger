@@ -92,7 +92,7 @@ I generally build in eclipse from the WUDSN ide.  WUDSN can be found here: https
 
 ---
 
-**Version 03, July 2019 notable changes **
+**Version 03, August 2019 notable changes **
 
 **Summary: Major display reworking**
 
