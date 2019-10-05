@@ -38,7 +38,7 @@ Title Screen:
 
 Press OPTION to choose Level:
 
-[![Level Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_SetLevel_700.png "Game Screen")](#features2)
+[![Level Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_LevelUp_700.png "Game Screen")](#features2)
 
 Press SELECT to choose Lives:
 
