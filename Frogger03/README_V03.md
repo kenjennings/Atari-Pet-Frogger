@@ -36,25 +36,29 @@ Title Screen:
 
 [![Title Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_Title.png "Title Screen")](#features1)
 
+Press OPTION to choose Level:
+
+[![Level Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_SetLevel_700.png "Game Screen")](#features2)
+
+Press SELECT to choose Lives:
+
+[![Lives Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_SetLives_700.png "Game Screen")](#features2)
+
 Game Screen:
 
-[![Game Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_Game.png "Game Screen")](#features2)
-
-Dying Frog!
-
-[![Dying Frog!](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_Dying.png "Dying Frog!")](#features3)
+[![Game Screen](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_Game_700.png "Game Screen")](#features2)
 
 You're Dead!
 
-[![You Died!](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_Dead.png "Dead Frog!")](#features3)
+[![You Died!](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_DeadFrog_700.png "Dead Frog!")](#features3)
 
 Saved a Frog!
 
-[![Frog Saved!](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_Saved.png "Saved a Frog!")](#features4)
+[![Frog Saved!](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_SavedFrog_700.png "Saved a Frog!")](#features4)
 
 Game Over:
 
-[![Game Over](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_GameOver.png "Game Over")](#features5)
+[![Game Over](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_GameOver_700.png "Game Over")](#features5)
 
 ---
 
