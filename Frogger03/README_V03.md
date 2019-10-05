@@ -118,9 +118,9 @@ Since the supporting code makes frog Player placement on the screen trivial, the
 
 And since the Frog flight path animation was already easily established, this is re-used to animate the flying tombstone on the Game Over display.  The tombstone is a fairly large object made of several Players and Missiles, 15 color clocks across, and 23 scan lines tall.  It displays "RIP" text and a shadowed side for perspective.
 
-On the surface it seems like these animated objects above are the only use of Player/Missile graphics.  However, Player/Missile graphics also appear in some non-obvious ways.  Player/Missile graphics create the Game display's black borders on the left and right sides.  Due to the character/color gymnastics done for the game's playfield, the color used for the background is not always consistent with the rest of the horizontal line. These borders hide the background color transitions making a cleaner visual presentation.
+On the surface it seems like these animated objects above are the only use of Player/Missile graphics.  However, Player/Missile graphics also appear in some non-obvious ways.  Player/Missile graphics create the Game display's black borders on the left and right sides.  Due to the character/color gymnastics done for the game's playfield, the color used for the background is not always consistent with the rest of the horizontal line. The left and right borders made from Players hide the background color transitions making a cleaner visual presentation.
 
-On the Title and Game displays Player/Missile graphics provide the four text labels for scores (SCORE and HI), frogs remaining (FROGS), and frogs saved (SAVED).  As these use different color registers from the playfield, they can be colored, flashed, and strobed separately from other objects on the same line.  The Player/Missile pixels are the same size as pixels in ANTIC Text Mode 4 (one color clock wide and one scan line tall), thus the "text" appears to look just like a presentation of Text Mode 4.
+On the Title and Game displays Player/Missile graphics provide the four text labels for scores (SCORE and HI), frogs remaining (FROGS), and frogs saved (SAVED).  As these use different color registers from the playfield, they can be colored and flashed separately from other objects on the same line.  The Player/Missile pixels are the same size as pixels in ANTIC Text Mode 4 (one color clock wide and one scan line tall), thus the "text" appears to be Text Mode 4.
 
 **Custom character set**
 
@@ -140,7 +140,7 @@ The Game screen is where most of the new activity occurs.  The game playfield is
 
 All screens are presented as custom Display Lists with the Display Lists and screen memory assembled directly where they will be used.  Therefore, there is very little screen redrawing.  Switching between display screens is nearly instantaneous, which is accomplished by merely updating the system's Display List pointer.  In fact, screen switching is so fast that transitions are added (splash screens and intentional delays) to allow the user time to recover from pressing the trigger so that the same button press is not accepted as input on the following screen.
 
-The Title and Game displays are specific custom Display Lists.  The giant Title text is Map Mode 9 pixels allowing complete palette control over the background and the pixels.  The Title animation is done by a simple exclusive OR of a random value masked with the static image of the title.  This piece of screen memory is one of the limited areas that experience redrawing in screen memory.
+The Title and Game displays are specific custom Display Lists.  The giant Title text is Map Mode 9 pixels allowing complete palette control over the background and the pixels.  The Title animation is done by a simple exclusive OR of a random value masked with the static image of the title.  This piece of screen memory is one of the limited areas that experience redrawing and updates.
 
 The Title graphics lines are also used to provide visible feedback to the user when pressing *OPTION* or *SELECT* to change the number of Frog lives and the starting difficulty of the game.  The new value is displayed as giant text scrolling onto the screen.  After a few seconds the animation to return the Title occurs.
 
@@ -148,7 +148,7 @@ The three splash screens (Saved Frog, Dead Frog, Game Over) share a common Displ
 
 On the Game screen Boats move by fine scrolling and coarse scrolling via LMS updates in the Display List -- No redrawing of the boats occurs at all.  Fine scrolling and the necessary coarse scrolling is such low overhead on the Atari that all the scrolling work is done during the vertical blank.  The Game display needs extra time for Display lists in places and there is a need for cosmetic matching between lines while supplying that space, so there are some blank lines and Map Mode C lines inserted strategically in the Game Display List. 
 
-Since the frog is now Player/Missile graphics and there is no frog moving through screen memory, there no longer needs to be separate screen memory for every row of boats.  There is now just one line of screen memory for boats moving left and one line of screen memory for boats moving right.  This reduces memory by 800 bytes (10 lines * 80), close to 10% of the final size of Version 02.  All the lines in the given direction refer to the same screen memory, but have different colors, and scroll values, so that they all appear to be different screen objects.
+Since the frog is now Player/Missile graphics and there is no frog moving through screen memory, there no longer needs to be separate screen memory for every row of boats.  There is now just one line of screen memory for boats moving left and one line of screen memory for boats moving right.  This reduces memory by 800 bytes (10 lines * 80), close to 10% of the final size of Version 02.  All the lines in the given direction refer to the same screen memory, but have different colors and scroll values, so that they all appear to be different screen objects.
 
 All five Display Lists jump to one of two places in one common Display List to end the display.  The Game display jumps to the point showing the final fine scrolling credits at the bottom of the screen.  All other displays jump to a prior point showing the text line prompting the user for input which is followed by the fine scrolling credits line.  Having one set of Display List instructions simplifies the code needed to support the prompt line and the fine scrolling credits.
 
@@ -164,21 +164,17 @@ Where Player/Missiles are used their horizontal positions have to be set and the
 
 Additionally, an animated Player/Missile image also appears on the Game Over display, so this display must position Players/Missiles for the character, but not position them for the text labels at the top of the screen.  Since, Player/Missile graphics do not have shadow registers the text at the top of the display must be purposely removed by a DLI that sets 0 positions for the objects.  
 
-The Game screen requires a few custom routines to properly change colors for each line of boats and beaches.  Horizontal scrolling changes the DMA timing on line which affects the time available for the DLI, so some visible changes by DLIs would move up and down to different lines. This required adding blank lines and Mode C lines that accomplish several purposes:
+The Game screen requires a few custom routines to properly change colors for each line of boats and beaches.  Horizontal scrolling changes the DMA timing on the line which affects the time available for the DLI, so some visible changes by DLIs would move up and down to different lines. This required adding blank lines and Mode C lines that accomplish several purposes:
 - Proper timing to start the DLIs.
 - Additional time for setting all the color registers.
 - Extra lines needed to support the height of the frog. 
-
-
-
 
 
 **Vertical Blank Interrupts**
 
 The Atari's indirection abilities allow several things to be managed in the game just by writing a couple bytes to hardware registers.  This relieves the overhead for animating the display.  It reduces overhead so much that the majority of the game and display updates are executed during the vertical blank.
 
-
-The credits  Fine scrolling the credits scrolling line.  It operates continuously during the vertical blank.  Looks most slick.  Someone may mistake me for a professional.
+The credits line is continuously fine-scrolled no matter what is happening on the rest of the screen.  This ine done during the vertical blank.  Looks most slick.  Someone may mistake me for a professional.
 
 
 **Other lame sound effects.**
@@ -189,9 +185,11 @@ Doubled the speed for Ode To Joy.  It was taking too long to play at normal spee
 
 The actual funeral dirge for the dead frog is abbreviated to relieve some tedium.  Also, most people don't recognize the song's initial bars and found them odd sounding, so that was another reason I eliminated them.
 
+
 **Joystick control.** 
 
 Joystick control is the same as V02, but the idiotic, repetitive, bit-bashing code to eliminate invalid input combinations has been replaced with a lookup table to convert raw joystick input into the cooked, final joystick input.  Derp. 
+
 
 **To Be Continued... V04??**
 
