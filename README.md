@@ -52,7 +52,7 @@ More of the game's internal operations and display parts have been Atari-fied.  
 
 [Version 03 PET FROGGER](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03/README_V03.md "Version 03 Atari PET FROGGER") 
 
-[![V03 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_NewProtoTitle2.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03/README_V03.md)
+[![V03 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_Composite_700.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03/README_V03.md)
 
 **Currently Work In Progress**
 
