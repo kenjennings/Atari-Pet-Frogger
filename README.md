@@ -60,9 +60,9 @@ More of the game's internal operations and display parts have been Atari-fied.  
  
 Version 03 maintains the same game play and overall screen layout as the prior version.  The same number of lines of boats appear on the display.  Within this limit the graphics are significantly enhanced.  
 
-The game graphics are changed to multi-color text (ANTIC mode 4, 5 colors), the boats are built of redefined characters with animated water parts.  Also, the boats now fine-scroll for movement.
+The game graphics are changed to multi-color text (ANTIC mode 4, 5 colors), the boats are built of redefined characters with animated water parts.  Also, the boats fine-scroll for movement.
 
-Player/Missile graphics are used now for the Frog, and for various other display enhancements on the screens. 
+Player/Missile graphics are used for the Frog, and for various other display enhancements on the screens. 
 
 OPTION and SELECT can be used on the Title screen to change the difficulty level, and the number of Frog lives.
 
