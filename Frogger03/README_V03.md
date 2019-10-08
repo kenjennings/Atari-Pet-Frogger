@@ -126,39 +126,41 @@ On the Title and Game displays Player/Missile graphics provide the four text lab
 
 The V03 game, like V02, uses the same, single, custom character set for all displays. This provides characters for display in ANTIC Text modes 2 (2 color) and 4 (5 color).
 
-The A-Z/a-z/0-9, and basic punctuation for the Instruction text on the Title display, the scrolling credits on all displays, and the scores on the Title and Game displays.
+The A-Z/a-z/0-9, and basic punctuation for the Instruction text remain for the text directions on the Title display, the scrolling credits on all displays, and the scores on the Title and Game displays.
 
-The Atari graphics control characters that were used in V02 as the pixels to create the giant text appearing on the Title screen and the various splash screens are no longer used for this purpose.  This is replaced in V03 with Map Mode 9 graphics that provide the same sized pixels with more color control using less memory.
+Version V02 uses Atari graphics control characters as "pixels" creating the giant text on the Title and splash screens.  Version V03 replaces these with Map Mode 9 graphics that provide the same sized pixels with more color control using less memory.   Antic Mode 2 used for graphics requires 8 scan lines per line which provides two vertical pixels.  Antic Mode 9 graphics lines use 4 scan lines for one line of pixels.  This means blank lines the same size as the pixel lines are also only 4 scan lines tall.  This means twice as many opportunities for display list interrupts to change colors for the lines, and so twice as many color changes.
 
-The characters providing colors in V02 via NTSC artifacts for Score and Frog lives labels are no longer used.  The artifacts don't work right on PAL and many modern digital/LED monitors.  These characters are now displayed in V03 using Player/Missile graphics discussed earlier.
+The characters in V02 providing colored Score and Lives labels do so via NTSC artifacts.  However, the artifacts don't work right on PAL and many modern digital/LED monitors.  These characters are now displayed in V03 using Player/Missile graphics discussed earlier.
 
-The V02 Frog and Splattered Frog characters are replaced in V03 with Player/Missile graphics objects.
+The V02 Frog and Splattered Frog characters are not used, since V03 replaces these with Player/Missile graphics objects.
 
-The Game screen is where most of the new activity occurs.  The game playfield is primarily 5-color, Text Mode 4 lines.  The character set provides several multi-color characters for drawing the safe beach/land, and the water/waves, and boats moving left and right.  Part of the movement is simply the result of scrolling the lines (waves "move" by fine scrolling with the boats.)  Additional animation is performed by changing character images depicting moving water at the bow and behind the engines of the boats. This animation does not occur by changing the characters of the boats, but by re-writing the bitmap in the character set for each character, so changing the image of one character in the redefined character set then changes it for all 24 occurrences of the character visible on the display.
+The Game screen is where most of the new activity occurs.  The game playfield is primarily 5-color, Antic Text Mode 4 lines.  The character set provides several multi-color characters for drawing the safe beach/land, and the water/waves, and boats moving left and right.  Part of the movement is simply the result of scrolling the lines (waves "move" by fine scrolling with the boats.)  Additional animation is performed by changing character images depicting moving water at the bow and behind the engines of the boats. This animation does not occur by changing the characters of the boats, but by re-writing the bitmap in the character set for each character, so changing the image of one character in the redefined character set then changes it for all 24 occurrences of the character visible on the display.
 
 **Playfield Graphics Handling.**
 
-All screens are presented as custom Display Lists with the Display Lists and screen memory assembled directly where they will be used.  Therefore, there is very little screen redrawing.  Switching between display screens is nearly instantaneous, which is accomplished by merely updating the system's Display List pointer.  In fact, screen switching is so fast that transitions are added (splash screens and intentional delays) to allow the user time to recover from pressing the trigger so that the same button press is not accepted as input on the following screen.
+The V02 game has a one-size-fits all display list for all screens.  V03 has different display lists for the Title screen, the Game screen, and then one Display List used by the three other splash screens for Saved Frog, Dead Frog, and Game Over. 
+
+All screens are presented with the custom Display Lists and screen memory assembled directly where they will be used.  Therefore, there is very little screen redrawing or display setup.  Switching between display screens is nearly instantaneous, which is accomplished by merely updating the system's Display List pointer.  In fact, screen switching is so fast that transitions are added (splash screens and intentional delays) to allow the user time to recover from pressing the trigger so that the same button press is not accepted as input on the following screen.
 
 The Title and Game displays are specific custom Display Lists.  The giant Title text is Map Mode 9 pixels allowing complete palette control over the background and the pixels.  The Title animation is done by a simple exclusive OR of a random value masked with the static image of the title.  This piece of screen memory is one of the limited areas that experience redrawing and updates.
 
-The Title graphics lines are also used to provide visible feedback to the user when pressing *OPTION* or *SELECT* to change the number of Frog lives and the starting difficulty of the game.  The new value is displayed as giant text scrolling onto the screen.  After a few seconds the animation to return the Title occurs.
+The Title graphics lines are also used to provide visible feedback to the user when pressing *OPTION* or *SELECT* to change the number of Frog lives and the starting difficulty of the game.  The new value is displayed as giant text scrolling onto the screen.  After a few seconds the animation returning to the Title occurs.
 
-The three splash screens (Saved Frog, Dead Frog, Game Over) share a common Display list.  The giant text is made of Map Mode 9 lines.  The graphics are not changed by redrawing that part of the display, but by simply updating the LMS instruction to point to the related screen memory.  Most of the "animation" on the splash screens are done with color changes by Display List Interrupts.  In V02 the "empty" lines were text modes, but V03 uses regular blank line instructions half the height of the text lines allowing twice as many color changes for animation.
+The three splash screens (Saved Frog, Dead Frog, Game Over) share a common Display list.  The giant text here is also made of Map Mode 9 lines like on the Title screen.  The graphics here are not changed by redrawing that part of the display, but by simply updating the LMS instruction to point to the screen memory holding the desired image.  Most of the "animation" on the splash screens are done with color changes by Display List Interrupts.  In V02 the "empty" lines were text modes, but V03 uses regular blank line instructions half the height of the text lines allowing twice as many color changes for animation.
 
-On the Game screen Boats move by fine scrolling and coarse scrolling via LMS updates in the Display List -- No redrawing of the boats occurs at all.  Fine scrolling and the necessary coarse scrolling is such low overhead on the Atari that all the scrolling work is done during the vertical blank.  The Game display needs extra time for Display lists in places and there is a need for cosmetic matching between lines while supplying that space, so there are some blank lines and Map Mode C lines inserted strategically in the Game Display List. 
+On the Game screen the Boats move by fine scrolling and coarse scrolling via LMS updates in the Display List -- no redrawing of the boats occurs at all.  Fine scrolling and the necessary coarse scrolling is such low overhead on the Atari that all the scrolling work is done during the vertical blank. (In fact, I was so lazy in an earlier iteration that the Boats' fine scrolling ran during every vertical blank even when the Game screen was not displayed.)  The Game display needs extra time for Display lists in places and there is a need for cosmetic matching between lines while supplying that space, so there are some blank lines and Map Mode C lines inserted strategically in the Game Display List. 
 
-Since the frog is now Player/Missile graphics and there is no frog moving through screen memory, there no longer needs to be separate screen memory for every row of boats.  There is now just one line of screen memory for boats moving left and one line of screen memory for boats moving right.  This reduces memory by 800 bytes (10 lines * 80), close to 10% of the final size of Version 02.  All the lines in the given direction refer to the same screen memory, but have different colors and scroll values, so that they all appear to be different screen objects.
+Since the frog is now Player/Missile graphics and there is no frog moving through screen memory, there no longer needs to be separate screen memory for every row of boats.  There is just one line of screen memory for boats moving left and one line of screen memory for boats moving right.  This reduces memory by 800 bytes (10 lines * 80), close to 10% of the final size of Version 02.  All the lines in the given direction refer to the same screen memory, but have different colors and scroll values, so that they all appear to be different screen objects.
 
-All five Display Lists jump to one of two places in one common Display List to end the display.  The Game display jumps to the point showing the final fine scrolling credits at the bottom of the screen.  All other displays jump to a prior point showing the text line prompting the user for input which is followed by the fine scrolling credits line.  Having one set of Display List instructions simplifies the code needed to support the prompt line and the fine scrolling credits.
+All the Display Lists jump to one of two places in another common Display List to end the display.  The Game display jumps to the point showing the final fine scrolling credits at the bottom of the screen.  All other displays jump to a prior point showing the text line prompting the user for input which is followed by the fine scrolling credits line.  Having one set of Display List instructions simplifies the code needed to support the prompt line and the fine scrolling credits.
 
 **Display List Interrupts**
 
 V02 uses essentially the same DLI to change background color and text luminance for each ANTIC Text Mode 2 line on the screen.  V03 uses a substantial amount of custom Display List Interrupts doing much more work.
 
-Display List Interrupts are largely table-driven.  Though there are several kinds of custom behaviors the DLIs still tend to read data from tables based on the occurrence of the DLI on that display.  Additionally, where playfield colors are involved the Display List Interrupts end by pre-loading page 0 locations with the values needed for the next Display List Interrupt. (3 cycles for LDA PageZero v 4 cycles for LDA TABLE,y is enough to make a difference).
+Display List Interrupts are largely table-driven.  Though there are several kinds of custom behaviors the DLIs still tend to read data from tables based on the occurrence of the DLI on that display.  Additionally, where playfield colors are involved the Display List Interrupts end by pre-loading page 0 locations with the values needed for the next Display List Interrupt. (3 cycles for LDA PageZero v 4 cycles for LDA TABLE,y is sometimes enough to make a difference).
 
-On the Title screen the title text is successive lines of Map Mode 9 graphics which is only a 2 color mode.  Each line is colored by a DLI providing new colors for the background and the pixels resulting in a dozen colors for the title.  The DLIs for the Instruction areas provide differnt blocks of color for the background, and varies the text brightness in gradient patterns.  The background colors for pixel and text areas extend straight through the horizontal overscan area.
+On the Title screen the title text is successive lines of Map Mode 9 graphics which is only a 2 color mode.  Each line is colored by a DLI providing new colors for the background and the pixels resulting in a dozen colors for the title.  The DLIs for the Instruction areas provide different blocks of color for the background, and varies the text brightness in gradient patterns.  The background colors for pixel and text areas extend straight through the horizontal overscan area.
 
 Where Player/Missiles are used their horizontal positions have to be set and then changed again to position them where re-used on the display.  The Title and Game displays re-use Players/Missiles multiple times.  The text for the Score labels is the first occurrence, the text for the Frogs and Saved labels is the second, and then the animated Frog image is the third which is used as decoration on the Title display, and as the player's avatar on the Game display.  The register updates for these are mixed with setting the colors for playfield graphics at those points of the display.  
 
@@ -172,23 +174,27 @@ The Game screen requires a few custom routines to properly change colors for eac
 
 **Vertical Blank Interrupts**
 
-The Atari's indirection abilities allow several things to be managed in the game just by writing a couple bytes to hardware registers.  This relieves the overhead for animating the display.  It reduces overhead so much that the majority of the game and display updates are executed during the vertical blank.
+Most of everything that happens on screen is counted, timed, and set by the Vertical Blank interrupt.  The Atari's indirection abilities allow several things to be managed in the game just by writing a couple bytes to hardware registers.  This relieves the overhead for animating the display.  It reduces overhead so much that the majority of the game and display updates are executed during the vertical blank.  The mainline code determines what kind of Player-Frog changes should occur and the Vertical Blank does the work.
 
-The credits line is continuously fine-scrolled no matter what is happening on the rest of the screen.  This ine done during the vertical blank.  Looks most slick.  Someone may mistake me for a professional.
+The credits line is continuously fine-scrolled no matter what is happening on the rest of the screen.  Looks most slick.  Someone may mistake me for a professional.
+
+Boat scrolling and Player/Missile positioning/redraws occur during the vertical blank. 
+
+The sound effects system is the lamest sequencer ever conceived also running during the Vertical Blank.
 
 
 **Other lame sound effects.**
 
-A few more things have audio effects attached to them.  A puttering sound added to simulate boat motors.
+A few more things in V03 have audio effects attached to them.  A puttering sound is added to simulate boat motors.
 
-Doubled the speed for Ode To Joy.  It was taking too long to play at normal speed and starting to sound like a funeral dirge.
+The speed for Ode To Joy is doubled.  It was taking too long to play at normal speed and starting to sound like the funeral dirge.
 
 The actual funeral dirge for the dead frog is abbreviated to relieve some tedium.  Also, most people don't recognize the song's initial bars and found them odd sounding, so that was another reason I eliminated them.
 
 
 **Joystick control.** 
 
-Joystick control is the same as V02, but the idiotic, repetitive, bit-bashing code to eliminate invalid input combinations has been replaced with a lookup table to convert raw joystick input into the cooked, final joystick input.  Derp. 
+Joystick control is the same as V02, but the idiotic, repetitive, bit-bashing code to eliminate invalid input combinations has been replaced with a lookup table to convert raw joystick input into the cooked, final joystick input in as few steps as possible.  Derp. 
 
 
 **To Be Continued... V04??**
@@ -197,11 +203,13 @@ Any other game mechanics and actual play action to change?
 
 - Allow backwards jumps?
 
+- Sinking boats?
+
 - Add timer to limit a frog's turn, or limit the entire game ?
 
-- Add another hazard/enemy object?
+- Add another hazard/enemy object?  Birds?  Gators?
 
-- Change Death into a push back to the previous row.
+- Change Death into a push back to the previous row?
 
 ---
 
