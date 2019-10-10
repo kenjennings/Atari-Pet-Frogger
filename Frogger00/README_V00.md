@@ -2,7 +2,9 @@
 
  PET FROGGER game for Commodore PET 4032 ported to the Atari 8-bit computers
 
-Video of the game play on YouTube: https://youtu.be/Aotkgw6ZSfw   The game has no sound as the original Pet version has no sound.
+Video of the game play on YouTube: https://youtu.be/Aotkgw6ZSfw   
+
+The game has no sound as the original Pet version has no sound.
 
 Title Screen:
 
