@@ -42,7 +42,7 @@ Ported (parodied) to Atari 8-bit computers November 2018 by Ken Jennings (if thi
 
 As much of the PET 4032 code is used as possible. In most places only the barest minimum of changes are made to deal with the differences on the Atari.  Yes, there is no sound.
 
-There are some changes.  Some changes are made to facilitate porting.  Some are necessary given the differences between the Pet and Atari 8-bit computers.  Occasionally, I did optimize something if it looked like there was something obviously wrong with the way something was done.  Sometimes an optimization is not.  Therefore, I don't usually delete code, but comment it out instead, so I can go back to see what was done originally.  Notable changes:
+There are changes.  Some changes are made to facilitate porting.  Some are necessary given the differences between the Pet and Atari 8-bit computers.  Occasionally, I did optimize something if it looked like there was something obviously wrong with the way the code was doing things, but that is not very frequent.   Sometimes an optimization turns out to not be an improvement.  Therefore, I don't usually delete the original code, but instead comment it out, so I can go back to see what was origfinally coded.  Notable changes:
 
 - References to fixed addresses are changed to meaningful labels.  This includes page 0 variables, and score values.
 
