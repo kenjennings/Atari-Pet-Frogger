@@ -42,11 +42,13 @@ Ported (parodied) to Atari 8-bit computers November 2018 by Ken Jennings (if thi
 
 As much of the PET 4032 code is used as possible. In most places only the barest minimum of changes are made to deal with the differences on the Atari.  Yes, there is no sound.
 
-Notable changes:
+There are some changes.  Some changes are made to facilitate porting.  Some are necessary given the differences between the Pet and Atari 8-bit computers.  Occasionally, I did optimize something if it looked like there was something obviously wrong with the way something was done.  Sometimes an optimization is not.  Therefore, I don't usually delete code, but comment it out instead, so I can go back to see what was done originally.  Notable changes:
 
 - References to fixed addresses are changed to meaningful labels.  This includes page 0 variables, and score values.
 
 - Kernel call $FFD2 is replaced with "fputc" subroutine for Atari.
+
+- Excessive chattiness... the source is heavily commented.  Much of it is me talking to myself in my head and trying to figure out what the Pet code was doing.
 
 - The Atari screen is a full screen editor, so cursor movement off the right edge of the screen is different from the Pet requiring an extra "DOWN" character to move the cursor to next lines.
 
