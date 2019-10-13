@@ -77,9 +77,9 @@ Porting to the Atari means understanding how to fit another computer's features 
 - Custom character set.  The Atari's text modes can render the imagery for text characters from anywhere in memory.  The images for characters can be changed simply by pointing to different memory.
 
 - 6 text modes.
--- 2 modes of 40 column text based on the "high resolution" pixels.  This allows monochrome text, plus a border color.  One mode is 8 scan lines tall which is the standard text display on the Atari.  The other is infrequently used and is 10 scan lines tall allowing for lower case descenders if an appropriate custom character set is supplied. 
-- - 2 modes of 40 column text based on the "medium resolution" pixels. This allows up to 5 colors with 4 colors within a single character.
-- - 2 modes of 20 column text based on the "medium resolution" pixels. This allows 5 colors.  Each character is a single color.
+- 2 modes of 40 column text based on the "high resolution" pixels.  This allows monochrome text, plus a border color.  One mode is 8 scan lines tall which is the standard text display on the Atari.  The other is infrequently used and is 10 scan lines tall allowing for lower case descenders if an appropriate custom character set is supplied. 
+- 2 modes of 40 column text based on the "medium resolution" pixels. This allows up to 5 colors with 4 colors within a single character.
+- 2 modes of 20 column text based on the "medium resolution" pixels. This allows 5 colors.  Each character is a single color.
 
 - 8 graphics modes.
 - - color modes range from very low resolution at 40 pixels across the screen, to "medium resolution" at 160 pixels across the screen.  
