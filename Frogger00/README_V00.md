@@ -168,14 +168,34 @@ COMMODORE 64
 
 BBC MICRO
 
-  
 
-porting handling methods 
-The first consideration is what other platforms games can be ported.  In theory, anything can be ported
 
 BASIC PROGRAMS
 
+BASIC programs will utilize fewer of the features of the computer making it easier to port to the Atari.
+
+
 ASSEMBLY PROGRAMS
+
+Assembly programs may use more features of the original platform.  Again, if the platform is less capable than the Atari then special considerations may need to be made.   Additionally, Oranges do not have to equal Apples, so an approximation or replacement in the Atari style could be done.
+
+
+ALSO
+
+Port known games in Atari BASIC to Assembly and improve the gaming experience.
+
+
+  
+SOURCES FOR GAMES
+
+- Magazines from the 1970s and 80s.
+
+- YouTube demonstrations.
+
+- Github.
+
+
+
 
 
 ---
