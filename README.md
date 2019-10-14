@@ -20,6 +20,10 @@ I generally build in eclipse from the WUDSN ide.  WUDSN can be found here: https
 
 ---
 
+[DISCUSSION OF PORTING GAMES FROM OTHER COMPUTERS TO ATARI](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_Porting.md "Discussing How To Port Games From Other Computers To Atari") 
+
+---
+
 [Version 00 PET FROGGER](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger00/README_V00.md "Version 00 Atari PET FROGGER") 
 
 [![V00 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger00/V00_Composite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger00/README_V00.md)
