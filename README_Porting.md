@@ -65,9 +65,10 @@ The first part of porting is knowing what you're porting to, and so understandin
  
  - Two (or four on the Atari 400/800) game controller ports provide inputs separate from the keyboard.  (Digital joysticks, potentiometers, and light pen input.)
  
- - Option, Select, Start buttons read separately from the keyboard and joysticks.
+ - Option, Select, Start buttons read separately from the keyboard and game controllers.
 
 Whew!  That's a lot, and it still leaves out considerable detail.  People have written entire books about this.
+
 
 **Atari Programming Environments**
 
@@ -77,12 +78,12 @@ Atari BASIC -- It is easy to understand and allows for fast testing of code chan
 
 If you are determined to work with BASIC, then I recommend using something other than Atari BASIC.  My favorite is OSS BASIC XL (or XE) which is compatible with Atari BASIC, but considerably faster, and has built-in support for Player/Missile graphics that Atari BASIC does not have.  However, no matter what you do any kind of interpreted BASIC is far, far slower than Assembly language.  That's reason enough to avoid Atari BASIC.
 
-There are versions of BASIC, and other languages that can be compiled into machine language.  Often the results are as good as having worked directly in Assembly, though sometimes there can still be compromises or language-specific gymnastics when working directly with Atari hardware features.  I do not have a lot of experience with these languages.  BASIC and Assembly cover all the bases for me.
+There are versions of BASIC, and other languages that can be compiled into machine language.  Often the results are as good as working in Assembly, though sometimes there can still be compromises or language-specific gymnastics when working directly with Atari hardware features.  I do not have a lot of experience with these languages.  BASIC and Assembly cover all the bases for me.
 
 
 **Things You Can Do In Atari BASIC**
 
-The following is a list of Atari features that a BASIC program can use.  Assembly is not needed to set up the features, though sometimes in BASIC the usage is minimal.
+The following is a list of Atari features that a BASIC program can use.  Assembly is not needed to set up the features, though with BASIC the feature's use may be limited.
 
 - Redefined custom character sets
 
@@ -106,19 +107,18 @@ The following is a list of Atari features that a BASIC program can use.  Assembl
 
 Porting the first-person shooter Counter-Strike:Global Offensive to the Atari is an admirable goal which would probably never reach conclusion with acceptable results within the a person's lifetime.  The best pool of potential games to port comes from other retro platforms sold around the same time as the Atari, since they would have reasonably similar capabilities as the Atari.
 
-There were many kinds of computers sold commercially during the time of the Atari, and I will not be discussing every single one.  Many have become obscured in history and it is difficult to find programs or source code listings.  If you do find an interesting game and the source for it on a less popular computer, then thumbs up for your team and have a ball with it.
+There were numerous kinds of computers sold commercially during the time of the Atari, and I will not be discussing every single one.  Many have become obscured in history to the point it is difficult to find programs or source code listings.  If you do find an interesting game and the source for it on a less popular computer, then thumbs up for your team and have a ball with it.
 
-A reasonable list of the commonly available home computers marketed in the US during the 1977 to 1983 timeframe: Pet, TRS-80, Apple II, TRS Color Computer, VIC-20, TI-44/9, Commodore 64, IBM PC/clones.  I'm not as familiar with many non-US brands.  Based on the documentation availability and YouTube reviews of systems and games here is a short list of non-US systems that seems to be popular:  BBC Micro, ZX Spectrum.  Because these were the more popular systems it is easier today to find games and most importantly, source code for games.
+A reasonable list of the commonly available home computers marketed in the US during the 1977 to 1983 timeframe: Pet, TRS-80, Apple II, TRS Color Computer, VIC-20, TI-44/9, Commodore 64, IBM PC/clones.  I'm not as familiar with many non-US brands.  Based on the documentation availability and YouTube reviews of systems and games here is my short list of non-US systems that seem to be popular:  BBC Micro, ZX Spectrum.  Because these were more popular it is easier today to find games and most importantly, source code for games.
 
 ??
 ZX Spectrum
 Compucolor II
 spectravideo compumate
-Exidy sorcerer
 Sinclair
 ??
 
-These platforms capabilities vary.  SOME are extremely limited.  SOME are better than others.  SOME may be limited in nearly all respects, but have one feature the Atari can't inherently duplicate (e.g.  64 column text.)  SOME can be improved with optional add-ons that will not be considered here.  The POSSIBLE lowest common denominators:
+These platforms capabilities vary.  SOME are extremely limited.  SOME are better than others.  SOME may be limited in most respects, but have a feature the Atari can't inherently duplicate (e.g.  64 column text.)  SOME can be improved with optional add-ons that will not be considered here.  The POSSIBLE lowest common denominators:
 
 - Limited graphics modes.  Perhaps even no graphics beyond the text display.
 
@@ -137,21 +137,47 @@ These platforms capabilities vary.  SOME are extremely limited.  SOME are better
 
 There are some conflicts the Atari has that are universal for all platforms and will require the Atari port to change the values, or perform other countermeasures.
 
-- Plain text is in ATASCII coding which is ASCII-like, but different from the ASCII used on other computers.   Basic A-Z, 0-9 characters are the same.  But ATASCII uses character 155(dec)/$9B(hex) as the end of string, and new line/carriage return.  Many computers may use character value 0 to identify the end of a string which is a valid, printable ATASCII character.
+- Plain text is in ATASCII codes which is ASCII-like, but different from the ASCII used on other computers.   Basic A-Z, 0-9 characters are the same.  But ATASCII uses character 155(dec)/$9B(hex) as the end of string, and new line/carriage return.  Many computers may use character value 0 to identify the end of a string which is a valid, printable ATASCII character for the Atari.
 
-- The internal character set order is different from ATASCII.  Notably, the character 0 entry in the character set is for the blank space. 
+- The order of characters in the character set is different from ATASCII.  Notably, the character 0 entry in the character set is for the blank space. 
 
 - Keyboard scan codes on the Atari are also different from both ATASCII and the internal character set order.
 
 
 **The Other Platforms**
 
+**The 6502s**
+
+Games written in Assembly for other 6502-based computers would be easier to port to the Atari as the language and syntax will be similar.
+ 
 PET
 
-The Pet is based on the 6502.  The 40xx series supports a monochrome text display of 40x25 characters.  Later models support 80 column text. It has no actual graphics capability and no color.  It does have a large text character set which includes lower case characters and many graphics shapes.  With careful use the text can create displays that appear to be drawn graphics.  As everything is text-based any game object or moving player is based on character positions. It has no sound, no joysticks, and as it has very limited hardware its BASIC language has little unique considerations.  There would be very little difference in capabilities between a BASIC program and an Assembly program in the Pet other than the execution speed. 
+The 40xx series supports a monochrome text display of 40x25 characters.  Later models support 80 column text. It has no actual graphics capability and no color.  It does have a large text character set which includes lower case characters and many graphics shapes.  With careful use the text can create displays that appear to be drawn graphics.  As everything is text-based any game object or moving player is based on character positions. It has no sound, no joysticks, and as it has very limited hardware its BASIC language has little unique considerations.  There would be very little difference in capabilities between a BASIC program and an Assembly program in the Pet other than the execution speed. 
 
-Any game for the Pet 40xx series systems should fit well within the Atari's display capabilities.  The 25 lines of text can easily be handled with a modified display list.  Some graphics characters on the Pet would require a redefined character set on the Atari replacing some characters with Pet-like images. 
+Any game for the Pet 40xx series systems should fit well within the Atari's display capabilities.  The 25 lines of text can easily be handled with a modified Display List.  Some graphics characters on the Pet would require a redefined character set on the Atari replacing some characters with Pet-like images. 
 
+APPLE II
+
+The Apple supports 40x24 character text mode.  Earlier models had only upper case alpha characters.  Later models supported lowercase.  It has an infrequently-used, low resolution, 80x48, 16-color mode.  Most games use the remarkably engineered 280x192 high resolution mode that works on a NTSC television to display six colors at 140 x 192 by exploiting the NTSC artifacts.  The system supports two separate screens for high resolution graphics allowing a computer with enough memory to double-buffer and display one screen while redrawing the other.  There is a hardware register setting to replace the bottom of the graphics screens with several lines of text.  The Apple has a shape table feature that executes a list of pseudo-coded line drawing commands that permit rotating and scaling the drawn lines.  Most Assembly games will write images directly to screen memory which is linear horizontally, but is not contiguous between adjacent lines.  Built-in sound is limited to clicks and short beeps on the keyboard speaker.  If joysticks are used they are analog controls made of 2 potentiometers (paddles controllers). 
+
+The Atari has a high resolution mode that generates NTSC artifact colors, but can only do 4 colors, not the 6 like the Apple.  Since artifacts effectively halve the pixel resolution then the Atari's Mode E, "medium resolution", 160 pixel graphics mode could also substitute.  It really depends on whether or not the Apple game uses all six colors and how the colors are used.  Player/Missiles could provide more color in limited places. 
+
+VIC-20
+
+The VIC-20 has a 16 color palette, supports 22x23 color text, and redefined character sets.  16 colors are available for the background and 8 colors for the text.  Text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  There are no graphics modes.  Displays that appear to be graphics are exploiting redefined character sets.  It uses a color map to specify colors per character positions.  It has a 3 voice sound chip, and supports an Atari digital joystick.
+
+ANTIC Mode 6 as text....
+
+COMMODORE 64
+
+The Commodore 64 has a 16 color palette, supports 40x25 color text, and redefined character sets. Similar to the VIC-20 the text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  Unlike the VIC-20 the C64 also supports graphics modes with similar rendering, and memory arrangement as the text character modes.  (1 bit for monochrome color pixels, and 2 bits for 4 color pixels.)  It uses a color map to specify colors per character positions and supports a limited amount of color indirection for some colors on the playfield.  It supports 8 movable "sprites" in 24x21 pixels and  1 color, and 12x21 pixels in 3 colors.  Sprites support limited collision detection with the playfield graphics.  It has a 3 voice sound synthesizer chip, and supports two Atari digital joysticks.
+
+
+
+
+**Other CPUs**
+
+Games written in Assembly for other computers that do not use the 6502 will be harder to port as you'll have to learn the nuances of a different Assembly language.  It could be easier to start from BASIC programs, or to execute porting simply based on visual appearance without reading too much of the original code.
 
 TRS-80
 
@@ -160,55 +186,39 @@ The TRS-80 models use a Z80 CPU.  This makes porting Assembly language source mo
 The 64 column text would need some workarounds on the Atari, if needed, since it is bigger than the Atari screen width.  The 128x48 graphics pixels are an odd dimension considerably less than most Atari graphics modes.  This could be duplicated with a line of Mode B and Mode C referencing the same line of screen memory and setting narrow screen width for 128 pixel width.  Alternatively, use the normal width screen for 160 pixels horizontally, and only draw in the middle 128 pixels.
 
 
-APPLE II
-
-The Apple is based on the 6502 and supports 40 character text mode.  Earlier models had only upper case alpha characters.  Later models supported lowercase.  It has an infrequently-used, low resolution, 80x48, 16-color mode.  Most games use the remarkably engineered 280x192 high resolution mode that works on a NTSC television to display six colors at 140 x 192 by exploiting the NTSC artifacts.  The system supports two separate screens for high resolution graphics allowing a computer with enough memory to double-buffer and display one screen while redrawing the other.  Some BASIC games may use a shape table feature that executes a list of pseudo-coded line drawing commands that permit rotating and scaling the image.  Most Assembly games will write images directly to screen memory which is linear horizontally, but not contiguous between adjacent lines.  Built-in sound is limited to clicks and short beeps on the keyboard speaker.  If joysticks are used they are analog controls made of 2 potentiometers (paddles controllers). 
-
-The Atari has a high resolution mode that generates NTSC artifact colors, but can only do 4 colors, not the 6 like the Apple.  Since artifacts effectively halve the resolution one of the Atari's Mode E, "medium resolution", 160 pixel graphics mode could substitute.  It really depends on whether or not the Apple game uses all six colors and how the colors are used.   Player/Missiles could provide more color in limited places. 
-
-
 TRS COLOR COMPUTER
 
 This system is based on the 6809 CPU which is not so similar to the 6502, so BASIC programs are an easier starting point.  It supports color text at 32x16.  It also supports graphics modes from 64x32 in 8 colors up to 256x192 in 4 colors.  The prior monochrome TRS-80 Model  concept of text characters subdivided into pixels also applies to this system, but supports more than one color on screen.  (The last version, Model 3 has more enhanced graphics.)  It includes a sound chip, and allows two analog joysticks similar to the Apple.  
 
 
-VIC-20
-
-The VIC-20 is 6502 based.  The system has a 16 color palette, supports 22x23 color text, and redefined character sets. 16 colors are available for the background and 8 colors for the text.  Text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  There are no graphics modes.  Displays that appear to be graphics are exploiting redefined character sets.  It uses a color map to specify colors per character positions.  It has a 3 voice sound chip, and supports an Atari digital joystick.
-
 TI-99/4
 
 This is another computer using  ...  Test, graphics, sprites, sound.  Joysticks.
 
-COMMODORE 64
-
-The Commodore 64 is 6502-based.  The system has a 16 color palette, supports 40x25 color text, and redefined character sets. Similar to the VIC-20 the text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  Unlike the VIC-20 the C64 also supports graphics modes with similar rendering, and memory arrangement as the text character modes.  (1 bit for monochrome color pixels, and 2 bits for 4 color pixels.)  It uses a color map to specify colors per character positions and supports a limited amount of color indirection for some colors on the playfield.  It supports 8 movable "sprites" in 24x21 pixels and  1 color, and 12x21 pixels in 3 colors.  Sprites support limited collision detection with the playfield graphics.  It has a 3 voice sound synthesizer chip, and supports two Atari digital joysticks.
-
 BBC MICRO
 
 
+**Types of Games To Port**
 
-
-
-BASIC PROGRAMS
+**BASIC PROGRAMS**
 
 BASIC programs will utilize fewer of the features of the computer making it easier to port to the Atari.  Also consider that when BASIC is the source and Assembly is the target, then Atari BASIC games are eligible for "porting".  A functional, but mediocre Atari BASIC game could be embellished with Assembly language into a work of art and an exciting gaming experience. 
 
 
-ASSEMBLY PROGRAMS
+**ASSEMBLY PROGRAMS**
 
 Assembly programs may use more features of the original platform.  Again, if the platform is less capable than the Atari then special considerations may need to be made.  Additionally, Oranges do not have to equal Apples, so an approximation or replacement in the Atari style could be done.
 
 Then again, just because the game is in machine language doesn't necessarily mean the author is pushing the platform to limits that would be difficult for the Atari.  Sometimes nice, simple games are in Assembly, just because BASIC can't handle timing or many updates.
 
 
-ALSO
+**ALSO**
 
 Port known games in Atari BASIC to Assembly and improve the gaming experience.
 
 
   
-SOURCES FOR GAMES
+**SOURCES FOR GAMES**
 
 - Books/Magazines from the 1970s and 80s.  
 Multi-Platform and dedicated.  (archive.org)  classic computer magazine archive
