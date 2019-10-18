@@ -2,7 +2,7 @@
 
 **Introduction**
 
-The Atari 8-bit computers have astounding capabilities considering the chips were first manufactured for development systems in 1978 and the home computers went on sale to the public in 1979.  The computers are the evolutionary successor to the Atari 2600, and the ancestor of the Amiga.  Some concepts from the 2600 apply to the Atari 8-bits, and understanding the Ataris provides insight into the Amiga's custom hardware features. 
+The Atari 8-bit computers have astounding capabilities considering the chips were first manufactured for development systems in 1978 and the home computers went on sale to the public in 1979.  The computers are the evolutionary successor to the Atari 2600 video game system, and the ancestor of the Amiga.  Some concepts from the 2600 apply to the Atari 8-bits, and understanding the Ataris provides insight into the Amiga's custom hardware features. 
 
 The 2600 requires a programming methodology that would drive most people nuts.  The machine has 128 bytes of RAM.  (BYTES, not KILOBYTES.) There is no memory for graphics.  Everything displayed on the screen has to be written into the graphics chip's registers by the program as the screen is drawn.  The game logic is slave to tight timing cycles.  Between the programming difficulty, and the more primitive graphics capabilities, Atari 2600 games tend to be simple.  In spite of this there are mind-blowing games on the 2600.  Respect is due the person who can write any kind of functional game for the 2600.
 
