@@ -4,19 +4,21 @@
 
 The Atari 8-bit computers have astounding capabilities considering the chips were first manufactured for development systems in 1978 and the home computers went on sale to the public in 1979.  The computers are the evolutionary successor to the Atari 2600, and the ancestor of the Amiga.  Some concepts from the 2600 apply to the Atari 8-bits, and understanding the Ataris provides insight into the Amiga's custom hardware features. 
 
-The 2600 requires a programming methodology that would drive most people nuts.  The machine has 128 bytes of RAM.  (BYTES, not KILOBYTES.) There is no memory for graphics.  Everything displayed on the screen has to be written into the graphics chip's registers as the screen is drawn.  The game logic is slave to tight timing cycles.  Between the programming difficulty, and the more primitive graphics capabilities, Atari 2600 games tend to be simple.  In spite of this there are mind-blowing games on the 2600.  Respect is due the person who can write any kind of functional game for the 2600.
+The 2600 requires a programming methodology that would drive most people nuts.  The machine has 128 bytes of RAM.  (BYTES, not KILOBYTES.) There is no memory for graphics.  Everything displayed on the screen has to be written into the graphics chip's registers by the program as the screen is drawn.  The game logic is slave to tight timing cycles.  Between the programming difficulty, and the more primitive graphics capabilities, Atari 2600 games tend to be simple.  In spite of this there are mind-blowing games on the 2600.  Respect is due the person who can write any kind of functional game for the 2600.
 
-The Atari computers began design as the advanced replacement for the 2600 that would have more capabilities and be easier to program.  Almost as soon as design started the focus shifted from a video game to making a personal computer with superior graphics ability.  Some of the resulting machines' graphics features would not be bested until the Amiga appeared.  
+The Atari computers began design as the advanced replacement for the 2600 video game system that would have more capabilities and be easier to program.  Almost as soon as design started the focus shifted from a video game to making a personal computer with superior graphics ability.  Some of the resulting machines' graphics features would not be bested until the Amiga appeared.  
 
 Programming the Atari computers is considerably easier than the 2600.  In fact, by comparison, the Atari computers allow downright lazy coding.  The graphics chips generate the playfield text and graphics and Player/Missile overlay graphics without direct CPU intervention.  The program simply arranges the data in memory and tells the graphics hardware where to find everything.  An Atari computer game is free to spend more time on complex game logic. 
 
 The Atari systems were popular in their time, selling several million of units, and around the 1982 to 1983 years they were very popular targets for software developers.  But, everything was not ported to all computers.  Each computer model had games written for them that may have been ported to only a limited number of other systems that possibly did not include the Ataris, or may not have been ported to any other computer at all.
 
+Porting other systems games to the Atari is an entertaining and educational experience.  The programmer learns how other computers worked, devises ways the Atari can represent the same thing using different graphics architecture and gives one an appreciation for how much can be done with tiny amounts of memory.
+
 ---
 
 **Overview Of The Atari Hardware**
 
-The first part of porting is knowing what you're porting to, and so understanding how to fit another computer's features into what the Atari can do.  Some things another computer can do may not be easily portable to the Atari, and at other times you may choose to enhance something on the Atari beyond what the original platform can do.  Also, the Atari graphics are originally intended for NTSC color television, so some features look different on other video standards (PAL, SECAM, etc.)
+The first part of porting is knowing what you're porting to, and so understand how to fit another computer's features into what the Atari can do.  Some things another computer can do may not be easily portable to the Atari, and at other times you may choose to enhance something on the Atari beyond what the original platform can do.  Do not expect, or even try to mak an Atari game look exactly like the game on another system.  Atari graphics features have their own strengths and weaknesses, so try to fit game behavior into the Atari's style.  Atari graphics are originally intended for NTSC color television, so some features must look different on  video standards (PAL, SECAM, etc.)  that another computer may use.  An overview of Atari features:
 
 - 1.79 MHz 6502 processor.  This is one of the fastest 6502 computers released.  Most other systems work at 1MHz.
 
@@ -31,7 +33,7 @@ The first part of porting is knowing what you're porting to, and so understandin
   - color modes range from very low resolution at 40 pixels across the screen, to "medium resolution" at 160 pixels across the screen.  
   - "high resolution" mode is 320 pixels across the screen allowing monochrome graphics (2 shades of the same color)
 
-- Mixing graphics modes on the screen.  The display is generated by the Graphics chip executing a "Display List" of instructions which specifies what kind of text or graphics to display for each horizontal line on the screen.  No CPU intervention is required for mixing graphics and text modes on the screen.
+- Mixing graphics modes on the screen.  The display is generated by the ANTIC graphics chip executing a "Display List" of instructions which specifies what kind of text or graphics to display for each horizontal line on the screen.  No CPU intervention is required for mixing graphics and text modes on the screen.
 
  - Display List Interrupt. The Display List instructions can trigger a machine language routine when the display reaches that line of the display.  Typical use is to change the value of color registers allowing more colors on screen, and changing the Player/Missile graphics to new positions.
 
@@ -43,11 +45,11 @@ The first part of porting is knowing what you're porting to, and so understandin
 
 - 128 color palette.  256 colors in some color interpretation modes.  Depending on graphics mode and color interpretation mode 2, 4, 5, 9, or 16 colors can be on screen at once without using any machine language routines to reuse colors. 
 
-- Full Color indirection.  In most of the display modes the normal color interpretation allows the colors on the screen to be any one of the 128 colors in the palette via a hardware register assigned to that color.  Changing the value of the color register changes all the pixels in the screen using that color register.
+- Full Color indirection.  In most of the graphics modes the normal color interpretation allows all the colors on the screen to be any one of the 128 colors in the palette via a hardware register assigned to that color.  Changing the value of the color register changes all the pixels in the screen using that color register.
 
 - Four color interpretation modes. The 14 text and graphics modes can be rendered using one of four kinds of color interpretation.  In theory, this makes 46 graphics modes possible.  However, the last three color interpretation modes (GTIA modes) work best in conjunction with certain graphics modes, so not all 46 combinations are practical.
   - Normal color interpretation utilizing color indirection.
-  - GTIA modes: 16 shades of one base color.  Up to 9 colors using color indirection.  16 colors all using the same brightness.
+  - 3 GTIA modes: 16 shades of one base color.  Up to 9 colors using color indirection.  16 colors all using the same brightness.
 
 -  An easy but infrequently used feature is color mixing between Player/Missile pixels and playfield pixels engaged by certain priority controls.  This can create up to 23 colors in normal color interpretation mode and up to 38 colors in the GTIA color interpretation modes.
   
@@ -72,9 +74,9 @@ Whew!  That's a lot, and it still leaves out considerable detail.  People have w
 
 **Atari Programming Environments**
 
-The next consideration for the Atari as the porting target is understanding how the chosen language affects the scope of the available feature on the Atari.  6502 Assembly language provides total control of the machine language program and offers complete use of all the Atari's features.  If it can be done on the Atari, it will be done in Assembly.
+The next consideration for the Atari as the porting target is understanding how the chosen language affects the scope of the available feature on the Atari.  6502 Assembly language provides total control of the machine language program and offers complete use of all the Atari's features.  If it can be done on the Atari, it can be done in Assembly.
 
-Atari BASIC -- It is easy to understand and allows for fast testing of code changes, since it is an interpreted language.  I use BASIC to prototype a program, so I can get logic in order and some semblance of the graphics working before starting in Assembly language.  If the game for another computer is written in BASIC, then converting to Atari BASIC is the best practical first step.  However, operating in Atari BASIC limits the hardware features possible.  Some Atari graphics features require use of machine language.  
+Atari BASIC -- It is easy to understand and allows for quickly testing code changes, since it is an interpreted language.  I use BASIC for new projects to prototype a program, so I can get logic in order and some semblance of the graphics working before starting in Assembly language.  If the game for another computer is written in BASIC, then converting to Atari BASIC is the best practical first step.  However, operating in Atari BASIC limits the hardware features possible.  Some Atari graphics features require use of machine language.  
 
 If you are determined to work with BASIC, then I recommend using something other than Atari BASIC.  My favorite is OSS BASIC XL (or XE) which is compatible with Atari BASIC, but considerably faster, and has built-in support for Player/Missile graphics that Atari BASIC does not have.  However, no matter what you do any kind of interpreted BASIC is far, far slower than Assembly language.  That's reason enough to avoid Atari BASIC.
 
@@ -105,18 +107,11 @@ The following is a list of Atari features that a BASIC program can use.  Assembl
 
 **Considering Other Platforms**
 
-Porting the first-person shooter Counter-Strike:Global Offensive to the Atari is an admirable goal which would probably never reach conclusion with acceptable results within the a person's lifetime.  The best pool of potential games to port comes from other retro platforms sold around the same time as the Atari, since they would have reasonably similar capabilities as the Atari.
+Porting the first-person shooter Counter-Strike:Global Offensive to the Atari is an admirable goal which would probably never reach acceptable results within the a person's lifetime.  The best pool of potential games to port comes from other retro platforms sold around the same time as the Atari, since they would have reasonably similar capabilities as the Atari.
 
 There were numerous kinds of computers sold commercially during the time of the Atari, and I will not be discussing every single one.  Many have become obscured in history to the point it is difficult to find programs or source code listings.  If you do find an interesting game and the source for it on a less popular computer, then thumbs up for your team and have a ball with it.
 
-A reasonable list of the commonly available home computers marketed in the US during the 1977 to 1983 timeframe: Pet, TRS-80, Apple II, TRS Color Computer, VIC-20, TI-44/9, Commodore 64, IBM PC/clones.  I'm not as familiar with many non-US brands.  Based on the documentation availability and YouTube reviews of systems and games here is my short list of non-US systems that seem to be popular:  BBC Micro, ZX Spectrum.  Because these were more popular it is easier today to find games and most importantly, source code for games.
-
-??
-ZX Spectrum
-Compucolor II
-spectravideo compumate
-Sinclair
-??
+A reasonable list of the commonly available home computers marketed in the US during the 1977 to 1983 timeframe: Pet, TRS-80, Apple II, TRS Color Computer, VIC-20, TI-44/9, Commodore 64, IBM PC/clones.  I'm not as familiar with many non-US brands.  Based on the documentation availability and YouTube reviews of systems and games here is my short list of non-US systems that seem to be popular:  BBC Micro, ZX Spectrum, Dragon, Sinclair ZX81.
 
 These platforms capabilities vary.  SOME are extremely limited.  SOME are better than others.  SOME may be limited in most respects, but have a feature the Atari can't inherently duplicate (e.g.  64 column text.)  SOME can be improved with optional add-ons that will not be considered here.  The POSSIBLE lowest common denominators:
 
@@ -137,7 +132,7 @@ These platforms capabilities vary.  SOME are extremely limited.  SOME are better
 
 There are some conflicts the Atari has that are universal for all platforms and will require the Atari port to change the values, or perform other countermeasures.
 
-- Plain text is in ATASCII codes which is ASCII-like, but different from the ASCII used on other computers.   Basic A-Z, 0-9 characters are the same.  But ATASCII uses character 155(dec)/$9B(hex) as the end of string, and new line/carriage return.  Many computers may use character value 0 to identify the end of a string which is a valid, printable ATASCII character for the Atari.
+- Plain text onthe Atari is in ATASCII codes which is ASCII-like, but different from the ASCII used on other computers.   Basic A-Z, 0-9 characters are the same.  But ATASCII uses character 155(dec)/$9B(hex) as the end of string, and new line/carriage return.  Many computers may use character value 0 to identify the end of a string which is a valid, printable ATASCII character for the Atari.
 
 - The order of characters in the character set is different from ATASCII.  Notably, the character 0 entry in the character set is for the blank space. 
 
@@ -166,13 +161,13 @@ VIC-20
 
 The VIC-20 has a 16 color palette, supports 22x23 color text, and redefined character sets.  16 colors are available for the background and 8 colors for the text.  Text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  There are no graphics modes.  Displays that appear to be graphics are exploiting redefined character sets.  It uses a color map to specify colors per character positions.  It has a 3 voice sound chip, and supports an Atari digital joystick.
 
+Since the only graphics capability is redefined character sets, there are literally hundreds of games, some that were sold commercially, that are almost the same game which just positions text characters using a redefined character set. Some more advanced games use character to simulate bitmapped graphics and shift images through multiple characters to simulate pixel-based graphics animation.
+
 ANTIC Mode 6 as text....
 
 COMMODORE 64
 
-The Commodore 64 has a 16 color palette, supports 40x25 color text, and redefined character sets. Similar to the VIC-20 the text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  Unlike the VIC-20 the C64 also supports graphics modes with similar rendering, and memory arrangement as the text character modes.  (1 bit for monochrome color pixels, and 2 bits for 4 color pixels.)  It uses a color map to specify colors per character positions and supports a limited amount of color indirection for some colors on the playfield.  It supports 8 movable "sprites" in 24x21 pixels and  1 color, and 12x21 pixels in 3 colors.  Sprites support limited collision detection with the playfield graphics.  It has a 3 voice sound synthesizer chip, and supports two Atari digital joysticks.
-
-
+The Commodore 64 is the newest of the systems and more capable than most.  It has a 16 color palette, supports 40x25 color text, and redefined character sets. Similar to the VIC-20 the text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  Unlike the VIC-20 the C64 also supports graphics modes with similar rendering, and memory arrangement as the text character modes.  (1 bit for monochrome color pixels, and 2 bits for 4 color pixels.)  It uses a color map to specify colors per character positions and supports a limited amount of color indirection for some colors on the playfield.  It supports 8 movable "sprites" in 24x21 pixels and  1 color, and 12x21 pixels in 3 colors.  Sprites support limited collision detection with the playfield graphics.  It has a 3 voice sound synthesizer chip, and supports two Atari digital joysticks.
 
 
 **Other CPUs**
@@ -185,11 +180,9 @@ The TRS-80 models use a Z80 CPU.  This makes porting Assembly language source mo
 
 The 64 column text would need some workarounds on the Atari, if needed, since it is bigger than the Atari screen width.  The 128x48 graphics pixels are an odd dimension considerably less than most Atari graphics modes.  This could be duplicated with a line of Mode B and Mode C referencing the same line of screen memory and setting narrow screen width for 128 pixel width.  Alternatively, use the normal width screen for 160 pixels horizontally, and only draw in the middle 128 pixels.
 
-
 TRS COLOR COMPUTER
 
 This system is based on the 6809 CPU which is not so similar to the 6502, so BASIC programs are an easier starting point.  It supports color text at 32x16.  It also supports graphics modes from 64x32 in 8 colors up to 256x192 in 4 colors.  The prior monochrome TRS-80 Model  concept of text characters subdivided into pixels also applies to this system, but supports more than one color on screen.  (The last version, Model 3 has more enhanced graphics.)  It includes a sound chip, and allows two analog joysticks similar to the Apple.  
-
 
 TI-99/4
 
@@ -204,20 +197,13 @@ BBC MICRO
 
 BASIC programs will utilize fewer of the features of the computer making it easier to port to the Atari.  Also consider that when BASIC is the source and Assembly is the target, then Atari BASIC games are eligible for "porting".  A functional, but mediocre Atari BASIC game could be embellished with Assembly language into a work of art and an exciting gaming experience. 
 
-
 **ASSEMBLY PROGRAMS**
 
-Assembly programs may use more features of the original platform.  Again, if the platform is less capable than the Atari then special considerations may need to be made.  Additionally, Oranges do not have to equal Apples, so an approximation or replacement in the Atari style could be done.
+Assembly programs may use more features of the original platform.  Each source system is differently abled from the Atari, so it is unlikely the Atari port can look exactly the same as the original.  Oranges do not have to equal Apples, so an approximation or replacement in the Atari style is always the goal. 
 
 Then again, just because the game is in machine language doesn't necessarily mean the author is pushing the platform to limits that would be difficult for the Atari.  Sometimes nice, simple games are in Assembly, just because BASIC can't handle timing or many updates.
 
 
-**ALSO**
-
-Port known games in Atari BASIC to Assembly and improve the gaming experience.
-
-
-  
 **SOURCES FOR GAMES**
 
 - Books/Magazines from the 1970s and 80s.  
@@ -228,8 +214,7 @@ trs80 color computer archive
 
 - Github.
 
-
-
 ---
 
 [Back to Home](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README.md "Home") 
+
