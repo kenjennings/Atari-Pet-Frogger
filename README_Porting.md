@@ -113,13 +113,15 @@ There were numerous kinds of computers sold commercially during the time of the 
 
 A reasonable list of the commonly available home computers marketed in the US during the 1977 to 1983 timeframe: Pet, TRS-80, Apple II, TRS Color Computer, VIC-20, TI-44/9, Commodore 64, IBM PC/clones.  I'm not as familiar with many non-US brands.  Based on the documentation availability and YouTube reviews of systems and games here is my short list of non-US systems that seem to be popular:  BBC Micro, ZX Spectrum, Dragon, Sinclair ZX81.
 
-These platforms capabilities vary.  SOME are extremely limited.  SOME are better than others.  SOME may be limited in most respects, but have a feature the Atari can't inherently duplicate (e.g.  64 column text.)  SOME can be improved with optional add-ons that will not be considered here.  The POSSIBLE lowest common denominators:
+These platforms capabilities vary.  SOME are extremely limited.  SOME are better than others.  SOME may be limited in most respects, but have a feature the Atari can't inherently duplicate (e.g.  64 column text, Color maps.)  SOME can be improved with optional add-ons that will not be considered here.  The POSSIBLE lowest common denominators:
 
 - Limited graphics modes.  Perhaps even no graphics beyond the text display.
 
 - If multiple graphics modes are possible the hardware cannot easily mix graphics modes, or text with graphics on screen.  Where this does occur it is usually done by simply drawing text on a graphics display.
 
-- Limited color palette:  2, 4, 8, or 16 colors.  Either no, or limited color indirection supported.  Color may be implemented by a separate color map that specifies the color used in a character-sized tile.
+- Limited color palette:  2, 4, 8, or 16 colors.  Either no, or limited color indirection supported.  
+
+- Color may be implemented by a separate color map that specifies the color used in a character-sized tile.  The Atari doesn't have a color map feature, so this is one of the harder objectives to work around.
 
 - Fixed location in memory for the text/graphics screen.
 
@@ -128,22 +130,32 @@ These platforms capabilities vary.  SOME are extremely limited.  SOME are better
 - No sound or limited sound.
 
 
-**Common Conflicts**
+**Common Conflicts And Atari-Specific Values**
 
-There are some conflicts the Atari has that are universal for all platforms and will require the Atari port to change the values, or perform other countermeasures.
+Some conflicts are nearly universal between differing platforms.  Many revolve around character representation.  While most computers are based on an ASCII layout for A-Z, 0-9, and basic symbols, each platform adds unique usage for other values. Possibilities:
 
-- Plain text onthe Atari is in ATASCII codes which is ASCII-like, but different from the ASCII used on other computers.   Basic A-Z, 0-9 characters are the same.  But ATASCII uses character 155(dec)/$9B(hex) as the end of string, and new line/carriage return.  Many computers may use character value 0 to identify the end of a string which is a valid, printable ATASCII character for the Atari.
+- No lower case support. 
+- ASCII control character values are not treated as such.
+- Custom graphics characters in place of others ASCII characters.
+- Some lesser-used symbols are not supported. (e.g. braces, backtick, tilde.)
+  
+These are the common issues specific to the Atari's differences. 
+ 
+- Plain text on the Atari is in ATASCII codes which is ASCII-like, but different from the ASCII used on other computers.   
+  - Basic A-Z, 0-9 characters are the same as ASCII.
+  - Character 155(dec)/$9B(hex) as the end of string, and new line/carriage return.  
+  - Character 0, often used as end of string on other systems, is a valid graphics character on the Atari. 
+  
+- Character set image order is different from ATASCII order.  (Other systems with refined character sets tend towards ASCII order.)
+  - Notably, entry 0 in the character set is for the blank space.  (This is actually a benefit.  When a program reads a zero value byte from screen memory it can use the CPU zero flag immediately without doing a comparison to recognize an blank/empty place on screen.)
 
-- The order of characters in the character set is different from ATASCII.  Notably, the character 0 entry in the character set is for the blank space. 
-
-- Keyboard scan codes on the Atari are also different from both ATASCII and the internal character set order.
-
+- Keyboard scan codes on the Atari are also different from both ATASCII and the the internal character set order.
 
 **The Other Platforms**
 
 **The 6502s**
 
-Games written in Assembly for other 6502-based computers would be easier to port to the Atari as the language and syntax will be similar.
+Games written in Assembly for other 6502-based computers would be easiest to port to the Atari in Assemble, since the language syntax will be similar, and only idiosyncrasies of the Assemblers needs to be managed.
  
 PET
 
@@ -161,13 +173,17 @@ VIC-20
 
 The VIC-20 has a 16 color palette, supports 22x23 color text, and redefined character sets.  16 colors are available for the background and 8 colors for the text.  Text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  There are no graphics modes.  Displays that appear to be graphics are exploiting redefined character sets.  It uses a color map to specify colors per character positions.  It has a 3 voice sound chip, and supports an Atari digital joystick.
 
-Since the only graphics capability is redefined character sets, there are literally hundreds of games, some that were sold commercially, that are almost the same game which just positions text characters using a redefined character set. Some more advanced games use character to simulate bitmapped graphics and shift images through multiple characters to simulate pixel-based graphics animation.
+Since the only graphics capability is redefined character sets, there are literally hundreds of games, and quite a number that were sold commercially, that are almost the same game pushing text characters around the screen using a different redefined character set.  Some more advanced games use redefined characters to simulate bit-mapped graphics and shift images through multiple characters to perform pixel-based graphics animation.
 
-ANTIC Mode 6 as text....
+ANTIC Mode 6 text has 20 characters per line and can show characters in 4 colors where the entire character is a single color. This is the closest in size to the VIC-20's 22 character text mode.  Using the Atari's wide screen for overscan allows adding characters to the line, so the Atari can manage 22 characters in Mode 6 which fits (just barely) on an NTSC TV.  However, this does mean the Atari's version of 22 characters is noticeably wider than the VIC-20's.  
+
+The other obstacle is the VIC's 16 background, and 8 text colors.  In most situations they are not all used.  Background coloring is a little more difficult as the Atari has one color for the background.  Display List interrupts can change the 4 text colors and background color for each line.  Where more color is needed, Player/Missile graphics can add limited amounts of color.  But, inevitably there will be situations where a color or two will have to be ignored or worked around.  
+
+
 
 COMMODORE 64
 
-The Commodore 64 is the newest of the systems and more capable than most.  It has a 16 color palette, supports 40x25 color text, and redefined character sets. Similar to the VIC-20 the text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  Unlike the VIC-20 the C64 also supports graphics modes with similar rendering, and memory arrangement as the text character modes.  (1 bit for monochrome color pixels, and 2 bits for 4 color pixels.)  It uses a color map to specify colors per character positions and supports a limited amount of color indirection for some colors on the playfield.  It supports 8 movable "sprites" in 24x21 pixels and  1 color, and 12x21 pixels in 3 colors.  Sprites support limited collision detection with the playfield graphics.  It has a 3 voice sound synthesizer chip, and supports two Atari digital joysticks.
+The Commodore 64 is the newest of the systems and so more capable than most.  It has a 16 color palette, supports 40x25 color text, and redefined character sets. Similar to the VIC-20 the text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  Unlike the VIC-20 the C64 also supports graphics modes with similar rendering, and memory arrangement as the text character modes.  (1 bit for monochrome color pixels, and 2 bits for 4 color pixels.)  It uses a color map to specify colors per character positions and supports a limited amount of color indirection for some colors on the playfield.  It supports 8 movable "sprites" in 24x21 pixels and  1 color, and 12x21 pixels in 3 colors.  Sprites support limited collision detection with the playfield graphics.  It has a 3 voice sound synthesizer chip, and supports two Atari digital joysticks.
 
 
 **Other CPUs**
