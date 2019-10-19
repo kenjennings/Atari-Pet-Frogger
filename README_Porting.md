@@ -155,7 +155,7 @@ These are the common issues specific to the Atari's differences.
 
 **The 6502s**
 
-Games written in Assembly for other 6502-based computers would be easiest to port to the Atari in Assemble, since the language syntax will be similar, and only idiosyncrasies of the Assemblers needs to be managed.
+Games written in Assembly for other 6502-based computers would be easiest to port to the Atari in Assemble, since the language syntax will be similar.  Managing idiosyncrasies of the different Assemblers may require retyping, or re-indenting.
  
 PET
 
@@ -175,9 +175,11 @@ The VIC-20 has a 16 color palette, supports 22x23 color text, and redefined char
 
 Since the only graphics capability is redefined character sets, there are literally hundreds of games, and quite a number that were sold commercially, that are almost the same game pushing text characters around the screen using a different redefined character set.  Some more advanced games use redefined characters to simulate bit-mapped graphics and shift images through multiple characters to perform pixel-based graphics animation.
 
-ANTIC Mode 6 text has 20 characters per line and can show characters in 4 colors where the entire character is a single color. This is the closest in size to the VIC-20's 22 character text mode.  Using the Atari's wide screen for overscan allows adding characters to the line, so the Atari can manage 22 characters in Mode 6 which fits (just barely) on an NTSC TV.  However, this does mean the Atari's version of 22 characters is noticeably wider than the VIC-20's.  
+ANTIC Mode 6 text has 20 characters per line and can show characters in 4 colors where the entire character is a single color. This is the closest in size to the VIC-20's 22 character text mode.  Using the Atari's wide screen for overscan allows adding characters to the line, so the Atari can manage 22 characters in Mode 6 which fits (just barely) on an NTSC TV.  However, this does mean the Atari's version of 22 characters is noticeably wider than the VIC-20's.  (Covering more TV screen area could be considered a bonus.)
 
-The other obstacle is the VIC's 16 background, and 8 text colors.  In most situations they are not all used.  Background coloring is a little more difficult as the Atari has one color for the background.  Display List interrupts can change the 4 text colors and background color for each line.  Where more color is needed, Player/Missile graphics can add limited amounts of color.  But, inevitably there will be situations where a color or two will have to be ignored or worked around.  
+ANTIC Mode 6 also uses 64 characters in its character set, so the VIC-20 program may run through more characters than the Atari can display.  Where characters are specific objects the Atari could deal with it via a Display List interrupt switching character sets every few lines, or using a more dynamic (and slower) method where the character images needed at the moment are copied to the characters shown on screen.  Where a VIC-20 game uses multiple characters to simulate a large graphics bitmap the Atari could do the same thing, as only 22 characters are needed for the same line, so a different character set every 2 or three lines could do the same work.
+
+Another obstacle is the VIC's 16 background, and 8 text colors using a color map.  In most situations they are not all used.  Background coloring is a little more difficult as the Atari has one color for the background.  Display List interrupts can change the 4 text colors and background color for each line.  Where more color is needed, Player/Missile graphics can add limited amounts of color.  But, inevitably there will be situations where a color or two will have to be ignored or worked around.  
 
 
 
@@ -233,4 +235,5 @@ trs80 color computer archive
 ---
 
 [Back to Home](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README.md "Home") 
+
 
