@@ -135,8 +135,11 @@ These platforms capabilities vary.  SOME are extremely limited.  SOME are better
 Some conflicts are nearly universal between differing platforms.  Many revolve around character representation.  While most computers are based on an ASCII layout for A-Z, 0-9, and basic symbols, each platform adds unique usage for other values. Possibilities:
 
 - No lower case support. 
+
 - ASCII control character values are not treated as such.
+
 - Custom graphics characters in place of others ASCII characters.
+
 - Some lesser-used symbols are not supported. (e.g. braces, backtick, tilde.)
   
 These are the common issues specific to the Atari's differences. 
@@ -146,9 +149,9 @@ These are the common issues specific to the Atari's differences.
   - Character 155(dec)/$9B(hex) as the end of string, and new line/carriage return.  
   - Character 0, often used as end of string on other systems, is a valid graphics character on the Atari. 
   
-- Character set image order is different from ATASCII order.  (Other systems with refined character sets tend towards ASCII order.)
-  - Notably, entry 0 in the character set is for the blank space.  (This is actually a benefit.  When a program reads a zero value byte from screen memory it can use the CPU zero flag immediately without doing a comparison to recognize an blank/empty place on screen.)
-
+- Character set image order is different from ATASCII order.  (Other systems with refined character sets may tend towards ASCII order.)
+  - Notably, entry 0 in the character set is for the blank space.  (This is a benefit in game code.  When a program reads a zero value byte from screen memory it can use the CPU zero flag immediately without doing a comparison to recognize an blank/empty place on screen.)
+  
 - Keyboard scan codes on the Atari are also different from both ATASCII and the the internal character set order.
 
 **The Other Platforms**
@@ -181,16 +184,21 @@ ANTIC Mode 6 also uses 64 characters in its character set, so the VIC-20 program
 
 Another obstacle is the VIC's 16 background, and 8 text colors using a color map.  In most situations they are not all used.  Background coloring is a little more difficult as the Atari has one color for the background.  Display List interrupts can change the 4 text colors and background color for each line.  Where more color is needed, Player/Missile graphics can add limited amounts of color.  But, inevitably there will be situations where a color or two will have to be ignored or worked around.  
 
-
-
 COMMODORE 64
 
 The Commodore 64 is the newest of the systems and so more capable than most.  It has a 16 color palette, supports 40x25 color text, and redefined character sets. Similar to the VIC-20 the text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  Unlike the VIC-20 the C64 also supports graphics modes with similar rendering, and memory arrangement as the text character modes.  (1 bit for monochrome color pixels, and 2 bits for 4 color pixels.)  It uses a color map to specify colors per character positions and supports a limited amount of color indirection for some colors on the playfield.  It supports 8 movable "sprites" in 24x21 pixels and  1 color, and 12x21 pixels in 3 colors.  Sprites support limited collision detection with the playfield graphics.  It has a 3 voice sound synthesizer chip, and supports two Atari digital joysticks.
 
+Since the C64 uses a color map like the Vic-20, porting to the Atari has similar concerns regaring color.  The C64 has 40 column text modes displaying one color for the text character, or a multi-color text mode allowing 4 colors within a text character using two bits per pixel resulting in 4 pixels across the width of the character.   The multi-color character set bit encoding is the same as Atari's ANTIC text mode 4.  
+
+The C64 has graphics modes roughly corresponding to Atari's high resolution, ANTIC mode F, and medium resolution ANTIC mode E, but the bytes are not linear per scan line across the screen.  Instead memory is arranged as if the graphics were a characters set.  Pixel manipulation on the C64 requires a fair amount of computation.  The Atari's linear memory allows more opportunity for optimization and pixel manipulation requires less code. 
+
+The C64 supports more sprites with greater horizontal resolution, so the Atari would need to adjust for differing number of objects on the same horizontal line, or use other graphics as a substitute for sprites.
+
+The C64 suports fine scrolling the size of one character horizontally and vertically.  However, when scrolling is enabled the C64 loses a horizontal line of text, and two vertical columns of text.  Also, when fine scrolling reaches its limit the screen data has to be coarse scrolled through screen memory by the CPU.  When porting it is possible to treat the Atari similarly and coarse scroll the hard way by redrawing the screen, but extra effort could simplify the code to leverage the Atari's coarse scrolling support in the Display List.
 
 **Other CPUs**
 
-Games written in Assembly for other computers that do not use the 6502 will be harder to port as you'll have to learn the nuances of a different Assembly language.  It could be easier to start from BASIC programs, or to execute porting simply based on visual appearance without reading too much of the original code.
+Games written in Assembly for other computers that do not use the 6502 will be harder to port, since the programmer must learn the nuances of a different Assembly language.  It is much easier to port BASIC programs which are not CPU dependent.  Alternatively, where the game's rules and behavior are completely documented, and videos exist of full game play, then porting can be based on analyzing these resources without without reading too much of the original code.
 
 TRS-80
 
@@ -225,8 +233,14 @@ Then again, just because the game is in machine language doesn't necessarily mea
 **SOURCES FOR GAMES**
 
 - Books/Magazines from the 1970s and 80s.  
-Multi-Platform and dedicated.  (archive.org)  classic computer magazine archive
-trs80 color computer archive
+
+- Multi-Platform and dedicated.  
+
+- (archive.org)  
+
+- classic computer magazine archive
+
+- trs80 color computer archive
 
 - YouTube demonstrations.
 
@@ -235,5 +249,3 @@ trs80 color computer archive
 ---
 
 [Back to Home](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README.md "Home") 
-
-
