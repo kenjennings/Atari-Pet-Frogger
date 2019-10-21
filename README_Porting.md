@@ -111,7 +111,7 @@ Porting the first-person shooter Counter-Strike:Global Offensive to the Atari is
 
 There were numerous kinds of computers sold commercially during the time of the Atari, and I will not be discussing every single one.  Many have become obscured in history to the point it is difficult to find programs or source code listings.  If you do find an interesting game and the source for it on a less popular computer, then thumbs up for your team and have a ball with it.
 
-A reasonable list of the commonly available home computers marketed in the US during the 1977 to 1983 timeframe: Pet, TRS-80, Apple II, TRS Color Computer, VIC-20, TI-44/9, Commodore 64, IBM PC/clones.  I'm not as familiar with many non-US brands.  Based on the documentation availability and YouTube reviews of systems and games here is my short list of non-US systems that seem to be popular:  BBC Micro, ZX Spectrum, Dragon, Sinclair ZX81.
+A reasonable list of the commonly available home computers marketed in the US during the 1977 to 1983 timeframe: Pet, TRS-80, Apple II, TRS Color Computer, VIC-20, TI-44/9, Commodore 64, IBM PC/clones.  I'm not as familiar with many non-US brands.  Based on the documentation availability and YouTube reviews of systems and games here is my short list of non-US systems that seem to be popular: BBC MICRO, Acorn Atom, Electron, Oric 1, ZX Spectrum, Dragon, Sinclair ZX81.
 
 These platforms capabilities vary.  SOME are extremely limited.  SOME are better than others.  SOME may be limited in most respects, but have a feature the Atari can't inherently duplicate (e.g.  64 column text, Color maps.)  SOME can be improved with optional add-ons that will not be considered here.  The POSSIBLE lowest common denominators:
 
@@ -186,15 +186,18 @@ Another obstacle is the VIC's 16 background, and 8 text colors using a color map
 
 COMMODORE 64
 
-The Commodore 64 is the newest of the systems and so more capable than most.  It has a 16 color palette, supports 40x25 color text, and redefined character sets. Similar to the VIC-20 the text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  Unlike the VIC-20 the C64 also supports graphics modes with similar rendering, and memory arrangement as the text character modes.  (1 bit for monochrome color pixels, and 2 bits for 4 color pixels.)  It uses a color map to specify colors per character positions and supports a limited amount of color indirection for some colors on the playfield.  It supports 8 movable "sprites" in 24x21 pixels and  1 color, and 12x21 pixels in 3 colors.  Sprites support limited collision detection with the playfield graphics.  It has a 3 voice sound synthesizer chip, and supports two Atari digital joysticks.
+The Commodore 64 is the newest of the systems and in some areas more capable than others.  It has a 16 color palette, supports 40x25 color text, and redefined character sets. Similar to the VIC-20 the text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  Unlike the VIC-20 the C64 also supports graphics modes with similar rendering, and memory arrangement as the text character modes.  (1 bit for monochrome color pixels, and 2 bits for 4 color pixels.)  It uses a color map to specify colors per character positions and supports a limited amount of color indirection for some colors on the playfield.  It supports 8 movable "sprites" in 24x21 pixels and  1 color, and 12x21 pixels in 3 colors.  Sprites support limited collision detection with the playfield graphics.  It has a 3 voice sound synthesizer chip, and supports two Atari digital joysticks.
 
 Since the C64 uses a color map like the Vic-20, porting to the Atari has similar concerns regaring color.  The C64 has 40 column text modes displaying one color for the text character, or a multi-color text mode allowing 4 colors within a text character using two bits per pixel resulting in 4 pixels across the width of the character.   The multi-color character set bit encoding is the same as Atari's ANTIC text mode 4.  
 
 The C64 has graphics modes roughly corresponding to Atari's high resolution, ANTIC mode F, and medium resolution ANTIC mode E, but the bytes are not linear per scan line across the screen.  Instead memory is arranged as if the graphics were a characters set.  Pixel manipulation on the C64 requires a fair amount of computation.  The Atari's linear memory allows more opportunity for optimization and pixel manipulation requires less code. 
 
-The C64 supports more sprites with greater horizontal resolution, so the Atari would need to adjust for differing number of objects on the same horizontal line, or use other graphics as a substitute for sprites.
+The C64 supports more sprites with greater horizontal resolution, so the Atari would need to adjust for differing number of objects on the same horizontal line, or use other graphics as a substitute for sprites.  The Atari supports more thorough Player/Missile collision detection, so this does not require compromise unless non-Player/Missile graphics are used to simulate sprites. 
 
 The C64 suports fine scrolling the size of one character horizontally and vertically.  However, when scrolling is enabled the C64 loses a horizontal line of text, and two vertical columns of text.  Also, when fine scrolling reaches its limit the screen data has to be coarse scrolled through screen memory by the CPU.  When porting it is possible to treat the Atari similarly and coarse scroll the hard way by redrawing the screen, but extra effort could simplify the code to leverage the Atari's coarse scrolling support in the Display List.
+
+BBC MICRO, Acorn Atom, Electron, Oric 1
+
 
 **Other CPUs**
 
@@ -212,9 +215,9 @@ This system is based on the 6809 CPU which is not so similar to the 6502, so BAS
 
 TI-99/4
 
-This is another computer using  ...  Test, graphics, sprites, sound.  Joysticks.
+This is another computer using  ...  Text, graphics, sprites, sound.  Joysticks.
 
-BBC MICRO
+BBC MICRO, Acorn Atom, Electron, Oric 1
 
 
 **Types of Games To Port**
@@ -249,3 +252,5 @@ Then again, just because the game is in machine language doesn't necessarily mea
 ---
 
 [Back to Home](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README.md "Home") 
+
+
