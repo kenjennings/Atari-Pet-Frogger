@@ -229,13 +229,13 @@ TRS-80
 
 The TRS-80 models use a Z80 CPU.  This makes porting Assembly language source more difficult.  Porting from BASIC games would be a better place to start if you don't want to learn Z80.  The models support 64x16 monochrome text and "graphics" using character cells divided into 2x3 segments as pixels (128x48 pixels).  The BASIC language has commands to plot pixels, and also allows a string packing technique to compress a series of pixel instructions, and then "print" them quickly to a location on screen.  Some later models support 80 column monochrome and higher resolution graphics.
 
-The 64 column text would need some workarounds on the Atari, if needed, since it is bigger than the Atari screen width.  The 128x48 graphics pixels are an odd dimension considerably less than most Atari graphics modes.  This could be duplicated with a line of Mode B and Mode C referencing the same line of screen memory and setting narrow screen width for 128 pixel width.  Alternatively, use the normal width screen for 160 pixels horizontally, and only draw in the middle 128 pixels.
+The 64 column text would need some workarounds on the Atari, if needed, since it is bigger than the Atari screen width.  Abbreviate text, or use more than one line.  (TRS-80's 16 lines v Atari's 24 lines, so for text issues that allow this there are plenty of extra lines. )
+
+The 128x48 graphics pixels are an odd dimension considerably less than most Atari graphics modes.  This could be duplicated with a line of Mode B and Mode C referencing the same line of screen memory and setting narrow screen width for 128 pixel width.  Alternatively, use the normal width screen for 160 pixels horizontally, and only draw in the middle 128 pixels.
 
 TRS COLOR COMPUTER
 
 This system is based on the 6809 CPU which is not so similar to the 6502, so BASIC programs are an easier starting point.  It supports color text at 32x16.  It also supports graphics modes from 64x32 in 8 colors up to 256x192 in 4 colors.  The prior monochrome TRS-80 Model  concept of text characters subdivided into pixels also applies to this system, but supports more than one color on screen.  (The last version, Model 3 has more enhanced graphics.)  It includes a sound chip, and allows two analog joysticks similar to the Apple.  
-
-
 
 TI-99/4
 
@@ -258,7 +258,7 @@ BASIC programs will utilize fewer of the features of the computer making it easi
 
 Assembly programs may use more features of the original platform.  Each source system is differently-abled from the Atari, so it is unlikely the Atari port can look exactly the same as the original.  Oranges do not have to equal Apples, so an approximation or replacement in the Atari style is the goal. 
 
-Then again, just because the game is in machine language doesn't necessarily mean the author is pushing the platform to limits that would be difficult for the Atari.  Sometimes nice, simple games are in Assembly, just because BASIC can't handle timing or many screen updates.
+On the other hand, just because the game is in machine language doesn't necessarily mean the author is pushing the platform to limits that would be difficult for the Atari.  Sometimes nice, simple games are in Assembly, just because BASIC can't handle timing or many screen updates.
 
 
 **SOURCES FOR GAMES**
