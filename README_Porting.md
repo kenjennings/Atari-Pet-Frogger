@@ -112,7 +112,7 @@ Porting the first-person shooter Counter-Strike:Global Offensive to the Atari is
 
 There were numerous kinds of computers sold commercially during the time of the Atari, and I will not be discussing every single one.  Many have become obscured in history to the point it is difficult to find programs or source code listings.  If you do find an interesting game and the source for it on a less popular computer, then thumbs up for your team and have a ball with it.
 
-A reasonable list of the commonly available home computers marketed in the US during the 1977 to 1983 timeframe: Pet, TRS-80, Apple II, TRS Color Computer, VIC-20, TI-44/9, Commodore 64, IBM PC/clones.  I'm not as familiar with many non-US brands.  Based on the documentation availability and YouTube reviews of systems and games here is my short list of non-US systems that seem to be popular: BBC MICRO, Acorn Atom, Electron, Oric 1, ZX Spectrum, Dragon, Sinclair ZX81.
+A reasonable list of the commonly available home computers marketed in the US during the 1977 to 1983 timeframe: Pet, TRS-80, Apple II, TRS Color Computer, VIC-20, TI-44/9, Commodore 64.  I'm not as familiar with many non-US brands.  Based on the documentation availability and YouTube reviews of systems and games here is my short list of non-US systems that seem to be popular: BBC MICRO, Acorn Atom, Electron, Oric 1, Sinclair ZX81, ZX Spectrum, Dragon 32.
 
 These platforms capabilities vary.  SOME are extremely limited.  SOME are better than others.  SOME may be limited in most respects, but have a feature the Atari can't inherently duplicate (e.g.  64 column text, Color maps.)  SOME can be improved with optional add-ons that will not be considered here.  The POSSIBLE lowest common denominators:
 
@@ -158,6 +158,27 @@ These are the common issues specific to the Atari's differences.
    
 - Keyboard scan codes on the Atari are also different from both ATASCII and the the internal character set order.
 
+
+**RESOURCES FOR GAMES AND PROGRAMS**
+
+General sources that provide information, demonstrations, programs, or source for a variety of computers.
+
+- Books/Magazines from the 1970s and 80s.  (Compute! Mapping books.)
+
+- Multi-Platform and dedicated.
+
+- (archive.org)  
+
+- classic computer magazine archive
+
+- trs80 color computer archive
+
+- YouTube video demonstrations
+
+- Github
+
+
+
 **The Other Platforms**
 
 **The 6502s**
@@ -168,25 +189,29 @@ PET - 1977
 
 The 40xx series supports a monochrome text display of 40x25 characters.  Later models support 80 column text. It has no actual graphics capability and no color.  It does have a large text character set which includes lower case characters and many graphics shapes.  With careful use the text can create displays that appear to be drawn graphics.  Since everything is text-based, any game object or moving player is based on character positions. It has no sound, no joysticks, and as it has very limited hardware its BASIC language is generic with few unique considerations.  There would be very little difference in capabilities between a BASIC program and an Assembly program in the Pet other than the execution speed. 
 
-Any game for the Pet 40xx series systems should fit well within the Atari's display capabilities.  The 25 lines of text can easily be handled with a modified Display List.  Some graphics characters on the Pet would require a redefined character set on the Atari replacing some characters with Pet-like images. 
+Any game for the Pet 40xx series systems should fit well within the Atari's display capabilities.  The 25 lines of text can easily be handled with a modified Display List.  Some graphics characters on the Pet would require a redefined character set on the Atari replacing  characters with Pet-like images. 
 
 APPLE II - 1977
 
-The Apple supports 40x24 character text mode.  Earlier models had only upper case alpha characters.  Later models supported lowercase.  It has an infrequently-used, low resolution, 80x48, 16-color mode.  Most games use the remarkably engineered 280x192 high resolution mode that works on a NTSC television to display six colors at 140 x 192 by exploiting the NTSC artifacts.  
+The Apple supports 40x24 character text mode.  Earlier models had only upper case alpha characters.  Later models supported lowercase.  It has an infrequently-used, low resolution, 80x48, 16-color mode.  Most games use the remarkably engineered 280x192 high resolution mode that works on a NTSC television to display six colors at 140 x 192 by exploiting the NTSC artifacts.  This mode uses 7 of the 8 bits in a byte for pixels that are 1/2 the NTSC color clock width producing two artifact colors, or white where two pixels are drawn next to each other.  The eighth bit controls shifting the signal by 1/4 color clock to produce two different artifact colors for the pixels from that byte.
 
-The system supports two separate screens for high resolution graphics allowing a computer with enough memory to double-buffer and display one screen while redrawing the other.  There is a hardware register setting to replace the bottom of the graphics screens with several lines of text.  
+The Apple supports two separate screens for high resolution graphics allowing a computer with enough memory to double-buffer and display one screen while redrawing the other.  There is a hardware register setting to replace the bottom of the graphics screens with several lines of text.
 
-The BASIC language included commands for dealing with the graphics modes and drawing lines.
+The BASIC language includes commands for engaging the graphics modes and drawing lines.
 
-The Apple software has a shape table feature that executes a list of pseudo-coded line drawing commands and permit rotating and scaling the drawn lines.  Most Assembly games will write images directly to screen memory which is linear horizontally, but is not contiguous between adjacent lines.  Built-in sound is limited to clicks and short beeps on the keyboard speaker.  If joysticks are used they are analog controls made of 2 potentiometers (paddles controllers). 
+The Apple software has a shape table feature that executes a list of pseudo-coded line drawing commands and permit rotating and scaling the drawn lines.  Most Assembly games will write images directly to screen memory which is linear horizontally, but is not contiguous between adjacent lines.  Built-in sound is limited to clicks and short beeps on the keyboard speaker.  If joysticks are used they are analog controls made of 2 potentiometers (paddles controllers).
 
-The Atari has a high resolution mode that generates NTSC artifact colors, but can only derive 4 colors, not the 6 like the Apple.  Since artifacts effectively halve the pixel resolution then the Atari's Mode E, "medium resolution", 160 pixel graphics mode could also substitute.  It really depends on whether or not the Apple game uses all six colors and how the colors are used.  Player/Missiles could provide more color in limited places. 
+The Atari has a high resolution mode that generates NTSC artifact colors, but can only derive 4 artifact colors, not the 6 like the Apple.  Since artifacts effectively halve the pixel resolution then the Atari's Mode E, "medium resolution", 160 pixel graphics mode could also be a substitute, though its use of 2 bits per pixel requires more coding compensation to simulate the Apple results.  It really depends on whether or not the Apple game uses all six colors and how the colors are used.  Player/Missiles could provide more color in limited places.
+
+Converting graphics to the Atari has obstacles.  The easiest is the non-contiguous order of lines of screen memory.  Since the Atari Display List can specify the memory to read for a line of graphics the Atari could arrange graphics memory in exactly the same way as the Apple, so Apple code accessing horizontal rows would work as-is.  But, this isn't necessarily needed as the common optimization for both the Apple or the Atari is a lookup table of pre-calculated addresses to eliminate the multiplication needed for the vertical coordinates.  Here the Atari merely needs a table of different values, and then the Apple's lookup code works the same regardless of the order of screen memory.
+
+Both options for memory order are minimal problem solvers as the real problem is that the Apple is using 7 bits of each byte for pixels to the Atari's 8 pixels.  This throws off pixel position for plotting, line drawing, and memory masking writing images into screen memory.  If Apple code is run directly on the Atari it will produce graphics where every 8th vertical line of pixels is blank.  Code manipulating graphics memory, and the data used for animating objects must be dissected and rebuilt in a form suiting the Atari.
 
 VIC-20 - 1979
 
 The VIC-20 has a 16 color palette, supports 22x23 color text, and redefined character sets.  16 colors are available for the background and 8 colors for the text.  Text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  There are no graphics modes.  Displays that appear to be graphics are exploiting redefined character sets.  It uses a color map to specify colors per character positions.  It has a 3 voice sound chip, and supports an Atari digital joystick.
 
-The BASIC language included in the VIC-20 is generic BASIC with no commands supporting the hardware.  BASIC programs using any of the graphics and sound will be packed with POKE statements. 
+The BASIC language included in the VIC-20 is generic BASIC with no commands supporting the hardware.  BASIC programs using any of the graphics and sound will be packed with POKE statements.
 
 Since the only graphics capability is redefined character sets, there are literally hundreds of games that are almost the same game pushing text characters around the screen using a different redefined character set.  Quite an amazing number of these games were sold commercially.  Some more advanced games use redefined characters to simulate bit-mapped graphics and shift images through multiple characters to simulate pixel-based graphics animation.
 
@@ -194,32 +219,37 @@ ANTIC Mode 6 text has 20 characters per line and can show characters in 4 colors
 
 ANTIC Mode 6 also uses 64 characters in its character set, so the VIC-20 program may run through more characters than the Atari can display.  Where many VIC-20 characters are specific graphics objects the Atari could deal with it via a Display List interrupt switching to different character sets every few lines, or using a more dynamic (and slower) method where the character images needed at the moment are copied to the characters shown on screen.  Where a VIC-20 game uses multiple characters to simulate a larger graphics bitmap the Atari could do the same thing, and as only 22 characters are needed for the one line, a different character set every 2 or three lines could do the same work.
 
-Another obstacle is the VIC's 16 background, and 8 text colors using a color map.  In most situations they are not all used.  Background coloring is a little more difficult as the Atari has one color for the background.  Display List interrupts can change the 4 text colors and background color for each line.  Where more color is needed, Player/Missile graphics can add limited amounts of color.  But, inevitably there will be situations where a color or two will have to be ignored or worked around.  
+Another obstacle is the VIC's 16 background, and 8 text colors using a color map.  In most situations they are not all used.  Background coloring is a little more difficult as the Atari has one color for the background.  Display List interrupts can change the 4 text colors and background color for each line.  Where more color is needed, Player/Missile graphics can add limited amounts of color.  But, inevitably there will be situations where a color or two will have to be ignored or worked around.
+
+ACORN ATOM - 1980
+
+This computer has graphics capabilities approximately like the TRS-80 Color Computer (64 column text, 4 and 2 color graphics modes from 64x64 to 256x192).  The BASIC language has memory manipulation commands that work on 4 byte words, plus an in-line Assembler.  Sound is from the keyboard speaker.
+
+BBC MICRO - 1981
 
 COMMODORE 64 - 1982
 
 The Commodore 64 is the newest of the systems and in some areas more capable than others.  It has a 16 color palette, supports 40x25 color text, and redefined character sets. Similar to the VIC-20 the text characters may be 8x8 pixels in one foreground color, or 4x8 pixels allowing 3 colors in the characters, plus the background.  Unlike the VIC-20 the C64 also supports graphics modes with similar rendering, and memory arrangement as the text character modes.  (1 bit for monochrome color pixels, and 2 bits for 4 color pixels.)  It uses a color map to specify color per character positions and supports limited color indirection for some colors on the playfield.  It supports 8 movable "sprites" in 24x21 pixels and 1 color, and 12x21 pixels in 3 colors.  Sprites support limited collision detection with the playfield graphics.  It has a 3 voice sound synthesizer chip, and supports two Atari digital joysticks.
 
-Like the VIC-20, the BASIC language that in the Commodore 64 is generic BASIC with no commands supporting the hardware.  BASIC programs using any of the graphics and sound will be packed with POKE statements. 
+Like the VIC-20, the BASIC language that in the Commodore 64 is generic BASIC with no commands supporting the hardware.  BASIC programs using any of the graphics and sound will be packed with POKE statements.
 
-Since the C64 uses a color map like the Vic-20, porting to the Atari has similar concerns regarding color.  The C64 has 40 column text modes displaying one color per text character (roughly like ANTIC mode 2), or a multi-color text mode allowing 4 colors within a text character using two bits per pixel resulting in 4 pixels across the width of the character.   The multi-color character set bit encoding is the same as Atari's ANTIC text mode 4.  
+Since the C64 uses a color map like the Vic-20, porting to the Atari has similar concerns regarding color.  The C64 has 40 column text modes displaying one color per text character (roughly like ANTIC mode 2), or a multi-color text mode allowing 4 colors within a text character using two bits per pixel resulting in 4 pixels across the width of the character.   The normal and multi-color character set bit encoding is the same as Atari uses in ANTIC text modes 2 and 4, respectively.
 
-ANTIC Text modes 2 and 4 use 128 characters in the character set and the C64 uses 256, so the C64 program may run through more characters than the Atari can display.  Solutions are similar to the VIC-20 -- where characters are specific graphics objects the Atari could deal with it via a Display List interrupt switching character sets every few lines, or using a more dynamic (and slower) method where the character images needed at the moment are copied to the characters shown on screen. 
+ANTIC Text modes 2 and 4 use 128 characters in the character set and the C64 uses 256, so the C64 program may run through more characters than the Atari can display.  Solutions are similar to the VIC-20 -- where characters are specific graphics objects the Atari could deal with it via a Display List interrupt switching character sets every few lines, or using a more dynamic (and slower) method where the character images needed at the moment are copied to the characters shown on screen.
 
-The C64 has graphics modes roughly corresponding to Atari's high resolution, ANTIC mode F, and medium resolution ANTIC mode E, but the bytes are not linear per scan line across the screen.  Instead, memory is arranged in character-sized cells as if the graphics were a characters set.  Pixel manipulation on the C64 requires a fair amount of computation due to the memory arrangement.  The Atari's linear memory allows more opportunity for optimization and pixel manipulation requires less code. 
+The C64 has graphics modes roughly corresponding to Atari's high resolution, ANTIC mode F, and medium resolution ANTIC mode E.  While the bit encoding is the same as the Atari modes the byte arrangement is not linear across the screen.  Instead, memory is arranged in character-sized cells as if the graphics were a characters set.  Pixel manipulation on the C64 requires a fair amount of computation due to the memory arrangement.  The Atari's linear memory allows more opportunity for optimization and pixel manipulation requires less code.
 
-The C64 supports more sprites with greater horizontal resolution, so the Atari would need to adjust for differing number of objects on the same horizontal line, or use other graphics as a substitute for sprites.  The Atari supports more thorough Player/Missile collision detection, so this does not require compromise unless the game must simulate sprites using non-Player/Missile graphics. 
+The C64 supports more sprites with greater horizontal resolution, so the Atari would need to adjust for differing number of objects on the same horizontal line, or use other graphics as a substitute for sprites.  The C64 uses a lookup table and pointer to the current image for each sprite.  Between the different size of sprites, and the 3-byte-wide memory arrangement the data for sprites must be reworked to function for Atari Player/Missile graphics.  The Atari supports more thorough Player/Missile collision detection, so this does not require compromise unless the game must simulate sprites using non-Player/Missile graphics.
 
 The C64 supports fine scrolling the size of one character horizontally and vertically.  However, when vertical scrolling the C64 loses a horizontal line of text, and for horizontal scrolling it loses two vertical columns of text.  Also, when fine scrolling reaches its limit the screen data has to be coarse scrolled through screen memory by the CPU.  When porting it is possible to treat the Atari similarly and coarse scroll the hard way by redrawing the screen, but extra effort could simplify the code to leverage the Atari's coarse scrolling support in the Display List.
 
-BBC MICRO
+ACORN ELECTRON - 1983
 
-Acorn Atom
+Interestingly, this is a 2MHz 6502 system when accessing RAM, and 1MHz when accessing ROM.  It supports text up to 80 columns. Graphics range from 160×256 (4 or 16 colours), 320×256 (2 or 4 colours), 640×256 (2 colours).  It had a large 32K ROM with unique features in BASIC, plus an Assembler.
 
-Electron
+ORIC 1 - 1983
 
-Oric 1
-
+This is a 1MHz 6502 system.  It has a 40x28 text mode supporting redefined character sets.  It also has a high resolution 240x200 graphics with 3 lines of text below.  It has a palette of 8 colors, and uses a color map arrangement to specify foreground and background colors.  It has a 3 voice sound chip.
 
 **Other CPUs**
 
@@ -233,20 +263,21 @@ The 64 column text would need some workarounds on the Atari, if needed, since it
 
 The 128x48 graphics pixels are an odd dimension considerably less than most Atari graphics modes.  This could be duplicated with a line of Mode B and Mode C referencing the same line of screen memory and setting narrow screen width for 128 pixel width.  Alternatively, use the normal width screen for 160 pixels horizontally, and only draw in the middle 128 pixels.
 
-TRS COLOR COMPUTER
-
-This system is based on the 6809 CPU which is not so similar to the 6502, so BASIC programs are an easier starting point.  It supports color text at 32x16.  It also supports graphics modes from 64x32 in 8 colors up to 256x192 in 4 colors.  The prior monochrome TRS-80 Model  concept of text characters subdivided into pixels also applies to this system, but supports more than one color on screen.  (The last version, Model 3 has more enhanced graphics.)  It includes a sound chip, and allows two analog joysticks similar to the Apple.  
-
-TI-99/4
+TI-99/4 - 1979
 
 This is another computer using  ...  Text, graphics, sprites, sound.  Joysticks.
 
-Sinclair ZX81.
+TRS COLOR COMPUTER - 1980
 
-ZX Spectrum, 
+This system is based on the 6809 CPU which is not so similar to the 6502, so BASIC programs are an easier starting point.  It supports color text at 32x16.  It also supports graphics modes from 64x32 in 8 colors up to 256x192 in 4 colors.  The prior monochrome TRS-80 Model  concept of text characters subdivided into pixels also applies to this system, but supports more than one color on screen.  (The last version, Model 3 has more enhanced graphics.)  It includes a sound chip, and allows two analog joysticks similar to the Apple.  
 
-Dragon, 
+Sinclair ZX81 - 1981
 
+ZX Spectrum - 1982
+
+DRAGON 32/64 - 1982
+
+The system is very similar to the TRS-80 Color Computer -- Same CPU, similar text and graphics modes.  The BASIC is similar, but uses different tokenization, so the text would have to be reentered. 
 
 **Types of Games To Port**
 
@@ -261,7 +292,7 @@ Assembly programs may use more features of the original platform.  Each source s
 On the other hand, just because the game is in machine language doesn't necessarily mean the author is pushing the platform to limits that would be difficult for the Atari.  Sometimes nice, simple games are in Assembly, just because BASIC can't handle timing or many screen updates.
 
 
-**SOURCES FOR GAMES**
+**RESOURCES FOR GAMES AND PROGRAMS**
 
 - Books/Magazines from the 1970s and 80s.  
 
