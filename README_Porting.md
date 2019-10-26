@@ -308,6 +308,15 @@ On the other hand, just because the game is in machine language doesn't necessar
 
 - Github.
 
+
+**ATARI TOOLS**
+
+- Emulators: Altirra, Atari 800.
+
+- Assemblers: MADS, Atasm
+
+- Eclipse, WUDSN
+
 ---
 
 [Back to Home](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README.md "Home") 
