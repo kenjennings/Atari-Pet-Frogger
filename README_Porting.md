@@ -18,7 +18,7 @@ Porting other systems games to the Atari is an entertaining and educational expe
 
 **Overview Of The Atari Hardware**
 
-The first part of porting is knowing what you're porting to, and so understand how to fit the Atari's abilities into another computer's features.  Some things another computer can do may not be easily portable to the Atari, and at other times you may choose to enhance something on the Atari beyond what the original platform can do.  Do not expect, or even try to make an Atari game look exactly like the game on another system.  Atari graphics features have their own strengths and weaknesses, so try to fit game behavior into the Atari's style.  Atari graphics are originally intended for NTSC color television, so some features must look different on the video standards (PAL, SECAM, etc.) that another computer may use.  An overview of Atari features:
+The first part of porting is knowing what you're porting to, and so understand how to fit the Atari's abilities into another computer's features.  Some things another computer can do may not be easily portable to the Atari, and at other times you may choose to enhance something on the Atari beyond what the original platform can do.  Do not expect, or even try to make an Atari game look exactly like the game on another system.  Atari graphics features have their own strengths and weaknesses, so try to fit game behavior into the Atari's style.  Atari graphics are originally intended for NTSC color television, so some features must look different on the video standards used on other computers (PAL, SECAM, etc.).  An overview of Atari features:
 
 - 1.79 MHz 6502 processor.  This is one of the fastest 6502 computers released.  Most other systems work at 1MHz.
 
@@ -47,7 +47,7 @@ The first part of porting is knowing what you're porting to, and so understand h
 
 - Full Color indirection.  In most of the graphics modes the normal color interpretation allows all the colors on the screen to be any one of the 128 colors in the palette via a hardware register assigned to that color.  Changing the value of the color register changes all the pixels in the screen using that color register.
 
-- Four color interpretation modes. The 14 text and graphics modes can be rendered using one of four kinds of color interpretation.  In theory, this makes 46 graphics modes possible.  However, the last three color interpretation modes (GTIA modes) work best in conjunction with certain graphics modes, so not all 46 combinations are practical.
+- Four color interpretation modes. The 14 text and graphics modes can be rendered using one of four kinds of color interpretation.  In theory, this makes 56 graphics modes possible.  However, the last three color interpretation modes (GTIA modes) work best in conjunction with certain graphics modes, so not all 56 combinations are practical.
   - Normal color interpretation utilizing color indirection.
   - 3 GTIA modes: 16 shades of one base color.  Up to 9 colors using color indirection.  16 colors all using the same brightness.
 
@@ -108,11 +108,11 @@ The following is a list of Atari features that a BASIC program can use.  Assembl
 
 **Considering Other Platforms**
 
-Porting the first-person shooter Counter-Strike:Global Offensive to the Atari is an admirable goal which would probably never reach acceptable results within the a person's lifetime.  The best pool of potential games to port comes from other retro platforms sold around the same time as the Atari, since they would have reasonably similar capabilities as the Atari.
+Porting the first-person shooter Counter-Strike:Global Offensive to the Atari is an admirable goal which would probably never reach acceptable results within a person's lifetime.  The best pool of potential games to port comes from other retro platforms sold around the same time as the Atari, since they would have reasonably similar capabilities as the Atari.
 
 There were numerous kinds of computers sold commercially during the time of the Atari, and I will not be discussing every single one.  Many have become obscured in history to the point it is difficult to find programs or source code listings.  If you do find an interesting game and the source for it on a less popular computer, then thumbs up for your team and have a ball with it.
 
-A reasonable list of the commonly available home computers marketed in the US during the 1977 to 1983 timeframe: Pet, TRS-80, Apple II, TRS Color Computer, VIC-20, TI-44/9, Commodore 64.  I'm not as familiar with many non-US brands.  Based on the documentation availability and YouTube reviews of systems and games here is my short list of non-US systems that seem to be popular: BBC MICRO, Acorn Atom, Electron, Oric 1, Sinclair ZX81, ZX Spectrum, Dragon 32.
+A reasonable list of the commonly available home computers marketed in the US during the 1977 to 1983 timeframe: Pet, TRS-80, Apple II, TRS Color Computer, VIC-20, TI-99/4A, Commodore 64.  I'm not as familiar with many non-US brands.  Based on the documentation availability and YouTube reviews of systems and games here is my short list of non-US systems that seem to be popular: BBC MICRO, Acorn Atom, Electron, Oric 1, Sinclair ZX81, ZX Spectrum, Dragon 32.
 
 These platforms capabilities vary.  SOME are extremely limited.  SOME are better than others.  SOME may be limited in most respects, but have a feature the Atari can't inherently duplicate (e.g.  64 column text, Color maps.)  SOME can be improved with optional add-ons that will not be considered here.  The POSSIBLE lowest common denominators:
 
@@ -263,7 +263,7 @@ The 64 column text would need some workarounds on the Atari, if needed, since it
 
 The 128x48 graphics pixels are an odd dimension considerably less than most Atari graphics modes.  This could be duplicated with a line of Mode B and Mode C referencing the same line of screen memory and setting narrow screen width for 128 pixel width.  Alternatively, use the normal width screen for 160 pixels horizontally, and only draw in the middle 128 pixels.
 
-TI-99/4 - 1979
+TI-99/4A - 1979
 
 This is another computer using  ...  Text, graphics, sprites, sound.  Joysticks.
 
