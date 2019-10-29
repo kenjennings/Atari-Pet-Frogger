@@ -273,7 +273,7 @@ TI-99/4A - 1981
 
 This is a unique system using a 3MHz TMS9900 CPU, technically a 16-bit processor, though only 256 bytes of scratchpad RAM and the system ROM are on the 16-bit bus while the rest of the RAM is on an 8-bit bus which severely reduces the speed.
 
-The system uses a graphics coprocesser providing four graphics modes plus a couple more "undocumented" variations from 240x192 to 256x192 with varing number of colors (from 2 to 15 colors) or flexibility in placing color.  The system has 15 colors with one color as "transparent".  The graphics modes display text character or graphics.
+The system uses a graphics coprocesser providing four graphics modes plus a couple more "undocumented" variations from 240x192 to 256x192 that vary in number of colors or flexibility in placing color.  The system has 15 colors with one color as "transparent".  The graphics modes display text character or graphics.
 
 The system supports 32 sprites overlayed on top of graphics, but only 4 sprites are visible per scan line.  Sprites have 1 color (and transparent) and are 8x8 or 16x16 pixels, and there is collision detection between sprites.  The "transparent" value in sprites shows the graphics pixels behind the sprites.
 
