@@ -98,7 +98,7 @@ The following is a list of Atari features that a BASIC program can use.  Assembl
 
 - Player/Missile graphics - Loading and positioning an image for Player/Missile graphics is easy in BASIC.  Animating an image is a harder problem.  OSS BASIC XL has built-in commands for vertically moving Player missile graphics.  The other common method is to use Atari BASIC/BASIC XL's unique string capabilities to assign a string to Player/Missile memory and manipulate the string.
 
-- Color mixing between playfield and Player/Missiles pixel colors.
+- Color mixing between playfield and Player/Missile pixel colors.
 
 - Sound.  Atari BASIC includes commands to play sounds.  Complicated music is more difficult due to the execution speed of BASIC. 
 
@@ -257,7 +257,7 @@ This is a 1MHz 6502 system.  It has a 40x28 text mode supporting redefined chara
 
 Games written in Assembly for computers that do not use the 6502 will be harder to port, since the programmer must learn the nuances of a different Assembly language.  It is much easier to port BASIC programs which are not CPU dependent.  Alternatively, where the game's rules and behavior are completely documented, and videos exist of full game play, then porting can be based on analyzing these resources without without reading too much of the original code.
 
-TRS-80
+TRS-80 - 1977
 
 The TRS-80 models use a Z80 CPU.  This makes porting Assembly language source more difficult.  Porting from BASIC games would be a better place to start if you don't want to learn Z80.  The models support 64x16 monochrome text and "graphics" using character cells divided into 2x3 segments as pixels (128x48 pixels).  The BASIC language has commands to plot pixels, and also allows a string packing technique to compress a series of pixel instructions, and then "print" them quickly to a location on screen.  Some later models support 80 column monochrome and higher resolution graphics.
 
@@ -265,17 +265,23 @@ The 64 column text would need some workarounds on the Atari, if needed, since it
 
 The 128x48 graphics pixels are an odd dimension considerably less than most Atari graphics modes.  This could be duplicated with a line of Mode B and Mode C referencing the same line of screen memory and setting narrow screen width for 128 pixel width.  Alternatively, use the normal width screen for 160 pixels horizontally, and only draw in the middle 128 pixels.
 
-TI-99/4A - 1979
-
-This is another computer using  ...  Text, graphics, sprites, sound.  Joysticks.
-
 TRS COLOR COMPUTER - 1980
 
 This system is based on the 6809 CPU which is not so similar to the 6502, so BASIC programs are an easier starting point.  It supports color text at 32x16.  It also supports graphics modes from 64x32 in 8 colors up to 256x192 in 4 colors.  The prior monochrome TRS-80 Model  concept of text characters subdivided into pixels also applies to this system, but supports more than one color on screen.  (The last version, Model 3 has more enhanced graphics.)  It includes a sound chip, and allows two analog joysticks similar to the Apple.  
 
-Sinclair ZX81 - 1981
+TI-99/4A - 1981
 
-ZX Spectrum - 1982
+This is a unique system using a 3MHz TMS9900 CPU, technically a 16-bit processor, though only 256 bytes of scratchpad RAM and the system ROM are on the 16-bit bus while the rest of the RAM is on an 8-bit bus which severely reduces the speed.
+
+The system uses a graphics coprocesser providing four graphics modes plus a couple more "undocumented" variations from 240x192 to 256x192 with varing number of colors (from 2 to 15 colors) or flexibility in placing color.  The system has 15 colors with one color as "transparent".  The graphics modes display text character or graphics.
+
+The system supports 32 sprites overlayed on top of graphics, but only 4 sprites are visible per scan line.  Sprites have 1 color (and transparent) and are 8x8 or 16x16 pixels, and there is collision detection between sprites.  The "transparent" value in sprites shows the graphics pixels behind the sprites.
+
+The computer has a sound chip with 3 voices for music, and 1 channel of white noise.  The TI-99/4A supports two joysticks.
+
+SINCLAIR ZX81 - 1981
+
+ZX SPECTRUM - 1982
 
 DRAGON 32/64 - 1982
 
@@ -294,21 +300,6 @@ Assembly programs may use more features of the original platform.  Each source s
 On the other hand, just because the game is in machine language doesn't necessarily mean the author is pushing the platform to limits that would be difficult for the Atari.  Sometimes nice, simple games are in Assembly, just because BASIC can't handle timing or many screen updates.
 
 
-**RESOURCES FOR GAMES AND PROGRAMS**
-
-- Books/Magazines from the 1970s and 80s.  
-
-- Multi-Platform and dedicated.  
-
-- (archive.org)  
-
-- classic computer magazine archive
-
-- trs80 color computer archive
-
-- YouTube demonstrations.
-
-- Github.
 
 
 **ATARI TOOLS**
@@ -322,3 +313,4 @@ On the other hand, just because the game is in machine language doesn't necessar
 ---
 
 [Back to Home](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README.md "Home") 
+
