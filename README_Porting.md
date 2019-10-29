@@ -183,7 +183,7 @@ General sources that provide information, demonstrations, programs, or source fo
 
 **The 6502s**
 
-Games written in Assembly for other 6502-based computers would be easiest to port to the Atari in Assemble, since the language syntax will be similar.  It is possible older code may lack formulas or computation supported by modern assemblers.  Managing idiosyncrasies of the different Assemblers may require retyping, or re-indenting.
+Games written in Assembly for other 6502-based computers would be easiest to port to the Atari in Assembly, since the language syntax will be similar.  Many older Assemblers required line numbers that may not be allowed in modern Assemblers.  It is possible older code may lack formulas or computation supported by modern assemblers.    Managing idiosyncrasies of the different Assemblers may require retyping, or re-indenting.
  
 PET - 1977
 
@@ -201,7 +201,7 @@ The BASIC language includes commands for engaging the graphics modes and drawing
 
 The Apple software has a shape table feature that executes a list of pseudo-coded line drawing commands and permit rotating and scaling the drawn lines.  Most Assembly games will write images directly to screen memory which is linear horizontally, but is not contiguous between adjacent lines.  Built-in sound is limited to clicks and short beeps on the keyboard speaker.  If joysticks are used they are analog controls made of 2 potentiometers (paddles controllers).
 
-The Atari has a high resolution mode that generates NTSC artifact colors, but can only derive 4 artifact colors, not the 6 like the Apple.  Since artifacts effectively halve the pixel resolution then the Atari's Mode E, "medium resolution", 160 pixel graphics mode could also be a substitute, though its use of 2 bits per pixel requires more coding compensation to simulate the Apple results.  It really depends on whether or not the Apple game uses all six colors and how the colors are used.  Player/Missiles could provide more color in limited places.
+The Atari has a high resolution mode that generates NTSC artifact colors, but can only derive 4 artifact colors, not the 6 from the Apple.  Since artifacts effectively halve the pixel resolution then the Atari's Mode E, "medium resolution", 160 pixel graphics mode could also be a substitute, though its use of 2 bits per pixel requires more coding compensation to simulate the Apple results.  It really depends on whether or not the Apple game uses all six colors and how the colors are used.  Player/Missiles could provide more color in limited places.
 
 Converting graphics to the Atari has obstacles.  The easiest is the non-contiguous order of lines of screen memory.  Since the Atari Display List can specify the memory to read for a line of graphics the Atari could arrange graphics memory in exactly the same way as the Apple, so Apple code accessing horizontal rows would work as-is.  But, this isn't necessarily needed as the common optimization for both the Apple or the Atari is a lookup table of pre-calculated addresses to eliminate the multiplication needed for the vertical coordinates.  Here the Atari merely needs a table of different values, and then the Apple's lookup code works the same regardless of the order of screen memory.
 
@@ -213,11 +213,13 @@ The VIC-20 has a 16 color palette, supports 22x23 color text, and redefined char
 
 The BASIC language included in the VIC-20 is generic BASIC with no commands supporting the hardware.  BASIC programs using any of the graphics and sound will be packed with POKE statements.
 
-Since the only graphics capability is redefined character sets, there are literally hundreds of games that are almost the same game pushing text characters around the screen using a different redefined character set.  Quite an amazing number of these games were sold commercially.  Some more advanced games use redefined characters to simulate bit-mapped graphics and shift images through multiple characters to simulate pixel-based graphics animation.
+Since the only graphics capability is redefined character sets, there are literally hundreds of games that are almost the same game pushing text characters around the screen using a different redefined character set.  Quite an amazing number of these games were sold commercially.  More advanced games use redefined characters to simulate bit-mapped graphics and shift images through multiple characters to simulate pixel-based graphics animation.
 
 ANTIC Mode 6 text has 20 characters per line and can show characters in 4 colors where the entire character is a single color. This is the closest in size to the VIC-20's 22 character text mode.  Using the Atari's wide screen for overscan allows adding characters to the line, so the Atari can manage 22 characters in Mode 6 which fits (just barely) on an NTSC TV.  However, this does mean the Atari's version of 22 characters is noticeably wider than the VIC-20's.  (Covering more TV screen area could be considered a bonus.)
 
 ANTIC Mode 6 also uses 64 characters in its character set, so the VIC-20 program may run through more characters than the Atari can display.  Where many VIC-20 characters are specific graphics objects the Atari could deal with it via a Display List interrupt switching to different character sets every few lines, or using a more dynamic (and slower) method where the character images needed at the moment are copied to the characters shown on screen.  Where a VIC-20 game uses multiple characters to simulate a larger graphics bitmap the Atari could do the same thing, and as only 22 characters are needed for the one line, a different character set every 2 or three lines could do the same work.
+
+Alternatively, since the VIC's text is the equivalent of 176 pixels horizontally, the Atari could use ANTIC Map Mode E lines to draw the text characters.  With Horizontal overscan the Atari can display the 176 pixels, but the medium resolution graphics displays 4 colors including the background.  The Multi-color character mode halves the horizontal resolution.  The Atari could use a 80-pixel per line GTIA color interpretation mode (BASIC Graphics Mode 10) with overscan to display the 88 pixels the VIC uses and has 9 colors available.  
 
 Another obstacle is the VIC's 16 background, and 8 text colors using a color map.  In most situations they are not all used.  Background coloring is a little more difficult as the Atari has one color for the background.  Display List interrupts can change the 4 text colors and background color for each line.  Where more color is needed, Player/Missile graphics can add limited amounts of color.  But, inevitably there will be situations where a color or two will have to be ignored or worked around.
 
@@ -277,7 +279,7 @@ ZX Spectrum - 1982
 
 DRAGON 32/64 - 1982
 
-The system is very similar to the TRS-80 Color Computer -- Same CPU, similar text and graphics modes.  The BASIC is similar, but uses different tokenization, so the text would have to be reentered. 
+The system is very similar to the TRS-80 Color Computer -- Same CPU, similar text and graphics modes.  The BASIC is similar, but uses different tokenization, so the text of a BASIC program from the Color Computer would have to be reentered to work on the Dragon. 
 
 **Types of Games To Port**
 
