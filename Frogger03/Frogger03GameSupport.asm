@@ -122,9 +122,13 @@
 ;PAL  200 pixels/second (50 characters/second.)
 
 ;MAX_FROG_SPEED = 13 ; Number of difficulty levels (which means 14)
-MAX_FROG_SPEED = 10 ; Number of difficulty levels (which means 11)
+MAX_FROG_SPEED = 8 ; Number of difficulty levels (which means 9)
 MAX_FROG_LIVES = 7  ; Maximum number of starting frog lives.
 
+; SO, per playtesters speeds 1 to 3 are painfully slow.
+; 10 and 11 are Spaceballs "ludicrous" speed.  Therefore, 
+; these are eliminated from the list.   Speeds 4 through 9 
+; are used.
 
 ; About the arrays below.  18 bytes per row instead of 19:
 ; FrogRow ranges from 0 to 18 which is 19 rows.  The first and
@@ -140,66 +144,36 @@ MAX_FROG_LIVES = 7  ; Maximum number of starting frog lives.
 ; rather than simply (BOAT_FRAMES),Y.
 
 BOAT_FRAMES ; Number of frames to wait to move boat. (top to bottom) (Difficulty 0 to 13)
-	.by 0 7 7 0 6 6 0 5 5 0 4 4 0 3 3 0 2 2   ; Difficulty 0 
-	.by 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 7 7   ; Difficulty 1 
-	.by 0 5 5 0 5 5 0 5 5 0 5 5 0 5 5 0 5 5   ; Difficulty 2
-	.by 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4   ; Difficulty 3 
-	.by 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3   ; Difficulty 4 
-	.by 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2   ; Difficulty 5 
-	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 6 
+	.by 0 5 5 0 5 5 0 5 5 0 5 5 0 5 5 0 5 5   ; Difficulty 0 
+	.by 0 5 5 0 4 5 0 4 4 0 4 5 0 4 5 0 4 4   ; Difficulty 1 
+	.by 0 4 4 0 3 4 0 3 3 0 4 3 0 3 4 0 3 3   ; Difficulty 2
+	.by 0 3 3 0 2 3 0 2 2 0 3 2 0 2 3 0 2 2   ; Difficulty 3 
+	.by 0 2 2 0 1 2 0 1 1 0 2 1 0 1 2 0 1 1   ; Difficulty 4 
+	.by 0 1 1 0 0 1 0 0 0 0 1 0 0 0 1 0 0 0   ; Difficulty 5 
+	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 6 
 	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 7
-	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 8
-	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 9
-	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 10
+	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 8
+;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 9
+;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 10
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 12
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 13
 
-;	.by 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7 0 7 7   ; Difficulty 0 
-;	.by 0 7 7 0 7 7 0 7 7 0 5 5 0 5 5 0 5 5   ; Difficulty 1 
-;	.by 0 7 7 0 7 7 0 5 5 0 5 5 0 3 3 0 3 3   ; Difficulty 2
-;	.by 0 7 7 0 7 5 0 5 5 0 3 3 0 3 2 0 2 2   ; Difficulty 3 
-;	.by 0 5 5 0 5 3 0 3 3 0 2 2 0 2 2 0 1 1   ; Difficulty 4 
-;	.by 0 5 5 0 3 3 0 3 2 0 2 2 0 1 1 0 1 1   ; Difficulty 5 
-;	.by 0 5 3 0 3 3 0 2 2 0 2 1 0 1 1 0 1 0   ; Difficulty 6 
-;	.by 0 3 3 0 3 2 0 2 2 0 1 1 0 1 0 0 0 0   ; Difficulty 7
-;	.by 0 3 3 0 2 2 0 1 1 0 1 1 0 0 0 0 0 0   ; Difficulty 8
-;	.by 0 3 2 0 2 1 0 1 1 0 0 0 0 0 0 0 0 0   ; Difficulty 9
-;	.by 0 2 2 0 1 1 0 1 0 0 0 0 0 0 0 0 0 0   ; Difficulty 10
-;	.by 0 2 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
-;	.by 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 12
-;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 13
-
 BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 0
-	.by 0 1 1 0 1 1 0 2 2 0 3 3 0 4 4 0 1 1   ; Difficulty 1
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 1
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 2
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 3
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 4
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 5
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 6
-	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 7
-	.by 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2   ; Difficulty 8
-	.by 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3   ; Difficulty 9
-	.by 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 ; Difficulty 10
+	.by 0 1 1 0 1 2 0 2 2 0 2 1 0 1 2 0 2 2   ; Difficulty 7
+	.by 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 ; Difficulty 8
+;	.by 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3   ; Difficulty 9
+;	.by 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 ; Difficulty 10
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 12
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 13
-
-;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 0
-;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 1
-;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 2
-;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 3
-;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 4
-;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 5
-;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 6
-;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 7
-;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 8
-;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 2 0 2 2   ; Difficulty 9
-;	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 2 2 0 2 2   ; Difficulty 10
-;	.by 0 1 1 0 1 1 0 1 1 0 2 2 0 2 2 0 2 2   ; Difficulty 11
-;	.by 0 1 1 0 1 1 0 2 2 0 2 2 0 2 2 0 2 2   ; Difficulty 12
-;	.by 0 1 1 0 2 2 0 2 2 0 2 3 0 2 3 0 3 3 0 ; Difficulty 13
 
 MOVING_ROW_STATES ; 19 entries describing boat directions. Beach (0), Right (1), Left (FF) directions.
 	.by 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0
@@ -555,7 +529,7 @@ MultiplyFrogsCrossed
 	lda FrogsCrossed           ; How many Frogs saved?
 	clc                        ; Plus...
 	adc NewLevelStart          ; the starting difficulty level.
-	cmp #MAX_FROG_SPEED+1      ; Number of difficulty levels. 0 to 10 OK.  11 not so much
+	cmp #MAX_FROG_SPEED+1      ; Number of difficulty levels. 0 to 8 OK.  9 not so much
 	bcc bMFC_SkipLimitCrossed  ; Exceeded the number of levels?
 	lda #MAX_FROG_SPEED        ; Yes.  Reset to max level.
 
