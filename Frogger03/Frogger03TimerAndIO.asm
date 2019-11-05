@@ -239,6 +239,7 @@ bCFCI_SkipResetLevel
 	stx NewLevelStart          ; Updated starting level.
 
 	jsr TitlePrepLevel
+	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
 	jmp bCFCI_StartupStage2
 
 

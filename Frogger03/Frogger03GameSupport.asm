@@ -305,6 +305,7 @@ bCGS_NextScoreDigit
 	; The prior values are now set the same as the New/current game's.
 	lda NewLevelStart
 	sta LastLevelStart
+	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
 
 	lda NewNumberOfLives       ; Reset Number of 
 	sta NumberOfLives          ; lives to new game config.
