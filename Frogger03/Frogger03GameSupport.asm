@@ -122,7 +122,8 @@
 ;PAL  200 pixels/second (50 characters/second.)
 
 ;MAX_FROG_SPEED = 13 ; Number of difficulty levels (which means 14)
-MAX_FROG_SPEED = 8 ; Number of difficulty levels (which means 9)
+;MAX_FROG_SPEED = 8 ; Number of difficulty levels (which means 9)
+MAX_FROG_SPEED = 6 ; Number of difficulty levels (which means 7)
 MAX_FROG_LIVES = 7  ; Maximum number of starting frog lives.
 
 ; SO, per playtesters speeds 1 to 3 are painfully slow.
@@ -150,9 +151,9 @@ BOAT_FRAMES ; Number of frames to wait to move boat. (top to bottom) (Difficulty
 	.by 0 3 3 0 2 3 0 2 2 0 3 2 0 2 3 0 2 2   ; Difficulty 3 
 	.by 0 2 2 0 1 2 0 1 1 0 2 1 0 1 2 0 1 1   ; Difficulty 4 
 	.by 0 1 1 0 0 1 0 0 0 0 1 0 0 0 1 0 0 0   ; Difficulty 5 
-	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 6 
-	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 7
-	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 8
+	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 6 
+;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 7
+;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 8
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 9
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 10
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
@@ -166,9 +167,9 @@ BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 3
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 4
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 5
-	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 6
-	.by 0 1 1 0 1 2 0 2 2 0 2 1 0 1 2 0 2 2   ; Difficulty 7
-	.by 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 ; Difficulty 8
+	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 ; Difficulty 6
+;	.by 0 1 1 0 1 2 0 2 2 0 2 1 0 1 2 0 2 2   ; Difficulty 7
+;	.by 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 ; Difficulty 8
 ;	.by 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3   ; Difficulty 9
 ;	.by 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 ; Difficulty 10
 ;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
