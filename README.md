@@ -48,7 +48,7 @@ Although the code is substantially modified from the original, the only thing go
 
 [![V02 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger02/V02_Composite.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02/README_V02.md)
 
-Version 02 continues to maintain the same game play in the same format as prior version.  The screen display is still the plain text mode (ANTIC mode 2, OS Text Mode 0) and frog movement is the size of a character.  
+Version 02 continues to maintain the same game play in the same screen geometry as prior version.  The screen display is still the plain text mode (ANTIC mode 2, OS Text Mode 0) and frog movement is the size of a character.  The visual perspective of the boats has been changed from the top view of boats in V00 and V01 now to a side view.
 
 More of the game's internal operations and display parts have been Atari-fied.  Short version: There is now sound and music (minimally), the game uses joystick input instead of the keyboard, animated color is applied to the custom screens, and a redefined character set provides a frog and boats that look more like a frog and boats.
 
@@ -57,28 +57,38 @@ More of the game's internal operations and display parts have been Atari-fied.  
 [Version 03 PET FROGGER](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03/README_V03.md "Version 03 Atari PET FROGGER") 
 
 [![V03 Composite](https://github.com/kenjennings/Atari-Pet-Frogger/raw/master/Frogger03/V03_Composite_700.png)](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger03/README_V03.md)
-
-**Currently Work In Progress**
-
-!!! Note, the current executable is a setup for playtesters and does not implement the difficulty arrangement expected in the final version. !!!
  
-Version 03 maintains the same game play and overall screen layout as the prior version.  The same number of lines of boats appear on the display.  Within this limit the graphics are significantly enhanced.  
+Version 03 maintains the same game play and overall screen geometry as the prior version.  The same number of lines of boats appear on the display.  Within this limit the graphics are significantly enhanced.  
 
-The game graphics are changed to multi-color text (ANTIC mode 4, 5 colors), the boats are built of redefined characters with animated water parts.  Also, the boats fine-scroll for movement.
+The game graphics are updated to multi-color text (ANTIC mode 4, 5 colors) and the boats are built of redefined characters with animated water parts.  Also, the boats fine-scroll for movement.
 
-Player/Missile graphics are used for the Frog, and for various other display enhancements on the screens. 
+Player/Missile graphics make the Frog and various other display enhancements on the screens.
 
-OPTION and SELECT can be used on the Title screen to change the difficulty level, and the number of Frog lives.
+OPTION and SELECT can be used on the Title screen to change the difficulty level (1 to 7) , and the number of starting Frog lives. (1 to 5)
 
 ---
 
-**More to come in V4? Or Not?**
+**More to come in V04?**
 
-**??????????????????**
+The version V03 playtesters suggested objects other than boats on the scrolling lines.  Also, missing boats or boats that sink could be interesting obstacles.  Other animated adversaries (such as birds) or bonus objects would add variety, strategy, and change the goals. 
 
-The version V03 Playtesters suggest objects other than boats on the scrolling lines.   Also, boats that sink could be an interesting obstacle.
+The visual changes described above will require wholesale re-engineering of how screen memory works.  The reason is that in V03 the moving boats are a trick.  As all the boats are the same and evenly spaced on each line there is only one line of boats going left and one line going right, and there is only enough screen memory allocated  to support scrolling from one boat position to the next before the scrolling resets to the origin position.  Thus V03 only has the appearance that the boats are moving across and then off the screen.
 
-These kinds of changes would vastly affect how the boat lines are represented in memory which then cascades into a number of other major code reorganizations.   We'll see. 
+Individual objects that display differently from others on the same line and from line to line require at least enough screen memory to describe every line on the screen individually.  The same line of data can't be shared on multiple lines.  This will be a big change to how the game screen works.
+
+Objects must be bigger to provide more detail.  This will impact the screen geometry.  Some lines of the display must go, so others can be bigger.  For example, if the boats increase to 12 scan lines tall then one line of boats is lost for every two displayed, so the 12 lines of boats would be reduced to 8.  Some safe beach lines would also need to be eliminated and resized similarly.  16 scan lines per each line of boat or beach graphics would halve the number of lines on the screen.
+
+Possible Enhancements for V04:
+- Add a timer to motivate the player to move faster and make mistakes. 
+- Allow backward jumps
+- Sinking boats.
+- Missing boats.
+- Other Non-boat obstacles/hazards. (Logs jam, gators)
+- Other object/hazard independent of boats (birds).
+- Bonus object/adds credit/lives.
+- Change death into push back to prior row position.
+- Bigger objects, bigger frog, more animation.
+
 
 **??????????????????**
 
