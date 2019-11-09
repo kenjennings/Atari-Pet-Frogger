@@ -100,11 +100,13 @@ I generally build in eclipse from the WUDSN ide.  WUDSN can be found here: https
 
 **Version 03, August 2019 notable changes **
 
+
 **Summary: Major display reworking**
 
 The focus here is to maintain the same play mechanics as close as possible to the original Pet Frogger game, but with as much visual enhancement as possible.  This requires some very careful choices.  Making the player's frog, and the screen graphics more detailed and appealing requires making objects bigger in some ways.  The problem with bigger is that small changes multiply into large impacts when they occur on 18 horizontal rows on the screen.  Fortunately, the original game had three text lines on screen that were unused.  This provides most of the needed free space for enhancing the lines, but a few more were still needed.  Therefore the display is slightly taller than the usual 200 scan line/25 text line screen.
 
 There is one notable behavior change -- A frog on a boat does not die immediately on touching the left or right side of the display.  The frog's motion is limited to the visible display, but the boat will continue to move off the screen.  Only when the frog loses contact with the safe zone on the boat will the frog's death occur.  This provides the player a few moments of grace to get off the boat to a possible safe area. 
+
 
 **Player/Missile Graphics**
 
@@ -122,6 +124,7 @@ On the surface it seems like these animated objects above are the only use of Pl
 
 On the Title and Game displays Player/Missile graphics provide the four text labels for scores (SCORE and HI), frogs remaining (FROGS), and frogs saved (SAVED).  As these use different color registers from the playfield, they can be colored and flashed separately from other objects on the same line.  The Player/Missile pixels are the same size as pixels in ANTIC Text Mode 4 (one color clock wide and one scan line tall), thus the "text" appears to be Text Mode 4.
 
+
 **Custom character set**
 
 The V03 game, like V02, uses the same, single, custom character set for all displays. This provides characters for display in ANTIC Text modes 2 (2 color) and 4 (5 color).
@@ -136,6 +139,7 @@ The V02 Frog and Splattered Frog characters are not used, since V03 replaces the
 
 The Game screen is where most of the new activity occurs.  The game playfield is primarily 5-color, Antic Text Mode 4 lines.  The character set provides several multi-color characters for drawing the safe beach/land, and the water/waves, and boats moving left and right.  Part of the movement is simply the result of scrolling the lines (waves "move" by fine scrolling with the boats.)  Additional animation is performed by changing character images depicting moving water at the bow and behind the engines of the boats. This animation does not occur by changing the characters of the boats, but by re-writing the bitmap in the character set for each character, so changing the image of one character in the redefined character set then changes it for all 24 occurrences of the character visible on the display.
 
+
 **Playfield Graphics Handling.**
 
 The V02 game has a one-size-fits all display list for all screens.  V03 has different display lists for the Title screen, the Game screen, and then one Display List used by the three other splash screens for Saved Frog, Dead Frog, and Game Over. 
@@ -148,11 +152,12 @@ The Title graphics lines are also used to provide visible feedback to the user w
 
 The three splash screens (Saved Frog, Dead Frog, Game Over) share a common Display list.  The giant text here is also made of Map Mode 9 lines like on the Title screen.  The graphics here are not changed by redrawing that part of the display, but by simply updating the LMS instruction to point to the screen memory holding the desired image.  Most of the "animation" on the splash screens are done with color changes by Display List Interrupts.  In V02 the "empty" lines were text modes, but V03 uses regular blank line instructions half the height of the text lines allowing twice as many color changes for animation.
 
-On the Game screen the Boats move by fine scrolling and coarse scrolling via LMS updates in the Display List -- no redrawing of the boats occurs at all.  Fine scrolling and the necessary coarse scrolling is such low overhead on the Atari that all the scrolling work is done during the vertical blank. (In fact, I was so lazy in an earlier iteration that the Boats' fine scrolling ran during every vertical blank even when the Game screen was not displayed.)  The Game display needs extra time for Display lists in places and there is a need for cosmetic matching between lines while supplying that space, so there are some blank lines and Map Mode C lines inserted strategically in the Game Display List. 
+On the Game screen the Boats move by fine scrolling and coarse scrolling via LMS updates in the Display List -- no redrawing of the boats occurs at all.  Fine scrolling and the necessary coarse scrolling is such low overhead on the Atari that all the scrolling work is done during the vertical blank. (In fact, I was so lazy in an earlier iteration that the Boats' fine scrolling ran during every vertical blank even when the Game screen was not displayed.)  The Game display needs extra time for Display lists in places and there is a need for cosmetic matching between lines while supplying that space, so there are some blank lines and Map Mode C lines inserted strategically in the Game Display List.
 
 Since the frog is now Player/Missile graphics and there is no frog moving through screen memory, there no longer needs to be separate screen memory for every row of boats.  There is just one line of screen memory for boats moving left and one line of screen memory for boats moving right.  This reduces memory by 800 bytes (10 lines * 80), close to 10% of the final size of Version 02.  All the lines in the given direction refer to the same screen memory, but have different colors and scroll values, so that they all appear to be different screen objects.
 
 All the Display Lists jump to one of two places in another common Display List to end the display.  The Game display jumps to the point showing the final fine scrolling credits at the bottom of the screen.  All other displays jump to a prior point showing the text line prompting the user for input which is followed by the fine scrolling credits line.  Having one set of Display List instructions simplifies the code needed to support the prompt line and the fine scrolling credits.
+
 
 **Display List Interrupts**
 
@@ -197,19 +202,18 @@ The actual funeral dirge for the dead frog is abbreviated to relieve some tedium
 Joystick control is the same as V02, but the idiotic, repetitive, bit-bashing code to eliminate invalid input combinations has been replaced with a lookup table to convert raw joystick input into the cooked, final joystick input in as few steps as possible.  Derp. 
 
 
-**To Be Continued... V04??**
+**To Be Continued... V04**
 
-Any other game mechanics and actual play action to change?
-
-- Allow backwards jumps?
-
-- Sinking boats?
-
-- Add timer to limit a frog's turn, or limit the entire game ?
-
-- Add another hazard/enemy object?  Birds?  Gators?
-
-- Change Death into a push back to the previous row?
+Possible Enhancements for V04:
+- Add a timer to motivate the player to move faster and make mistakes. 
+- Allow backward jumps
+- Sinking boats.
+- Missing boats.
+- Other Non-boat obstacles/hazards. (Logs jam, gators)
+- Other object/hazard independent of boats (birds).
+- Bonus object/adds credit/lives.
+- Change death into push back to prior row position.
+- Bigger objects, bigger frog, more animation.
 
 ---
 
