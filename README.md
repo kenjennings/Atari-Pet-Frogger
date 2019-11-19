@@ -2,7 +2,7 @@
 
 OldSkoolCoder presented a video on YouTube and source code on GitHub for a Frogger-like game written for the PET 4032 in 1983.
 
-The PET assembly source is here:  https://github.com/OldSkoolCoder/PET-Frogger
+The PET 4032 assembly source is here:  https://github.com/OldSkoolCoder/PET-Frogger
 
 The OldSkoolCoder YouTube channel is here:  https://www.youtube.com/channel/UCtWfJHX6gZSOizZDbwmOrdg/videos
 
@@ -70,27 +70,26 @@ OPTION and SELECT can be used on the Title screen to change the difficulty level
 
 **More to come in V04?**
 
-The version V03 playtesters suggested objects other than boats on the scrolling lines.  Also, missing boats or boats that sink could be interesting obstacles.  Other animated adversaries (such as birds) or bonus objects would add variety, strategy, and change the goals. 
+V03 intentionally limits the game play to stay as close as possible to the parameters of the original Pet 4032 version while amping up the graphics.  The limited game play mechanics makes the game, well, limited.  Though pretty to look at, the game is borderline boring.
+ 
+The V03 playtesters suggested a variety of changes to the game's graphics and the game behaviors which would add variety and change the strategy. 
 
-The visual changes described above will require wholesale re-engineering of how screen memory works.  The reason is that in V03 the moving boats are a trick.  As all the boats are the same and evenly spaced on each line there is only one line of boats going left and one line going right, and there is only enough screen memory allocated  to support scrolling from one boat position to the next before the scrolling resets to the origin position.  Thus V03 only has the appearance that the boats are moving across and then off the screen.
+Possible Enhancements for V04:
+- Display
+  - Sinking boats, missing boats.
+  - Other non-boat obstacles/hazards. (Log jams, alligators)
+  - Other object/hazard independent of horizontal moving rows (swooping birds).
+  - Bigger objects, bigger frog, more animation details.
+- Gameplay
+  - Add a level timer to motivate the player to move faster and make mistakes. 
+  - Allow backward jumps, since more hazards require more flexible player movement.
+  - Reduced maximum speed, since more hazards require more opportunity for player reaction. 
+  - Change death into a push back to prior row position.
+
+The visual changes described above will require wholesale re-engineering of how screen memory works.  The reason is that V03 uses tricks to create the illusion of boats moving across the screen.  The moving boats capitalize on the hardware-assisted scrolling in the Atari.  First, since all the boats are the same and evenly spaced on each line,  there is only one line of boats going left and one line going right.  The display list points to the same lines of screen memory for every left-moving row, and then for every right-moving row.  Also, there is only enough screen memory allocated to a line of boats support scrolling from one boat position to the next before the scrolling resets to the origin position.  Since the boats are identical this makes it appear the boats move continuously across the screen.
 
 Individual objects that display differently from others on the same line and from line to line require at least enough screen memory to describe every line on the screen individually.  The same line of data can't be shared on multiple lines.  This will be a big change to how the game screen works.
 
-Objects must be bigger to provide more detail.  This will impact the screen geometry.  Some lines of the display must go, so others can be bigger.  For example, if the boats increase to 12 scan lines tall then one line of boats is lost for every two displayed, so the 12 lines of boats would be reduced to 8.  Some safe beach lines would also need to be eliminated and resized similarly.  16 scan lines per each line of boat or beach graphics would halve the number of lines on the screen.
-
-Possible Enhancements for V04:
-- Add a timer to motivate the player to move faster and make mistakes. 
-- Allow backward jumps
-- Sinking boats.
-- Missing boats.
-- Other Non-boat obstacles/hazards. (Logs jam, gators)
-- Other object/hazard independent of boats (birds).
-- Bonus object/adds credit/lives.
-- Change death into push back to prior row position.
-- Bigger objects, bigger frog, more animation.
-
-
-**??????????????????**
-
+Objects must be bigger to provide more detail.  This will impact the screen geometry.  Some lines of the display must go, so others can be bigger.  For example, if the boats increase to 12 scan lines tall then one line of boats is lost for every two displayed, so the 12 lines of boats on screen would be reduced to 8.  Safe beach lines would also need to be resized, and some eliminated as a result.  16 scan lines per each line of boat or beach graphics would halve the number of lines on the screen.
 
 ---
