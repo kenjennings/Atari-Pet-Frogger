@@ -27,7 +27,6 @@
 ;
 ; --------------------------------------------------------------------------
 
-
 ; ==========================================================================
 ; Originally, this was coarse scroll movement and the frog moved the 
 ; width of a character.  
@@ -66,16 +65,6 @@
 ; kind of parallax effect. almost).
 
 ; Possible scrolling speeds:
-; Speed 1 (watching paint dry.  Actually, the drying paint cried from boredom.)
-; 8 Frames per 1 pixel/color clock scroll
-; NTSC 7.5 pixels/second (less than two characters/second.)
-; PAL  6.25 pixels/second (just slightly more than 1.5 characters/second)
-
-; Speed 2 (watching the snail Olympics.)
-; 7 Frames per 1 pixel/color clock scroll
-; NTSC 8.5 pixels/second (about two characters/second.)
-; PAL  7 pixels/second (just slightly less than 2 character/second)
-
 ; Speed 3  (Maybe as exciting as "meh".)
 ; 6 Frames per 1 pixel/color clock scroll
 ; NTSC 10 pixels/second (2.5 characters/second.)
@@ -106,23 +95,6 @@
 ;NTSC 60 pixels/second (15 characters/second.)
 ;PAL  50 pixels/second (12.5 characters/second.)
 
-;Speed 9  (possibly highest tolerable speed.)
-;1 Frames per 2 pixel/color clock scroll
-;NTSC 120 pixels/second (30 characters/second.)
-;PAL  100 pixels/second (25 characters/second.)
-
-;Speed 10  (cartoon roadrunner speed).
-;1 Frames per 3 pixel/color clock scroll
-;NTSC 180 pixels/second (45 characters/second.)
-;PAL  150 pixels/second (37.5 characters/second.)
-
-;Speed 11  (Spaceballs' ludicrous speed.)
-;1 Frames per 4 pixel/color clock scroll
-;NTSC 240 pixels/second (60 characters/second.)
-;PAL  200 pixels/second (50 characters/second.)
-
-;MAX_FROG_SPEED = 13 ; Number of difficulty levels (which means 14)
-;MAX_FROG_SPEED = 8 ; Number of difficulty levels (which means 9)
 MAX_FROG_SPEED = 6 ; Number of difficulty levels (which means 7)
 MAX_FROG_LIVES = 7  ; Maximum number of starting frog lives.
 
@@ -152,13 +124,6 @@ BOAT_FRAMES ; Number of frames to wait to move boat. (top to bottom) (Difficulty
 	.by 0 2 2 0 1 2 0 1 1 0 2 1 0 1 2 0 1 1   ; Difficulty 4 
 	.by 0 1 1 0 0 1 0 0 0 0 1 0 0 0 1 0 0 0   ; Difficulty 5 
 	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 6 
-;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 7
-;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 8
-;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 9
-;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 10
-;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
-;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 12
-;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 13
 
 BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 0
@@ -168,13 +133,6 @@ BOAT_SHIFT  ; Number of color clocks to scroll boat. (add or subtract)
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 4
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1   ; Difficulty 5
 	.by 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 1 1 0 ; Difficulty 6
-;	.by 0 1 1 0 1 2 0 2 2 0 2 1 0 1 2 0 2 2   ; Difficulty 7
-;	.by 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 2 2 0 ; Difficulty 8
-;	.by 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3 0 3 3   ; Difficulty 9
-;	.by 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 4 4 0 ; Difficulty 10
-;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 11
-;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0   ; Difficulty 12
-;	.by 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ; Difficulty 13
 
 MOVING_ROW_STATES ; 19 entries describing boat directions. Beach (0), Right (1), Left (FF) directions.
 	.by 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0 1 $FF 0

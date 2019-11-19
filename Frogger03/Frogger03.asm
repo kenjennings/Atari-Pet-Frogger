@@ -117,7 +117,8 @@
 ; * Replace the chunky text "graphics" for Title, Saved, Game Over, and 
 ;   the Dead Frog with bitmaps for ANTIC map mode 9.  This is effectively 
 ;   the same pixel size, uses half the memory to cover the exact same
-;   same screen real estate, and allows more color flexibility than text.
+;   same screen real estate, and allows more color flexibility than 
+;   Text mode 2.
 ; * Eliminate "blank" text lines where there is nothing displayed and use
 ;   actual blank line instructions in the Display List.   Additionally, 
 ;   the blank lines for the splash displays (Saved, Dead Frog, Game Over) 
@@ -693,8 +694,8 @@ SAVEY = $FF
 	.by "Fine Scrolling Boats. Custom character set for boats. "
 	.by "Player/Missile Frog. "
 	.by "Customized Display Lists and DLIs. "
-	.by "Most game logic moved to VBI. **"
-	.by "Special Thanks to playtesters "
+	.by "Most game logic moved to VBI. "
+	.by "** Special Thanks to playtesters "
 	.by "-The Doctor-, Philsan, Faicuai, and Mclaneinc. **"
 
 

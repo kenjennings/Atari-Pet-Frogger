@@ -529,16 +529,6 @@ RemoveFroggies
 
 	sta FrogsCrossed          ; reset count to 0.  (Remember A == space == 0 ?)
 
-; Add FrogsCrossed + NewLevelStart == Current Difficulty
-;	clc                       ; Plus...
-;	adc NewLevelStart         ; the currently selected starting level.
-;	cmp #MAX_FROG_SPEED+1     ; Number of difficulty levels. 0 to 10 OK.  11 not so much
-;	bcc bCSF_SkipLimitCrossed 
-;	lda #MAX_FROG_SPEED       ; Or Reset to max level.
-
-;bCSF_SkipLimitCrossed
-;	sta FrogsCrossedIndex    ; sets the base index into difficulty arrays
-
 	jsr MultiplyFrogsCrossed ; Multiply by 18, make index base, set difficulty address pointers.
 
 	jsr StrobeSavedLabel     ; Glow the Saved label.  VBI will decrement it.
@@ -885,13 +875,13 @@ DeadFrogRain
 	ldy #2 ; Top 20 lines of screen...
 DeadLoopTopOverGrey
 	jsr DeadFrogGreyScroll      ; Increments and color stuffing.
-	cpy #21                     ; Reached the 19th line?
+	cpy #21                     ; Reached the big text lines?
 	bne DeadLoopTopOverGrey     ; No, continue looping.
 
 	ldy #29 ; Bottom 20 lines of screen (above prompt and credits.)
 DeadLoopBottomOverGrey
 	jsr DeadFrogGreyScroll      ; Increments and color stuffing.
-	cpy #48                     ; Reached the 23rd line?
+	cpy #48                     ; Reached the last line?
 	bne DeadLoopBottomOverGrey  ; No, continue looping.
 
 	rts
@@ -1346,6 +1336,8 @@ EndCopyBaseColors
 ; ==========================================================================
 ; Redundant code section used for two separate loops in the Dead Frog event.
 ;
+; Y = position in color table.
+; A = color to use and update
 ; --------------------------------------------------------------------------
 
 DeadFrogGreyScroll
@@ -1396,6 +1388,8 @@ SkipZeroOverCycle2
 ; ==========================================================================
 ; Redundant code section used for two separate loops in the Dead Frog event.
 ;
+; X == caller's current position in red sine table.
+; Y == caller's current line/row in the display's color table.
 ; --------------------------------------------------------------------------
 
 OverRedScroll
@@ -1567,8 +1561,9 @@ ExitSliceColorAndLuma
 ; ==========================================================================
 ; Support function. Decrement Title text colors.
 ; 
-; Cut out of the EventTransitionToGame, it makes that shorter and more 
-; readable, and allows the start to branch to the end/exit point.
+; This is cut out of the EventTransitionToGame to make that code shorter 
+; and more readable, but most importantly it allows that routines start to 
+; branch instead of jmp to the end/exit point.
 ;
 ; BEQ state is exit immediate exit. (Text value has reached 0)
 ; --------------------------------------------------------------------------
@@ -1614,34 +1609,35 @@ ExitFadeColPfToBlack          ; Insure we're leaving with 0 for both colors 0.  
 ;
 ; Uses TempWipeColor in page 0.
 ; X = current Row
-; A = color to use.
+; A = color to use, expected to be color component (i.e. $F0 with luminance
+;     bits 0) 
 ; --------------------------------------------------------------------------
 
 GreyEachColorTable
 
-	sta TempWipeColor
+	sta TempWipeColor     ; Save it to reuse
 
-	lda COLPF0_TABLE+3,x
-	and #$0F
-	ora TempWipeColor
-	sta COLPF0_TABLE+3,x
+	lda COLPF0_TABLE+3,x  ; Pull the row's color from the color table
+	and #$0F              ; Zero the table color, keep the luminance.
+	ora TempWipeColor     ; Add the caller's input color to the luminance.
+	sta COLPF0_TABLE+3,x  ; Resave the new value in the color table.
 
-	lda COLPF1_TABLE+3,x
+	lda COLPF1_TABLE+3,x  ; Rinse for COLPF1
 	and #$0F
 	ora TempWipeColor
 	sta COLPF1_TABLE+3,x
 
-	lda COLPF2_TABLE+3,x
+	lda COLPF2_TABLE+3,x ; Repeat for COLPF2
 	and #$0F
 	ora TempWipeColor
 	sta COLPF2_TABLE+3,x
 
-	lda COLPF3_TABLE+3,x
+	lda COLPF3_TABLE+3,x ; And So On...
 	and #$0F
 	ora TempWipeColor
 	sta COLPF3_TABLE+3,x
 
-	lda COLBK_TABLE+3,x
+	lda COLBK_TABLE+3,x  ; and more.
 	and #$0F
 	ora TempWipeColor
 	sta COLBK_TABLE+3,x
@@ -1846,6 +1842,7 @@ ExitBoatCharacterAnimation
 ; DoBoatCharacterAnimation set up zero page VBIPointer1 and VBIPointer2.
 ; Copy 8 bytes from pointer1 to pointer 2.
 ; Without the cpy/bne loop overhead *  8 bytes.
+;
 ; Y = byte index.
 ; -----------------------------------------------------------------------------
 
@@ -1853,28 +1850,28 @@ BoatCsetCopy8
 
 	ldy #0
 
-	lda (VBIPointer1),y
+	lda (VBIPointer1),y ; 1
 	sta (VBIPointer2),y
 	iny
-	lda (VBIPointer1),y
+	lda (VBIPointer1),y ; 2
 	sta (VBIPointer2),y
 	iny
-	lda (VBIPointer1),y
+	lda (VBIPointer1),y ; 3
 	sta (VBIPointer2),y
 	iny
-	lda (VBIPointer1),y
+	lda (VBIPointer1),y ; 4
 	sta (VBIPointer2),y
 	iny
-	lda (VBIPointer1),y
+	lda (VBIPointer1),y ; 5
 	sta (VBIPointer2),y
 	iny
-	lda (VBIPointer1),y
+	lda (VBIPointer1),y ; 6
 	sta (VBIPointer2),y
 	iny
-	lda (VBIPointer1),y
+	lda (VBIPointer1),y ; 7
 	sta (VBIPointer2),y
 	iny
-	lda (VBIPointer1),y
+	lda (VBIPointer1),y ; 8
 	sta (VBIPointer2),y
 
 	rts
@@ -1928,8 +1925,8 @@ ExitScrollTheCredits
 ; F I N E   S C R O L L I N G   B O A T S
 ;==============================================================================
 
-; Offsets from first LMS low byte in Display List to 
-; the subsequent LMS low byte of each boat line. (VBI)
+; Offsets from the first LMS low byte in the Display List 
+; to the subsequent LMS low byte of each boat line. (VBI)
 ; For the Right Boats this is the offset from PF_LMS1.
 ; For the Left Boats this is the offset from PF_LMS2.
 BOAT_LMS_OFFSET 
@@ -2105,7 +2102,7 @@ TitleLeftScroll
 	sta TitleHSCROL        ; Reset HSCROL for next screen byte.
 
 	inc TT_LMS0            ; Coarse scroll display to next byte...
-	inc TT_LMS1
+	inc TT_LMS1            ; Incrementing 6 pointers rather than copying 60 bytes.
 	inc TT_LMS2
 	inc TT_LMS3
 	inc TT_LMS4
@@ -2172,15 +2169,15 @@ bTSD_ColorLoop
 ; "LEVEL 9"   "7 LIVES"
 ; --------------------------------------------------------------------------
 
-LEVEL_TEXT   .sb " LEVEL "
-LEVEL_NUMBER .sb "   "       ; Actual number goes here.
+LEVEL_TEXT   .sb " Level "
+LEVEL_NUMBER .sb "   "            ; Actual number goes here.
 
 LIVES_LIST                        ; Reference 1 to 7 as --X, so 0 to 8
 LEVEL_LIST1  .sb "12345678911111" ; 0 to 13 == 1 to 14
 LEVEL_LIST2  .sb "         01234" ; 
 
 LIVES_TEXT   .sb " "
-LIVES_NUMBER .sb "  LIVES  " ; Actual number goes there
+LIVES_NUMBER .sb "  Lives  "      ; Actual number goes there
 
 
 ; ==========================================================================
@@ -2211,6 +2208,7 @@ TitlePrepLevel
 ; ==========================================================================
 ; Convert the user-selected NewNumberOfLives to "text" built of pixels
 ; that will be scrolled into the Title area.
+; Correctly label the value as "LIFE" or "LIVES".
 ; hackitty hack hack hack
 ; --------------------------------------------------------------------------
 
@@ -2221,9 +2219,9 @@ TitlePrepLives
 	bne bTPL_UsePlural ; 1 LIFE, 2 LIVES, right?
 	; Singular
 	lda #I_F
-	sta LIVES_NUMBER+4
+	sta LIVES_NUMBER+4   
 	lda #I_SPACE
-	sta LIVES_NUMBER+6
+	sta LIVES_NUMBER+6   
 	beq bTPL_SkipPlural
 
 bTPL_UsePlural
@@ -2246,6 +2244,7 @@ bTPL_SkipPlural
 ; TITLE FINISH PREP
 ; ==========================================================================
 ; Common code.  Fill in pointer, set length.  Print the pixels.
+;
 ; A+X == Address of screen codes to print.
 ; --------------------------------------------------------------------------
 
@@ -2280,7 +2279,7 @@ TitleFinishPrep
 TitlePrintString
 
 	cpy #0                ; If length is 0, then
-	beq bTPS_Exit         ; Nothing to do here.  (yes, overkill.  could check X too for greater than 9.  derp.))
+	beq bTPS_Exit         ; Nothing to do here.  (yes, overkill. could check X too for greater than 9.  derp.)
 
 	sty SAVEY             ; Remember length for later.
 
@@ -2302,8 +2301,9 @@ bTPS_Exit
 ; ==========================================================================
 ; Write bytes 1 to 6 (skipping 0 and 8) of the character from an internal 
 ; character code into the right side Title buffer at a designated position.
-; The position is byte aligned.  No fancy bit twiddling to do pixel-
-; accurate placement. 
+; The position is byte aligned.  Thanks to 2 color graphics mode there is
+; no fancy bit twiddling to do pixel placement. Charset bitmap and graphics 
+; bitmap are the same.
 ;
 ; Uses MaintPointer2 for character pointer.
 ; Uses SAVEA temporarily.
@@ -2395,32 +2395,6 @@ bTSO_Loop
 	stx TitleHSCROL         ; Zero the fine scroll while we're here
 
 	rts
-
-
-; ==========================================================================
-; TITLE CLEAR RIGHT GRAPHICS                                             
-; ==========================================================================
-; Clear the right side of the scrolling buffer.  
-; Done in preparation of populating and prior to scrolling left.
-; --------------------------------------------------------------------------
-
-;TitleClearRightGraphics
-
-;	lda #INTERNAL_SPACE
-;	ldx #9
-
-;bTCRG_Loop
-;	sta TITLE_RIGHT,x
-;	sta TITLE_RIGHT+20,x
-;	sta TITLE_RIGHT+40,x
-;	sta TITLE_RIGHT+60,x
-;	sta TITLE_RIGHT+80,x
-;	sta TITLE_RIGHT+100,x
-
-;	dex
-;	bpl bTCRG_Loop
-
-;	rts
 
 
 ; ==========================================================================
@@ -2784,7 +2758,7 @@ libPmgClearBitmaps
 	tax      ; count 0 to 255.
 
 bCB_Loop
-	sta MISSILEADR,x ; Missiles
+	sta MISSILEADR,x  ; Missiles
 	sta PLAYERADR0,x  ; Player 0
 	sta PLAYERADR1,x  ; Player 1
 	sta PLAYERADR2,x  ; Player 2
@@ -2841,12 +2815,16 @@ LoadPmgTextLines
 bLPTL_LoadBytes
 	lda P0TEXT_TABLE,x
 	sta PLAYERADR0+PMGLABEL_OFFSET,x
+	
 	lda P1TEXT_TABLE,x
 	sta PLAYERADR1+PMGLABEL_OFFSET,x
+	
 	lda P2TEXT_TABLE,x
 	sta PLAYERADR2+PMGLABEL_OFFSET,x
+	
 	lda P3TEXT_TABLE,x
 	sta PLAYERADR3+PMGLABEL_OFFSET,x
+	
 	lda MTEXT_TABLE,x
 	sta MISSILEADR+PMGLABEL_OFFSET,x
 
@@ -2871,15 +2849,18 @@ SetPmgAllZero
 	sta COLPM1_TABLE+2
 	sta COLPM2_TABLE+2
 	sta COLPM3_TABLE+2
+	
 	sta SIZEP0_TABLE+2
 	sta SIZEP0_TABLE+2
 	sta SIZEP0_TABLE+2
 	sta SIZEP0_TABLE+2
 	sta SIZEM_TABLE+2   ; and Missile size 3, 2, 1, 0
+	
 	sta HPOSP0_TABLE+2
 	sta HPOSP1_TABLE+2
 	sta HPOSP2_TABLE+2
 	sta HPOSP3_TABLE+2
+	
 	sta HPOSM0_TABLE+2
 	sta HPOSM1_TABLE+2
 	sta HPOSM2_TABLE+2

@@ -81,23 +81,23 @@ I_WATER3     = $5C ; up,     water
 I_WATER4     = $5D ; down,   water
 
 ; Special artifact characters for Score:, :Hi, Frogs:, Saved Frogs:
-I_BS = $50 ; "S", ctrl-P
-I_SC = $41 ; "c", ctrl-A
-I_SO = $42 ; "o", ctrl-B
-I_SR = $43 ; "r", ctrl-C
-I_SE = $44 ; "e", ctrl-D
+; I_BS = $50 ; "S", ctrl-P
+;I_SC = $41 ; "c", ctrl-A
+;I_SO = $42 ; "o", ctrl-B
+;I_SR = $43 ; "r", ctrl-C
+;I_SE = $44 ; "e", ctrl-D
 I_CO = $20 ; ":", @
 
-I_BH = $3E ; "H", ^
-I_SI = $3F ; "i", _
+;I_BH = $3E ; "H", ^
+;I_SI = $3F ; "i", _
 
-I_BF = $3B ; "F", [
-I_SS = $3C ; "s", \
-I_SG = $3D ; "g", ]
+;I_BF = $3B ; "F", [
+;I_SS = $3C ; "s", \
+;I_SG = $3D ; "g", ]
 
-I_BA = $45 ; "a", ctrl-E
-I_SV = $48 ; "v", ctrl-H
-I_SD = $4A ; "d", ctrl-J
+;I_BA = $45 ; "a", ctrl-E
+;I_SV = $48 ; "v", ctrl-H
+;I_SD = $4A ; "d", ctrl-J
 
 ; Frog shapes alternate in the Frog counter to make their 8-pixel wide
 ; shapes more recognizable.
@@ -1539,7 +1539,7 @@ CHARACTER_SET
 ; $06: . . . . . # # .
 ; $00: . . . . . . . .
 
-; Char $7E: DELETE 
+; Char $7E: DELETE - two versions of frog heads to display next to each other.
   .BYTE $00,$00,$66,$99,$FF,$FF,$66,$3C
 ; $00: . . . . . . . . 
 ; $00: . . . . . . . . 
@@ -1560,17 +1560,6 @@ CHARACTER_SET
 ; $3C: . . # # # # . . 
 ; $00: . . . . . . . . 
 ; $00: . . . . . . . . 
-
-; Old Frog  V02
-;	.BYTE $E7,$BD,$FF,$7E,$18,$3C,$66,$E7
-;; $E7: # # # . . # # #
-;; $BD: # . # # # # . #
-;; $FF: # # # # # # # #
-;; $7E: . # # # # # # .
-;; $18: . . . # # . . .
-;; $3C: . . # # # # . .
-;; $66: . # # . . # # .
-;; $E7: # # # . . # # #
 
 
 ;==================================================================================================

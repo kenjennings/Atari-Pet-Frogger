@@ -381,6 +381,7 @@ SIZEOF_BIG_GFX = 119 ; That is, 120 - 1
 
 
 ; ANTIC has a 4K boundary for screen memory.
+;
 ; Visibly adjacent lines of screen data need not be contiguous 
 ; in memory.  The LMS in the Display List tells ANTIC where to 
 ; start reading screen memory.  Therefore we can declare lines 
@@ -443,17 +444,6 @@ PLAYFIELD_MEM13
 PLAYFIELD_MEM16
 	mLineOfRightBoats           ; + 64 == 64
 
-; Title text.  Bit-mapped version for Mode 9.
-; Will not scroll these, so no need for individual labels and leading blanks.
-; 60 bytes here instead of the 240 bytes used for the scrolling text version.
-
-; Graphics chars design, PET FROGGER
-; |]]|]]|] |  |]]|]]|]]|  |]]|]]|]]|  |  |]]|]]|]]|  |]]|]]|] |  | ]|]]|] |  | ]|]]|]]|  | ]|]]|]]|  |]]|]]|]]|  |]]|]]|] |
-; |]]|  |]]|  |]]|  |  |  |  |]]|  |  |  |]]|  |  |  |]]|  |]]|  |]]|  |]]|  |]]|  |  |  |]]|  |  |  |]]|  |  |  |]]|  |]]|
-; |]]|  |]]|  |]]|]]|] |  |  |]]|  |  |  |]]|]]|] |  |]]|  |]]|  |]]|  |]]|  |]]|  |  |  |]]|  |  |  |]]|]]|] |  |]]|  |]]|
-; |]]|]]|] |  |]]|  |  |  |  |]]|  |  |  |]]|  |  |  |]]|]]|] |  |]]|  |]]|  |]]| ]|]]|  |]]| ]|]]|  |]]|  |  |  |]]|]]|] |
-; |]]|  |  |  |]]|  |  |  |  |]]|  |  |  |]]|  |  |  |]]| ]|] |  |]]|  |]]|  |]]|  |]]|  |]]|  |]]|  |]]|  |  |  |]]| ]|] |
-; |]]|  |  |  |]]|]]|]]|  |  |]]|  |  |  |]]|  |  |  |]]|  |]]|  | ]|]]|] |  | ]|]]|]]|  | ]|]]|]]|  |]]|]]|]]|  |]]|  |]]|
 
 TITLE_MEM1  ; "Blank" to support the animated dissolve in.
 	.ds 120  ; Code will clear it, so do not need to declare zeros.                                        ; + 120 == 184
@@ -469,8 +459,20 @@ TITLE_END   = TITLE_START+10
 
 TITLE_UNDERLINE
 ; 4  |--- --- ---  --- --- --- --- --- --- ---| TITLE underline are constant part of title.
-;	.by %11111100 %11111100 %11111100 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111 ; + 10 == 134
+
 	.by %11111100 %11111100 %11111100 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111 %00111111 ; + 10 == 194
+
+; Title text.  Bit-mapped version for Mode 9.
+; Will not scroll these, so no need for individual labels and leading blanks.
+; 60 bytes here instead of the 240 bytes used for the scrolling text version.
+
+; Graphics chars design, PET FROGGER
+; |]]|]]|] |  |]]|]]|]]|  |]]|]]|]]|  |  |]]|]]|]]|  |]]|]]|] |  | ]|]]|] |  | ]|]]|]]|  | ]|]]|]]|  |]]|]]|]]|  |]]|]]|] |
+; |]]|  |]]|  |]]|  |  |  |  |]]|  |  |  |]]|  |  |  |]]|  |]]|  |]]|  |]]|  |]]|  |  |  |]]|  |  |  |]]|  |  |  |]]|  |]]|
+; |]]|  |]]|  |]]|]]|] |  |  |]]|  |  |  |]]|]]|] |  |]]|  |]]|  |]]|  |]]|  |]]|  |  |  |]]|  |  |  |]]|]]|] |  |]]|  |]]|
+; |]]|]]|] |  |]]|  |  |  |  |]]|  |  |  |]]|  |  |  |]]|]]|] |  |]]|  |]]|  |]]| ]|]]|  |]]| ]|]]|  |]]|  |  |  |]]|]]|] |
+; |]]|  |  |  |]]|  |  |  |  |]]|  |  |  |]]|  |  |  |]]| ]|] |  |]]|  |]]|  |]]|  |]]|  |]]|  |]]|  |]]|  |  |  |]]| ]|] |
+; |]]|  |  |  |]]|]]|]]|  |  |]]|  |  |  |]]|  |  |  |]]|  |]]|  | ]|]]|] |  | ]|]]|]]|  | ]|]]|]]|  |]]|]]|]]|  |]]|  |]]|
 
 TITLE_GFX  ; 
 	.by %11111000 %11111100 %11111100 %00111111 %00111110 %00011110 %00011111 %00011111 %00111111 %00111110
@@ -478,7 +480,7 @@ TITLE_GFX  ;
 	.by %11001100 %11111000 %00110000 %00111110 %00110011 %00110011 %00110000 %00110000 %00111110 %00110011
 	.by %11111000 %11000000 %00110000 %00110000 %00111110 %00110011 %00110111 %00110111 %00110000 %00111110
 	.by %11000000 %11000000 %00110000 %00110000 %00110110 %00110011 %00110011 %00110011 %00110000 %00110110
-;	.by %11000000 %11111100 %00110000 %00110000 %00110011 %00011110 %00011111 %00011111 %00111111 %00110011 ; + 60 == 194
+
 	.by %11000000 %11111100 %00110000 %00110000 %00110011 %00011110 %00011111 %00011111 %00111111 %00110011 ; + 60 == 254
 
 
@@ -594,31 +596,30 @@ PLAYFIELD_MEM18 = PLAYFIELD_MEM0+23 ; One last line of Beach                   ;
 
 	.align $0100  ; Realign to next page.
 
+; Labels for score, lives, etc are now done as Player/Missile graphics .
+; The only thing left here are blanks as placeholders for the labels, 
+; the score values and the color characters.
 
 ; Top Score line for game score and Hi score.
 
 SCORE_MEM1 ; Labels for scores                                                 ; + 40 == 40
 ; 1  |Score:00000000            00000000:Hi   | SCORE_TXT
-;	.by I_BS I_SC I_SO I_SR I_SE I_CO -- Now done as P/M graphics.
-	.sb "     "
+	.sb "     " ; "SCORE"
 	.by I_CO
 SCREEN_MYSCORE
-	.sb "00000000            "
+	.sb "00000000            " ; "HI"
 SCREEN_HISCORE
 	.sb "00000000"
-;	.by I_CO I_BH I_SI  ; Replaced by P/M graphics
 	.by I_CO 
 	.sb "     "
 
 	
 SCORE_MEM2  ; Second line for lives, and frogs saved.              ; + 40 == 80
 ; 2  |Frogs:0    Frogs Saved:OOOOOOOOOOOOOOOOO| SCORE_TXT
-;	.by I_BF I_SR I_SO I_SG I_SS I_CO   -- Now done as P/M graphics.
 	.sb "     " ; "FROGS"
 	.by I_CO
 SCREEN_LIVES
 	.sb"        "
-;	.by I_BF I_SR I_SO I_SG I_SS $00 I_BS I_BA I_SV I_SE I_SD I_CO  -- Now done as P/M graphics.
 SCREEN_SAVED  ; 20 is waaaay more than a normal person can manage to rescue.
 	.sb "          "
 	.sb "          "
@@ -1659,6 +1660,7 @@ PLAYER1_FROG_DATA
 PLAYER2_FROG_DATA  ; at Y+2 to Y+4
 	.by $00 $00 $ee $ee $ee $00 $00 $00 $00 $00 $00
 
+	
 ; Using 4 bytes here instead of 3 to eliminate another address lookup table.
 ; The 4th byte is the same for all instances.
 ; Eye positions:
@@ -1949,7 +1951,7 @@ GRAVE_PMCOLORS_TABLE ; 0, 1, 2, 3
 ; impairs the custom character graphic used to count saved frogs.
 ; There's just 4 color clocks in a ANTIC Mode 4 character and its
 ; just not possible to render two eyes in a face. So, this still 
-; needs a high-res representation.  So, what to do about the text?
+; needs a high-res representation.  Then what to do about the text?
 ;
 ; We could go to using the custom character set defined for the 
 ; title text.  But, then there's only one color available for 
