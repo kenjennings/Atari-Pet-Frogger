@@ -173,7 +173,7 @@ Where Player/Missiles are used multiple times on a screen their horizontal posit
 
 Additionally, an animated Player/Missile image also appears on the Game Over display, so this display must position Players/Missiles for the moving element, but not present the text labels at the top of the screen.  It would make sense and be easier to clear the Player/Missile bitmap for the objects that should not be displayed.  However, the idiot doing the programming did this the hard way.  One of the DLIs is responsible for purposely removing the unwanted Player/Missiles elements from the display by setting 0 horizontal positions for the objects. 
 
-The Game screen requires a few custom routines to properly change colors for each line of boats and beaches.  Horizontal scrolling changes the DMA timing on the line which affects the time available for the DLI.  In come early iterations the visible changes by DLIs would move up and down to different lines.  The fix required adding blank lines and Mode C lines that accomplished several purposes:
+The Game screen requires a few custom routines to properly change colors for each line of boats and beaches.  Horizontal scrolling changes the DMA timing on the line which affects the time available for the DLI.  In some early iterations the visible changes by DLIs would move up and down to different lines.  The fix required adding blank lines and Mode C lines that accomplished several purposes:
 - Proper timing to start the DLIs.
 - Additional time for setting all the color registers.
 - Extra lines needed to support the height of the Frog image. 
