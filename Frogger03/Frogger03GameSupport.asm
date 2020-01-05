@@ -173,7 +173,9 @@ FrogMoveUp
 	jsr Add10ToScore     ; 10 points for moving forward.
 
 	ldx FrogRow          ; Get the current Row number
+	beq bFMU_SkipDex     ; Already 0.
 	dex                  ; Minus 1 row.
+bFMU_SkipDex
 	stx FrogNewRow       ; Save new Row Number. 
 	lda FROG_PMY_TABLE,x ; Get the new Player/Missile Y position based on row number.
 	sta FrogNewPMY       ; Update Frog position on screen. 
@@ -296,9 +298,9 @@ Add500ToScore
 	ldy #5 
 
 bA5TS_loop
-	jsr Add100ToScore       ; What it says.  +100
-	jsr PlayBling           ; Sound per each 100 point award.
-	jsr CopyScoreToScreen   ; Update the screen information
+	jsr Add100ToScore       ; What it says.  +100             (regs Saved in, restored out).
+	jsr PlayBling           ; Sound per each 100 point award. (regs Saved in, restored out).
+	jsr CopyScoreToScreen   ; Update the screen information.  (Uses A, X.)
 
 ba5TS_AudioPause            ; Wait for audio to finish.
 	lda SOUND_CONTROL1      ; Is channel 1 still busy?

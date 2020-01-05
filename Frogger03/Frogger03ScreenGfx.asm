@@ -469,7 +469,7 @@ bFTU_End
 
 
 ; ==========================================================================
-; COPY SCORE TO SCREEN
+; COPY SCORE TO SCREEN                                                 A  X
 ; ==========================================================================
 ; Copy the score from memory to screen positions.
 ; --------------------------------------------------------------------------
@@ -685,17 +685,19 @@ EndWriteNewLives
 
 ChangeScreen
 
+	sta SAVEA
 	sta VBICurrentDL                  ; Tell VBI to change to new display mode.
 
-	jsr HideButtonPrompt              ; Always tell the VBI to stop the prompt. (This preserves A)
+	mRegSaveAYX                       ; Save A, X, and Y.
+
+	jsr HideButtonPrompt              ; Always tell the VBI to stop the prompt.
 
 	; While waiting for the VBI to do its part, lets do something useful.
 	; Display Win, Display Dead and Display Game Over are the same display lists.  
 	; The only difference is the LMS to point to the big text.
 	; So, reassign that here.
 
-	pha                               ; Save Display number for later.
-	tay
+	ldy SAVEA                         ; Get the desired display number back.
 	lda DISPLAYLIST_GFXLMS_TABLE,y    ; Get the new address.
 	sta GFX_LMS                       ; Save in the Win/Dead/Over display list.
 
@@ -703,7 +705,6 @@ ChangeScreen
 	; of the screen.   Determine if we need to do it or not do it and then
 	; draw or erase the borders accordingly.
 
-;bCSCheckScreenBorders
 	lda DISPLAY_NEEDS_BORDERS_TABLE,y ; Does this display need the P/M graphics borders? 
 	beq bCSNoBorders                  ; If it is 0 it is not needed.  Erase it this.
 	jsr DrawGameBorder                ; Game screen needs left and right sides masked.
@@ -714,7 +715,7 @@ bCSNoBorders
 
 	; Back to checking on what the VBI has accomplished...
 bCSContinueUpdate
-	pla                               ; Get the display number back.
+	lda SAVEA                         ; Get the desired display number back.
 
 LoopChangeScreenWaitForVBI            ; Wait for VBI to signal the values changed.
 	cmp VBICurrentDL                  ; Is the DISPLAY value the same?
@@ -725,6 +726,8 @@ LoopChangeScreenWaitForVBI            ; Wait for VBI to signal the values change
 	jsr CopyBaseColors    ; Now update the DLI color tables.
 
 	jsr CopyPMGBase       ; And update the base player/missile data.
+
+	mRegRestoreAYX       ; Restore Y, X, and A
 
 	rts
 

@@ -400,7 +400,7 @@
 ; memory, therefore indulging in this evilness to define Page Zero
 ; variables and load directly into them at the same time...
 ; --------------------------------------------------------------------------
-	ORG $82
+	ORG $80
 
 ; ======== M A I N   G A M E   G L O B A L S ======== 
 
