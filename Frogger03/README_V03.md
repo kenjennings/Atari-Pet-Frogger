@@ -181,7 +181,7 @@ The Game screen requires a few custom routines to properly change colors for eac
 
 **Vertical Blank Interrupts**
 
-Most of everything that happens on screen is counted, timed, and set by the Vertical Blank interrupt.  The Atari's indirection abilities allow several things to be managed in the game just by writing a couple bytes to hardware registers.  This relieves significant overhead for animating the display.  It reduces overhead so much that the majority of the game and display updates are executed during the vertical blank.  The mainline code determines what kind of displays changes should occur, posts those updates for the Vertical Blank, and then spends most of its time in a do-nothing look waiting for the next frame to start.  The Vertical Blank typically has more code work to do than the main line code.
+Most of everything that happens on screen is counted, timed, and set by the Vertical Blank interrupt.  The Atari's indirection abilities allow several things to be managed in the game just by writing a couple bytes to hardware registers.  This relieves significant overhead for animating the display.  It reduces overhead so much that the majority of the game and display updates are executed during the vertical blank.  The mainline code determines what kind of displays changes should occur, posts those updates for the Vertical Blank, and then spends most of its time in a do-nothing loop waiting for the next frame to start.  The Vertical Blank typically has more code work to do than the main line code.
 
 The credits line is continuously fine-scrolled no matter what is happening on the rest of the screen.  Looks most slick.  Someone may mistake me for a professional.
 
