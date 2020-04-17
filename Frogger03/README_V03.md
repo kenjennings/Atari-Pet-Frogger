@@ -4,7 +4,7 @@
 
 PET FROGGER game for Commodore PET 4032 ported to the Atari 8-bit computers
 
-Video of the game play on YouTube: A URL for YouTube goes here
+Video of the game play on YouTube: https://youtu.be/UtNz5EE3xno 
 
 **PET FROGGER for Commodore PET 4032**
 
