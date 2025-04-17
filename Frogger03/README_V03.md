@@ -8,11 +8,11 @@ Video of the game play on YouTube: https://youtu.be/UtNz5EE3xno
 
 (c) November 1983 by John C. Dale, aka Dalesoft
 
-[Version 00](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V00.md "Version 00") Ported (or parodied) to Atari 8-bit computers November 2018 by Ken Jennings (if this were 1983, aka FTR Enterprises)
+[Version 00](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger00/README_V00.md "Version 00") Ported (or parodied) to Atari 8-bit computers November 2018 by Ken Jennings (if this were 1983, aka FTR Enterprises)
 
-[Version 01](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V01.md "Version 01") Updated for Atari 8-bit computers December 2018 by Ken Jennings 
+[Version 01](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger01/README_V01.md "Version 01") Updated for Atari 8-bit computers December 2018 by Ken Jennings 
 
-[Version 02](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/README_V02.md "Version 02") Further enhanced for Atari 8-bit computers February 2019 by Ken Jennings 
+[Version 02](https://github.com/kenjennings/Atari-Pet-Frogger/blob/master/Frogger02/README_V02.md "Version 02") Further enhanced for Atari 8-bit computers February 2019 by Ken Jennings 
 
 Version 03, August 2019 continues to maintain the same game play in the same format as prior versions.  However, graphics have been greatly improved while still striving to retain similar screen geometry with the original game. The Frog is now upgraded to a Player/Missile overlay object.  
 
